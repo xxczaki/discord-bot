@@ -50,6 +50,7 @@ export const criminals = [
     {
         name: 'Vlastimir Đorđević',
         url: 'https://en.wikipedia.org/wiki/Vlastimir_%C4%90or%C4%91evi%C4%87',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/f/f6/Vlastimir_%C4%90or%C4%91evi%C4%87.jpg',
         sentence: 18
     },
     {
@@ -70,21 +71,31 @@ export const criminals = [
     {
         name: 'Goran Jelisić',
         url: 'https://en.wikipedia.org/wiki/Goran_Jelisi%C4%87',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Goran_Jelisi%C4%87_committing_murder.jpg/440px-Goran_Jelisi%C4%87_committing_murder.jpg',
         sentence: 40
     },
     {
         name: 'Radislav Krstić',
         url: 'https://en.wikipedia.org/wiki/Radislav_Krsti%C4%87',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Radislav_Krstic2013.jpg/440px-Radislav_Krstic2013.jpg',
         sentence: 40
     },
     {
         name: 'Radovan Karadžić',
         url: 'https://en.wikipedia.org/wiki/Radovan_Karad%C5%BEi%C4%87',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Initial_appearance_Radovan_Karad%C5%BEi%C4%87_at_his_trial_-_31_July_2008.jpg/440px-Initial_appearance_Radovan_Karad%C5%BEi%C4%87_at_his_trial_-_31_July_2008.jpg',
         sentence: Infinity
     },
     {
         name: 'Milan Babić',
         url: 'https://en.wikipedia.org/wiki/Milan_Babi%C4%87',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/5/51/Milan_Babi%C4%87_crop.jpg',
         sentence: 13
+    },
+    {
+        name: 'Slobodan Praljak',
+        url: 'https://en.wikipedia.org/wiki/Slobodan_Praljak',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Slobodan_Praljak.jpg/440px-Slobodan_Praljak.jpg',
+        sentence: 20
     }
 ];

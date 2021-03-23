@@ -25,7 +25,15 @@ client.on('message', async msg => {
   } else if (msg.content === '!criminal') {
       const random = criminals[Math.floor(Math.random() * criminals.length)];
 
-      msg.reply(`jesteś [${random.name}](${random.url}) i zostałeś skazany na ${random.sentence === Infinity ? 'dożywocie' : `${random.sentence} lat więzienia`} przez Międzynarodowy Trybunał Karny dla byłej Jugosławii w Hadze.`);
+      const embed = new Discord.MessageEmbed()
+          .setColor('#0099ff')
+          .setTitle(`Jesteś ${random.name}!`)
+          .setURL(random.url)
+          .setDescription(`Zostałeś skazany na ${random.sentence === Infinity ? 'dożywocie' : `${random.sentence} lat więzienia`} przez Międzynarodowy Trybunał Karny dla byłej Jugosławii w Hadze.`)
+          .setThumbnail('https://i.imgur.com/wSTFkRM.png')
+          .setFooter('Dane: Wikipedia');
+
+      msg.channel.send(embed);
   }
 });
 
