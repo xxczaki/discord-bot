@@ -97,5 +97,12 @@ export const criminals = [
         url: 'https://en.wikipedia.org/wiki/Slobodan_Praljak',
         image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Slobodan_Praljak.jpg/440px-Slobodan_Praljak.jpg',
         sentence: 20
+    },
+    {
+        name: 'Antoni Kępiński',
+        url: 'https://kepinski.ch/',
+        image: 'https://kepinski.ch/_next/image?url=%2Fimages%2Fme.jpg&w=384&q=75',
+        sentence: Infinity
     }
 ];
+
