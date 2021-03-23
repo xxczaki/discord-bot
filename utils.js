@@ -111,7 +111,7 @@ export const criminals = [
         sentence: 88
     },
     {
-        name: 'Dawid A.',
+        name: 'gotfryd1999',
         url: 'https://www.youtube.com/watch?v=5t53TcKIlMc',
         image: 'https://imgur.com/xKvOXWW.png',
         sentence: 2137
