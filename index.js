@@ -1,7 +1,7 @@
 import Discord from 'discord.js';
 import levenshtein from 'fast-levenshtein';
 
-import {countries, dates} from './utils.js';
+import {countries, dates, criminals} from './utils.js';
 
 const client = new Discord.Client();
 
@@ -22,6 +22,10 @@ client.on('message', async msg => {
       const random = await msg.guild.members.cache.random().id;
 
       msg.reply(`I can confirm that <@!${random}> did your mum ${dates[Math.floor(Math.random() * dates.length)]}.`);
+  } else if (msg.content === '!criminal') {
+      const random = criminals[Math.floor(Math.random() * criminals.length)];
+
+      msg.reply(`jesteś [${random.name}](${random.url}) i zostałeś skazany na ${random.sentence === Infinity ? 'dożywocie' : `${random.sentence} lat więzienia`} przez Międzynarodowy Trybunał Karny dla byłej Jugosławii w Hadze.`);
   }
 });
 
