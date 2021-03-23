@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import levenshtein from 'fast-levenshtein';
+import si from 'systeminformation';
 
 import {countries, dates, criminals} from './utils.js';
 
@@ -34,6 +35,8 @@ client.on('message', async msg => {
           .setFooter('Dane: Wikipedia');
 
       msg.channel.send(embed);
+  } else if (levenshtein.get(msg.content, '!temp') <= 3) {
+      msg.channel.send(await si.cpuTemperature());
   }
 });
 
