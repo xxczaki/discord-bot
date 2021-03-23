@@ -30,7 +30,7 @@ client.on('message', async msg => {
           .setTitle(`Jesteś ${random.name}!`)
           .setURL(random.url)
           .setDescription(`Zostałeś skazany na ${random.sentence === Infinity ? 'dożywocie' : `${random.sentence} lat więzienia`} przez Międzynarodowy Trybunał Karny dla byłej Jugosławii w Hadze.`)
-          .setThumbnail('https://i.imgur.com/wSTFkRM.png')
+          .setThumbnail(random.image || undefined)
           .setFooter('Dane: Wikipedia');
 
       msg.channel.send(embed);
