@@ -36,7 +36,7 @@ client.on('message', async msg => {
 
       msg.channel.send(embed);
   } else if (levenshtein.get(msg.content, '!temp') <= 3) {
-      msg.channel.send(await info.getCPUTemperature());
+      msg.channel.send(]await info.getCPUTemperature());
   }
 });
 

@@ -103,6 +103,18 @@ export const criminals = [
         url: 'https://kepinski.ch/',
         image: 'https://kepinski.ch/_next/image?url=%2Fimages%2Fme.jpg&w=384&q=75',
         sentence: Infinity
+    },
+    {
+        name: 'ciemnyRUS',
+        url: 'https://steamcommunity.com/id/szefHKurbex/',
+        image: 'https://cdn.akamai.steamstatic.com/steamcommunity/public/images/avatars/ff/ffd2514e1117d666024ac97bca8ab72d27e65d99_full.jpg',
+        sentence: 88
+    },
+    {
+        name: 'Dawid A.',
+        url: 'https://www.youtube.com/watch?v=5t53TcKIlMc',
+        image: 'https://imgur.com/xKvOXWW.png',
+        sentence: 2137
     }
 ];
 
