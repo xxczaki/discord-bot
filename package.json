@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "^12.5.1",
+    "discord.js": "^12.5.3",
     "fast-levenshtein": "^3.0.0",
     "raspberry-info": "^1.0.4"
   }

@@ -19,8 +19,8 @@ client.on('message', async msg => {
       msg.reply(`jesteś Chungusem w ${Math.floor(Math.random() * (120 - 2) + 2)}%`);
   } else if (levenshtein.get(msg.content, 'among us') <= 3) {
       msg.reply(`cringe/10`);
-  } else if (levenshtein.get(msg.content, '!doin') <= 3) {
-      const random = await msg.guild.members.cache.random().id;
+  } else if (msg.content === '!doin') {
+      const random = (await msg.guild.members.fetch()).random().id;
 
       msg.reply(`I can confirm that <@!${random}> did your mum ${dates[Math.floor(Math.random() * dates.length)]}.`);
   } else if (msg.content === '!criminal') {
@@ -35,7 +35,7 @@ client.on('message', async msg => {
           .setFooter('Dane: Wikipedia');
 
       msg.channel.send(embed);
-  } else if (levenshtein.get(msg.content, '!temp') <= 3) {
+  } else if (msg.content === '!temp') {
       msg.channel.send(await info.getCPUTemperature());
   }
 });
