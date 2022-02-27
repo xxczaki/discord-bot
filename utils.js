@@ -100,7 +100,7 @@ export const criminals = [
     },
     {
         name: 'Antoni Kępiński',
-        url: 'https://kepinski.ch/',
+        url: 'https://www.kepinski.ch/',
         image: 'https://kepinski.ch/_next/image?url=%2Fimages%2Fme.jpg&w=384&q=75',
         sentence: Infinity
     },
@@ -111,7 +111,7 @@ export const criminals = [
         sentence: 88
     },
     {
-        name: 'gotfryd1999',
+        name: 'jdr1984',
         url: 'https://www.youtube.com/watch?v=5t53TcKIlMc',
         image: 'https://imgur.com/xKvOXWW.png',
         sentence: 2137

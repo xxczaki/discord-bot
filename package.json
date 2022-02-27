@@ -1,18 +1,18 @@
 {
-  "name": "discord-bot",
-  "type": "module",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "discord.js": "^12.5.3",
-    "fast-levenshtein": "^3.0.0",
-    "raspberry-info": "^1.0.4"
-  }
+    "name": "discord-bot",
+    "type": "module",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "discord.js": "^13.3.1",
+        "fast-levenshtein": "^3.0.0"
+    },
+    "devDependencies": {}
 }
