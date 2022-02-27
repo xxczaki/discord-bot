@@ -30,21 +30,25 @@ export const criminals = [
     {
         name: 'Zlatko Aleksovski',
         url: 'https://en.wikipedia.org/wiki/Zlatko_Aleksovski',
+        image: 'https://img.over-blog-kiwi.com/0/99/13/66/20160327/ob_ea5526_aleksovski-zlatko02.jpg',
         sentence: 7
     },
     {
         name: 'Vidoje Blagojević',
         url: 'https://en.wikipedia.org/wiki/Vidoje_Blagojevi%C4%87',
+        image: 'https://alchetron.com/cdn/vidoje-blagojevi-761416cf-1dbd-4178-b2d5-be9398cdce9-resize-750.jpeg',
         sentence: 15
     },
     {
         name: 'Tihomir Blaškić',
         url: 'https://en.wikipedia.org/wiki/Tihomir_Bla%C5%A1ki%C4%87',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/a/a3/Tihomir_Bla%C5%A1ki%C4%87.jpg',
         sentence: 9
     },
     {
         name: 'Johan Tarčulovski',
         url: 'https://en.wikipedia.org/wiki/Johan_Tar%C4%8Dulovski',
+        image: 'https://www.icty.org/x/image/Press/pressrel/2011/110707_tarculovski.jpg',
         sentence: 12
     },
     {
@@ -56,17 +60,20 @@ export const criminals = [
     {
         name: 'Dražen Erdemović',
         url: 'https://en.wikipedia.org/wiki/Dra%C5%BEen_Erdemovi%C4%87',
+        image: 'https://www.internationalcrimesdatabase.org/upload/ICD/CaseFile75/Drazen%20Erdemovic.jpg',
         sentence: 5
     },
     {
         name: 'Stanislav Galić',
         url: 'https://en.wikipedia.org/wiki/Stanislav_Gali%C4%87',
+        image: 'https://alchetron.com/cdn/stanislav-gali-b21d6b3e-3a9b-4614-964c-408246067aa-resize-750.jpg',
         sentence: Infinity
     },
     {
         name: 'Enver Hadžihasanović',
         url: 'https://en.wikipedia.org/wiki/Enver_Had%C5%BEihasanovi%C4%87',
-        sentence: 3.5
+        image: 'http://img.over-blog-kiwi.com/0/99/13/66/20160327/ob_e57d0f_hadzihasanovic-enver.jpg',
+        sentence: 3.5,
     },
     {
         name: 'Goran Jelisić',
@@ -101,7 +108,7 @@ export const criminals = [
     {
         name: 'Antoni Kępiński',
         url: 'https://www.kepinski.ch/',
-        image: 'https://kepinski.ch/_next/image?url=%2Fimages%2Fme.jpg&w=384&q=75',
+        image: 'https://github.com/xxczaki.png',
         sentence: Infinity
     },
     {
@@ -113,8 +120,8 @@ export const criminals = [
     {
         name: 'jdr1984',
         url: 'https://www.youtube.com/watch?v=5t53TcKIlMc',
-        image: 'https://imgur.com/xKvOXWW.png',
+        image: 'https://ocdn.eu/zapytaj/MDA_/de127a459e21ba3856775b7d2bfe7054.jpg',
         sentence: 2137
-    }
+    },
 ];
 
