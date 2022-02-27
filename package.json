@@ -5,7 +5,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "start": "pm2 startup && pm2 kill && pm2 start index.js",
+        "start": "sudo env PATH=$PATH:/opt/render/project/nodes/node-16.14.0/bin /opt/render/project/src/node_modules/pm2/bin/pm2 startup systemd -u render --hp /opt/render && pm2 kill && pm2 start index.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "keywords": [],
