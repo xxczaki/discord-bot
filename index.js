@@ -36,6 +36,22 @@ client.on('messageCreate', async msg => {
         embed.footer = {text: 'Dane: Wikipedia'};
 
         msg.channel.send({embeds: [embed]});
+    } else if (msg.content === '!help') {
+        const embed = new MessageEmbed();
+
+        embed.color = '#0099ff';
+        embed.title = `Dostępne komendy:`;
+        embed.description =
+        `
+        !wc
+        !nys
+        !chungus
+        !doin
+        !criminal
+        !help
+        `;
+
+        msg.channel.send({embeds: [embed]});
     }
   } catch (error) {
       const embed = new MessageEmbed();
