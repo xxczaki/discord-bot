@@ -1,5 +1,6 @@
 import {Client, Intents, MessageEmbed} from 'discord.js';
 import levenshtein from 'fast-levenshtein';
+import {randomInt} from 'node:crypto';
 
 import {countries, dates, criminals} from './utils.js';
 
@@ -12,19 +13,19 @@ client.on('ready', () => {
 client.on('messageCreate', async msg => {
   try {
     if (msg.content === '!wc') {
-      msg.reply(`you have committed over ${Math.floor(Math.random() * (900 - 20) + 20)} war crimes in ${countries[Math.floor(Math.random() * countries.length)]}.`);
+      msg.reply(`you have committed ${randomInt(900)} war crimes in ${countries[randomInt(countries.length)]}.`);
     } else if (msg.content === '!nys') {
-        msg.reply(`jesteś Nysem w ${Math.floor(Math.random() * (120 - 2) + 2)}%`);
+        msg.reply(`jesteś Nysem w ${randomInt(120)}%`);
     } else if (msg.content === '!chungus') {
-        msg.reply(`jesteś Chungusem w ${Math.floor(Math.random() * (120 - 2) + 2)}%`);
+        msg.reply(`jesteś Chungusem w ${randomInt(120)}%`);
     } else if (levenshtein.get(msg.content, 'among us') <= 3) {
         msg.reply(`cringe/10`);
     } else if (msg.content === '!doin') {
         const random = msg.guild.members.cache.random().user.id;
 
-        msg.reply(`I can confirm that <@!${random}> did your mum ${dates[Math.floor(Math.random() * dates.length)]}.`);
+        msg.reply(`I can confirm that <@!${random}> did your mum ${dates[randomInt(dates.length)]}.`);
     } else if (msg.content === '!criminal') {
-        const random = criminals[Math.floor(Math.random() * criminals.length)];
+        const random = criminals[randomInt(criminals.length)];
 
         const embed = new MessageEmbed();
 
