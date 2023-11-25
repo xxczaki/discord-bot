@@ -1,6 +1,5 @@
 {
     "name": "discord-bot",
-    "type": "module",
     "version": "1.0.0",
     "description": "",
     "main": "index.js",
@@ -12,7 +11,11 @@
     "author": "",
     "license": "MIT",
     "dependencies": {
-        "discord.js": "^13.3.1",
-        "fast-levenshtein": "^3.0.0"
+        "@discord-player/extractor": "^4.4.5",
+        "@discordjs/rest": "^2.2.0",
+        "discord-player": "^6.6.6",
+        "discord.js": "^14.14.1",
+        "mediaplex": "^0.0.9",
+        "youtube-ext": "^1.1.16"
     }
 }
