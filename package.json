@@ -17,7 +17,7 @@
     "@evan/opus": "^1.0.2",
     "discord-player": "^6.6.7",
     "discord.js": "^14.14.1",
-    "ytdl-core": "^4.11.5"
+    "play-dl": "^1.9.7"
   },
   "devDependencies": {
     "@discordjs/rest": "^2.2.0",

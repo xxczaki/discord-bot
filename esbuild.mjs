@@ -14,7 +14,6 @@ await esbuild.build({
 		'discord-player',
 		'@evan/opus',
 		'discord.js',
-		'ytdl-core',
 	],
 	outfile: 'dist/index.js',
 	minify: true,

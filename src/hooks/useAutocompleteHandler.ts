@@ -36,9 +36,9 @@ export default async function useAutocompleteHandler(
 		return interaction.respond(results);
 	}
 
-	const identifier = interaction.options.getString('id', true);
+	const identifier = interaction.options.getString('id');
 
-	if (identifier.length === 0) return interaction.respond([]);
+	if (!identifier || identifier.length === 0) return interaction.respond([]);
 
 	const channel = interaction.client.channels.cache.get(PLAYLISTS_CHANNEL_ID);
 
