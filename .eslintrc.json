@@ -1,0 +1,18 @@
+{
+	"root": true,
+	"extends": [
+		"eslint:recommended",
+		"plugin:prettier/recommended",
+		"plugin:@typescript-eslint/recommended"
+	],
+	"rules": {
+		"@typescript-eslint/consistent-type-imports": [
+			"error",
+			{ "disallowTypeAnnotations": false }
+		],
+		"no-empty": [
+			"error",
+			{ "allowEmptyCatch": true }
+		]
+	}
+}
