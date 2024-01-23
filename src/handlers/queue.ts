@@ -5,6 +5,7 @@ import {
 	type CacheType,
 	EmbedBuilder,
 } from 'discord.js';
+import getTrackPosition from '../utils/getTrackPosition';
 
 export default async function queueCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
@@ -29,17 +30,13 @@ export default async function queueCommandHandler(
 			descriptionLength = 0;
 			embedDescriptions.push([]);
 			currentDescriptionIndex++;
-			continue;
 		}
 
-		const entry = `${index + 1}. "${track.title}" by ${track.author} (*${
-			track.duration
-		}*)`;
+		const position = getTrackPosition(queue, track);
+		const entry = `${currentDescriptionIndex === 0 ? position : position + 1}. "${track.title}" by ${track.author} (*${track.duration}*)`;
 
 		descriptionLength += entry.length;
-		embedDescriptions[currentDescriptionIndex][index] = `${index + 1}. "${
-			track.title
-		}" by ${track.author} (*${track.duration}*)`;
+		embedDescriptions[currentDescriptionIndex][index] = entry;
 		index++;
 	}
 
@@ -70,7 +67,7 @@ export default async function queueCommandHandler(
 			},
 			{
 				name: 'Number of tracks',
-				value: `${queue?.tracks.data.length ?? '*unknown*'}`,
+				value: `${queue?.size ?? '*unknown*'}`,
 				inline: true,
 			},
 			{
@@ -80,7 +77,7 @@ export default async function queueCommandHandler(
 					: `${queue.durationFormatted} (will end at \`${addMilliseconds(
 							new Date(),
 							queue.estimatedDuration,
-					  ).toLocaleTimeString('pl')}\`)`,
+						).toLocaleTimeString('pl')}\`)`,
 			},
 			{
 				name: !currentTrack

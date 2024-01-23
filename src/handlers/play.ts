@@ -1,10 +1,11 @@
-import { useMainPlayer } from 'discord-player';
+import { useMainPlayer, useQueue } from 'discord-player';
 import type { GuildMember } from 'discord.js';
 import {
 	type ChatInputCommandInteraction,
 	type CacheType,
 	EmbedBuilder,
 } from 'discord.js';
+import getTrackPosition from '../utils/getTrackPosition';
 
 export default async function playCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
@@ -23,6 +24,7 @@ export default async function playCommandHandler(
 
 	try {
 		const player = useMainPlayer();
+		const queue = useQueue(interaction.guild?.id ?? '');
 
 		await interaction.deferReply();
 
@@ -35,7 +37,9 @@ export default async function playCommandHandler(
 
 		const embed = new EmbedBuilder()
 			.setTitle(track.title)
-			.setDescription('Added to queue.')
+			.setDescription(
+				`Added to queue (position №${getTrackPosition(queue, track)}).`,
+			)
 			.setURL(track.url)
 			.setAuthor({ name: track.author })
 			.setThumbnail(track.thumbnail)

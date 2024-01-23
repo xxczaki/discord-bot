@@ -1,8 +1,8 @@
 import { useMainPlayer } from 'discord-player';
 import type { CacheType, Interaction } from 'discord.js';
-import Fuse from 'fuse.js';
 import truncateString from '../utils/truncateString';
 import { PLAYLISTS_CHANNEL_ID } from '../constants/channelIds';
+import getPlaylists from '../utils/getPlaylists';
 
 export default async function useAutocompleteHandler(
 	interaction: Interaction<CacheType>,
@@ -11,12 +11,12 @@ export default async function useAutocompleteHandler(
 		return;
 	}
 
-	const query = interaction.options.getString('query');
-
-	if (query) {
-		const player = useMainPlayer();
+	if (interaction.commandName === 'play') {
+		const query = interaction.options.getString('query', true);
 
 		if (query.length === 0) return interaction.respond([]);
+
+		const player = useMainPlayer();
 
 		const data = await player.search(query, { requestedBy: interaction.user });
 
@@ -24,7 +24,7 @@ export default async function useAutocompleteHandler(
 
 		const results = data.tracks
 			.filter(track => track.url.length < 100)
-			.slice(0, 10)
+			.slice(0, 25)
 			.map(track => ({
 				name: `"${truncateString(track.title, 40)}" by ${truncateString(
 					track.author,
@@ -37,30 +37,9 @@ export default async function useAutocompleteHandler(
 	}
 
 	const identifier = interaction.options.getString('id');
-
-	if (!identifier || identifier.length === 0) return interaction.respond([]);
-
 	const channel = interaction.client.channels.cache.get(PLAYLISTS_CHANNEL_ID);
 
-	if (channel && channel.isTextBased()) {
-		const messages = await channel.messages.fetch({ limit: 20, cache: true });
-		const fuse = new Fuse(messages.map(message => message.content));
-		const matching = fuse.search(identifier);
+	const playlists = await getPlaylists(channel, identifier);
 
-		if (!matching) return interaction.respond([]);
-
-		const results = matching
-			.map(message => {
-				const match = /id="(?<id>.+)"/.exec(message.item)!;
-				const id = match.groups!.id;
-
-				return {
-					name: id,
-					value: id,
-				};
-			})
-			.slice(0, 10);
-
-		return interaction.respond(results);
-	}
+	return interaction.respond(playlists);
 }
