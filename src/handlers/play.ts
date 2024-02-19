@@ -38,7 +38,7 @@ export default async function playCommandHandler(
 		const embed = new EmbedBuilder()
 			.setTitle(track.title)
 			.setDescription(
-				`Added to queue (position №${getTrackPosition(queue, track)}).`,
+				`Added to queue (position ${getTrackPosition(queue, track) + 1}).`,
 			)
 			.setURL(track.url)
 			.setAuthor({ name: track.author })

@@ -1,4 +1,4 @@
-import { addMilliseconds } from 'date-fns';
+import { addMilliseconds } from 'date-fns/addMilliseconds';
 import { QueueRepeatMode, useQueue } from 'discord-player';
 import {
 	type ChatInputCommandInteraction,
