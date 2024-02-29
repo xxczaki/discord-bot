@@ -14,3 +14,5 @@ export { default as skipCommandHandler } from './skip';
 export { default as sortCommandHandler } from './sort';
 export { default as statsCommandHandler } from './stats';
 export { default as volumeCommandHandler } from './volume';
+export { default as filtersCommandHandler } from './filters';
+export { default as tempoCommandHandler } from './tempo';

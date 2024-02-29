@@ -17,6 +17,8 @@ import {
 	sortCommandHandler,
 	statsCommandHandler,
 	volumeCommandHandler,
+	filtersCommandHandler,
+	tempoCommandHandler,
 } from '../handlers';
 
 export default async function useCommandHandlers(
@@ -70,6 +72,12 @@ export default async function useCommandHandlers(
 			break;
 		case 'stats':
 			await statsCommandHandler(interaction);
+			break;
+		case 'filters':
+			await filtersCommandHandler(interaction);
+			break;
+		case 'tempo':
+			await tempoCommandHandler(interaction);
 			break;
 		default:
 			break;

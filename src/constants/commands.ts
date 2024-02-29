@@ -3,11 +3,11 @@ import type { ApplicationCommandData } from 'discord.js';
 const COMMANDS: ApplicationCommandData[] = [
 	{
 		name: 'play',
-		description: 'Plays some music',
+		description: 'Plays some music.',
 		options: [
 			{
 				name: 'query',
-				description: 'Searches for a song',
+				description: 'Query to use to search for your song',
 				type: 3,
 				required: true,
 				autocomplete: true,
@@ -16,19 +16,19 @@ const COMMANDS: ApplicationCommandData[] = [
 	},
 	{
 		name: 'pause',
-		description: 'Pauses the queue',
+		description: 'Pauses the queue.',
 	},
 	{
 		name: 'resume',
-		description: 'Resumes the queue',
+		description: 'Resumes the queue.',
 	},
 	{
 		name: 'skip',
-		description: 'Skips the current track',
+		description: 'Skips the current track.',
 	},
 	{
 		name: 'remove',
-		description: 'Removes track from the queue',
+		description: 'Removes track from the queue.',
 		options: [
 			{
 				name: 'track_id',
@@ -40,7 +40,7 @@ const COMMANDS: ApplicationCommandData[] = [
 	},
 	{
 		name: 'move',
-		description: 'Moves track in the queue to a different position',
+		description: 'Moves track in the queue to a different position.',
 		options: [
 			{
 				name: 'from',
@@ -58,7 +58,7 @@ const COMMANDS: ApplicationCommandData[] = [
 	},
 	{
 		name: 'queue',
-		description: 'Get information about the current queue',
+		description: 'Get information about the current queue.',
 		options: [
 			{
 				name: 'page_number',
@@ -70,11 +70,11 @@ const COMMANDS: ApplicationCommandData[] = [
 	},
 	{
 		name: 'shuffle',
-		description: 'Shuffles the queue',
+		description: 'Shuffles the queue.',
 	},
 	{
 		name: 'loop',
-		description: 'Loop controls',
+		description: 'Loop controls.',
 		options: [
 			{
 				name: 'loop_mode',
@@ -92,7 +92,7 @@ const COMMANDS: ApplicationCommandData[] = [
 	},
 	{
 		name: 'volume',
-		description: 'Sets the volume of the player',
+		description: 'Sets the volume of the player.',
 		options: [
 			{
 				name: 'value',
@@ -105,15 +105,15 @@ const COMMANDS: ApplicationCommandData[] = [
 	},
 	{
 		name: 'purge',
-		description: 'Purges the queue',
+		description: 'Purges the queue.',
 	},
 	{
 		name: 'debug',
-		description: 'Shows debug information',
+		description: 'Shows debug information.',
 	},
 	{
 		name: 'playlist',
-		description: 'Allows enqueuening multiple songs in one go',
+		description: 'Allows enqueuening multiple songs in one go.',
 		options: [
 			{
 				name: 'id',
@@ -125,7 +125,7 @@ const COMMANDS: ApplicationCommandData[] = [
 	},
 	{
 		name: 'deduplicate',
-		description: 'Removes duplicates from the queue (based on the URLs)',
+		description: 'Removes duplicates from the queue (based on the URLs).',
 	},
 	{
 		name: 'sort',
@@ -134,6 +134,38 @@ const COMMANDS: ApplicationCommandData[] = [
 	{
 		name: 'stats',
 		description: 'Shows certain statistics regarding bot usage.',
+	},
+	{
+		name: 'filters',
+		description: 'Toggle an audio filter.',
+		options: [
+			{
+				name: 'audio_filter',
+				description: 'The filter you want to toggle',
+				type: 3,
+				choices: [
+					{ name: 'Bassboost', value: 'bassboost' },
+					{ name: 'Earrape', value: 'earrape' },
+					{ name: 'Lofi', value: 'lofi' },
+					{ name: 'Nightcore', value: 'nightcore' },
+					{ name: 'Vaporwave', value: 'vaporwave' },
+				],
+			},
+		],
+	},
+	{
+		name: 'tempo',
+		description: 'Sets the tempo of the player.',
+		options: [
+			{
+				name: 'value',
+				description: 'Desired tempo, base is 1',
+				type: 10,
+				minValue: 0,
+				maxValue: 2,
+				required: true,
+			},
+		],
 	},
 ];
 

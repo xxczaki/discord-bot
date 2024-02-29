@@ -1,3 +1,4 @@
+import type { QueueFilters } from 'discord-player';
 import { useMainPlayer, useQueue } from 'discord-player';
 import type { GuildMember } from 'discord.js';
 import {
@@ -31,6 +32,7 @@ export default async function playCommandHandler(
 		const { track } = await player.play(channel, query, {
 			nodeOptions: {
 				metadata: interaction,
+				defaultFFmpegFilters: ['normalize' as keyof QueueFilters],
 			},
 			requestedBy: interaction.user.id,
 		});

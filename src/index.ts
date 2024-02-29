@@ -14,6 +14,7 @@ import useDebugListeners from './hooks/useDebugListeners';
 import { StatsHandler } from './utils/StatsHandler';
 import initializeCommands from './utils/initializeCommands';
 import resetStatus from './utils/resetStatus';
+import logger from './utils/logger';
 
 const statsHandler = StatsHandler.getInstance();
 
@@ -69,7 +70,7 @@ const statsHandler = StatsHandler.getInstance();
 	});
 
 	client.on('ready', () => {
-		console.log(`Logged in as ${client.user?.tag}!`);
+		logger.info(`Logged in as ${client.user?.tag}!`);
 
 		client.user?.setActivity('Idle, use /play to get started', {
 			type: ActivityType.Custom,

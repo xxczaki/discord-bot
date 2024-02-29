@@ -1,0 +1,14 @@
+# fly.toml app configuration file generated for icc-discord-bot on 2024-02-28T16:22:15+01:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'icc-discord-bot'
+primary_region = 'iad'
+
+[build]
+  dockerfile = 'Dockerfile'
+
+[[vm]]
+  size = 'shared-cpu-1x'
+	memory = "512mb"

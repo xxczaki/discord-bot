@@ -5,6 +5,7 @@ import {
 } from 'discord.js';
 import { StatsHandler } from '../utils/StatsHandler';
 import redis from '../utils/redis';
+import logger from '../utils/logger';
 
 const statsHandler = StatsHandler.getInstance();
 
@@ -56,7 +57,7 @@ export default async function statsCommandHandler(
 
 					requestedStatsMap[value.requestedById] = 1;
 				} catch (error) {
-					console.log(error);
+					logger.error(error);
 				}
 			}
 
