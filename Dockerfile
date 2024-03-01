@@ -16,6 +16,8 @@ RUN pnpm install --frozen-lockfile && \
 
 FROM node:20-alpine
 
+ENV TZ="Europe/Warsaw"
+
 RUN apk update && \
 		apk add --no-cache ffmpeg
 

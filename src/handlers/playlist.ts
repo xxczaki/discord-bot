@@ -6,10 +6,15 @@ import {
 	ActionRowBuilder,
 } from 'discord.js';
 import { PLAYLISTS_CHANNEL_ID } from '../constants/channelIds';
+import { useQueue } from 'discord-player';
 
 export default async function playlistCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
 ) {
+	const queue = useQueue(interaction.guild?.id ?? '');
+
+	queue?.filters.ffmpeg.setInputArgs(['-threads', '4']);
+
 	const identifier = interaction.options.getString('id');
 
 	const modal = new ModalBuilder()

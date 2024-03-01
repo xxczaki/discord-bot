@@ -10,5 +10,5 @@ primary_region = 'iad'
   dockerfile = 'Dockerfile'
 
 [[vm]]
-  size = 'shared-cpu-1x'
+  size = 'shared-cpu-2x'
 	memory = "512mb"

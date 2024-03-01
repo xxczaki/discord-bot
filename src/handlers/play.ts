@@ -29,6 +29,8 @@ export default async function playCommandHandler(
 
 		await interaction.deferReply();
 
+		queue?.filters.ffmpeg.setInputArgs(['-threads', '4']);
+
 		const { track } = await player.play(channel, query, {
 			nodeOptions: {
 				metadata: interaction,
