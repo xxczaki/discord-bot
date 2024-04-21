@@ -167,6 +167,17 @@ const COMMANDS: ApplicationCommandData[] = [
 			},
 		],
 	},
+	{
+		name: 'lateness',
+		description: 'Measures lateness.',
+		options: [
+			{
+				name: 'expected_hour',
+				description: 'Expected hour, formatted as HH:mm',
+				type: 3,
+			},
+		],
+	},
 ];
 
 export default COMMANDS;

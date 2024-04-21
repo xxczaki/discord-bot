@@ -1,12 +1,12 @@
-import type { ChatInputCommandInteraction, CacheType } from 'discord.js';
+import { useQueue } from 'discord-player';
+import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
 import {
+	ActionRowBuilder,
 	ModalBuilder,
 	TextInputBuilder,
 	TextInputStyle,
-	ActionRowBuilder,
 } from 'discord.js';
 import { PLAYLISTS_CHANNEL_ID } from '../constants/channelIds';
-import { useQueue } from 'discord-player';
 
 export default async function playlistCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
@@ -33,10 +33,10 @@ export default async function playlistCommandHandler(
 	if (identifier) {
 		const channel = interaction.client.channels.cache.get(PLAYLISTS_CHANNEL_ID);
 
-		if (channel && channel.isTextBased()) {
+		if (channel?.isTextBased()) {
 			const messages = await channel.messages.fetch({ limit: 20, cache: true });
 			const idMarker = `id="${identifier}"`;
-			const message = messages.find(message =>
+			const message = messages.find((message) =>
 				message.content.includes(idMarker),
 			);
 

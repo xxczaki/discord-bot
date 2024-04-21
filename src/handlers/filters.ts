@@ -1,6 +1,6 @@
 import type { QueueFilters } from 'discord-player';
 import { useQueue } from 'discord-player';
-import { type ChatInputCommandInteraction, type CacheType } from 'discord.js';
+import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
 
 export default async function filtersCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
@@ -12,7 +12,7 @@ export default async function filtersCommandHandler(
 
 	if (!filter) {
 		const activeFilters = queue?.filters.ffmpeg.filters
-			.filter(name => !['normalize', 'tempo'].includes(name)) // internal filters
+			.filter((name) => !['normalize', 'tempo'].includes(name)) // internal filters
 			.join(', ');
 
 		if (!activeFilters) {
@@ -29,7 +29,7 @@ export default async function filtersCommandHandler(
 	await queue?.filters.ffmpeg.toggle(filter as keyof QueueFilters);
 
 	const activeFilters = queue?.filters.ffmpeg.filters
-		.filter(name => !['normalize', 'tempo'].includes(name)) // internal filters
+		.filter((name) => !['normalize', 'tempo'].includes(name)) // internal filters
 		.join(', ');
 
 	if (!activeFilters) {

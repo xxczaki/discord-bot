@@ -1,20 +1,20 @@
+import process from 'node:process';
 import {
+	ActivityType,
 	Client,
 	EmbedBuilder,
 	Events,
 	GatewayIntentBits,
-	ActivityType,
 } from 'discord.js';
-import process from 'node:process';
 import useAutocompleteHandler from './hooks/useAutocompleteHandler';
-import getInitializedPlayer from './utils/initializePlayer';
 import useCommandHandlers from './hooks/useCommandHandlers';
-import usePlaylistModalSubmit from './hooks/usePlaylistModalSubmit';
 import useDebugListeners from './hooks/useDebugListeners';
+import usePlaylistModalSubmit from './hooks/usePlaylistModalSubmit';
 import { StatsHandler } from './utils/StatsHandler';
 import initializeCommands from './utils/initializeCommands';
-import resetStatus from './utils/resetStatus';
+import getInitializedPlayer from './utils/initializePlayer';
 import logger from './utils/logger';
+import resetStatus from './utils/resetStatus';
 
 const statsHandler = StatsHandler.getInstance();
 
@@ -56,7 +56,7 @@ const statsHandler = StatsHandler.getInstance();
 		});
 	});
 
-	player.events.on('emptyQueue', queue => {
+	player.events.on('emptyQueue', (queue) => {
 		queue.metadata.followUp('Queue finished.');
 		resetStatus(client);
 	});
@@ -77,7 +77,7 @@ const statsHandler = StatsHandler.getInstance();
 		});
 	});
 
-	client.on('interactionCreate', async interaction => {
+	client.on('interactionCreate', async (interaction) => {
 		await useAutocompleteHandler(interaction);
 
 		if (!interaction.isChatInputCommand()) return;
@@ -85,7 +85,7 @@ const statsHandler = StatsHandler.getInstance();
 		await useCommandHandlers(interaction);
 	});
 
-	client.on(Events.InteractionCreate, async interaction => {
+	client.on(Events.InteractionCreate, async (interaction) => {
 		if (!interaction.isModalSubmit()) return;
 
 		await usePlaylistModalSubmit(interaction);

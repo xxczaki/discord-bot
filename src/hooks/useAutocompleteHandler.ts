@@ -1,8 +1,8 @@
 import { useMainPlayer } from 'discord-player';
 import type { CacheType, Interaction } from 'discord.js';
-import truncateString from '../utils/truncateString';
 import { PLAYLISTS_CHANNEL_ID } from '../constants/channelIds';
 import getPlaylists from '../utils/getPlaylists';
+import truncateString from '../utils/truncateString';
 
 export default async function useAutocompleteHandler(
 	interaction: Interaction<CacheType>,
@@ -23,9 +23,9 @@ export default async function useAutocompleteHandler(
 		if (!data.hasTracks()) return interaction.respond([]);
 
 		const results = data.tracks
-			.filter(track => track.url.length < 100)
+			.filter((track) => track.url.length < 100)
 			.slice(0, 25)
-			.map(track => ({
+			.map((track) => ({
 				name: `"${truncateString(track.title, 40)}" by ${truncateString(
 					track.author,
 					40,

@@ -10,7 +10,7 @@ export default async function getPlaylists(
 	}
 
 	const rawMessages = await channel.messages.fetch({ limit: 25, cache: true });
-	const messages = rawMessages.map(message => message.content);
+	const messages = rawMessages.map((message) => message.content);
 
 	const fuse = new Fuse(messages);
 	let matching: Array<{ item: string }> = query ? fuse.search(query) : [];
@@ -18,13 +18,13 @@ export default async function getPlaylists(
 	if (query && !matching) return [];
 
 	if (matching.length === 0) {
-		matching = messages.map(content => ({ item: content }));
+		matching = messages.map((content) => ({ item: content }));
 	}
 
 	return matching
-		.flatMap(message => {
-			const match = /id="(?<id>.+)"/.exec(message.item)!;
-			const id = match?.groups!.id;
+		.flatMap((message) => {
+			const match = /id="(?<id>.+)"/.exec(message.item);
+			const id = match?.groups?.id;
 
 			if (!id) {
 				return [];

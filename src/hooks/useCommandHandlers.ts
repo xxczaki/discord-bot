@@ -3,6 +3,8 @@ import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
 import {
 	debugCommandHandler,
 	deduplicateCommandHandler,
+	filtersCommandHandler,
+	latenessCommandHandler,
 	loopCommandHandler,
 	moveCommandHandler,
 	pauseCommandHandler,
@@ -16,9 +18,8 @@ import {
 	skipCommandHandler,
 	sortCommandHandler,
 	statsCommandHandler,
-	volumeCommandHandler,
-	filtersCommandHandler,
 	tempoCommandHandler,
+	volumeCommandHandler,
 } from '../handlers';
 
 export default async function useCommandHandlers(
@@ -78,6 +79,9 @@ export default async function useCommandHandlers(
 			break;
 		case 'tempo':
 			await tempoCommandHandler(interaction);
+			break;
+		case 'lateness':
+			await latenessCommandHandler(interaction);
 			break;
 		default:
 			break;

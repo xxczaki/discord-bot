@@ -1,8 +1,8 @@
 import { addMilliseconds } from 'date-fns/addMilliseconds';
 import { QueueRepeatMode, useQueue } from 'discord-player';
 import {
-	type ChatInputCommandInteraction,
 	type CacheType,
+	type ChatInputCommandInteraction,
 	EmbedBuilder,
 } from 'discord.js';
 import getTrackPosition from '../utils/getTrackPosition';
@@ -33,7 +33,9 @@ export default async function queueCommandHandler(
 		}
 
 		const position = getTrackPosition(queue, track);
-		const entry = `${currentDescriptionIndex === 0 ? position : position + 1}. "${track.title}" by ${track.author} (*${track.duration}*)`;
+		const entry = `${
+			currentDescriptionIndex === 0 ? position : position + 1
+		}. "${track.title}" by ${track.author} (*${track.duration}*)`;
 
 		descriptionLength += entry.length;
 		embedDescriptions[currentDescriptionIndex][index] = entry;

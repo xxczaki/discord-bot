@@ -1,16 +1,16 @@
 import type {
-	SerializedTrack,
-	SerializedPlaylist,
 	Playlist,
+	SerializedPlaylist,
+	SerializedTrack,
 } from 'discord-player';
 import {
-	serialize,
 	DiscordPlayerQueryResultCache,
 	type QueryCacheProvider,
 	type QueryCacheResolverContext,
 	SearchResult,
 	type Track,
 	deserialize,
+	serialize,
 	useMainPlayer,
 } from 'discord-player';
 import type { Redis } from 'ioredis';
@@ -28,7 +28,7 @@ export class RedisQueryCache implements QueryCacheProvider<Track> {
 		const serialized = JSON.stringify(
 			data.playlist
 				? serialize(data.playlist)
-				: data.tracks.map(track => serialize(track)),
+				: data.tracks.map((track) => serialize(track)),
 		);
 
 		await this.redis.setex(key, this.EXPIRY_TIMEOUT, serialized);
@@ -45,9 +45,12 @@ export class RedisQueryCache implements QueryCacheProvider<Track> {
 
 		const parsed = serialized
 			.filter(Boolean)
-			.map(item => deserialize(player, JSON.parse(item!))) as Track[];
+			// biome-ignore lint/style/noNonNullAssertion: Code copied from discord-player
+			.map((item) => deserialize(player, JSON.parse(item!))) as Track[];
 
-		const res = parsed.map(item => new DiscordPlayerQueryResultCache(item, 0));
+		const res = parsed.map(
+			(item) => new DiscordPlayerQueryResultCache(item, 0),
+		);
 
 		return res;
 	}
@@ -68,7 +71,7 @@ export class RedisQueryCache implements QueryCacheProvider<Track> {
 				| SerializedPlaylist;
 
 			const parsed = Array.isArray(raw)
-				? (raw.map(item => deserialize(player, item)) as Track[])
+				? (raw.map((item) => deserialize(player, item)) as Track[])
 				: (deserialize(player, raw) as Playlist);
 
 			return new SearchResult(player, {

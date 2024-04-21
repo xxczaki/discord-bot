@@ -16,3 +16,4 @@ export { default as statsCommandHandler } from './stats';
 export { default as volumeCommandHandler } from './volume';
 export { default as filtersCommandHandler } from './filters';
 export { default as tempoCommandHandler } from './tempo';
+export { default as latenessCommandHandler } from './lateness';

@@ -1,6 +1,6 @@
 import type { QueueFilters } from 'discord-player';
-import { useQueue, AudioFilters } from 'discord-player';
-import { type ChatInputCommandInteraction, type CacheType } from 'discord.js';
+import { AudioFilters, useQueue } from 'discord-player';
+import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
 
 export default async function tempoCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,

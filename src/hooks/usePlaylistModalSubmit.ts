@@ -1,8 +1,8 @@
-import type { GuildMember, ModalSubmitInteraction } from 'discord.js';
-import { EmbedBuilder, type CacheType } from 'discord.js';
-import cryptoRandom from '../utils/cryptoRandom';
 import type { QueueFilters } from 'discord-player';
 import { useMainPlayer } from 'discord-player';
+import type { GuildMember, ModalSubmitInteraction } from 'discord.js';
+import { type CacheType, EmbedBuilder } from 'discord.js';
+import cryptoRandom from '../utils/cryptoRandom';
 
 export default async function usePlaylistModalSubmit(
 	interaction: ModalSubmitInteraction<CacheType>,
@@ -38,8 +38,8 @@ export default async function usePlaylistModalSubmit(
 	const playlistQueue = new Queue();
 
 	const prioritySongs = songsArray
-		.filter(song => song.startsWith('*'))
-		.map(song => song.replace('*', ''));
+		.filter((song) => song.startsWith('*'))
+		.map((song) => song.replace('*', ''));
 	let pickedSongs = [];
 
 	if (isToPickEmpty) {
@@ -49,7 +49,7 @@ export default async function usePlaylistModalSubmit(
 	} else {
 		pickedSongs = [
 			...songsArray
-				.filter(song => !song.startsWith('*'))
+				.filter((song) => !song.startsWith('*'))
 				.sort(() => 0.5 - cryptoRandom())
 				.slice(0, Math.abs(toPick - prioritySongs.length)),
 			...prioritySongs,
@@ -61,7 +61,7 @@ export default async function usePlaylistModalSubmit(
 	await interaction.deferReply();
 
 	await playlistQueue.addAll(
-		pickedSongs.map(song => async () => {
+		pickedSongs.map((song) => async () => {
 			const promise = player.play(channel, song, {
 				nodeOptions: {
 					metadata: interaction,

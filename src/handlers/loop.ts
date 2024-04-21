@@ -1,5 +1,5 @@
 import { QueueRepeatMode, useQueue } from 'discord-player';
-import { type ChatInputCommandInteraction, type CacheType } from 'discord.js';
+import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
 
 export default async function loopCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,

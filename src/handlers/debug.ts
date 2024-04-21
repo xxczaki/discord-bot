@@ -1,8 +1,8 @@
 import type { QueueFilters } from 'discord-player';
 import { useMainPlayer, useQueue } from 'discord-player';
 import {
-	type ChatInputCommandInteraction,
 	type CacheType,
+	type ChatInputCommandInteraction,
 	EmbedBuilder,
 } from 'discord.js';
 

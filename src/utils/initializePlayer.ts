@@ -1,4 +1,4 @@
-import { Player, AudioFilters } from 'discord-player';
+import { AudioFilters, Player } from 'discord-player';
 import type { Client } from 'discord.js';
 import { RedisQueryCache } from './RedisQueryCache';
 
@@ -15,7 +15,7 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 			queryCache: new RedisQueryCache(redis),
 		});
 
-		await initializedPlayer.extractors.loadDefault(extractor =>
+		await initializedPlayer.extractors.loadDefault((extractor) =>
 			['SpotifyExtractor', 'YouTubeExtractor'].includes(extractor),
 		);
 	}

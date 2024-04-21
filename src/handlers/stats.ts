@@ -1,11 +1,11 @@
 import {
-	type ChatInputCommandInteraction,
 	type CacheType,
+	type ChatInputCommandInteraction,
 	EmbedBuilder,
 } from 'discord.js';
 import { StatsHandler } from '../utils/StatsHandler';
-import redis from '../utils/redis';
 import logger from '../utils/logger';
+import redis from '../utils/redis';
 
 const statsHandler = StatsHandler.getInstance();
 
@@ -19,7 +19,7 @@ export default async function statsCommandHandler(
 
 	await interaction.reply('Loading latest stats…');
 
-	return new Promise(resolve => {
+	return new Promise((resolve) => {
 		statsStream.on('data', async (keys = []) => {
 			statsStream.pause();
 
