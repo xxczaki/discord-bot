@@ -1,3 +1,5 @@
+import process from 'node:process';
+
 type EnvironmentVariableNames =
 	| 'TOKEN'
 	| 'CLIENT_ID'

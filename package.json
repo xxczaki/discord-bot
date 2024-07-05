@@ -6,9 +6,10 @@
 	"scripts": {
 		"start": "pnpm build && node --env-file=.env dist/index.js",
 		"build": "node esbuild.mjs",
-		"lint": "biome check --apply ./src",
+		"lint": "biome check --write ./src",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
+	"packageManager": "pnpm@9.4.0",
 	"keywords": [],
 	"author": "",
 	"license": "MIT",
@@ -16,24 +17,24 @@
 		"@discord-player/extractor": "^4.4.7",
 		"@discordjs/opus": "^0.9.0",
 		"bufferutil": "^4.0.8",
-		"discord-player": "^6.6.8",
-		"discord.js": "^14.14.1",
+		"discord-player": "^6.6.10",
+		"discord.js": "^14.15.3",
 		"sodium-native": "^4.1.1",
-		"utf-8-validate": "^6.0.3",
+		"utf-8-validate": "^6.0.4",
 		"ytdl-core": "^4.11.5"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.7.0",
-		"@discordjs/rest": "^2.2.0",
-		"@types/node": "^20.12.7",
+		"@biomejs/biome": "1.8.3",
+		"@discordjs/rest": "^2.3.0",
+		"@types/node": "^20.14.9",
 		"date-fns": "^3.6.0",
-		"esbuild": "0.20.2",
-		"esbuild-plugin-pino": "^2.1.1",
+		"esbuild": "0.23.0",
+		"esbuild-plugin-pino": "^2.2.0",
 		"fuse.js": "^7.0.0",
 		"ioredis": "^5.4.1",
 		"p-queue": "^8.0.1",
-		"pino": "^8.20.0",
-		"typescript": "^5.4.5",
+		"pino": "^9.2.0",
+		"typescript": "^5.5.3",
 		"ulid": "^2.3.0"
 	}
 }

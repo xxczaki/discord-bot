@@ -18,6 +18,6 @@ export default async function initializeCommands() {
 
 		logger.info('Successfully reloaded application (/) commands.');
 	} catch (error) {
-		console.error(error);
+		logger.error('Application commands refresh failure', error);
 	}
 }

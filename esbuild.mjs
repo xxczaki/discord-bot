@@ -9,13 +9,9 @@ await esbuild.build({
 	external: [
 		'@discord-player/extractor',
 		'@discordjs/opus',
-		'@ffmpeg-installer/ffmpeg',
-		'@node-ffmpeg/node-ffmpeg-installer',
 		'bufferutil',
 		'discord-player',
 		'discord.js',
-		'ffmpeg-binaries',
-		'ffmpeg-static',
 		'sodium-native',
 		'utf-8-validate',
 		'ytdl-core',
