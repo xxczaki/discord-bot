@@ -7,10 +7,7 @@ export default async function deduplicateCommandHandler(
 	const queue = useQueue(interaction.guild?.id ?? '');
 
 	if (!queue) {
-		await interaction.reply({
-			content: 'Queue is not defined.',
-			ephemeral: true,
-		});
+		await interaction.editReply('Queue is not defined.');
 		return;
 	}
 
@@ -24,9 +21,9 @@ export default async function deduplicateCommandHandler(
 	}
 
 	if (removed === 0) {
-		await interaction.reply('No duplicates were found.');
+		await interaction.editReply('No duplicates were found.');
 		return;
 	}
 
-	await interaction.reply(`Removed ${removed} duplicates.`);
+	await interaction.editReply(`Removed ${removed} duplicates.`);
 }

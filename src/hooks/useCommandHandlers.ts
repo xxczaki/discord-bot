@@ -25,6 +25,8 @@ import {
 export default async function useCommandHandlers(
 	interaction: ChatInputCommandInteraction<CacheType>,
 ) {
+	await interaction.deferReply();
+
 	switch (interaction.commandName) {
 		case 'playlist':
 			await playlistCommandHandler(interaction);

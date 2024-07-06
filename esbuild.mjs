@@ -14,7 +14,6 @@ await esbuild.build({
 		'discord.js',
 		'sodium-native',
 		'utf-8-validate',
-		'ytdl-core',
 	],
 	plugins: [esbuildPluginPino({ transports: [] })],
 	outdir: 'dist',

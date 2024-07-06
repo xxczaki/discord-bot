@@ -8,5 +8,5 @@ export default async function resumeCommandHandler(
 
 	queue?.node.setPaused(false);
 
-	await interaction.reply('Track resumed.');
+	await interaction.editReply('Track resumed.');
 }

@@ -57,7 +57,7 @@ const statsHandler = StatsHandler.getInstance();
 	});
 
 	player.events.on('emptyQueue', (queue) => {
-		queue.metadata.followUp('Queue finished.');
+		queue.metadata.reply('Queue finished.');
 		resetStatus(client);
 	});
 

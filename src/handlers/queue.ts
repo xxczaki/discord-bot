@@ -16,7 +16,9 @@ export default async function queueCommandHandler(
 	const currentTrack = queue?.currentTrack;
 
 	if (!currentTrack && tracks.length === 0) {
-		await interaction.reply('The queue is empty and nothing is being played.');
+		await interaction.editReply(
+			'The queue is empty and nothing is being played.',
+		);
 		return;
 	}
 
@@ -47,10 +49,9 @@ export default async function queueCommandHandler(
 	);
 
 	if (pageNumber > embedDescriptions.length - 1) {
-		await interaction.reply({
-			content: `Invalid page number provided; it should be within range: [1, ${embedDescriptions.length}].`,
-			ephemeral: true,
-		});
+		await interaction.editReply(
+			`Invalid page number provided; it should be within range: [1, ${embedDescriptions.length}].`,
+		);
 		return;
 	}
 
@@ -95,5 +96,5 @@ export default async function queueCommandHandler(
 				: `Page ${pageNumber + 1}/${embedDescriptions.length}`,
 		});
 
-	await interaction.reply({ embeds: [queueEmbed] });
+	await interaction.editReply({ embeds: [queueEmbed] });
 }

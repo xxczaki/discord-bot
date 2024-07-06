@@ -8,13 +8,8 @@ export default async function tempoCommandHandler(
 	const queue = useQueue(interaction.guild?.id ?? '');
 	const value = interaction.options.getNumber('value', true);
 
-	await interaction.deferReply();
-
 	if (Number.isNaN(value)) {
-		await interaction.reply({
-			content: 'Invalid value provided.',
-			ephemeral: true,
-		});
+		await interaction.editReply('Invalid value provided.');
 		return;
 	}
 
@@ -22,5 +17,5 @@ export default async function tempoCommandHandler(
 
 	await queue?.filters.ffmpeg.toggle('tempo' as keyof QueueFilters);
 
-	await interaction.followUp(`Tempo adjusted to \`${value}\`.`);
+	await interaction.editReply(`Tempo adjusted to \`${value}\`.`);
 }

@@ -17,8 +17,6 @@ export default async function latenessCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
 ) {
 	if (await lateness.isLocked) {
-		await interaction.deferReply();
-
 		const arrived = new ButtonBuilder()
 			.setCustomId('arrived')
 			.setLabel('Stop (user arrived)')
@@ -40,10 +38,9 @@ export default async function latenessCommandHandler(
 			cancel,
 		);
 
-		const response = await interaction.followUp({
+		const response = await interaction.editReply({
 			content: '⚠️ Lateness measurement is already in progress\n',
 			components: [row],
-			ephemeral: true,
 		});
 
 		try {
@@ -90,7 +87,7 @@ export default async function latenessCommandHandler(
 		const stats: Record<number, string> = {};
 		const delays: number[] = [];
 
-		await interaction.reply('Loading lateness data…');
+		await interaction.editReply('Loading lateness data…');
 
 		return new Promise((resolve) => {
 			statsStream.on('data', async (keys = []) => {
@@ -171,8 +168,6 @@ export default async function latenessCommandHandler(
 		});
 	}
 
-	await interaction.deferReply();
-
 	const today = new Date();
 	const [hours, minutes] = expected
 		.split(':')
@@ -182,7 +177,7 @@ export default async function latenessCommandHandler(
 
 	await lateness.start(today);
 
-	await interaction.followUp(
+	await interaction.editReply(
 		`✅ Measuring lateness, expected today at: \`${today.toLocaleTimeString(
 			'pl',
 		)}\`.`,

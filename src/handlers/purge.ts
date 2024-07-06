@@ -8,5 +8,5 @@ export default async function purgeCommandHandler(
 
 	queue?.delete();
 
-	await interaction.reply('Queue purged, leaving…');
+	await interaction.editReply('Queue purged, leaving…');
 }

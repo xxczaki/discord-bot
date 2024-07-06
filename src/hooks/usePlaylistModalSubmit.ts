@@ -13,10 +13,7 @@ export default async function usePlaylistModalSubmit(
 	const channel = (interaction.member as GuildMember).voice.channel;
 
 	if (!channel) {
-		await interaction.reply({
-			content: 'You are not connected to a voice channel!',
-			ephemeral: true,
-		});
+		await interaction.editReply('You are not connected to a voice channel!');
 		return;
 	}
 
@@ -27,10 +24,9 @@ export default async function usePlaylistModalSubmit(
 	let enqueued = 0;
 
 	if (Number.isNaN(toPick) || toPick > songsArray.length || toPick === 0) {
-		await interaction.reply({
-			content: 'Invalid number of songs to pick was specified.',
-			ephemeral: true,
-		});
+		await interaction.editReply(
+			'Invalid number of songs to pick was specified.',
+		);
 		return;
 	}
 
@@ -58,8 +54,6 @@ export default async function usePlaylistModalSubmit(
 
 	const player = useMainPlayer();
 
-	await interaction.deferReply();
-
 	await playlistQueue.addAll(
 		pickedSongs.map((song) => async () => {
 			const promise = player.play(channel, song, {
@@ -85,5 +79,5 @@ export default async function usePlaylistModalSubmit(
 			} skipped.\n\nNumber of priority songs: ${prioritySongs.length}.`,
 		);
 
-	await interaction.followUp({ embeds: [embed] });
+	await interaction.editReply({ embeds: [embed] });
 }

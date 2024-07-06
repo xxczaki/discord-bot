@@ -7,14 +7,11 @@ export default async function pauseCommandHandler(
 	const queue = useQueue(interaction.guild?.id ?? '');
 
 	if (queue?.node.isPaused()) {
-		await interaction.reply({
-			content: 'The track is already paused.',
-			ephemeral: true,
-		});
+		await interaction.editReply('The track is already paused.');
 		return;
 	}
 
 	queue?.node.setPaused(true);
 
-	await interaction.reply('Track paused.');
+	await interaction.editReply('Track paused.');
 }

@@ -41,11 +41,10 @@ export default async function playlistCommandHandler(
 			);
 
 			if (!message) {
-				return interaction.reply({
-					content:
-						'Playlist with such id does not seem to exist on the `#listy-piosenek` channel.',
-					ephemeral: true,
-				});
+				await interaction.editReply(
+					'Playlist with such id does not seem to exist on the `#listy-piosenek` channel.',
+				);
+				return;
 			}
 
 			const content = message.content
@@ -73,5 +72,5 @@ export default async function playlistCommandHandler(
 
 	modal.addComponents(firstRow, secondRow);
 
-	return interaction.showModal(modal);
+	await interaction.showModal(modal);
 }

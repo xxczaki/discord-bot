@@ -9,7 +9,7 @@ export default async function loopCommandHandler(
 
 	queue?.setRepeatMode(mode);
 
-	await interaction.reply(
+	await interaction.editReply(
 		`Queue loop mode changed to \`${QueueRepeatMode[mode]}\`.`,
 	);
 }

@@ -17,7 +17,7 @@ export default async function statsCommandHandler(
 	const playStatsMap: Record<string, number> = {};
 	const requestedStatsMap: Record<string, number> = {};
 
-	await interaction.reply('Loading latest stats…');
+	await interaction.editReply('Loading latest stats…');
 
 	return new Promise((resolve) => {
 		statsStream.on('data', async (keys = []) => {

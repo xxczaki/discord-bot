@@ -14,10 +14,7 @@ export default async function playCommandHandler(
 	const channel = (interaction.member as GuildMember).voice.channel;
 
 	if (!channel) {
-		await interaction.reply({
-			content: 'You are not connected to a voice channel!',
-			ephemeral: true,
-		});
+		await interaction.editReply('You are not connected to a voice channel!');
 		return;
 	}
 
@@ -26,8 +23,6 @@ export default async function playCommandHandler(
 	try {
 		const player = useMainPlayer();
 		const queue = useQueue(interaction.guild?.id ?? '');
-
-		await interaction.deferReply();
 
 		queue?.filters.ffmpeg.setInputArgs(['-threads', '4']);
 
@@ -52,8 +47,8 @@ export default async function playCommandHandler(
 				{ name: 'Source', value: track.source, inline: true },
 			);
 
-		await interaction.followUp({ embeds: [embed] });
+		await interaction.editReply({ embeds: [embed] });
 	} catch (error) {
-		await interaction.reply(`Something went wrong: ${error}.`);
+		await interaction.editReply(`Something went wrong: ${error}.`);
 	}
 }

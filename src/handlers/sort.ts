@@ -7,10 +7,7 @@ export default async function sortCommandHandler(
 	const queue = useQueue(interaction.guild?.id ?? '');
 
 	if (!queue) {
-		await interaction.reply({
-			content: 'Queue is not defined.',
-			ephemeral: true,
-		});
+		await interaction.editReply('Queue is not defined.');
 		return;
 	}
 
@@ -26,5 +23,5 @@ export default async function sortCommandHandler(
 		return 0;
 	});
 
-	await interaction.reply('Queue sorted alphabetically.');
+	await interaction.editReply('Queue sorted alphabetically.');
 }

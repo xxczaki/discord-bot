@@ -10,7 +10,7 @@ export default function useDebugListeners() {
 		logger.debug(`[${queue.guild.name}: ${queue.guild.id}] ${message}`),
 	);
 
-	player.on('error', (error) => {
+	player.on('error', async (error) => {
 		logger.error('Player error', error);
 	});
 	player.events.on('error', (_, error) => {
