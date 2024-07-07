@@ -1,4 +1,4 @@
-name: Fly Deploy
+name: Deploy
 on:
   workflow_run:
     workflows: ["Lint"]
@@ -7,7 +7,7 @@ on:
       - completed
 jobs:
   deploy:
-    name: Deploy app
+    name: Deploy with Fly.io
     runs-on: ubuntu-latest
     concurrency: deploy-group # ensure only one action runs at a time
     steps:
