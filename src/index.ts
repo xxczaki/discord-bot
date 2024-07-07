@@ -8,6 +8,8 @@ import getInitializedPlayer from './utils/initializePlayer';
 
 const statsHandler = StatsHandler.getInstance();
 
+useDebugListeners();
+
 (async () => {
 	await initializeCommands();
 
@@ -115,6 +117,4 @@ const statsHandler = StatsHandler.getInstance();
 	});
 
 	client.login(process.env.TOKEN);
-
-	useDebugListeners();
 })();
