@@ -27,7 +27,7 @@ await esbuild.build({
 			project: 'icc-discord-bot',
 			telemetry: false,
 			release: {
-				name: process.env.GIT_COMMIT,
+				name: process.env.SENTRY_RELEASE_NAME,
 			},
 		}),
 	],
