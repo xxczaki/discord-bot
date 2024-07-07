@@ -54,8 +54,7 @@ export default async function playCommandHandler(
 		const moveFirst = new ButtonBuilder()
 			.setCustomId('move-first')
 			.setLabel('Make it play next')
-			.setStyle(ButtonStyle.Secondary)
-			.setDisabled(trackPosition <= 1);
+			.setStyle(ButtonStyle.Secondary);
 
 		const remove = new ButtonBuilder()
 			.setCustomId('remove')
@@ -69,7 +68,7 @@ export default async function playCommandHandler(
 
 		const response = await interaction.editReply({
 			embeds: [embed],
-			components: [row],
+			components: trackPosition <= 1 ? [] : [row],
 		});
 
 		try {
@@ -79,7 +78,7 @@ export default async function playCommandHandler(
 
 			switch (answer.customId) {
 				case 'move-first':
-					queue?.moveTrack(track, 1);
+					queue?.moveTrack(track, 0);
 
 					await answer.update({
 						content: 'Moved to the beginning of the queue.',

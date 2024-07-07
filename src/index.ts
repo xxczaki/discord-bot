@@ -1,6 +1,12 @@
 import('./utils/sentry');
 
-import { Client, Events, GatewayIntentBits } from 'discord.js';
+import {
+	type ButtonBuilder,
+	Client,
+	Events,
+	GatewayIntentBits,
+	type TextBasedChannel,
+} from 'discord.js';
 import useDebugListeners from './hooks/useDebugListeners';
 import { StatsHandler } from './utils/StatsHandler';
 import getEnvironmentVariable from './utils/getEnvironmentVariable';
@@ -24,7 +30,8 @@ const statsHandler = StatsHandler.getInstance();
 	const player = await getInitializedPlayer(client);
 
 	player.events.on('playerStart', async (queue, track) => {
-		const { EmbedBuilder } = await import('discord.js');
+		const { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } =
+			await import('discord.js');
 
 		const embed = new EmbedBuilder()
 			.setTitle(track.title)
@@ -37,7 +44,37 @@ const statsHandler = StatsHandler.getInstance();
 				{ name: 'Source', value: track.source, inline: true },
 			);
 
-		await queue.metadata.channel.send({ embeds: [embed] });
+		const skip = new ButtonBuilder()
+			.setCustomId('skip')
+			.setLabel('Skip')
+			.setStyle(ButtonStyle.Danger);
+
+		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(skip);
+
+		const response = await (queue.metadata.channel as TextBasedChannel).send({
+			embeds: [embed],
+			components: [row],
+		});
+
+		try {
+			const answer = await response.awaitMessageComponent({
+				time: 60_000, // 1 minute
+			});
+
+			if (answer.customId === 'skip') {
+				queue?.node.skip();
+
+				await answer.update({
+					content: 'Track skipped.',
+					embeds: [],
+					components: [],
+				});
+			}
+		} catch (e) {
+			await response.edit({
+				components: [],
+			});
+		}
 
 		await statsHandler.saveStat('play', {
 			title: track.title,
