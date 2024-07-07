@@ -1,6 +1,6 @@
+import { sentryEsbuildPlugin } from '@sentry/esbuild-plugin';
 import * as esbuild from 'esbuild';
 import esbuildPluginPino from 'esbuild-plugin-pino';
-import { sentryEsbuildPlugin } from '@sentry/esbuild-plugin';
 
 await esbuild.build({
 	entryPoints: ['src/index.ts'],
