@@ -51,9 +51,17 @@ export default async function playCommandHandler(
 				{ name: 'Source', value: track.source, inline: true },
 			);
 
+		const isInQueue = queue?.tracks.some(({ id }) => id === track.id);
+
+		const playNow = new ButtonBuilder()
+			.setCustomId('play-now')
+			.setLabel('Play now')
+			.setStyle(ButtonStyle.Success)
+			.setDisabled(!isInQueue);
+
 		const moveFirst = new ButtonBuilder()
 			.setCustomId('move-first')
-			.setLabel('Make it play next')
+			.setLabel('Play next')
 			.setStyle(ButtonStyle.Secondary)
 			.setDisabled(trackPosition <= 1);
 
@@ -61,9 +69,10 @@ export default async function playCommandHandler(
 			.setCustomId('remove')
 			.setLabel('Remove')
 			.setStyle(ButtonStyle.Danger)
-			.setDisabled(!queue?.tracks.some(({ id }) => id === track.id));
+			.setDisabled(!isInQueue);
 
 		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+			playNow,
 			moveFirst,
 			remove,
 		);
@@ -79,6 +88,15 @@ export default async function playCommandHandler(
 			});
 
 			switch (answer.customId) {
+				case 'play-now':
+					queue?.moveTrack(track, 0);
+					queue?.node.skip();
+
+					await answer.update({
+						content: 'Playing this track now.',
+						components: [],
+					});
+					break;
 				case 'move-first':
 					queue?.moveTrack(track, 0);
 
