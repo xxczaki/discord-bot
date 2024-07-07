@@ -1,5 +1,9 @@
-- name: Setup Biome CLI
-  uses: biomejs/setup-biome@v2
-
-- name: Run Biome
-  run: biome ci .
+name: Lint
+on: push
+jobs:
+  setup:
+    name: Setup Biome CLI
+    uses: biomejs/setup-biome@v2
+  lint:
+    name: Run Biome
+    run: biome ci .
