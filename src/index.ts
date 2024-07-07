@@ -3,6 +3,7 @@ import('./utils/sentry');
 import { Client, Events, GatewayIntentBits } from 'discord.js';
 import useDebugListeners from './hooks/useDebugListeners';
 import { StatsHandler } from './utils/StatsHandler';
+import getEnvironmentVariable from './utils/getEnvironmentVariable';
 import initializeCommands from './utils/initializeCommands';
 import getInitializedPlayer from './utils/initializePlayer';
 
@@ -78,14 +79,27 @@ const statsHandler = StatsHandler.getInstance();
 	});
 
 	client.on('ready', async () => {
-		const [{ default: logger }, { default: resetStatus }] = await Promise.all([
-			import('./utils/logger'),
-			import('./utils/resetStatus'),
-		]);
+		const [{ default: logger }, { default: resetStatus }, { BOT_CHANNEL_ID }] =
+			await Promise.all([
+				import('./utils/logger'),
+				import('./utils/resetStatus'),
+				import('./constants/channelIds'),
+			]);
 
 		logger.info(`Logged in as ${client.user?.tag}!`);
 
 		resetStatus(client);
+
+		const channel = client.channels.cache.get(BOT_CHANNEL_ID);
+
+		if (channel?.isTextBased()) {
+			const commitHash = process.env.GIT_COMMIT;
+			const wasDeploymentManual = !commitHash;
+
+			channel.send(
+				`ℹ️ Update successful, ready to play.\n\nDeployment source: \`${wasDeploymentManual ? 'manual' : commitHash}\``,
+			);
+		}
 	});
 
 	client.on('interactionCreate', async (interaction) => {
@@ -114,7 +128,7 @@ const statsHandler = StatsHandler.getInstance();
 		await usePlaylistModalSubmit(interaction);
 	});
 
-	client.login(process.env.TOKEN);
+	client.login(getEnvironmentVariable('TOKEN'));
 
 	useDebugListeners(client);
 })();

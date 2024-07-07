@@ -9,10 +9,10 @@ jobs:
   deploy:
     name: Deploy app
     runs-on: ubuntu-latest
-    concurrency: deploy-group    # ensure only one action runs at a time
+    concurrency: deploy-group # ensure only one action runs at a time
     steps:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only
+      - run: flyctl deploy --remote-only --env GIT_COMMIT=$(git rev-parse --short "$GITHUB_SHA")
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
