@@ -9,9 +9,10 @@ FROM base AS build
 
 COPY src ./src/
 COPY package.json pnpm-lock.yaml esbuild.mjs ./
-RUN pnpm install --frozen-lockfile && \
-		pnpm build && \
-		pnpm prune --prod
+RUN pnpm install --frozen-lockfile
+RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN \
+    SENTRY_AUTH_TOKEN="$(cat /run/secrets/SENTRY_AUTH_TOKEN)" pnpm build && \
+RUN pnpm prune --prod
 
 
 FROM node:20-alpine
