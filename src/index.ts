@@ -109,6 +109,12 @@ const statsHandler = StatsHandler.getInstance();
 		resetStatus(client);
 	});
 
+	player.events.on('connectionDestroyed', async () => {
+		const { default: resetStatus } = await import('./utils/resetStatus');
+
+		resetStatus(client);
+	});
+
 	player.events.on('disconnect', async () => {
 		const { default: resetStatus } = await import('./utils/resetStatus');
 
