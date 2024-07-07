@@ -78,7 +78,7 @@ export default async function playCommandHandler(
 
 			switch (answer.customId) {
 				case 'move-first':
-					queue?.moveTrack(trackPosition, 1);
+					queue?.moveTrack(trackPosition - 1, 1);
 
 					await answer.update({
 						content: 'Moved to the beginning of the queue.',
@@ -86,7 +86,7 @@ export default async function playCommandHandler(
 					});
 					break;
 				case 'remove':
-					queue?.removeTrack(trackPosition);
+					queue?.removeTrack(trackPosition - 1);
 
 					await answer.update({
 						content: 'Track removed from the queue.',
