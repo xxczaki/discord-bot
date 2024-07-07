@@ -96,8 +96,10 @@ const statsHandler = StatsHandler.getInstance();
 			const commitHash = process.env.GIT_COMMIT;
 			const wasDeploymentManual = !commitHash;
 
+			const commitLink = `[\`${commitHash}\`](https://github.com/xxczaki/discord-bot/commit/${commitHash})`;
+
 			channel.send(
-				`ℹ️ Update successful, ready to play.\n\nDeployment source: \`${wasDeploymentManual ? 'manual' : commitHash}\``,
+				`ℹ️ Update successful, ready to play.\n\nDeployment source: ${wasDeploymentManual ? '`manual`' : commitLink}`,
 			);
 		}
 	});
