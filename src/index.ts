@@ -8,8 +8,6 @@ import getInitializedPlayer from './utils/initializePlayer';
 
 const statsHandler = StatsHandler.getInstance();
 
-useDebugListeners();
-
 (async () => {
 	await initializeCommands();
 
@@ -23,6 +21,8 @@ useDebugListeners();
 	});
 
 	const player = await getInitializedPlayer(client);
+
+	useDebugListeners();
 
 	player.events.on('playerStart', async (queue, track) => {
 		const { EmbedBuilder } = await import('discord.js');
