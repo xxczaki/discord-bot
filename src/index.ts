@@ -22,8 +22,6 @@ const statsHandler = StatsHandler.getInstance();
 
 	const player = await getInitializedPlayer(client);
 
-	useDebugListeners();
-
 	player.events.on('playerStart', async (queue, track) => {
 		const { EmbedBuilder } = await import('discord.js');
 
@@ -117,4 +115,6 @@ const statsHandler = StatsHandler.getInstance();
 	});
 
 	client.login(process.env.TOKEN);
+
+	useDebugListeners(client);
 })();
