@@ -25,6 +25,7 @@ await esbuild.build({
 			authToken: process.env.SENTRY_AUTH_TOKEN,
 			org: 'parsify-technologies',
 			project: 'icc-discord-bot',
+			telemetry: false,
 		}),
 	],
 	outdir: 'dist',
