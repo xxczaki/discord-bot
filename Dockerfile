@@ -6,6 +6,7 @@ RUN apk update --no-cache && \
 
 
 FROM base AS build
+ENV NODE_ENV=production
 
 COPY src ./src/
 COPY package.json pnpm-lock.yaml esbuild.mjs ./
