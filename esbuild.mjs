@@ -26,6 +26,9 @@ await esbuild.build({
 			org: 'parsify-technologies',
 			project: 'icc-discord-bot',
 			telemetry: false,
+			release: {
+				name: process.env.GITHUB_SHA,
+			},
 		}),
 	],
 	outdir: 'dist',

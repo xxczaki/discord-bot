@@ -16,3 +16,4 @@ jobs:
       - run: flyctl deploy --remote-only --env GIT_COMMIT=$(git rev-parse --short "$GITHUB_SHA")
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
