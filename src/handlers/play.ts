@@ -54,12 +54,14 @@ export default async function playCommandHandler(
 		const moveFirst = new ButtonBuilder()
 			.setCustomId('move-first')
 			.setLabel('Make it play next')
-			.setStyle(ButtonStyle.Secondary);
+			.setStyle(ButtonStyle.Secondary)
+			.setDisabled(trackPosition <= 1);
 
 		const remove = new ButtonBuilder()
 			.setCustomId('remove')
 			.setLabel('Remove')
-			.setStyle(ButtonStyle.Danger);
+			.setStyle(ButtonStyle.Danger)
+			.setDisabled(!queue?.tracks.some(({ id }) => id === track.id));
 
 		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
 			moveFirst,
@@ -68,7 +70,7 @@ export default async function playCommandHandler(
 
 		const response = await interaction.editReply({
 			embeds: [embed],
-			components: trackPosition <= 1 ? [] : [row],
+			components: [row],
 		});
 
 		try {
@@ -82,7 +84,7 @@ export default async function playCommandHandler(
 
 					await answer.update({
 						content: 'Moved to the beginning of the queue.',
-						components: [],
+						components: [row],
 					});
 					break;
 				case 'remove':
