@@ -6,14 +6,13 @@ RUN apk update --no-cache && \
 
 
 FROM base AS build
-ENV NODE_ENV=production
 
 COPY src ./src/
 COPY package.json pnpm-lock.yaml esbuild.mjs ./
 RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN \
 		--mount=type=secret,id=GIT_COMMIT \
 		pnpm install --frozen-lockfile && \
-    SENTRY_AUTH_TOKEN="$(cat /run/secrets/SENTRY_AUTH_TOKEN)" GIT_COMMIT="$(cat /run/secrets/GIT_COMMIT)" pnpm build && \
+    NODE_ENV=production SENTRY_AUTH_TOKEN="$(cat /run/secrets/SENTRY_AUTH_TOKEN)" GIT_COMMIT="$(cat /run/secrets/GIT_COMMIT)" pnpm build && \
 		pnpm prune --prod
 
 
