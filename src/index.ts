@@ -50,7 +50,7 @@ const statsHandler = StatsHandler.getInstance();
 			activities: [
 				{
 					name: `"${track.title}" by ${track.author}`,
-					type: ActivityType.Streaming,
+					type: ActivityType.Listening,
 				},
 			],
 			status: PresenceUpdateStatus.Online,
