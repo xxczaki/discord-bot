@@ -1,8 +1,4 @@
-import { useMainPlayer } from 'discord-player';
 import type { CacheType, Interaction } from 'discord.js';
-import { PLAYLISTS_CHANNEL_ID } from '../constants/channelIds';
-import getPlaylists from '../utils/getPlaylists';
-import truncateString from '../utils/truncateString';
 
 export default async function useAutocompleteHandler(
 	interaction: Interaction<CacheType>,
@@ -16,11 +12,15 @@ export default async function useAutocompleteHandler(
 
 		if (query.length === 0) return interaction.respond([]);
 
+		const { useMainPlayer } = await import('discord-player');
+
 		const player = useMainPlayer();
 
 		const data = await player.search(query, { requestedBy: interaction.user });
 
 		if (!data.hasTracks()) return interaction.respond([]);
+
+		const { default: truncateString } = await import('../utils/truncateString');
 
 		const results = data.tracks
 			.filter((track) => track.url.length < 100)
@@ -35,6 +35,12 @@ export default async function useAutocompleteHandler(
 
 		return interaction.respond(results);
 	}
+
+	const [{ PLAYLISTS_CHANNEL_ID }, { default: getPlaylists }] =
+		await Promise.all([
+			import('../constants/channelIds'),
+			import('../utils/getPlaylists'),
+		]);
 
 	const identifier = interaction.options.getString('id');
 	const channel = interaction.client.channels.cache.get(PLAYLISTS_CHANNEL_ID);

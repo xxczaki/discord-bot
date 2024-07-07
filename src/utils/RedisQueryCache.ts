@@ -3,15 +3,12 @@ import type {
 	SerializedPlaylist,
 	SerializedTrack,
 } from 'discord-player';
-import {
+import type {
 	DiscordPlayerQueryResultCache,
-	type QueryCacheProvider,
-	type QueryCacheResolverContext,
+	QueryCacheProvider,
+	QueryCacheResolverContext,
 	SearchResult,
-	type Track,
-	deserialize,
-	serialize,
-	useMainPlayer,
+	Track,
 } from 'discord-player';
 import type { Redis } from 'ioredis';
 
@@ -24,6 +21,8 @@ export class RedisQueryCache implements QueryCacheProvider<Track> {
 	}
 
 	public async addData(data: SearchResult): Promise<void> {
+		const { serialize } = await import('discord-player');
+
 		const key = this.createKey(data.query);
 		const serialized = JSON.stringify(
 			data.playlist
@@ -37,6 +36,9 @@ export class RedisQueryCache implements QueryCacheProvider<Track> {
 	public async getData(): Promise<
 		DiscordPlayerQueryResultCache<Track<unknown>>[]
 	> {
+		const { useMainPlayer, deserialize, DiscordPlayerQueryResultCache } =
+			await import('discord-player');
+
 		const player = useMainPlayer();
 
 		const data = await this.redis.keys(this.createKey('*'));
@@ -58,6 +60,8 @@ export class RedisQueryCache implements QueryCacheProvider<Track> {
 	public async resolve(
 		context: QueryCacheResolverContext,
 	): Promise<SearchResult> {
+		const { useMainPlayer, SearchResult } = await import('discord-player');
+
 		const player = useMainPlayer();
 
 		try {
@@ -69,6 +73,8 @@ export class RedisQueryCache implements QueryCacheProvider<Track> {
 			const raw = JSON.parse(serialized) as
 				| SerializedTrack[]
 				| SerializedPlaylist;
+
+			const { deserialize } = await import('discord-player');
 
 			const parsed = Array.isArray(raw)
 				? (raw.map((item) => deserialize(player, item)) as Track[])

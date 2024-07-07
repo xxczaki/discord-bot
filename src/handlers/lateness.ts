@@ -1,15 +1,9 @@
-import { differenceInMinutes, format } from 'date-fns';
-import {
-	ActionRowBuilder,
+import type {
 	ButtonBuilder,
-	ButtonStyle,
-	type CacheType,
-	type ChatInputCommandInteraction,
-	EmbedBuilder,
+	CacheType,
+	ChatInputCommandInteraction,
 } from 'discord.js';
 import { LatenessHandler } from '../utils/LatenessHandler';
-import logger from '../utils/logger';
-import redis from '../utils/redis';
 
 const lateness = LatenessHandler.getInstance();
 
@@ -17,6 +11,10 @@ export default async function latenessCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
 ) {
 	if (await lateness.isLocked) {
+		const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = await import(
+			'discord.js'
+		);
+
 		const arrived = new ButtonBuilder()
 			.setCustomId('arrived')
 			.setLabel('Stop (user arrived)')
@@ -89,6 +87,16 @@ export default async function latenessCommandHandler(
 
 		await interaction.editReply('Loading lateness data…');
 
+		const [
+			{ differenceInMinutes, format },
+			{ default: redis },
+			{ EmbedBuilder },
+		] = await Promise.all([
+			import('date-fns'),
+			import('../utils/redis'),
+			import('discord.js'),
+		]);
+
 		return new Promise((resolve) => {
 			statsStream.on('data', async (keys = []) => {
 				statsStream.pause();
@@ -124,6 +132,8 @@ export default async function latenessCommandHandler(
 
 						stats[expected.getTime()] = identifier;
 					} catch (error) {
+						const { default: logger } = await import('../utils/logger');
+
 						logger.error(error);
 					}
 				}

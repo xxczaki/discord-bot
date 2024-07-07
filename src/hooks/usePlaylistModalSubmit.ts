@@ -1,8 +1,6 @@
 import type { QueueFilters } from 'discord-player';
-import { useMainPlayer } from 'discord-player';
 import type { GuildMember, ModalSubmitInteraction } from 'discord.js';
-import { type CacheType, EmbedBuilder } from 'discord.js';
-import cryptoRandom from '../utils/cryptoRandom';
+import type { CacheType } from 'discord.js';
 
 export default async function usePlaylistModalSubmit(
 	interaction: ModalSubmitInteraction<CacheType>,
@@ -29,6 +27,7 @@ export default async function usePlaylistModalSubmit(
 	}
 
 	const { default: Queue } = await import('p-queue');
+
 	const playlistQueue = new Queue();
 
 	const prioritySongs = songsArray
@@ -39,8 +38,12 @@ export default async function usePlaylistModalSubmit(
 	if (isToPickEmpty) {
 		pickedSongs = songsArray;
 	} else if (prioritySongs.length === 0) {
+		const { default: cryptoRandom } = await import('../utils/cryptoRandom');
+
 		pickedSongs = songsArray.sort(() => 0.5 - cryptoRandom()).slice(0, toPick);
 	} else {
+		const { default: cryptoRandom } = await import('../utils/cryptoRandom');
+
 		pickedSongs = [
 			...songsArray
 				.filter((song) => !song.startsWith('*'))
@@ -49,6 +52,8 @@ export default async function usePlaylistModalSubmit(
 			...prioritySongs,
 		].sort(() => 0.5 - cryptoRandom());
 	}
+
+	const { useMainPlayer } = await import('discord-player');
 
 	const player = useMainPlayer();
 
@@ -68,6 +73,8 @@ export default async function usePlaylistModalSubmit(
 			} catch {}
 		}),
 	);
+
+	const { EmbedBuilder } = await import('discord.js');
 
 	const embed = new EmbedBuilder()
 		.setTitle('✅ Playlist loaded')

@@ -1,5 +1,4 @@
 import type { Channel } from 'discord.js';
-import Fuse from 'fuse.js';
 
 export default async function getPlaylists(
 	channel: Channel | undefined,
@@ -11,6 +10,8 @@ export default async function getPlaylists(
 
 	const rawMessages = await channel.messages.fetch({ limit: 25, cache: true });
 	const messages = rawMessages.map((message) => message.content);
+
+	const { default: Fuse } = await import('fuse.js');
 
 	const fuse = new Fuse(messages);
 	let matching: Array<{ item: string }> = query ? fuse.search(query) : [];

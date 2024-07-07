@@ -1,6 +1,6 @@
 FROM node:20-alpine AS base
 
-RUN apk update && \
+RUN apk update --no-cache && \
 		apk add --no-cache python3 make g++ && \
 		corepack enable
 
@@ -18,7 +18,7 @@ FROM node:20-alpine
 
 ENV TZ="Europe/Warsaw"
 
-RUN apk update && \
+RUN apk update --no-cache && \
 		apk add --no-cache ffmpeg
 
 COPY --from=build package.json ./dist/

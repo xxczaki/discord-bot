@@ -1,11 +1,5 @@
-import { addMilliseconds } from 'date-fns/addMilliseconds';
-import { QueueRepeatMode, useQueue } from 'discord-player';
-import {
-	type CacheType,
-	type ChatInputCommandInteraction,
-	EmbedBuilder,
-} from 'discord.js';
-import getTrackPosition from '../utils/getTrackPosition';
+import { useQueue } from 'discord-player';
+import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
 
 export default async function queueCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
@@ -26,6 +20,10 @@ export default async function queueCommandHandler(
 	let currentDescriptionIndex = 0;
 	let index = 0;
 	const embedDescriptions: string[][] = [[]];
+
+	const { default: getTrackPosition } = await import(
+		'../utils/getTrackPosition'
+	);
 
 	for (const track of tracks) {
 		if (descriptionLength > 2000) {
@@ -54,6 +52,13 @@ export default async function queueCommandHandler(
 		);
 		return;
 	}
+
+	const [{ EmbedBuilder }, { QueueRepeatMode }, { addMilliseconds }] =
+		await Promise.all([
+			import('discord.js'),
+			import('discord-player'),
+			import('date-fns/addMilliseconds'),
+		]);
 
 	const queueEmbed = new EmbedBuilder()
 		.setTitle('Queue')

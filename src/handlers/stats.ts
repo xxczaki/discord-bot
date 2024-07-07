@@ -4,7 +4,6 @@ import {
 	EmbedBuilder,
 } from 'discord.js';
 import { StatsHandler } from '../utils/StatsHandler';
-import logger from '../utils/logger';
 import redis from '../utils/redis';
 
 const statsHandler = StatsHandler.getInstance();
@@ -57,6 +56,8 @@ export default async function statsCommandHandler(
 
 					requestedStatsMap[value.requestedById] = 1;
 				} catch (error) {
+					const { default: logger } = await import('../utils/logger');
+
 					logger.error(error);
 				}
 			}

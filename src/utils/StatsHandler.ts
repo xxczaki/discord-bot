@@ -1,5 +1,3 @@
-import { ulid } from 'ulid';
-
 import redis from './redis';
 
 export class StatsHandler {
@@ -19,6 +17,8 @@ export class StatsHandler {
 		type: 'play',
 		payload: { title: string; author: string; requestedById?: string },
 	) {
+		const { ulid } = await import('ulid');
+
 		await redis.set(
 			`discord-player:stats:${type}:${ulid()}`,
 			JSON.stringify(payload),

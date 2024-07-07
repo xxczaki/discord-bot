@@ -1,5 +1,5 @@
 import type { QueueFilters } from 'discord-player';
-import { AudioFilters, useQueue } from 'discord-player';
+import { useQueue } from 'discord-player';
 import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
 
 export default async function tempoCommandHandler(
@@ -12,6 +12,8 @@ export default async function tempoCommandHandler(
 		await interaction.editReply('Invalid value provided.');
 		return;
 	}
+
+	const { AudioFilters } = await import('discord-player');
 
 	AudioFilters.define('tempo', `atempo=${value}`);
 

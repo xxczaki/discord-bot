@@ -1,106 +1,159 @@
 import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
 
-import {
-	debugCommandHandler,
-	deduplicateCommandHandler,
-	filtersCommandHandler,
-	latenessCommandHandler,
-	loopCommandHandler,
-	moveCommandHandler,
-	pauseCommandHandler,
-	playCommandHandler,
-	playlistCommandHandler,
-	purgeCommandHandler,
-	queueCommandHandler,
-	removeCommandHandler,
-	resumeCommandHandler,
-	shuffleCommandHandler,
-	skipCommandHandler,
-	sortCommandHandler,
-	statsCommandHandler,
-	tempoCommandHandler,
-	volumeCommandHandler,
-} from '../handlers';
-
 export default async function useCommandHandlers(
 	interaction: ChatInputCommandInteraction<CacheType>,
 ) {
 	switch (interaction.commandName) {
-		case 'playlist':
+		case 'playlist': {
+			const { playlistCommandHandler } = await import('../handlers');
+
 			await playlistCommandHandler(interaction);
 			break;
-		case 'play':
+		}
+		case 'play': {
 			await interaction.deferReply();
+
+			const { playCommandHandler } = await import('../handlers');
+
 			await playCommandHandler(interaction);
 			break;
-		case 'pause':
+		}
+		case 'pause': {
 			await interaction.deferReply();
+
+			const { pauseCommandHandler } = await import('../handlers');
+
 			await pauseCommandHandler(interaction);
 			break;
-		case 'resume':
+		}
+		case 'resume': {
 			await interaction.deferReply();
+
+			const { resumeCommandHandler } = await import('../handlers');
+
 			await resumeCommandHandler(interaction);
 			break;
-		case 'skip':
+		}
+		case 'skip': {
 			await interaction.deferReply();
+
+			const { skipCommandHandler } = await import('../handlers');
+
 			await skipCommandHandler(interaction);
 			break;
-		case 'remove':
+		}
+		case 'remove': {
 			await interaction.deferReply();
+
+			const { removeCommandHandler } = await import('../handlers');
+
 			await removeCommandHandler(interaction);
 			break;
-		case 'move':
+		}
+		case 'move': {
 			await interaction.deferReply();
+
+			const { moveCommandHandler } = await import('../handlers');
+
 			await moveCommandHandler(interaction);
 			break;
-		case 'queue':
+		}
+		case 'queue': {
 			await interaction.deferReply();
+
+			const { queueCommandHandler } = await import('../handlers');
+
 			await queueCommandHandler(interaction);
 			break;
-		case 'shuffle':
+		}
+		case 'shuffle': {
 			await interaction.deferReply();
+
+			const { shuffleCommandHandler } = await import('../handlers');
+
 			await shuffleCommandHandler(interaction);
 			break;
-		case 'loop':
+		}
+		case 'loop': {
 			await interaction.deferReply();
+
+			const { loopCommandHandler } = await import('../handlers');
+
 			await loopCommandHandler(interaction);
 			break;
-		case 'volume':
+		}
+		case 'volume': {
 			await interaction.deferReply();
+
+			const { volumeCommandHandler } = await import('../handlers');
+
 			await volumeCommandHandler(interaction);
 			break;
-		case 'purge':
+		}
+		case 'purge': {
 			await interaction.deferReply();
+
+			const { purgeCommandHandler } = await import('../handlers');
+
 			await purgeCommandHandler(interaction);
 			break;
-		case 'debug':
+		}
+		case 'debug': {
 			await interaction.deferReply({ ephemeral: true });
+
+			const { debugCommandHandler } = await import('../handlers');
+
 			await debugCommandHandler(interaction);
 			break;
-		case 'deduplicate':
+		}
+		case 'deduplicate': {
 			await interaction.deferReply();
+
+			const { deduplicateCommandHandler } = await import('../handlers');
+
 			await deduplicateCommandHandler(interaction);
 			break;
-		case 'sort':
+		}
+		case 'sort': {
 			await interaction.deferReply();
+
+			const { sortCommandHandler } = await import('../handlers');
+
 			await sortCommandHandler(interaction);
 			break;
-		case 'stats':
+		}
+		case 'stats': {
 			await interaction.deferReply();
+
+			const { statsCommandHandler } = await import('../handlers');
+
 			await statsCommandHandler(interaction);
 			break;
-		case 'filters':
+		}
+		case 'filters': {
 			await interaction.deferReply();
+
+			const { filtersCommandHandler } = await import('../handlers');
+
 			await filtersCommandHandler(interaction);
 			break;
-		case 'tempo':
+		}
+		case 'tempo': {
 			await interaction.deferReply();
+
+			const { tempoCommandHandler } = await import('../handlers');
+
 			await tempoCommandHandler(interaction);
 			break;
-		case 'lateness':
+		}
+		case 'lateness': {
 			await interaction.deferReply();
+
+			const { latenessCommandHandler } = await import('../handlers');
+
 			await latenessCommandHandler(interaction);
 			break;
+		}
 		default:
 			break;
 	}

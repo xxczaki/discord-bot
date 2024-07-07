@@ -1,6 +1,3 @@
-import { differenceInCalendarDays } from 'date-fns';
-import { ulid } from 'ulid';
-
 import redis from './redis';
 
 export class LatenessHandler {
@@ -35,10 +32,16 @@ export class LatenessHandler {
 			return;
 		}
 
+		const { differenceInCalendarDays } = await import(
+			'date-fns/differenceInCalendarDays'
+		);
+
 		if (actual && differenceInCalendarDays(expected, actual) > 2) {
 			await redis.del('discord-player:lateness-lock');
 			return;
 		}
+
+		const { ulid } = await import('ulid');
 
 		await redis
 			.multi()

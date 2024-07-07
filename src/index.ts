@@ -1,21 +1,10 @@
 import('./utils/sentry');
 
-import {
-	ActivityType,
-	Client,
-	EmbedBuilder,
-	Events,
-	GatewayIntentBits,
-} from 'discord.js';
-import useAutocompleteHandler from './hooks/useAutocompleteHandler';
-import useCommandHandlers from './hooks/useCommandHandlers';
+import { Client, Events, GatewayIntentBits } from 'discord.js';
 import useDebugListeners from './hooks/useDebugListeners';
-import usePlaylistModalSubmit from './hooks/usePlaylistModalSubmit';
 import { StatsHandler } from './utils/StatsHandler';
 import initializeCommands from './utils/initializeCommands';
 import getInitializedPlayer from './utils/initializePlayer';
-import logger from './utils/logger';
-import resetStatus from './utils/resetStatus';
 
 const statsHandler = StatsHandler.getInstance();
 
@@ -26,6 +15,7 @@ const statsHandler = StatsHandler.getInstance();
 		intents: [
 			GatewayIntentBits.Guilds,
 			GatewayIntentBits.GuildVoiceStates,
+			GatewayIntentBits.GuildPresences,
 			GatewayIntentBits.MessageContent,
 		],
 	});
@@ -33,6 +23,8 @@ const statsHandler = StatsHandler.getInstance();
 	const player = await getInitializedPlayer(client);
 
 	player.events.on('playerStart', async (queue, track) => {
+		const { EmbedBuilder } = await import('discord.js');
+
 		const embed = new EmbedBuilder()
 			.setTitle(track.title)
 			.setDescription('Playing it now.')
@@ -52,42 +44,72 @@ const statsHandler = StatsHandler.getInstance();
 			requestedById: track.requestedBy?.id,
 		});
 
-		client.user?.setActivity(`"${track.title}" by ${track.author}`, {
-			type: ActivityType.Streaming,
+		const { ActivityType, PresenceUpdateStatus } = await import('discord.js');
+
+		client.user?.setPresence({
+			activities: [
+				{
+					name: `"${track.title}" by ${track.author}`,
+					type: ActivityType.Streaming,
+				},
+			],
+			status: PresenceUpdateStatus.Online,
 		});
 	});
 
-	player.events.on('emptyQueue', (queue) => {
+	player.events.on('emptyQueue', async (queue) => {
 		queue.metadata.reply('Queue finished.');
+
+		const { default: resetStatus } = await import('./utils/resetStatus');
+
 		resetStatus(client);
 	});
 
-	player.events.on('queueDelete', () => {
+	player.events.on('queueDelete', async () => {
+		const { default: resetStatus } = await import('./utils/resetStatus');
+
 		resetStatus(client);
 	});
 
-	player.events.on('disconnect', () => {
+	player.events.on('disconnect', async () => {
+		const { default: resetStatus } = await import('./utils/resetStatus');
+
 		resetStatus(client);
 	});
 
-	client.on('ready', () => {
+	client.on('ready', async () => {
+		const [{ default: logger }, { default: resetStatus }] = await Promise.all([
+			import('./utils/logger'),
+			import('./utils/resetStatus'),
+		]);
+
 		logger.info(`Logged in as ${client.user?.tag}!`);
 
-		client.user?.setActivity('Idle, use /play to get started', {
-			type: ActivityType.Custom,
-		});
+		resetStatus(client);
 	});
 
 	client.on('interactionCreate', async (interaction) => {
+		const { default: useAutocompleteHandler } = await import(
+			'./hooks/useAutocompleteHandler'
+		);
+
 		await useAutocompleteHandler(interaction);
 
 		if (!interaction.isChatInputCommand()) return;
+
+		const { default: useCommandHandlers } = await import(
+			'./hooks/useCommandHandlers'
+		);
 
 		await useCommandHandlers(interaction);
 	});
 
 	client.on(Events.InteractionCreate, async (interaction) => {
 		if (!interaction.isModalSubmit()) return;
+
+		const { default: usePlaylistModalSubmit } = await import(
+			'./hooks/usePlaylistModalSubmit'
+		);
 
 		await usePlaylistModalSubmit(interaction);
 	});

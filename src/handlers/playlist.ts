@@ -1,12 +1,6 @@
 import { useQueue } from 'discord-player';
 import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
-import {
-	ActionRowBuilder,
-	ModalBuilder,
-	TextInputBuilder,
-	TextInputStyle,
-} from 'discord.js';
-import { PLAYLISTS_CHANNEL_ID } from '../constants/channelIds';
+import { ModalBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
 
 export default async function playlistCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
@@ -31,6 +25,8 @@ export default async function playlistCommandHandler(
 		.setStyle(TextInputStyle.Paragraph);
 
 	if (identifier) {
+		const { PLAYLISTS_CHANNEL_ID } = await import('../constants/channelIds');
+
 		const channel = interaction.client.channels.cache.get(PLAYLISTS_CHANNEL_ID);
 
 		if (channel?.isTextBased()) {
@@ -62,6 +58,8 @@ export default async function playlistCommandHandler(
 		.setPlaceholder('20')
 		.setRequired(false)
 		.setStyle(TextInputStyle.Short);
+
+	const { ActionRowBuilder } = await import('discord.js');
 
 	const firstRow = new ActionRowBuilder<TextInputBuilder>().addComponents(
 		songsInput,

@@ -1,12 +1,6 @@
 import type { QueueFilters } from 'discord-player';
-import { useMainPlayer, useQueue } from 'discord-player';
 import type { GuildMember } from 'discord.js';
-import {
-	type CacheType,
-	type ChatInputCommandInteraction,
-	EmbedBuilder,
-} from 'discord.js';
-import getTrackPosition from '../utils/getTrackPosition';
+import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
 
 export default async function playCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
@@ -21,6 +15,8 @@ export default async function playCommandHandler(
 	const query = interaction.options.getString('query', true);
 
 	try {
+		const { useMainPlayer, useQueue } = await import('discord-player');
+
 		const player = useMainPlayer();
 		const queue = useQueue(interaction.guild?.id ?? '');
 
@@ -33,6 +29,10 @@ export default async function playCommandHandler(
 			},
 			requestedBy: interaction.user.id,
 		});
+
+		const [{ EmbedBuilder }, { default: getTrackPosition }] = await Promise.all(
+			[import('discord.js'), import('../utils/getTrackPosition')],
+		);
 
 		const embed = new EmbedBuilder()
 			.setTitle(track.title)
