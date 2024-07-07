@@ -54,7 +54,8 @@ export default async function playCommandHandler(
 		const moveFirst = new ButtonBuilder()
 			.setCustomId('move-first')
 			.setLabel('Make it play next')
-			.setStyle(ButtonStyle.Secondary);
+			.setStyle(ButtonStyle.Secondary)
+			.setDisabled(trackPosition <= 1);
 
 		const remove = new ButtonBuilder()
 			.setCustomId('remove')
@@ -78,7 +79,7 @@ export default async function playCommandHandler(
 
 			switch (answer.customId) {
 				case 'move-first':
-					queue?.moveTrack(trackPosition - 1, 1);
+					queue?.moveTrack(track, 1);
 
 					await answer.update({
 						content: 'Moved to the beginning of the queue.',
@@ -86,7 +87,7 @@ export default async function playCommandHandler(
 					});
 					break;
 				case 'remove':
-					queue?.removeTrack(trackPosition - 1);
+					queue?.removeTrack(track);
 
 					await answer.update({
 						content: 'Track removed from the queue.',
