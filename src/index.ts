@@ -1,4 +1,5 @@
-import process from 'node:process';
+import('./utils/sentry');
+
 import {
 	ActivityType,
 	Client,

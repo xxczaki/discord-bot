@@ -1,4 +1,3 @@
-import process from 'node:process';
 import { useMainPlayer } from 'discord-player';
 import logger from '../utils/logger';
 
@@ -11,19 +10,19 @@ export default function useDebugListeners() {
 	);
 
 	player.on('error', async (error) => {
-		logger.error('Player error', error);
+		logger.error(error, 'Player error');
 	});
 	player.events.on('error', (_, error) => {
-		logger.error('Player error', error);
+		logger.error(error, 'Player error');
 	});
 	player.events.on('playerError', (_, error) => {
-		logger.error('Player error', error);
+		logger.error(error, 'Player error');
 	});
 
 	process.on('unhandledRejection', (reason) => {
-		logger.error('Unhandled promise rejection:', reason);
+		logger.error(reason, 'Unhandled promise rejection:');
 	});
 	process.on('uncaughtException', (error) => {
-		logger.error('Uncaught exception:', error);
+		logger.error(error, 'Uncaught exception:');
 	});
 }

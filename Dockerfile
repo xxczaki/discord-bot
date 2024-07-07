@@ -1,7 +1,7 @@
 FROM node:20-alpine AS base
 
 RUN apk update && \
-		apk add --no-cache libc6-compat python3 make g++ && \
+		apk add --no-cache python3 make g++ && \
 		corepack enable
 
 

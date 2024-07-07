@@ -1,4 +1,8 @@
-# flyctl launch added from .gitignore
-**/node_modules
+node_modules
 fly.toml
 .env
+Dockerfile
+docker-compose.yml
+biome.json
+license
+.vscode
