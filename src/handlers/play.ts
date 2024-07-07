@@ -84,7 +84,7 @@ export default async function playCommandHandler(
 
 					await answer.update({
 						content: 'Moved to the beginning of the queue.',
-						components: [row],
+						components: [],
 					});
 					break;
 				case 'remove':
@@ -97,7 +97,7 @@ export default async function playCommandHandler(
 					});
 					break;
 			}
-		} catch (e) {
+		} catch {
 			await interaction.editReply({
 				components: [],
 			});

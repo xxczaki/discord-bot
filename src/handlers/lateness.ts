@@ -67,7 +67,7 @@ export default async function latenessCommandHandler(
 						components: [],
 					});
 			}
-		} catch (e) {
+		} catch {
 			await interaction.editReply({
 				content:
 					'⏳ Answer not received within 1 minute, continuing to measure lateness',

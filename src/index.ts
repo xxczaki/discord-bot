@@ -70,7 +70,7 @@ const statsHandler = StatsHandler.getInstance();
 					components: [],
 				});
 			}
-		} catch (e) {
+		} catch {
 			await response.edit({
 				components: [],
 			});
