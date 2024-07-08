@@ -24,7 +24,9 @@ export default async function usePlaylistModalSubmit(
 	let enqueued = 0;
 
 	if (Number.isNaN(toPick) || toPick > songsArray.length || toPick === 0) {
-		await interaction.editReply('Invalid number of songs to pick was specified.');
+		await interaction.editReply(
+			'Invalid number of songs to pick was specified.',
+		);
 		return;
 	}
 
