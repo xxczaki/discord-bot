@@ -26,15 +26,15 @@ importers:
       discord.js:
         specifier: ^14.15.3
         version: 14.15.3(bufferutil@4.0.8)(utf-8-validate@6.0.4)
-      play-dl:
-        specifier: ^1.9.7
-        version: 1.9.7
       sodium-native:
         specifier: ^4.1.1
         version: 4.1.1
       utf-8-validate:
         specifier: ^6.0.4
         version: 6.0.4
+      youtube-ext:
+        specifier: ^1.1.25
+        version: 1.1.25
       zlib-sync:
         specifier: ^0.1.9
         version: 0.1.9
@@ -1378,13 +1378,6 @@ packages:
     resolution: {integrity: sha512-g3/hpwfujK5a4oVbaefoJxezLzsDgLcNJeITvC6yrfwYeT9la+edCK42j5QpEQSQCZgTKapXvnQIdgZwvRaZug==}
     hasBin: true
 
-  play-audio@0.5.2:
-    resolution: {integrity: sha512-ZAqHUKkQLix2Iga7pPbsf1LpUoBjcpwU93F1l3qBIfxYddQLhxS6GKmS0d3jV8kSVaUbr6NnOEcEMFvuX93SWQ==}
-
-  play-dl@1.9.7:
-    resolution: {integrity: sha512-KpgerWxUCY4s9Mhze2qdqPhiqd8Ve6HufpH9mBH3FN+vux55qSh6WJKDabfie8IBHN7lnrAlYcT/UdGax58c2A==}
-    engines: {node: '>=16.0.0'}
-
   postgres-array@2.0.0:
     resolution: {integrity: sha512-VpZrUqU5A69eQyW2c5CA1jtLecCsN2U/bD6VilrFDWq5+5UIEVO7nazS3TEcHf1zuPYO/sqGvUvW62g86RXZuA==}
     engines: {node: '>=4'}
@@ -1678,6 +1671,9 @@ packages:
   yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
+
+  youtube-ext@1.1.25:
+    resolution: {integrity: sha512-/TV40aXAQv7hKdwOPOjPKD02kJbfkuwu8IFj9F5OLAetM6NiJ0Sk/sh2IsoL236R1UZgGI9sjcLvKhecYSW5tA==}
 
   youtube-sr@4.3.11:
     resolution: {integrity: sha512-3oHiS2x7PpMiDRW7Cq8nz1bkAIBOJHoOwkPl/oncM/+A9/3xxMDgMLGW2dsBEP1DHFyRXYTVABgfbdwHF8sXXQ==}
@@ -3121,12 +3117,6 @@ snapshots:
       sonic-boom: 4.0.1
       thread-stream: 3.1.0
 
-  play-audio@0.5.2: {}
-
-  play-dl@1.9.7:
-    dependencies:
-      play-audio: 0.5.2
-
   postgres-array@2.0.0: {}
 
   postgres-bytea@1.0.0: {}
@@ -3367,6 +3357,10 @@ snapshots:
   yallist@4.0.0: {}
 
   yocto-queue@0.1.0: {}
+
+  youtube-ext@1.1.25:
+    dependencies:
+      undici: 6.19.2
 
   youtube-sr@4.3.11: {}
 

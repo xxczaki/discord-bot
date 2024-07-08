@@ -10,13 +10,13 @@ await esbuild.build({
 	external: [
 		'@discord-player/extractor',
 		'@discordjs/opus',
-		'play-dl',
 		'@sentry/profiling-node',
 		'bufferutil',
 		'discord-player',
 		'discord.js',
 		'sodium-native',
 		'utf-8-validate',
+		'youtube-ext',
 		'zlib-sync',
 	],
 	plugins: [
