@@ -5,6 +5,8 @@ import type { CacheType } from 'discord.js';
 export default async function usePlaylistModalSubmit(
 	interaction: ModalSubmitInteraction<CacheType>,
 ) {
+	await interaction.deferReply();
+
 	const songs = interaction.fields.getTextInputValue('songsInput');
 	const toPickRaw = interaction.fields.getTextInputValue('toPickInput');
 	const isToPickEmpty = toPickRaw.length === 0;
