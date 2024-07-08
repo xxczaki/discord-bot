@@ -30,7 +30,6 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 		await initializedPlayer.extractors.loadDefault((extractor) =>
 			[
 				'SpotifyExtractor',
-				'AppleMusicExtractor',
 				'SoundCloudExtractor',
 				'YouTubeExtractor',
 			].includes(extractor),
