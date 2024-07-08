@@ -16,11 +16,11 @@
 	"dependencies": {
 		"@discord-player/extractor": "^4.4.7",
 		"@discordjs/opus": "^0.9.0",
-		"@distube/ytdl-core": "^4.13.4",
 		"@sentry/profiling-node": "^8.15.0",
 		"bufferutil": "^4.0.8",
 		"discord-player": "^6.6.10",
 		"discord.js": "^14.15.3",
+		"play-dl": "^1.9.7",
 		"sodium-native": "^4.1.1",
 		"utf-8-validate": "^6.0.4",
 		"zlib-sync": "^0.1.9"
