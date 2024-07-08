@@ -96,7 +96,7 @@ const statsHandler = StatsHandler.getInstance();
 	});
 
 	player.events.on('emptyQueue', async (queue) => {
-		queue.metadata.reply('Queue finished.');
+		queue.metadata.send('Queue finished.');
 
 		const { default: resetStatus } = await import('./utils/resetStatus');
 
