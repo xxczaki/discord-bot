@@ -13,7 +13,7 @@ export default async function usePlaylistModalSubmit(
 	const channel = (interaction.member as GuildMember).voice.channel;
 
 	if (!channel) {
-		await interaction.reply('You are not connected to a voice channel!');
+		await interaction.editReply('You are not connected to a voice channel!');
 		return;
 	}
 
@@ -24,7 +24,7 @@ export default async function usePlaylistModalSubmit(
 	let enqueued = 0;
 
 	if (Number.isNaN(toPick) || toPick > songsArray.length || toPick === 0) {
-		await interaction.reply('Invalid number of songs to pick was specified.');
+		await interaction.editReply('Invalid number of songs to pick was specified.');
 		return;
 	}
 
@@ -86,5 +86,5 @@ export default async function usePlaylistModalSubmit(
 			} skipped.\n\nNumber of priority songs: ${prioritySongs.length}.`,
 		);
 
-	await interaction.reply({ embeds: [embed] });
+	await interaction.editReply({ embeds: [embed] });
 }
