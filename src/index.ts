@@ -96,7 +96,9 @@ const statsHandler = StatsHandler.getInstance();
 	});
 
 	player.events.on('emptyQueue', async (queue) => {
-		await (queue.metadata.channel as TextBasedChannel).send('Queue finished.');
+		await (queue.metadata.channel as TextBasedChannel).send(
+			'Queue finished, leaving…',
+		);
 
 		const { default: resetStatus } = await import('./utils/resetStatus');
 
