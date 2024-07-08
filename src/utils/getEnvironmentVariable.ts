@@ -3,7 +3,8 @@ type EnvironmentVariableNames =
 	| 'CLIENT_ID'
 	| 'REDIS_URL'
 	| 'NODE_ENV'
-	| 'SENTRY_DSN';
+	| 'SENTRY_DSN'
+	| 'YOUTUBE_COOKIE';
 
 export default function getEnvironmentVariable(name: EnvironmentVariableNames) {
 	const rawVariable = process.env[name];
