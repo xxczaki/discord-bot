@@ -19,9 +19,9 @@
 		"bufferutil": "^4.0.8",
 		"discord-player": "^6.6.10",
 		"discord.js": "^14.15.3",
+		"play-dl": "^1.9.7",
 		"sodium-native": "^4.1.1",
 		"utf-8-validate": "^6.0.4",
-		"youtube-ext": "^1.1.25",
 		"zlib-sync": "^0.1.9"
 	},
 	"devDependencies": {

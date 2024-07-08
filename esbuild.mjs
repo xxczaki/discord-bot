@@ -14,9 +14,9 @@ await esbuild.build({
 		'bufferutil',
 		'discord-player',
 		'discord.js',
+		'play-dl',
 		'sodium-native',
 		'utf-8-validate',
-		'youtube-ext',
 		'zlib-sync',
 	],
 	plugins: [
