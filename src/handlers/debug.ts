@@ -4,6 +4,7 @@ import {
 	type ChatInputCommandInteraction,
 	EmbedBuilder,
 } from 'discord.js';
+import getReleaseDetails from '../utils/getReleaseDetails';
 
 export default async function debugCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
@@ -18,6 +19,11 @@ export default async function debugCommandHandler(
 			{
 				name: 'Event loop lag',
 				value: `${player.eventLoopLag}ms`,
+				inline: true,
+			},
+			{
+				name: 'Release',
+				value: getReleaseDetails(),
 				inline: true,
 			},
 		])

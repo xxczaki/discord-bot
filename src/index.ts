@@ -124,12 +124,17 @@ const statsHandler = StatsHandler.getInstance();
 	});
 
 	client.on('ready', async () => {
-		const [{ default: logger }, { default: resetStatus }, { BOT_CHANNEL_ID }] =
-			await Promise.all([
-				import('./utils/logger'),
-				import('./utils/resetStatus'),
-				import('./constants/channelIds'),
-			]);
+		const [
+			{ default: logger },
+			{ default: resetStatus },
+			{ default: getReleaseDetails },
+			{ BOT_CHANNEL_ID },
+		] = await Promise.all([
+			import('./utils/logger'),
+			import('./utils/resetStatus'),
+			import('./utils/getReleaseDetails'),
+			import('./constants/channelIds'),
+		]);
 
 		logger.info(`Logged in as ${client.user?.tag}!`);
 
@@ -138,13 +143,8 @@ const statsHandler = StatsHandler.getInstance();
 		const channel = client.channels.cache.get(BOT_CHANNEL_ID);
 
 		if (channel?.isTextBased()) {
-			const commitHash = process.env.GIT_COMMIT;
-			const wasDeploymentManual = !commitHash;
-
-			const commitLink = `[\`${commitHash}\`](<https://github.com/xxczaki/discord-bot/commit/${commitHash}>)`;
-
 			channel.send({
-				content: `ℹ️ Update successful, ready to play.\n\nDeployment source: ${wasDeploymentManual ? '`manual`' : commitLink}`,
+				content: `ℹ️ Update successful, ready to play.\n\nDeployment source: ${getReleaseDetails()}.`,
 			});
 		}
 	});
