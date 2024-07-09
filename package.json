@@ -21,6 +21,7 @@
 		"discord.js": "^14.15.3",
 		"sodium-native": "^4.1.1",
 		"utf-8-validate": "^6.0.4",
+		"ytdl-core": "^4.11.5",
 		"zlib-sync": "^0.1.9"
 	},
 	"devDependencies": {
