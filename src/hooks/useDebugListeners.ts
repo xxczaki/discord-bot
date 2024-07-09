@@ -14,18 +14,17 @@ export default function useDebugListeners(client: Client<boolean>) {
 
 	const player = useMainPlayer();
 
-	player.on('debug', (message) => logger.debug(`[Player] ${message}`));
-	player.events.on('debug', (queue, message) =>
-		logger.debug(`[${queue.guild.name}: ${queue.guild.id}] ${message}`),
-	);
-
 	player.on('error', async (error) => {
-		logger.error(error, 'Player error');
-	});
-	player.events.on('error', (_, error) => {
-		logger.error(error, 'Player error');
-	});
-	player.events.on('playerError', (_, error) => {
+		const { BOT_CHANNEL_ID } = await import('../constants/channelIds');
+
+		const channel = client.channels.cache.get(BOT_CHANNEL_ID);
+
+		if (channel?.isTextBased()) {
+			channel.send({
+				content: `❌ Player error, possibly fatal – the message is visible below:\n\n\`\`\`${error.message}\`\`\``,
+			});
+		}
+
 		logger.error(error, 'Player error');
 	});
 }
