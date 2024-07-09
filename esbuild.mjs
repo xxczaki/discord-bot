@@ -10,7 +10,6 @@ await esbuild.build({
 	external: [
 		'@discord-player/extractor',
 		'@discordjs/opus',
-		'@distube/ytdl-core',
 		'bufferutil',
 		'discord-player',
 		'discord.js',
