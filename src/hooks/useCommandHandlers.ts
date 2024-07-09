@@ -154,6 +154,14 @@ export default async function useCommandHandlers(
 			await latenessCommandHandler(interaction);
 			break;
 		}
+		case 'flush_query_cache': {
+			await interaction.deferReply();
+
+			const { flushQueryCacheCommandHandler } = await import('../handlers');
+
+			await flushQueryCacheCommandHandler(interaction);
+			break;
+		}
 		default:
 			break;
 	}

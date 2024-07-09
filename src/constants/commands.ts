@@ -178,6 +178,10 @@ const COMMANDS: ApplicationCommandData[] = [
 			},
 		],
 	},
+	{
+		name: 'flush_query_cache',
+		description: 'Flushes the internal query cache.',
+	},
 ];
 
 export default COMMANDS;

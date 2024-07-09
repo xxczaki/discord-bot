@@ -74,7 +74,9 @@ export default async function usePlaylistModalSubmit(
 			try {
 				enqueued++;
 				return await promise;
-			} catch {}
+			} catch {
+				enqueued--;
+			}
 		}),
 	);
 
