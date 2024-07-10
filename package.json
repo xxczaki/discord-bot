@@ -9,14 +9,14 @@
 		"lint": "biome check --write ./src",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
-	"packageManager": "pnpm@9.4.0",
+	"packageManager": "pnpm@9.5.0",
 	"keywords": [],
 	"author": "",
 	"license": "MIT",
 	"dependencies": {
 		"@discord-player/extractor": "^4.4.7",
 		"@discordjs/opus": "^0.9.0",
-		"@distube/ytdl-core": "github:soya-daizu/ytdl-core#sig-patch",
+		"@distube/ytdl-core": "^4.13.5",
 		"bufferutil": "^4.0.8",
 		"discord-player": "^6.6.10",
 		"discord.js": "^14.15.3",

@@ -18,8 +18,8 @@ importers:
         specifier: ^0.9.0
         version: 0.9.0
       '@distube/ytdl-core':
-        specifier: github:soya-daizu/ytdl-core#sig-patch
-        version: https://codeload.github.com/soya-daizu/ytdl-core/tar.gz/118983d1a4877b63cbdcdd144e60e57d0566c11c
+        specifier: ^4.13.5
+        version: 4.13.5
       bufferutil:
         specifier: ^4.0.8
         version: 4.0.8
@@ -279,9 +279,8 @@ packages:
     resolution: {integrity: sha512-PZ+vLpxGCRtmr2RMkqh8Zp+BenUaJqlS6xhgWKEZcgC/vfHLEzpHtKkB0sl3nZWpwtcKk6YWy+pU3okL2I97FA==}
     engines: {node: '>=16.11.0'}
 
-  '@distube/ytdl-core@https://codeload.github.com/soya-daizu/ytdl-core/tar.gz/118983d1a4877b63cbdcdd144e60e57d0566c11c':
-    resolution: {tarball: https://codeload.github.com/soya-daizu/ytdl-core/tar.gz/118983d1a4877b63cbdcdd144e60e57d0566c11c}
-    version: 4.13.4
+  '@distube/ytdl-core@4.13.5':
+    resolution: {integrity: sha512-g+4UJIR/auAJbia7iB0aWvaJDbs22P53NySWa47b1NT4xMTDJYguxHFArPrvRkcJrb/AgKjv/XoSZGghpL0CJA==}
     engines: {node: '>=16'}
 
   '@esbuild/aix-ppc64@0.23.0':
@@ -2003,7 +2002,7 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@distube/ytdl-core@https://codeload.github.com/soya-daizu/ytdl-core/tar.gz/118983d1a4877b63cbdcdd144e60e57d0566c11c':
+  '@distube/ytdl-core@4.13.5':
     dependencies:
       http-cookie-agent: 6.0.5(tough-cookie@4.1.4)(undici@6.19.2)
       m3u8stream: 0.8.6
