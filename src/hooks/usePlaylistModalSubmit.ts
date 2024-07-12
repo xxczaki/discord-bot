@@ -57,13 +57,17 @@ export default async function usePlaylistModalSubmit(
 		].sort(() => 0.5 - cryptoRandom());
 	}
 
-	const { useMainPlayer } = await import('discord-player');
+	const [{ useMainPlayer }, { default: isYouTubeLink }] = await Promise.all([
+		import('discord-player'),
+		import('../utils/isYouTubeLink'),
+	]);
 
 	const player = useMainPlayer();
 
 	await playlistQueue.addAll(
 		pickedSongs.map((song) => async () => {
 			const promise = player.play(channel, song, {
+				searchEngine: isYouTubeLink(song) ? 'youtubeVideo' : 'spotifySearch',
 				nodeOptions: {
 					metadata: interaction,
 					defaultFFmpegFilters: ['normalize' as keyof QueueFilters],

@@ -88,10 +88,11 @@ export default async function queueCommandHandler(
 						).toLocaleTimeString('pl')}\`)`,
 			},
 			{
-				name: !currentTrack
+				name: 'Currently playing',
+				// value: queue?.node.createProgressBar() ?? '',
+				value: !currentTrack
 					? '*nothing*'
-					: `"${currentTrack.title}" by ${currentTrack.author}`,
-				value: queue?.node.createProgressBar() ?? '',
+					: `"${currentTrack.title}" by ${currentTrack.author} (*${currentTrack.duration}*)`,
 			},
 		])
 		.setDescription(embedDescriptions[pageNumber].join('\n') || null)

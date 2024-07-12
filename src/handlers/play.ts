@@ -15,7 +15,11 @@ export default async function playCommandHandler(
 	const query = interaction.options.getString('query', true);
 
 	try {
-		const { useMainPlayer, useQueue } = await import('discord-player');
+		const [{ useMainPlayer, useQueue }, { default: isYouTubeLink }] =
+			await Promise.all([
+				import('discord-player'),
+				import('../utils/isYouTubeLink'),
+			]);
 
 		const player = useMainPlayer();
 		const queue = useQueue(interaction.guild?.id ?? '');
@@ -23,6 +27,7 @@ export default async function playCommandHandler(
 		queue?.filters.ffmpeg.setInputArgs(['-threads', '4']);
 
 		const { track } = await player.play(channel, query, {
+			searchEngine: isYouTubeLink(query) ? 'youtubeVideo' : 'spotifySearch',
 			nodeOptions: {
 				metadata: interaction,
 				defaultFFmpegFilters: ['normalize' as keyof QueueFilters],

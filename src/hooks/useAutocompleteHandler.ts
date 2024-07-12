@@ -16,7 +16,10 @@ export default async function useAutocompleteHandler(
 
 		const player = useMainPlayer();
 
-		const data = await player.search(query, { requestedBy: interaction.user });
+		const data = await player.search(query, {
+			searchEngine: 'spotifySearch',
+			requestedBy: interaction.user,
+		});
 
 		if (!data.hasTracks()) return interaction.respond([]);
 

@@ -10,9 +10,9 @@ await esbuild.build({
 	external: [
 		'@discord-player/extractor',
 		'@discordjs/opus',
-		'@distube/ytdl-core',
 		'bufferutil',
 		'discord-player',
+		'discord-player-youtubei',
 		'discord.js',
 		'sodium-native',
 		'utf-8-validate',
