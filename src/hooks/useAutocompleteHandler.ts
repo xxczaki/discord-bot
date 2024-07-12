@@ -12,12 +12,15 @@ export default async function useAutocompleteHandler(
 
 		if (query.length === 0) return interaction.respond([]);
 
-		const { useMainPlayer } = await import('discord-player');
+		const [{ useMainPlayer }, { default: isYouTubeLink }] = await Promise.all([
+			import('discord-player'),
+			import('../utils/isYouTubeLink'),
+		]);
 
 		const player = useMainPlayer();
 
 		const data = await player.search(query, {
-			searchEngine: 'spotifySearch',
+			searchEngine: isYouTubeLink(query) ? 'youtubeVideo' : 'spotifySearch',
 			requestedBy: interaction.user,
 		});
 
