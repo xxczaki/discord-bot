@@ -26,8 +26,10 @@ export default async function playCommandHandler(
 
 		queue?.filters.ffmpeg.setInputArgs(['-threads', '4']);
 
+		console.log(query);
+
 		const { track } = await player.play(channel, query, {
-			searchEngine: isYouTubeLink(query) ? 'youtubeVideo' : 'spotifySearch',
+			searchEngine: isYouTubeLink(query) ? 'youtubeVideo' : 'spotifySong',
 			nodeOptions: {
 				metadata: interaction,
 				defaultFFmpegFilters: ['normalize' as keyof QueueFilters],
