@@ -32,7 +32,7 @@ export default async function getPlaylists(channel: TextBasedChannel) {
 				.setDescription(
 					truncateString(
 						`${getNumberOfSongs(songs.length)}, including: ${samples}.`,
-						100,
+						95,
 					),
 				)
 				.setValue(id);
