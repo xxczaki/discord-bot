@@ -49,33 +49,29 @@ export default async function latenessCommandHandler(
 			switch (answer.customId) {
 				case 'arrived':
 					await lateness.end(new Date());
-					await answer.update({
+					return answer.update({
 						content: '✅ Measurement stopped',
 						components: [],
 					});
-					break;
 				case 'not-arrived':
 					await lateness.end(null);
-					await answer.update({
+					return answer.update({
 						content: '✅ Measurement stopped',
 						components: [],
 					});
-					break;
 				default:
-					await answer.update({
+					return answer.update({
 						content: '⏳ Continuing to measure lateness',
 						components: [],
 					});
 			}
 		} catch {
-			await interaction.editReply({
+			return interaction.editReply({
 				content:
 					'⏳ Answer not received within 1 minute, continuing to measure lateness',
 				components: [],
 			});
 		}
-
-		return;
 	}
 
 	const expected = interaction.options.getString('expected_hour');

@@ -59,14 +59,6 @@ const COMMANDS: ApplicationCommandData[] = [
 	{
 		name: 'queue',
 		description: 'Get information about the current queue.',
-		options: [
-			{
-				name: 'page_number',
-				description:
-					'Which page of the queue to display, defaults to the first one',
-				type: 4,
-			},
-		],
 	},
 	{
 		name: 'shuffle',
@@ -112,16 +104,9 @@ const COMMANDS: ApplicationCommandData[] = [
 		description: 'Shows debug information.',
 	},
 	{
-		name: 'playlist',
-		description: 'Allows enqueuening multiple songs in one go.',
-		options: [
-			{
-				name: 'id',
-				description: 'Optional identifier of the playlist from #listy-piosenek',
-				type: 3,
-				autocomplete: true,
-			},
-		],
+		name: 'playlists',
+		description:
+			'Allows enqueuening multiple songs in one go, using the playlists from from #listy-piosenek.',
 	},
 	{
 		name: 'deduplicate',

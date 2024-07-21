@@ -7,10 +7,9 @@ export default async function flushQueryCacheCommandHandler(
 	const userId = interaction.member?.user.id;
 
 	if (userId !== OWNER_USER_ID) {
-		await interaction.editReply(
+		return interaction.editReply(
 			`Only <@!${OWNER_USER_ID}> is allowed to run this command.`,
 		);
-		return;
 	}
 
 	const { default: redis } = await import('../utils/redis');

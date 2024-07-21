@@ -10,8 +10,7 @@ export default async function moveCommandHandler(
 	const to = interaction.options.getInteger('to', true) - 1;
 
 	if (from === to) {
-		await interaction.editReply('Nothing to move.');
-		return;
+		return interaction.editReply('Nothing to move.');
 	}
 
 	try {

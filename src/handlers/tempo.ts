@@ -9,8 +9,7 @@ export default async function tempoCommandHandler(
 	const value = interaction.options.getNumber('value', true);
 
 	if (Number.isNaN(value)) {
-		await interaction.editReply('Invalid value provided.');
-		return;
+		return interaction.editReply('Invalid value provided.');
 	}
 
 	const { AudioFilters } = await import('discord-player');

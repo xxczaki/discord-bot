@@ -3,7 +3,6 @@ import('./utils/sentry');
 import {
 	type ButtonBuilder,
 	Client,
-	Events,
 	GatewayIntentBits,
 	type TextBasedChannel,
 } from 'discord.js';
@@ -64,12 +63,16 @@ const statsHandler = StatsHandler.getInstance();
 			if (answer.customId === 'skip') {
 				queue?.node.skip();
 
-				await answer.update({
+				return answer.update({
 					content: 'Track skipped.',
 					embeds: [],
 					components: [],
 				});
 			}
+
+			await response.edit({
+				components: [],
+			});
 		} catch {
 			await response.edit({
 				components: [],
@@ -163,16 +166,6 @@ const statsHandler = StatsHandler.getInstance();
 		);
 
 		await useCommandHandlers(interaction);
-	});
-
-	client.on(Events.InteractionCreate, async (interaction) => {
-		if (!interaction.isModalSubmit()) return;
-
-		const { default: usePlaylistModalSubmit } = await import(
-			'./hooks/usePlaylistModalSubmit'
-		);
-
-		await usePlaylistModalSubmit(interaction);
 	});
 
 	client.login(getEnvironmentVariable('TOKEN'));

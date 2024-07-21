@@ -8,8 +8,7 @@ export default async function playCommandHandler(
 	const channel = (interaction.member as GuildMember).voice.channel;
 
 	if (!channel) {
-		await interaction.editReply('You are not connected to a voice channel!');
-		return;
+		return interaction.editReply('You are not connected to a voice channel!');
 	}
 
 	const query = interaction.options.getString('query', true);
@@ -119,6 +118,10 @@ export default async function playCommandHandler(
 						components: [],
 					});
 					break;
+				default:
+					await answer.update({
+						components: [],
+					});
 			}
 		} catch {
 			await interaction.editReply({
@@ -126,6 +129,12 @@ export default async function playCommandHandler(
 			});
 		}
 	} catch (error) {
-		await interaction.editReply(`Something went wrong: ${error}.`);
+		if (error instanceof Error && error.name.includes('ERR_NO_RESULT')) {
+			return interaction.editReply('No results found for the given query.');
+		}
+
+		const { default: logger } = await import('../utils/logger');
+
+		logger.error(error);
 	}
 }

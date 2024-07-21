@@ -41,17 +41,4 @@ export default async function useAutocompleteHandler(
 
 		return interaction.respond(results);
 	}
-
-	const [{ PLAYLISTS_CHANNEL_ID }, { default: getPlaylists }] =
-		await Promise.all([
-			import('../constants/channelIds'),
-			import('../utils/getPlaylists'),
-		]);
-
-	const identifier = interaction.options.getString('id');
-	const channel = interaction.client.channels.cache.get(PLAYLISTS_CHANNEL_ID);
-
-	const playlists = await getPlaylists(channel, identifier);
-
-	return interaction.respond(playlists);
 }

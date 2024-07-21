@@ -14,14 +14,12 @@ export default async function filtersCommandHandler(
 			.join(', ');
 
 		if (!activeFilters) {
-			await interaction.editReply('All filters are currently disabled.');
-			return;
+			return interaction.editReply('All filters are currently disabled.');
 		}
 
-		await interaction.editReply(
+		return interaction.editReply(
 			`Currently active filters: \`${activeFilters}\`.`,
 		);
-		return;
 	}
 
 	await queue?.filters.ffmpeg.toggle(filter as keyof QueueFilters);
@@ -31,10 +29,9 @@ export default async function filtersCommandHandler(
 		.join(', ');
 
 	if (!activeFilters) {
-		await interaction.editReply(
+		return interaction.editReply(
 			`Toggled the \`${filter}\` filter.\n\nAll filters are now disabled.`,
 		);
-		return;
 	}
 
 	await interaction.editReply(

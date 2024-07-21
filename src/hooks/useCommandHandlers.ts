@@ -5,6 +5,8 @@ export default async function useCommandHandlers(
 ) {
 	switch (interaction.commandName) {
 		case 'playlist': {
+			await interaction.deferReply();
+
 			const { playlistCommandHandler } = await import('../handlers');
 
 			await playlistCommandHandler(interaction);

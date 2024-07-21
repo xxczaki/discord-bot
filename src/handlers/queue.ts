@@ -1,5 +1,12 @@
 import { useQueue } from 'discord-player';
-import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
+import type {
+	ButtonBuilder,
+	CacheType,
+	ChatInputCommandInteraction,
+	EmbedBuilder,
+	InteractionResponse,
+	Message,
+} from 'discord.js';
 
 export default async function queueCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
@@ -10,10 +17,9 @@ export default async function queueCommandHandler(
 	const currentTrack = queue?.currentTrack;
 
 	if (!currentTrack && tracks.length === 0) {
-		await interaction.editReply(
+		return interaction.editReply(
 			'The queue is empty and nothing is being played.',
 		);
-		return;
 	}
 
 	let descriptionLength = 0;
@@ -42,23 +48,15 @@ export default async function queueCommandHandler(
 		index++;
 	}
 
-	const pageNumber = Math.abs(
-		(interaction.options.getInteger('page_number') || 1) - 1,
-	);
-
-	if (pageNumber > embedDescriptions.length - 1) {
-		await interaction.editReply(
-			`Invalid page number provided; it should be within range: [1, ${embedDescriptions.length}].`,
-		);
-		return;
-	}
-
-	const [{ EmbedBuilder }, { QueueRepeatMode }, { addMilliseconds }] =
-		await Promise.all([
-			import('discord.js'),
-			import('discord-player'),
-			import('date-fns/addMilliseconds'),
-		]);
+	const [
+		{ EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder },
+		{ QueueRepeatMode },
+		{ addMilliseconds },
+	] = await Promise.all([
+		import('discord.js'),
+		import('discord-player'),
+		import('date-fns/addMilliseconds'),
+	]);
 
 	const queueEmbed = new EmbedBuilder()
 		.setTitle('Queue')
@@ -95,12 +93,91 @@ export default async function queueCommandHandler(
 					: `"${currentTrack.title}" by ${currentTrack.author} (*${currentTrack.duration}*)`,
 			},
 		])
-		.setDescription(embedDescriptions[pageNumber].join('\n') || null)
+		.setDescription(embedDescriptions[0].join('\n') || null)
 		.setFooter({
 			text: !embedDescriptions.length
 				? ''
-				: `Page ${pageNumber + 1}/${embedDescriptions.length}`,
+				: `Page 1/${embedDescriptions.length}`,
 		});
 
-	await interaction.editReply({ embeds: [queueEmbed] });
+	const previous = new ButtonBuilder()
+		.setCustomId('0')
+		.setLabel('Previous page')
+		.setStyle(ButtonStyle.Secondary)
+		.setDisabled(true);
+	const next = new ButtonBuilder()
+		.setCustomId('1')
+		.setLabel('Next page')
+		.setStyle(ButtonStyle.Secondary)
+		.setDisabled(embedDescriptions.length === 1);
+
+	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+		previous,
+		next,
+	);
+
+	const response = await interaction.editReply({
+		embeds: [queueEmbed],
+		components: [row],
+	});
+
+	await componentResponseListener(response, {
+		queueEmbed,
+		embedDescriptions,
+		previous,
+		next,
+	});
+}
+
+type ListenerProps = {
+	queueEmbed: EmbedBuilder;
+	embedDescriptions: string[][];
+	previous: ButtonBuilder;
+	next: ButtonBuilder;
+};
+
+async function componentResponseListener(
+	response: InteractionResponse<boolean> | Message<boolean>,
+	properties: ListenerProps,
+) {
+	const { queueEmbed, embedDescriptions, previous, next } = properties;
+
+	try {
+		const answer = await response.awaitMessageComponent({
+			time: 60_000, // 1 minute
+		});
+		const pageNumber = Number.parseInt(answer.customId, 10);
+
+		queueEmbed
+			.setDescription(embedDescriptions[pageNumber].join('\n') || null)
+			.setFooter({
+				text: `Page ${pageNumber + 1}/${embedDescriptions.length}`,
+			});
+
+		const previousPage = pageNumber - 1;
+		const nextPage = pageNumber + 1;
+
+		previous.setCustomId(`${previousPage}`).setDisabled(previousPage < 0);
+		next
+			.setCustomId(`${nextPage}`)
+			.setDisabled(nextPage + 1 > embedDescriptions.length);
+
+		const { ActionRowBuilder } = await import('discord.js');
+
+		const updatedRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+			previous,
+			next,
+		);
+
+		const nextResponse = await answer.update({
+			embeds: [queueEmbed],
+			components: [updatedRow],
+		});
+
+		await componentResponseListener(nextResponse, properties);
+	} catch {
+		await response.edit({
+			components: [],
+		});
+	}
 }

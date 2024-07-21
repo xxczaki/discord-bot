@@ -1,28 +1,14 @@
-import type { Channel } from 'discord.js';
+import {
+	StringSelectMenuOptionBuilder,
+	type TextBasedChannel,
+} from 'discord.js';
 
-export default async function getPlaylists(
-	channel: Channel | undefined,
-	query: string | null,
-) {
-	if (!channel?.isTextBased()) {
-		return [];
-	}
-
+export default async function getPlaylists(channel: TextBasedChannel) {
 	const rawMessages = await channel.messages.fetch({ limit: 25, cache: true });
 	const messages = rawMessages.map((message) => message.content);
 
-	const { default: Fuse } = await import('fuse.js');
-
-	const fuse = new Fuse(messages);
-	let matching: Array<{ item: string }> = query ? fuse.search(query) : [];
-
-	if (query && !matching) return [];
-
-	if (matching.length === 0) {
-		matching = messages.map((content) => ({ item: content }));
-	}
-
-	return matching
+	return messages
+		.map((content) => ({ item: content }))
 		.flatMap((message) => {
 			const match = /id="(?<id>.+)"/.exec(message.item);
 			const id = match?.groups?.id;
@@ -31,10 +17,12 @@ export default async function getPlaylists(
 				return [];
 			}
 
-			return {
-				name: id,
-				value: id,
-			};
+			return (
+				new StringSelectMenuOptionBuilder()
+					.setLabel(id)
+					// .setDescription('The dual-type Grass/Poison Seed Pokémon.')
+					.setValue(id)
+			);
 		})
 		.slice(0, 25);
 }
