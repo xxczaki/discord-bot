@@ -2,9 +2,7 @@ import {
 	StringSelectMenuOptionBuilder,
 	type TextBasedChannel,
 } from 'discord.js';
-import sampleSize from 'lodash.samplesize';
 import cleanUpPlaylistContent from './cleanUpPlaylistContent';
-import truncateString from './truncateString';
 
 export default async function getPlaylists(channel: TextBasedChannel) {
 	const rawMessages = await channel.messages.fetch({ limit: 25, cache: true });
@@ -20,21 +18,10 @@ export default async function getPlaylists(channel: TextBasedChannel) {
 			}
 
 			const songs = cleanUpPlaylistContent(message).split('\n');
-			const samples = sampleSize(
-				songs.filter((song) => !/https?:\/\//.exec(song)),
-				3,
-			)
-				.map((sample) => `"${sample}"`)
-				.join(', ');
 
 			return new StringSelectMenuOptionBuilder()
 				.setLabel(id)
-				.setDescription(
-					truncateString(
-						`${getNumberOfSongs(songs.length)}, including: ${samples}.`,
-						95,
-					),
-				)
+				.setDescription(getNumberOfSongs(songs.length))
 				.setValue(id);
 		})
 		.slice(0, 25);
