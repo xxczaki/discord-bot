@@ -34,7 +34,7 @@ export default async function playlistsCommandHandler(
 
 	const select = new StringSelectMenuBuilder()
 		.setCustomId('playlistSelect')
-		.setPlaceholder('Select 1-5 entries')
+		.setPlaceholder('Select up to 5 entries')
 		.addOptions(...playlists)
 		.setMinValues(1)
 		.setMaxValues(5);
@@ -44,7 +44,7 @@ export default async function playlistsCommandHandler(
 	);
 
 	const response = await interaction.editReply({
-		content: 'Select which playlists you want to enqueue:',
+		content: 'Choose which playlists you want to enqueue:',
 		components: [row],
 	});
 

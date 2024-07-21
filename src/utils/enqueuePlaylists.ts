@@ -25,14 +25,14 @@ export default async function enqueuePlaylists(
 		limit: 25,
 		cache: true,
 	});
+
+	const { default: cleanUpPlaylistContent } = await import(
+		'../utils/cleanUpPlaylistContent'
+	);
+
 	const songs = messages
 		.filter((message) => playlistIds.some((id) => message.content.includes(id)))
-		.map((message) =>
-			message.content
-				.replace(/id=".+"/, '')
-				.replaceAll('`', '')
-				.trim(),
-		)
+		.map((message) => cleanUpPlaylistContent(message.content))
 		.join('\n');
 
 	const voiceChannel = (interaction.member as GuildMember).voice.channel;

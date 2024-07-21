@@ -51,6 +51,9 @@ importers:
       '@sentry/node':
         specifier: ^8.19.0
         version: 8.19.0
+      '@types/lodash.samplesize':
+        specifier: ^4.2.9
+        version: 4.2.9
       '@types/node':
         specifier: ^20.14.11
         version: 20.14.11
@@ -69,6 +72,9 @@ importers:
       ioredis:
         specifier: ^5.4.1
         version: 5.4.1
+      lodash.samplesize:
+        specifier: ^4.2.0
+        version: 4.2.0
       p-queue:
         specifier: ^8.0.1
         version: 8.0.1
@@ -707,6 +713,12 @@ packages:
   '@types/connect@3.4.36':
     resolution: {integrity: sha512-P63Zd/JUGq+PdrM1lv0Wv5SBYeA2+CORvbrXbngriYY0jzLUWfQMQQxOhjONEz/wlHOAxOdY7CY65rgQdTjq2w==}
 
+  '@types/lodash.samplesize@4.2.9':
+    resolution: {integrity: sha512-z193XZXQsZ7nUlj6hai6kCDulX9/XDNdCC6XJvGI1cgWcdyo7iNGPxZjSaH/fDG273uo8xjP+c/tMslQvyu8Sg==}
+
+  '@types/lodash@4.17.7':
+    resolution: {integrity: sha512-8wTvZawATi/lsmNu10/j2hk1KEP0IvjubqPE3cu1Xz7xfXXt5oCq3SNUz4fMIP4XGF9Ky+Ue2tBA3hcS7LSBlA==}
+
   '@types/mysql@2.15.22':
     resolution: {integrity: sha512-wK1pzsJVVAjYCSZWQoWHziQZbNggXFDUEIGf54g4ZM/ERuP86uGdWeKZWMYlqTPMZfHJJvLPyogXGvCOg87yLQ==}
 
@@ -1149,6 +1161,9 @@ packages:
 
   lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
+
+  lodash.samplesize@4.2.0:
+    resolution: {integrity: sha512-1ZhKV7/nuISuaQdxfCqrs4HHxXIYN+0Z4f7NMQn2PHkxFZJGavJQ1j/paxyJnLJmN2ZamNN6SMepneV+dCgQTA==}
 
   lodash.snakecase@4.1.1:
     resolution: {integrity: sha512-QZ1d4xoBHYUeuouhEq3lk3Uq7ldgyFXGBhg04+oRLnIz8o9T65Eh+8YdroUwn846zchkA9yDsDl5CVVaV2nqYw==}
@@ -2356,6 +2371,12 @@ snapshots:
     dependencies:
       '@types/node': 20.14.11
 
+  '@types/lodash.samplesize@4.2.9':
+    dependencies:
+      '@types/lodash': 4.17.7
+
+  '@types/lodash@4.17.7': {}
+
   '@types/mysql@2.15.22':
     dependencies:
       '@types/node': 20.14.11
@@ -2842,6 +2863,8 @@ snapshots:
   lodash.isarguments@3.1.0: {}
 
   lodash.merge@4.6.2: {}
+
+  lodash.samplesize@4.2.0: {}
 
   lodash.snakecase@4.1.1: {}
 
