@@ -4,12 +4,12 @@ export default async function useCommandHandlers(
 	interaction: ChatInputCommandInteraction<CacheType>,
 ) {
 	switch (interaction.commandName) {
-		case 'playlist': {
+		case 'playlists': {
 			await interaction.deferReply();
 
-			const { playlistCommandHandler } = await import('../handlers');
+			const { playlistsCommandHandler } = await import('../handlers');
 
-			await playlistCommandHandler(interaction);
+			await playlistsCommandHandler(interaction);
 			break;
 		}
 		case 'play': {

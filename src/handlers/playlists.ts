@@ -5,7 +5,7 @@ import type {
 } from 'discord.js';
 import { PLAYLISTS_CHANNEL_ID } from '../constants/channelIds';
 
-export default async function playlistCommandHandler(
+export default async function playlistsCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
 ) {
 	const channel = interaction.client.channels.cache.get(PLAYLISTS_CHANNEL_ID);
@@ -16,12 +16,7 @@ export default async function playlistCommandHandler(
 
 	const [
 		{ useQueue },
-		{
-			StringSelectMenuBuilder,
-			TextInputBuilder,
-			TextInputStyle,
-			ActionRowBuilder,
-		},
+		{ StringSelectMenuBuilder, ActionRowBuilder },
 		{ default: getPlaylists },
 		{ default: enqueuePlaylists },
 	] = await Promise.all([

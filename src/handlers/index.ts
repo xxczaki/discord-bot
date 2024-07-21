@@ -7,7 +7,7 @@ export { default as loopCommandHandler } from './loop';
 export { default as moveCommandHandler } from './move';
 export { default as pauseCommandHandler } from './pause';
 export { default as playCommandHandler } from './play';
-export { default as playlistCommandHandler } from './playlist';
+export { default as playlistsCommandHandler } from './playlists';
 export { default as purgeCommandHandler } from './purge';
 export { default as queueCommandHandler } from './queue';
 export { default as removeCommandHandler } from './remove';
