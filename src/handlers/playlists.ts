@@ -62,8 +62,6 @@ export default async function playlistsCommandHandler(
 			components: [],
 		});
 	} catch {
-		await response.edit({
-			components: [],
-		});
+		await response.delete();
 	}
 }
