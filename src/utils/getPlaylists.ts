@@ -4,6 +4,7 @@ import {
 } from 'discord.js';
 import sampleSize from 'lodash.samplesize';
 import cleanUpPlaylistContent from './cleanUpPlaylistContent';
+import truncateString from './truncateString';
 
 export default async function getPlaylists(channel: TextBasedChannel) {
 	const rawMessages = await channel.messages.fetch({ limit: 25, cache: true });
@@ -20,7 +21,7 @@ export default async function getPlaylists(channel: TextBasedChannel) {
 
 			const songs = cleanUpPlaylistContent(message).split('\n');
 			const samples = sampleSize(
-				songs.filter((song) => /https?:\/\//.exec(song)),
+				songs.filter((song) => !/https?:\/\//.exec(song)),
 				3,
 			)
 				.map((sample) => `"${sample}"`)
@@ -29,7 +30,10 @@ export default async function getPlaylists(channel: TextBasedChannel) {
 			return new StringSelectMenuOptionBuilder()
 				.setLabel(id)
 				.setDescription(
-					`${getNumberOfSongs(songs.length)}, including: ${samples}.`,
+					truncateString(
+						`${getNumberOfSongs(songs.length)}, including: ${samples}.`,
+						100,
+					),
 				)
 				.setValue(id);
 		})
