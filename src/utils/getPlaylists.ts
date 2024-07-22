@@ -24,7 +24,8 @@ export default async function getPlaylists(channel: TextBasedChannel) {
 				.setDescription(getNumberOfSongs(songs.length))
 				.setValue(id);
 		})
-		.slice(0, 25);
+		.slice(0, 25)
+		.sort();
 }
 
 function getNumberOfSongs(number: number) {
