@@ -73,6 +73,18 @@ async function getRows(
 		oPositions.push(
 			possiblePositions[Math.floor(Math.random() * possiblePositions.length)],
 		);
+
+		const possiblePositionsNext = getAllPositions().filter(
+			(position) =>
+				!xPositions.includes(position) || !oPositions.includes(position),
+		);
+
+		if (possiblePositionsNext.length === 0) {
+			await interaction.update({
+				content: 'Game finished, draw.',
+				components: [],
+			});
+		}
 	}
 
 	for (let i = 0; i < EMPTY_GRID.length; i++) {
