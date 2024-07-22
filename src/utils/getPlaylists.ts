@@ -19,14 +19,14 @@ export default async function getPlaylists(channel: TextBasedChannel) {
 
 			const songs = cleanUpPlaylistContent(message).split('\n');
 
-			return [id, songs];
+			return { id, entriesNo: songs.length };
 		})
 		.slice(0, 25)
-		.sort(([a], [b]) => a.charCodeAt(0) - b.charCodeAt(0))
-		.map(([id, songs]) => {
+		.sort(({ id: a }, { id: b }) => a.charCodeAt(0) - b.charCodeAt(0))
+		.map(({ id, entriesNo }) => {
 			return new StringSelectMenuOptionBuilder()
 				.setLabel(id)
-				.setDescription(getNumberOfSongs(songs.length))
+				.setDescription(getNumberOfSongs(entriesNo))
 				.setValue(id);
 		});
 }
