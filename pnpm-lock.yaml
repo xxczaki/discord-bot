@@ -24,8 +24,8 @@ importers:
         specifier: ^6.7.0
         version: 6.7.0(@discord-player/extractor@4.5.0)(@discordjs/opus@0.9.0)(bufferutil@4.0.8)(utf-8-validate@6.0.4)
       discord-player-youtubei:
-        specifier: ^1.1.14
-        version: 1.1.14
+        specifier: ^1.2.0-beta.0
+        version: 1.2.0-beta.0
       discord.js:
         specifier: ^14.15.3
         version: 14.15.3(bufferutil@4.0.8)(utf-8-validate@6.0.4)
@@ -893,8 +893,9 @@ packages:
   discord-api-types@0.37.92:
     resolution: {integrity: sha512-7xnedbQRLRef/O+4jKPyIFwl6YqoyihOG3OSneiRmVJMBk30ph2YuZGcHjeX1Kk/a3yQWeyCKe4RZJB3iECcxg==}
 
-  discord-player-youtubei@1.1.14:
-    resolution: {integrity: sha512-W+eaemsDABUEWiYu0O1WFs8QgBy7b/ZO7+PVX0NZdo8vpIIxodalv6ZA7w9WfSz2YlQnvlSVXGabYodEz4vrkA==}
+  discord-player-youtubei@1.2.0-beta.0:
+    resolution: {integrity: sha512-wc7KcGnCrlbrZUz9cUKFrdohZEd553M7VAvWY3ZVlRHMSLYOzqdRQ8uf1oREAOcNuveHcwl6C2TQdoMjS8YLWQ==}
+    deprecated: Accidental
     hasBin: true
 
   discord-player@6.7.0:
@@ -2522,7 +2523,7 @@ snapshots:
 
   discord-api-types@0.37.92: {}
 
-  discord-player-youtubei@1.1.14:
+  discord-player-youtubei@1.2.0-beta.0:
     dependencies:
       undici: 6.19.2
       youtubei.js: 10.1.0
