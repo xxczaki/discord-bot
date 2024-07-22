@@ -179,6 +179,10 @@ const COMMANDS: ApplicationCommandData[] = [
 			},
 		],
 	},
+	{
+		name: 'tic_tac_toe',
+		description: 'Allows you to play Tic-tac-toe with the bot itself.',
+	},
 ];
 
 export default COMMANDS;

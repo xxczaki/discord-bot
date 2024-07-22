@@ -172,6 +172,14 @@ export default async function useCommandHandlers(
 			await avatarCommandHandler(interaction);
 			break;
 		}
+		case 'tic_tac_toe': {
+			await interaction.deferReply({ ephemeral: true });
+
+			const { ticTacToeCommandHandler } = await import('../handlers');
+
+			await ticTacToeCommandHandler(interaction);
+			break;
+		}
 		default:
 			break;
 	}

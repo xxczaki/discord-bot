@@ -19,3 +19,4 @@ export { default as sortCommandHandler } from './sort';
 export { default as statsCommandHandler } from './stats';
 export { default as tempoCommandHandler } from './tempo';
 export { default as volumeCommandHandler } from './volume';
+export { default as ticTacToeCommandHandler } from './ticTacToe';
