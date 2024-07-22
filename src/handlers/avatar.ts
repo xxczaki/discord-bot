@@ -10,7 +10,7 @@ export default async function avatarCommandHandler(
 	const user = interaction.options.getUser('user', true);
 
 	const queueEmbed = new EmbedBuilder()
-		.setDescription(`Server avatar of <@!${user.id}>.`)
+		.setDescription(`Server avatar of <@!${user.id}>`)
 		.setImage(user.avatarURL());
 
 	await interaction.editReply({ embeds: [queueEmbed] });
