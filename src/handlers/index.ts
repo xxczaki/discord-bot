@@ -1,3 +1,4 @@
+export { default as avatarCommandHandler } from './avatar';
 export { default as debugCommandHandler } from './debug';
 export { default as deduplicateCommandHandler } from './deduplicate';
 export { default as filtersCommandHandler } from './filters';

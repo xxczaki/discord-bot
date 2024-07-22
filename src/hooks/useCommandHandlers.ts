@@ -164,6 +164,14 @@ export default async function useCommandHandlers(
 			await flushQueryCacheCommandHandler(interaction);
 			break;
 		}
+		case 'avatar': {
+			await interaction.deferReply();
+
+			const { avatarCommandHandler } = await import('../handlers');
+
+			await avatarCommandHandler(interaction);
+			break;
+		}
 		default:
 			break;
 	}

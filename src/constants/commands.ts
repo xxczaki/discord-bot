@@ -167,6 +167,18 @@ const COMMANDS: ApplicationCommandData[] = [
 		name: 'flush_query_cache',
 		description: 'Flushes the internal query cache.',
 	},
+	{
+		name: 'avatar',
+		description: "Fetches and displays user's avatar.",
+		options: [
+			{
+				name: 'user',
+				description: 'The user whose avatar you want to preview',
+				type: 6,
+				required: true,
+			},
+		],
+	},
 ];
 
 export default COMMANDS;
