@@ -6,12 +6,14 @@ import {
 	type CacheType,
 	type ChatInputCommandInteraction,
 } from 'discord.js';
+import { randomInt } from 'node:crypto';
 
 const EMPTY_GRID = [
 	[null, null, null],
 	[null, null, null],
 	[null, null, null],
 ];
+const EMPTY_CHARACTER = '‎';
 
 export default async function ticTacToeCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
@@ -42,7 +44,7 @@ function getAllPositions() {
 	const result: string[] = [];
 
 	for (let i = 0; i < EMPTY_GRID.length; i++) {
-		for (let j = 0; j < EMPTY_GRID[i].length; j++) {
+		for (let j = 0; j < EMPTY_GRID.length; j++) {
 			result.push(`${i}-${j}`);
 		}
 	}
@@ -50,54 +52,57 @@ function getAllPositions() {
 	return result;
 }
 
-async function getRows(
-	xPositions: string[],
-	oPositions: string[],
-	interaction?: ButtonInteraction<CacheType>,
-) {
-	const rows: ActionRowBuilder<ButtonBuilder>[] = [];
+function getWinPositions() {
+	const sequences: string[][] = [];
 
-	if (interaction) {
-		const possiblePositions = getAllPositions().filter(
-			(position) =>
-				!xPositions.includes(position) || !oPositions.includes(position),
+	const ascendingDiagonal: string[][] = [];
+
+	for (let i = 0; i < EMPTY_GRID.length; i++) {
+		sequences.push(
+			allPositions.filter((position) => position.startsWith(`${i}`)),
+		);
+		sequences.push(
+			allPositions.filter((position) => position.endsWith(`${i}`)),
 		);
 
-		if (possiblePositions.length === 0) {
-			await interaction.update({
-				content: 'Game finished, draw.',
-				components: [],
-			});
-		}
-
-		oPositions.push(
-			possiblePositions[Math.floor(Math.random() * possiblePositions.length)],
+		ascendingDiagonal.push(
+			allPositions.filter(
+				(position) =>
+					position.startsWith(`${i}`) &&
+					position.endsWith(`${EMPTY_GRID.length - 1 - i}`),
+			),
 		);
-
-		const possiblePositionsNext = getAllPositions().filter(
-			(position) =>
-				!xPositions.includes(position) || !oPositions.includes(position),
-		);
-
-		if (possiblePositionsNext.length === 0) {
-			await interaction.update({
-				content: 'Game finished, draw.',
-				components: [],
-			});
-		}
 	}
 
+	sequences.push(ascendingDiagonal.flat());
+
+	sequences.push(
+		allPositions.filter(
+			(position) => position[0] === position[position.length - 1],
+		),
+	);
+
+	return sequences;
+}
+
+const allPositions = getAllPositions();
+const winPositions = getWinPositions();
+
+async function getRows(xPositions: string[], oPositions: string[]) {
+	const rows: ActionRowBuilder<ButtonBuilder>[] = [];
 	for (let i = 0; i < EMPTY_GRID.length; i++) {
 		const actionRow = new ActionRowBuilder<ButtonBuilder>();
 
-		for (let j = 0; j < EMPTY_GRID[i].length; j++) {
+		for (let j = 0; j < EMPTY_GRID.length; j++) {
 			const id = `${i}-${j}`;
+			const label = getLabel(id, xPositions, oPositions);
 
 			actionRow.addComponents(
 				new ButtonBuilder()
 					.setCustomId(id)
-					.setLabel(getLabel(id, xPositions, oPositions))
-					.setStyle(ButtonStyle.Secondary),
+					.setLabel(label)
+					.setStyle(ButtonStyle.Secondary)
+					.setDisabled(label !== EMPTY_CHARACTER),
 			);
 		}
 
@@ -113,10 +118,36 @@ function getLabel(id: string, xPositions: string[], oPositions: string[]) {
 	}
 
 	if (oPositions.includes(id)) {
-		return '○';
+		return '⭕';
 	}
 
-	return '‎';
+	return EMPTY_CHARACTER;
+}
+
+function getPossiblePositions(xPositions: string[], oPositions: string[]) {
+	return allPositions.filter(
+		(position) =>
+			!xPositions.includes(position) && !oPositions.includes(position),
+	);
+}
+
+async function getOPositions(xPositions: string[], oPositions: string[]) {
+	const possiblePositions = getPossiblePositions(xPositions, oPositions);
+
+	return [
+		...oPositions,
+		possiblePositions[randomInt(0, possiblePositions.length - 1)],
+	];
+}
+
+function isGameOverByWin(positions: string[]) {
+	if (positions.length < 3) {
+		return false;
+	}
+
+	return winPositions.find((sequence) =>
+		sequence.every((position) => positions.includes(position)),
+	);
 }
 
 async function nextMove(
@@ -124,7 +155,43 @@ async function nextMove(
 	xPositions: string[],
 	oPositions: string[],
 ) {
-	const rows = await getRows(xPositions, oPositions, interaction);
+	if (isGameOverByWin(xPositions)) {
+		await interaction.update({
+			content: 'Game over, you won – congrats!',
+			components: [],
+		});
+		return;
+	}
+
+	const possiblePositions = getPossiblePositions(xPositions, oPositions);
+
+	if (possiblePositions.length === 0) {
+		await interaction.update({
+			content: 'Game finished, draw.',
+			components: [],
+		});
+		return;
+	}
+
+	const newOPositions = await getOPositions(xPositions, oPositions);
+
+	if (isGameOverByWin(newOPositions)) {
+		await interaction.update({
+			content: 'Game over, I won – you fucking loser.',
+			components: [],
+		});
+		return;
+	}
+
+	if (newOPositions.length === 0) {
+		await interaction.update({
+			content: 'Game finished, draw.',
+			components: [],
+		});
+		return;
+	}
+
+	const rows = await getRows(xPositions, newOPositions);
 	const response = await interaction.update({
 		content:
 			'I made my move, your turn again. Choose where to place your `❌`:',
@@ -137,7 +204,7 @@ async function nextMove(
 		});
 
 		if (answer.isButton()) {
-			await nextMove(answer, [...xPositions, answer.customId], oPositions);
+			await nextMove(answer, [...xPositions, answer.customId], newOPositions);
 		}
 	} catch {
 		await interaction.editReply({

@@ -108,24 +108,6 @@ const statsHandler = StatsHandler.getInstance();
 		resetStatus(client);
 	});
 
-	player.events.on('queueDelete', async () => {
-		const { default: resetStatus } = await import('./utils/resetStatus');
-
-		resetStatus(client);
-	});
-
-	player.events.on('connectionDestroyed', async () => {
-		const { default: resetStatus } = await import('./utils/resetStatus');
-
-		resetStatus(client);
-	});
-
-	player.events.on('disconnect', async () => {
-		const { default: resetStatus } = await import('./utils/resetStatus');
-
-		resetStatus(client);
-	});
-
 	client.on('ready', async () => {
 		const [
 			{ default: logger },
