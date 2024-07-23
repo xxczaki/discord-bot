@@ -8,11 +8,7 @@ import {
 	type ChatInputCommandInteraction,
 } from 'discord.js';
 
-const EMPTY_GRID = [
-	[null, null, null],
-	[null, null, null],
-	[null, null, null],
-];
+const GRID_SIZE = 3;
 const EMPTY_CHARACTER = '‎';
 
 export default async function ticTacToeCommandHandler(
@@ -21,7 +17,7 @@ export default async function ticTacToeCommandHandler(
 	const rows = await getRows([], []);
 	const response = await interaction.editReply({
 		content:
-			"The game begins and it's your turn. Choose where to place your `❌`:",
+			"The game begins and it's your turn. Choose where to place your symbol:",
 		components: rows,
 	});
 
@@ -43,8 +39,8 @@ export default async function ticTacToeCommandHandler(
 function getAllPositions() {
 	const result: string[] = [];
 
-	for (let i = 0; i < EMPTY_GRID.length; i++) {
-		for (let j = 0; j < EMPTY_GRID.length; j++) {
+	for (let i = 0; i < GRID_SIZE; i++) {
+		for (let j = 0; j < GRID_SIZE; j++) {
 			result.push(`${i}-${j}`);
 		}
 	}
@@ -52,12 +48,12 @@ function getAllPositions() {
 	return result;
 }
 
-function getWinPositions() {
+function getWinningSequences() {
 	const sequences: string[][] = [];
 
 	const ascendingDiagonal: string[][] = [];
 
-	for (let i = 0; i < EMPTY_GRID.length; i++) {
+	for (let i = 0; i < GRID_SIZE; i++) {
 		sequences.push(
 			allPositions.filter((position) => position.startsWith(`${i}`)),
 		);
@@ -69,7 +65,7 @@ function getWinPositions() {
 			allPositions.filter(
 				(position) =>
 					position.startsWith(`${i}`) &&
-					position.endsWith(`${EMPTY_GRID.length - 1 - i}`),
+					position.endsWith(`${GRID_SIZE - 1 - i}`),
 			),
 		);
 	}
@@ -86,14 +82,14 @@ function getWinPositions() {
 }
 
 const allPositions = getAllPositions();
-const winPositions = getWinPositions();
+const winningSequences = getWinningSequences();
 
 async function getRows(xPositions: string[], oPositions: string[]) {
 	const rows: ActionRowBuilder<ButtonBuilder>[] = [];
-	for (let i = 0; i < EMPTY_GRID.length; i++) {
+	for (let i = 0; i < GRID_SIZE; i++) {
 		const actionRow = new ActionRowBuilder<ButtonBuilder>();
 
-		for (let j = 0; j < EMPTY_GRID.length; j++) {
+		for (let j = 0; j < GRID_SIZE; j++) {
 			const id = `${i}-${j}`;
 			const label = getLabel(id, xPositions, oPositions);
 
@@ -145,7 +141,7 @@ function isGameOverByWin(positions: string[]) {
 		return false;
 	}
 
-	return winPositions.find((sequence) =>
+	return winningSequences.find((sequence) =>
 		sequence.every((position) => positions.includes(position)),
 	);
 }
@@ -167,7 +163,7 @@ async function nextMove(
 
 	if (possiblePositions.length === 0) {
 		await interaction.update({
-			content: 'Game finished, draw.',
+			content: 'Game over, draw.',
 			components: [],
 		});
 		return;
@@ -185,7 +181,7 @@ async function nextMove(
 
 	if (newOPositions.length === 0) {
 		await interaction.update({
-			content: 'Game finished, draw.',
+			content: 'Game over, draw.',
 			components: [],
 		});
 		return;
