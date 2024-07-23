@@ -1,3 +1,4 @@
+import { randomInt } from 'node:crypto';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -6,7 +7,6 @@ import {
 	type CacheType,
 	type ChatInputCommandInteraction,
 } from 'discord.js';
-import { randomInt } from 'node:crypto';
 
 const EMPTY_GRID = [
 	[null, null, null],
