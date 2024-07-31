@@ -12,7 +12,7 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 			{ Player },
 			{ RedisQueryCache },
 			{ default: redis },
-			{ createYoutubeiStream, YoutubeiExtractor },
+			{ YoutubeiExtractor },
 			{ SpotifyExtractor },
 		] = await Promise.all([
 			import('discord-player'),
@@ -27,9 +27,7 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 		});
 
 		await initializedPlayer.extractors.register(YoutubeiExtractor, {});
-		await initializedPlayer.extractors.register(SpotifyExtractor, {
-			createStream: createYoutubeiStream,
-		});
+		await initializedPlayer.extractors.register(SpotifyExtractor);
 		await initializedPlayer.extractors.loadDefault((extractor) =>
 			['SpotifyExtractor', 'YoutubeiExtractor'].includes(extractor),
 		);
