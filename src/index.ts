@@ -29,8 +29,14 @@ const statsHandler = StatsHandler.getInstance();
 	const player = await getInitializedPlayer(client);
 
 	player.events.on('playerStart', async (queue, track) => {
-		const { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } =
-			await import('discord.js');
+		const {
+			EmbedBuilder,
+			ButtonBuilder,
+			ButtonStyle,
+			ActionRowBuilder,
+			ActivityType,
+			PresenceUpdateStatus,
+		} = await import('discord.js');
 
 		const embed = new EmbedBuilder()
 			.setTitle(track.title)
@@ -55,6 +61,17 @@ const statsHandler = StatsHandler.getInstance();
 			components: [row],
 		});
 
+		client.user?.setPresence({
+			activities: [
+				{
+					name: `"${track.title}" by ${track.author}`,
+					type: ActivityType.Listening,
+					url: track.url,
+				},
+			],
+			status: PresenceUpdateStatus.Online,
+		});
+
 		try {
 			const answer = await response.awaitMessageComponent({
 				time: 60_000, // 1 minute
@@ -70,33 +87,18 @@ const statsHandler = StatsHandler.getInstance();
 				});
 			}
 
-			await response.edit({
-				components: [],
-			});
+			throw 'fallthrough to catch block';
 		} catch {
 			await response.edit({
 				components: [],
 			});
+
+			await statsHandler.saveStat('play', {
+				title: track.title,
+				author: track.author,
+				requestedById: track.requestedBy?.id,
+			});
 		}
-
-		await statsHandler.saveStat('play', {
-			title: track.title,
-			author: track.author,
-			requestedById: track.requestedBy?.id,
-		});
-
-		const { ActivityType, PresenceUpdateStatus } = await import('discord.js');
-
-		client.user?.setPresence({
-			activities: [
-				{
-					name: `"${track.title}" by ${track.author}`,
-					type: ActivityType.Listening,
-					url: track.url,
-				},
-			],
-			status: PresenceUpdateStatus.Online,
-		});
 	});
 
 	player.events.on('emptyQueue', async (queue) => {
@@ -104,17 +106,15 @@ const statsHandler = StatsHandler.getInstance();
 			'Queue finished, leaving…',
 		);
 
-		const { ActivityType, PresenceUpdateStatus } = await import('discord.js');
+		const { default: resetPresence } = await import('./utils/resetPresence');
 
-		client.user?.setPresence({
-			activities: [
-				{
-					name: 'Idle, use /play to get started',
-					type: ActivityType.Custom,
-				},
-			],
-			status: PresenceUpdateStatus.Idle,
-		});
+		resetPresence(client);
+	});
+
+	player.events.on('queueDelete', async () => {
+		const { default: resetPresence } = await import('./utils/resetPresence');
+
+		resetPresence(client);
 	});
 
 	client.on('ready', async () => {

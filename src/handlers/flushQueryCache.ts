@@ -1,5 +1,5 @@
 import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
-import { OWNER_USER_ID } from '../constants/channelIds';
+import { OWNER_USER_ID } from '../constants/userIds';
 
 export default async function flushQueryCacheCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
