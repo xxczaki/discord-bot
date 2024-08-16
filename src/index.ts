@@ -92,6 +92,7 @@ const statsHandler = StatsHandler.getInstance();
 				{
 					name: `"${track.title}" by ${track.author}`,
 					type: ActivityType.Listening,
+					url: track.url,
 				},
 			],
 			status: PresenceUpdateStatus.Online,
@@ -103,27 +104,31 @@ const statsHandler = StatsHandler.getInstance();
 			'Queue finished, leaving…',
 		);
 
-		const { default: resetStatus } = await import('./utils/resetStatus');
+		const { ActivityType, PresenceUpdateStatus } = await import('discord.js');
 
-		resetStatus(client);
+		client.user?.setPresence({
+			activities: [
+				{
+					name: 'Idle, use /play to get started',
+					type: ActivityType.Custom,
+				},
+			],
+			status: PresenceUpdateStatus.Idle,
+		});
 	});
 
 	client.on('ready', async () => {
 		const [
 			{ default: logger },
-			{ default: resetStatus },
 			{ default: getReleaseDetails },
 			{ BOT_CHANNEL_ID },
 		] = await Promise.all([
 			import('./utils/logger'),
-			import('./utils/resetStatus'),
 			import('./utils/getReleaseDetails'),
 			import('./constants/channelIds'),
 		]);
 
 		logger.info(`Logged in as ${client.user?.tag}!`);
-
-		resetStatus(client);
 
 		const channel = client.channels.cache.get(BOT_CHANNEL_ID);
 
