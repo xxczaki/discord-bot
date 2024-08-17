@@ -134,7 +134,7 @@ const statsHandler = StatsHandler.getInstance();
 
 		if (channel?.isTextBased()) {
 			channel.send({
-				content: `ℹ️ Update successful, ready to play.\n\nDeployment source: ${getReleaseDetails()}.`,
+				content: `ℹ️ Deployment successful, ready to play.\n\nSource: ${getReleaseDetails()}.`,
 			});
 		}
 	});

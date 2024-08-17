@@ -122,21 +122,7 @@ const COMMANDS: ApplicationCommandData[] = [
 	},
 	{
 		name: 'filters',
-		description: 'Toggle an audio filter.',
-		options: [
-			{
-				name: 'audio_filter',
-				description: 'The filter you want to toggle',
-				type: 3,
-				choices: [
-					{ name: 'Bassboost', value: 'bassboost' },
-					{ name: 'Earrape', value: 'earrape' },
-					{ name: 'Lofi', value: 'lofi' },
-					{ name: 'Nightcore', value: 'nightcore' },
-					{ name: 'Vaporwave', value: 'vaporwave' },
-				],
-			},
-		],
+		description: 'Allows toggling the audio filters.',
 	},
 	{
 		name: 'tempo',
