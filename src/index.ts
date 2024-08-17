@@ -11,6 +11,7 @@ import { StatsHandler } from './utils/StatsHandler';
 import getEnvironmentVariable from './utils/getEnvironmentVariable';
 import initializeCommands from './utils/initializeCommands';
 import getInitializedPlayer from './utils/initializePlayer';
+import resetPresence from './utils/resetPresence';
 
 const statsHandler = StatsHandler.getInstance();
 
@@ -25,6 +26,8 @@ const statsHandler = StatsHandler.getInstance();
 			GatewayIntentBits.MessageContent,
 		],
 	});
+
+	resetPresence(client);
 
 	const player = await getInitializedPlayer(client);
 
@@ -106,14 +109,10 @@ const statsHandler = StatsHandler.getInstance();
 			'Queue finished, leaving…',
 		);
 
-		const { default: resetPresence } = await import('./utils/resetPresence');
-
 		resetPresence(client);
 	});
 
 	player.events.on('queueDelete', async () => {
-		const { default: resetPresence } = await import('./utils/resetPresence');
-
 		resetPresence(client);
 	});
 
