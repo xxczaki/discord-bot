@@ -17,6 +17,9 @@ const FILTERS: OptionData[] = [
 	{ label: 'Lofi', value: 'lofi' },
 	{ label: 'Nightcore', value: 'nightcore' },
 	{ label: 'Vaporwave', value: 'vaporwave' },
+	{ label: 'Tremolo', value: 'tremolo' },
+	{ label: 'Vibrato', value: 'vibrato' },
+	{ label: '8D', value: '8D' },
 ];
 
 export default async function filtersCommandHandler(
@@ -33,10 +36,10 @@ export default async function filtersCommandHandler(
 
 	const select = new StringSelectMenuBuilder()
 		.setCustomId('filterSelect')
-		.setPlaceholder('Select up to 5 filters')
+		.setPlaceholder('Select up to 3 filters')
 		.addOptions(...filters)
 		.setMinValues(0)
-		.setMaxValues(5);
+		.setMaxValues(3);
 
 	const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 		select,
@@ -57,9 +60,7 @@ export default async function filtersCommandHandler(
 				...answer.values.filter(
 					(value) => !activeFilters.includes(value as keyof QueueFilters),
 				),
-				...activeFilters.filter(
-					(value) => !answer.values.includes(value as keyof QueueFilters),
-				),
+				...activeFilters.filter((value) => !answer.values.includes(value)),
 			] as Array<keyof QueueFilters>;
 
 			await queue?.filters.ffmpeg.toggle(toToggle);
