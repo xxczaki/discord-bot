@@ -1,4 +1,5 @@
 import { REST, Routes } from 'discord.js';
+import * as Sentry from '@sentry/node';
 import COMMANDS from '../constants/commands';
 import getEnvironmentVariable from './getEnvironmentVariable';
 import logger from './logger';
@@ -14,10 +15,12 @@ export default async function initializeCommands() {
 
 		await rest.put(Routes.applicationCommands(clientId), {
 			body: COMMANDS,
+			signal: AbortSignal.timeout(10_000)
 		});
 
 		logger.info('Successfully reloaded application (/) commands.');
 	} catch (error) {
 		logger.error('Application commands refresh failure', error);
+		Sentry.captureException(error);
 	}
 }
