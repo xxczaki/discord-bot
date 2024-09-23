@@ -8,7 +8,6 @@ RUN apk update --no-cache && \
 FROM base AS build
 
 ARG RAILWAY_GIT_COMMIT_SHA
-ARG NODE_ENV
 ARG SENTRY_AUTH_TOKEN
 
 COPY src ./src/
@@ -19,7 +18,7 @@ RUN pnpm install --frozen-lockfile && \
 #RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN \
 #		--mount=type=secret,id=SENTRY_RELEASE_NAME \
 #		pnpm install --frozen-lockfile && \
-#    NODE_ENV=production SENTRY_AUTH_TOKEN="$(cat /run/secrets/SENTRY_AUTH_TOKEN)" SENTRY_RELEASE_NAME="$(cat /run/secrets/SENTRY_RELEASE_NAME)" pnpm build && \
+#   NODE_ENV=production SENTRY_AUTH_TOKEN="$(cat /run/secrets/SENTRY_AUTH_TOKEN)" SENTRY_RELEASE_NAME="$(cat /run/secrets/SENTRY_RELEASE_NAME)" pnpm build && \
 #		pnpm prune --prod
 
 
