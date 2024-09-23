@@ -13,7 +13,7 @@ ARG SENTRY_AUTH_TOKEN
 COPY src ./src/
 COPY package.json pnpm-lock.yaml esbuild.mjs ./
 RUN pnpm install --frozen-lockfile && \
-    GIT_COMMIT=$(git rev-parse --short "$RAILWAY_GIT_COMMIT_SHA") SENTRY_RELEASE_NAME=$RAILWAY_GIT_COMMIT_SHA SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN pnpm build && \
+    SENTRY_RELEASE_NAME=$RAILWAY_GIT_COMMIT_SHA SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN pnpm build && \
 		pnpm prune --prod
 #RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN \
 #		--mount=type=secret,id=SENTRY_RELEASE_NAME \
