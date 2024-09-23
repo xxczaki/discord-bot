@@ -9,7 +9,7 @@
 		"lint": "biome check --write ./src",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
-	"packageManager": "pnpm@9.7.0",
+	"packageManager": "pnpm@9.11.0",
 	"keywords": [],
 	"author": "",
 	"license": "MIT",
@@ -25,13 +25,13 @@
 		"zlib-sync": "^0.1.9"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.9.0",
+		"@biomejs/biome": "1.9.2",
 		"@discordjs/rest": "^2.4.0",
 		"@sentry/esbuild-plugin": "^2.22.4",
 		"@sentry/node": "^8.30.0",
 		"@types/node": "^22.5.5",
-		"date-fns": "^3.6.0",
-		"esbuild": "0.23.1",
+		"date-fns": "^4.1.0",
+		"esbuild": "0.24.0",
 		"esbuild-plugin-pino": "^2.2.0",
 		"ioredis": "^5.4.1",
 		"p-queue": "^8.0.1",
@@ -41,7 +41,8 @@
 	},
 	"pnpm": {
 		"overrides": {
-			"libsodium-wrappers": "npm:sodium-native@4.2.0"
+			"libsodium-wrappers": "npm:sodium-native@4.2.0",
+			"youtubei.js": "^10.5.0"
 		}
 	}
 }
