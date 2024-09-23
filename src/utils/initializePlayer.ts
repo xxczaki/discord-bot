@@ -27,7 +27,7 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 
 		initializedPlayer = new Player(client, {
 			queryCache: new RedisQueryCache(redis),
-			bridgeProvider
+			bridgeProvider,
 		});
 
 		await initializedPlayer.extractors.register(YoutubeiExtractor, {});
