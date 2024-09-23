@@ -1,10 +1,10 @@
 name: Deploy
-on:
-  workflow_run:
-    workflows: ["Lint"]
-    branches: [main]
-    types: 
-      - completed
+# on:
+#  workflow_run:
+#    workflows: ["Lint"]
+#    branches: [main]
+#    types: 
+#      - completed
 jobs:
   deploy:
     name: Deploy with Fly.io
