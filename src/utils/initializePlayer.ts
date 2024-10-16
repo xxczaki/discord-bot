@@ -30,7 +30,11 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 			bridgeProvider,
 		});
 
-		await initializedPlayer.extractors.register(YoutubeiExtractor, {});
+		await initializedPlayer.extractors.register(YoutubeiExtractor, {
+			streamOptions: {
+				useClient: "ANDROID"
+			}
+		});
 		await initializedPlayer.extractors.register(SpotifyExtractor, {});
 		await initializedPlayer.extractors.loadDefault((extractor) =>
 			['SpotifyExtractor', 'YoutubeiExtractor'].includes(extractor),
