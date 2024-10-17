@@ -45,17 +45,19 @@ export default async function enqueuePlaylists(
 
 	const [
 		{ default: Queue },
+		{ availableParallelism },
 		{ useMainPlayer },
 		{ default: isYouTubeLink },
 		{ EmbedBuilder },
 	] = await Promise.all([
 		import('p-queue'),
+		import('node:os'),
 		import('discord-player'),
 		import('../utils/isYouTubeLink'),
 		import('discord.js'),
 	]);
 
-	const playlistQueue = new Queue();
+	const playlistQueue = new Queue({ concurrency: availableParallelism() });
 	const songsArray = songs.trim().split('\n');
 	const player = useMainPlayer();
 
