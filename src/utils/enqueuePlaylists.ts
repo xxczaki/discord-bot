@@ -47,12 +47,12 @@ export default async function enqueuePlaylists(
 	const [
 		{ default: Queue },
 		{ useMainPlayer },
-		{ default: isYouTubeLink },
+		// { default: isYouTubeLink },
 		{ EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle },
 	] = await Promise.all([
 		import('p-queue'),
 		import('discord-player'),
-		import('../utils/isYouTubeLink'),
+		// import('../utils/isYouTubeLink'),
 		import('discord.js'),
 	]);
 
@@ -65,7 +65,7 @@ export default async function enqueuePlaylists(
 	await playlistQueue.addAll(
 		songsArray.map((song) => async () => {
 			const promise = player.play(voiceChannel, song, {
-				searchEngine: isYouTubeLink(song) ? 'youtubeVideo' : 'spotifySearch',
+				// searchEngine: isYouTubeLink(song) ? 'youtubeVideo' : 'spotifySearch',
 				nodeOptions: {
 					metadata: interaction,
 					defaultFFmpegFilters: ['normalize' as keyof QueueFilters],

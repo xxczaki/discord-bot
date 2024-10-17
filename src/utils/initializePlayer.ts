@@ -1,4 +1,3 @@
-import { BridgeProvider, BridgeSource } from '@discord-player/extractor';
 import { AudioFilters, type Player } from 'discord-player';
 import type { Client } from 'discord.js';
 
@@ -27,8 +26,8 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 			queryCache: new RedisQueryCache(redis),
 		});
 
-		await initializedPlayer.extractors.register(YoutubeiExtractor, {});
 		await initializedPlayer.extractors.register(SpotifyExtractor, {});
+		await initializedPlayer.extractors.register(YoutubeiExtractor, {});
 		await initializedPlayer.extractors.loadDefault((extractor) =>
 			['SpotifyExtractor', 'YoutubeiExtractor'].includes(extractor),
 		);
