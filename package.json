@@ -7,6 +7,7 @@
 		"start": "pnpm build && node --env-file=.env dist/index.js",
 		"build": "node esbuild.mjs",
 		"lint": "biome check --write ./src",
+		"tsc": "tsc --noEmit",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"packageManager": "pnpm@9.12.1",

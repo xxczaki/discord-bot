@@ -15,11 +15,6 @@ COPY package.json pnpm-lock.yaml esbuild.mjs ./
 RUN pnpm install --frozen-lockfile && \
     SENTRY_RELEASE_NAME=$RAILWAY_GIT_COMMIT_SHA SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN pnpm build && \
 		pnpm prune --prod
-#RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN \
-#		--mount=type=secret,id=SENTRY_RELEASE_NAME \
-#		pnpm install --frozen-lockfile && \
-#   NODE_ENV=production SENTRY_AUTH_TOKEN="$(cat /run/secrets/SENTRY_AUTH_TOKEN)" SENTRY_RELEASE_NAME="$(cat /run/secrets/SENTRY_RELEASE_NAME)" pnpm build && \
-#		pnpm prune --prod
 
 
 FROM node:20-alpine

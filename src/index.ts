@@ -1,11 +1,6 @@
 import('./utils/sentry');
 
-import {
-	type ButtonBuilder,
-	Client,
-	GatewayIntentBits,
-	type TextBasedChannel,
-} from 'discord.js';
+import { type ButtonBuilder, Client, GatewayIntentBits } from 'discord.js';
 import useDebugListeners from './hooks/useDebugListeners';
 import { StatsHandler } from './utils/StatsHandler';
 import getEnvironmentVariable from './utils/getEnvironmentVariable';
@@ -59,7 +54,7 @@ const statsHandler = StatsHandler.getInstance();
 
 		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(skip);
 
-		const response = await (queue.metadata.channel as TextBasedChannel).send({
+		const response = await queue.metadata.channel.send({
 			embeds: [embed],
 			components: [row],
 		});
@@ -105,9 +100,7 @@ const statsHandler = StatsHandler.getInstance();
 	});
 
 	player.events.on('emptyQueue', async (queue) => {
-		await (queue.metadata.channel as TextBasedChannel).send(
-			'Queue finished, leaving…',
-		);
+		await queue.metadata.channel.send('Queue finished, leaving…');
 
 		resetPresence(client);
 	});
@@ -131,7 +124,7 @@ const statsHandler = StatsHandler.getInstance();
 
 		const channel = client.channels.cache.get(BOT_CHANNEL_ID);
 
-		if (channel?.isTextBased()) {
+		if (channel?.isSendable()) {
 			channel.send({
 				content: `ℹ️ Deployment successful, ready to play.\n\nSource: ${getReleaseDetails()}.`,
 			});
