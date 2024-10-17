@@ -15,14 +15,14 @@ export default async function enqueuePlaylists(
 		interaction.client.channels.cache.get(PLAYLISTS_CHANNEL_ID);
 
 	if (!playlistsChannel?.isTextBased()) {
-		return interaction.update({
+		return interaction.editReply({
 			content: 'Invalid playlists channel type!',
 			components: [],
 		});
 	}
 
 	const messages = await playlistsChannel.messages.fetch({
-		limit: 25,
+		limit: 30,
 		cache: true,
 	});
 
@@ -38,7 +38,7 @@ export default async function enqueuePlaylists(
 	const voiceChannel = (interaction.member as GuildMember).voice.channel;
 
 	if (!voiceChannel) {
-		return interaction.update({
+		return interaction.editReply({
 			content: 'You are not connected to a voice channel!',
 			components: [],
 		});
@@ -47,12 +47,12 @@ export default async function enqueuePlaylists(
 	const [
 		{ default: Queue },
 		{ useMainPlayer },
-		// { default: isYouTubeLink },
+		{ default: isYouTubeLink },
 		{ EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle },
 	] = await Promise.all([
 		import('p-queue'),
 		import('discord-player'),
-		// import('../utils/isYouTubeLink'),
+		import('../utils/isYouTubeLink'),
 		import('discord.js'),
 	]);
 
@@ -65,7 +65,7 @@ export default async function enqueuePlaylists(
 	await playlistQueue.addAll(
 		songsArray.map((song) => async () => {
 			const promise = player.play(voiceChannel, song, {
-				// searchEngine: isYouTubeLink(song) ? 'youtubeVideo' : 'spotifySearch',
+				searchEngine: isYouTubeLink(song) ? 'youtubeVideo' : 'spotifySearch',
 				nodeOptions: {
 					metadata: interaction,
 					defaultFFmpegFilters: ['normalize' as keyof QueueFilters],
@@ -97,7 +97,8 @@ export default async function enqueuePlaylists(
 
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(shuffle);
 
-	const response = await interaction.update({
+	const response = await interaction.editReply({
+		content: null,
 		embeds: [embed],
 		components: [row],
 	});

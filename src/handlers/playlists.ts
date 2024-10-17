@@ -34,10 +34,10 @@ export default async function playlistsCommandHandler(
 
 	const select = new StringSelectMenuBuilder()
 		.setCustomId('playlistSelect')
-		.setPlaceholder('Select up to 5 entries')
+		.setPlaceholder('Select up to 10 entries')
 		.addOptions(...playlists)
 		.setMinValues(1)
-		.setMaxValues(5);
+		.setMaxValues(10);
 
 	const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 		select,
@@ -53,11 +53,13 @@ export default async function playlistsCommandHandler(
 			time: 60_000, // 1 minute
 		});
 
+		await answer.deferUpdate();
+
 		if (answer.isStringSelectMenu()) {
 			return enqueuePlaylists(answer);
 		}
 
-		await answer.update({
+		await answer.editReply({
 			content: 'No playlists were selected, aborting…',
 			components: [],
 		});
