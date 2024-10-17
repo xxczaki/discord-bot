@@ -13,7 +13,6 @@ export default function useDebugListeners(client: Client<boolean>) {
 	});
 	process.on('uncaughtException', (error) => {
 		logger.error(error, 'Uncaught exception');
-		server.close();
 	});
 
 	client.on('error', (error) => logger.error(error, 'Client error'));
@@ -25,4 +24,7 @@ export default function useDebugListeners(client: Client<boolean>) {
 	player.events.on('playerError', (_, error) =>
 		logger.error(error, 'Player error'),
 	);
+
+	player.on('debug', (message) => logger.info({}, message));
+	player.events.on('debug', (_, message) => logger.info({}, message));
 }

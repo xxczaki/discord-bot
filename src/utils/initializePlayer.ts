@@ -7,8 +7,6 @@ let initializedPlayer: Player;
 // Internal normalizer
 AudioFilters.define('normalize', 'loudnorm=I=-14:LRA=11:TP=-1');
 
-const bridgeProvider = new BridgeProvider(BridgeSource.SoundCloud);
-
 export default async function getInitializedPlayer(client: Client<boolean>) {
 	if (!initializedPlayer) {
 		const [
@@ -27,7 +25,6 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 
 		initializedPlayer = new Player(client, {
 			queryCache: new RedisQueryCache(redis),
-			bridgeProvider,
 		});
 
 		await initializedPlayer.extractors.register(YoutubeiExtractor, {});
