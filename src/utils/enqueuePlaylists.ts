@@ -1,6 +1,5 @@
 import type { QueueFilters } from 'discord-player';
 import type {
-	ButtonBuilder,
 	CacheType,
 	GuildMember,
 	StringSelectMenuInteraction,
@@ -48,7 +47,7 @@ export default async function enqueuePlaylists(
 		{ default: Queue },
 		{ useMainPlayer },
 		{ default: isYouTubeLink },
-		{ EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle },
+		{ EmbedBuilder },
 	] = await Promise.all([
 		import('p-queue'),
 		import('discord-player'),
@@ -61,6 +60,43 @@ export default async function enqueuePlaylists(
 	const player = useMainPlayer();
 
 	let enqueued = 0;
+
+	const embed = new EmbedBuilder().setTitle('⏳ Processing playlist(s)…');
+
+	playlistQueue.on('next', async () => {
+		await interaction.editReply({
+			content: null,
+			components: [],
+			embeds: [
+				embed.setDescription(
+					`${songsArray.length - playlistQueue.pending}/${songsArray.length} song(s) processed and added to the queue so far.`,
+				),
+			],
+		});
+	});
+
+	playlistQueue.on('idle', async () => {
+		const { useQueue } = await import('discord-player');
+		const queue = useQueue(interaction.guild?.id ?? '');
+
+		queue?.tracks.shuffle();
+
+		await interaction.editReply({
+			content: null,
+			embeds: [
+				embed
+					.setTitle('✅ Playlist(s) loaded')
+					.setDescription(
+						`${enqueued} song(s) had been processed and added to the queue.\n${
+							songsArray.length - enqueued
+						} skipped.`,
+					)
+					.setFooter({
+						text: 'ℹ️ The queue was automatically shuffled for you.',
+					}),
+			],
+		});
+	});
 
 	await playlistQueue.addAll(
 		songsArray.map((song) => async () => {
@@ -81,52 +117,4 @@ export default async function enqueuePlaylists(
 			}
 		}),
 	);
-
-	const embed = new EmbedBuilder()
-		.setTitle('✅ Playlists loaded')
-		.setDescription(
-			`${enqueued} song(s) processed and added to queue.\n${
-				songsArray.length - enqueued
-			} skipped.`,
-		);
-
-	const shuffle = new ButtonBuilder()
-		.setCustomId('shuffle')
-		.setLabel('Shuffle')
-		.setStyle(ButtonStyle.Secondary);
-
-	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(shuffle);
-
-	const response = await interaction.editReply({
-		content: null,
-		embeds: [embed],
-		components: [row],
-	});
-
-	try {
-		const answer = await response.awaitMessageComponent({
-			time: 60_000, // 1 minute
-		});
-
-		if (answer.customId === 'shuffle') {
-			const { useQueue } = await import('discord-player');
-			const queue = useQueue(interaction.guild?.id ?? '');
-
-			queue?.tracks.shuffle();
-
-			return answer.update({
-				content: 'Queue shuffled.',
-				embeds: [],
-				components: [],
-			});
-		}
-
-		await response.edit({
-			components: [],
-		});
-	} catch {
-		await response.edit({
-			components: [],
-		});
-	}
 }
