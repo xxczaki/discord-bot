@@ -45,19 +45,17 @@ export default async function enqueuePlaylists(
 
 	const [
 		{ default: Queue },
-		{ availableParallelism },
 		{ useMainPlayer },
 		{ default: isYouTubeLink },
 		{ EmbedBuilder },
 	] = await Promise.all([
 		import('p-queue'),
-		import('node:os'),
 		import('discord-player'),
 		import('../utils/isYouTubeLink'),
 		import('discord.js'),
 	]);
 
-	const playlistQueue = new Queue({ concurrency: availableParallelism() });
+	const playlistQueue = new Queue();
 	const songsArray = songs.trim().split('\n');
 	const player = useMainPlayer();
 
@@ -94,7 +92,7 @@ export default async function enqueuePlaylists(
 						} skipped.`,
 					)
 					.setFooter({
-						text: 'ℹ️ The queue was automatically shuffled for you.',
+						text: 'The queue was automatically shuffled for you.',
 					}),
 			],
 		});
