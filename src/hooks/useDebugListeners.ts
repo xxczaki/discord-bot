@@ -25,6 +25,6 @@ export default function useDebugListeners(client: Client<boolean>) {
 		logger.error(error, 'Player error'),
 	);
 
-	player.on('debug', (message) => logger.info({}, message));
-	player.events.on('debug', (_, message) => logger.info({}, message));
+	player.on('debug', (message) => logger.debug({}, message));
+	player.events.on('debug', (_, message) => logger.debug({}, message));
 }
