@@ -1,5 +1,7 @@
 import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
 import { OWNER_USER_ID } from '../constants/userIds';
+import logger from '../utils/logger';
+import redis from '../utils/redis';
 
 export default async function flushQueryCacheCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
@@ -7,19 +9,17 @@ export default async function flushQueryCacheCommandHandler(
 	const userId = interaction.member?.user.id;
 
 	if (userId !== OWNER_USER_ID) {
-		return interaction.editReply(
+		return interaction.reply(
 			`Only <@!${OWNER_USER_ID}> is allowed to run this command.`,
 		);
 	}
-
-	const { default: redis } = await import('../utils/redis');
 
 	const stream = redis.scanStream({
 		match: 'discord-player:query-cache:*',
 		count: 500,
 	});
 
-	await interaction.editReply('Flushing the query cache…');
+	await interaction.reply('Flushing the query cache…');
 
 	let deleted = 0;
 
@@ -32,8 +32,6 @@ export default async function flushQueryCacheCommandHandler(
 					await redis.del(key);
 					deleted++;
 				} catch (error) {
-					const { default: logger } = await import('../utils/logger');
-
 					logger.error(error);
 				}
 			}

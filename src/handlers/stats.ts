@@ -4,6 +4,7 @@ import {
 	EmbedBuilder,
 } from 'discord.js';
 import { StatsHandler } from '../utils/StatsHandler';
+import logger from '../utils/logger';
 import redis from '../utils/redis';
 
 const statsHandler = StatsHandler.getInstance();
@@ -16,7 +17,7 @@ export default async function statsCommandHandler(
 	const playStatsMap: Record<string, number> = {};
 	const requestedStatsMap: Record<string, number> = {};
 
-	await interaction.editReply('Loading latest stats…');
+	await interaction.reply('Loading latest stats…');
 
 	return new Promise((resolve) => {
 		statsStream.on('data', async (keys = []) => {
@@ -56,8 +57,6 @@ export default async function statsCommandHandler(
 
 					requestedStatsMap[value.requestedById] = 1;
 				} catch (error) {
-					const { default: logger } = await import('../utils/logger');
-
 					logger.error(error);
 				}
 			}

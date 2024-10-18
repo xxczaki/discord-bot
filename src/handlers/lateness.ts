@@ -1,9 +1,15 @@
-import type {
+import { differenceInMinutes, format } from 'date-fns';
+import {
+	ActionRowBuilder,
 	ButtonBuilder,
-	CacheType,
-	ChatInputCommandInteraction,
+	ButtonStyle,
+	type CacheType,
+	type ChatInputCommandInteraction,
+	EmbedBuilder,
 } from 'discord.js';
 import { LatenessHandler } from '../utils/LatenessHandler';
+import logger from '../utils/logger';
+import redis from '../utils/redis';
 
 const lateness = LatenessHandler.getInstance();
 
@@ -11,10 +17,6 @@ export default async function latenessCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
 ) {
 	if (await lateness.isLocked) {
-		const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = await import(
-			'discord.js'
-		);
-
 		const arrived = new ButtonBuilder()
 			.setCustomId('arrived')
 			.setLabel('Stop (user arrived)')
@@ -36,7 +38,7 @@ export default async function latenessCommandHandler(
 			cancel,
 		);
 
-		const response = await interaction.editReply({
+		const response = await interaction.reply({
 			content: '⚠️ Lateness measurement is already in progress\n',
 			components: [row],
 		});
@@ -81,17 +83,7 @@ export default async function latenessCommandHandler(
 		const stats: Record<number, string> = {};
 		const delays: number[] = [];
 
-		await interaction.editReply('Loading lateness data…');
-
-		const [
-			{ differenceInMinutes, format },
-			{ default: redis },
-			{ EmbedBuilder },
-		] = await Promise.all([
-			import('date-fns'),
-			import('../utils/redis'),
-			import('discord.js'),
-		]);
+		await interaction.reply('Loading lateness data…');
 
 		return new Promise((resolve) => {
 			statsStream.on('data', async (keys = []) => {
@@ -128,8 +120,6 @@ export default async function latenessCommandHandler(
 
 						stats[expected.getTime()] = identifier;
 					} catch (error) {
-						const { default: logger } = await import('../utils/logger');
-
 						logger.error(error);
 					}
 				}
@@ -183,7 +173,7 @@ export default async function latenessCommandHandler(
 
 	await lateness.start(today);
 
-	await interaction.editReply(
+	await interaction.reply(
 		`✅ Measuring lateness, expected today at: \`${today.toLocaleTimeString(
 			'pl',
 		)}\`.`,

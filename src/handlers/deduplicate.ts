@@ -7,8 +7,10 @@ export default async function deduplicateCommandHandler(
 	const queue = useQueue(interaction.guild?.id ?? '');
 
 	if (!queue) {
-		return interaction.editReply('Queue is not defined.');
+		return interaction.reply('Queue is not defined.');
 	}
+
+	await interaction.deferReply();
 
 	let removed = 0;
 

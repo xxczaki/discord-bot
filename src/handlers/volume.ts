@@ -9,5 +9,5 @@ export default async function volumeCommandHandler(
 
 	queue?.node.setVolume(volume);
 
-	await interaction.editReply(`Volume changed to \`${volume}\`.`);
+	await interaction.reply(`Volume changed to \`${volume}\`.`);
 }

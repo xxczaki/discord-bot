@@ -1,10 +1,15 @@
-import type { QueueFilters } from 'discord-player';
-import type {
-	CacheType,
-	GuildMember,
-	StringSelectMenuInteraction,
+import { availableParallelism } from 'node:os';
+import { type QueueFilters, useMainPlayer, useQueue } from 'discord-player';
+import {
+	type CacheType,
+	EmbedBuilder,
+	type GuildMember,
+	type StringSelectMenuInteraction,
 } from 'discord.js';
+import Queue from 'p-queue';
 import { PLAYLISTS_CHANNEL_ID } from '../constants/channelIds';
+import cleanUpPlaylistContent from './cleanUpPlaylistContent';
+import isYouTubeLink from './isYouTubeLink';
 
 export default async function enqueuePlaylists(
 	interaction: StringSelectMenuInteraction<CacheType>,
@@ -25,10 +30,6 @@ export default async function enqueuePlaylists(
 		cache: true,
 	});
 
-	const { default: cleanUpPlaylistContent } = await import(
-		'../utils/cleanUpPlaylistContent'
-	);
-
 	const songs = messages
 		.filter((message) => playlistIds.some((id) => message.content.includes(id)))
 		.map((message) => cleanUpPlaylistContent(message.content))
@@ -43,19 +44,7 @@ export default async function enqueuePlaylists(
 		});
 	}
 
-	const [
-		{ default: Queue },
-		{ useMainPlayer },
-		{ default: isYouTubeLink },
-		{ EmbedBuilder },
-	] = await Promise.all([
-		import('p-queue'),
-		import('discord-player'),
-		import('../utils/isYouTubeLink'),
-		import('discord.js'),
-	]);
-
-	const playlistQueue = new Queue();
+	const playlistQueue = new Queue({ concurrency: availableParallelism() });
 	const songsArray = songs.trim().split('\n');
 	const player = useMainPlayer();
 
@@ -76,7 +65,6 @@ export default async function enqueuePlaylists(
 	});
 
 	playlistQueue.on('idle', async () => {
-		const { useQueue } = await import('discord-player');
 		const queue = useQueue(interaction.guild?.id ?? '');
 
 		queue?.tracks.shuffle();

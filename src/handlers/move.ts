@@ -10,7 +10,7 @@ export default async function moveCommandHandler(
 	const to = interaction.options.getInteger('to', true) - 1;
 
 	if (from === to) {
-		return interaction.editReply('Nothing to move.');
+		return interaction.reply('Nothing to move.');
 	}
 
 	try {
@@ -22,11 +22,11 @@ export default async function moveCommandHandler(
 
 		queue?.moveTrack(from, to);
 
-		await interaction.editReply(
+		await interaction.reply(
 			`Moved "${trackToMove.title}" to position \`${to + 1}\`.`,
 		);
 	} catch {
-		await interaction.editReply(
+		await interaction.reply(
 			'Could not move the track, are the specified positions correct?',
 		);
 	}

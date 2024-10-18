@@ -8,5 +8,5 @@ export default async function skipCommandHandler(
 
 	queue?.node.skip();
 
-	await interaction.editReply('Track skipped.');
+	await interaction.reply('Track skipped.');
 }

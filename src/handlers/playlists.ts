@@ -1,9 +1,14 @@
-import type {
-	CacheType,
-	ChatInputCommandInteraction,
+import { useQueue } from 'discord-player';
+import {
+	ActionRowBuilder,
+	type CacheType,
+	type ChatInputCommandInteraction,
+	type GuildMember,
 	StringSelectMenuBuilder,
 } from 'discord.js';
 import { PLAYLISTS_CHANNEL_ID } from '../constants/channelIds';
+import enqueuePlaylists from '../utils/enqueuePlaylists';
+import getPlaylists from '../utils/getPlaylists';
 
 export default async function playlistsCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
@@ -11,20 +16,17 @@ export default async function playlistsCommandHandler(
 	const channel = interaction.client.channels.cache.get(PLAYLISTS_CHANNEL_ID);
 
 	if (!channel?.isTextBased()) {
-		return interaction.editReply('Invalid playlists channel type!');
+		return interaction.reply('Invalid playlists channel type!');
 	}
 
-	const [
-		{ useQueue },
-		{ StringSelectMenuBuilder, ActionRowBuilder },
-		{ default: getPlaylists },
-		{ default: enqueuePlaylists },
-	] = await Promise.all([
-		import('discord-player'),
-		import('discord.js'),
-		import('../utils/getPlaylists'),
-		import('../utils/enqueuePlaylists'),
-	]);
+	const voiceChannel = (interaction.member as GuildMember).voice.channel;
+
+	if (!voiceChannel) {
+		return interaction.reply({
+			content: 'You are not connected to a voice channel!',
+			components: [],
+		});
+	}
 
 	const queue = useQueue(interaction.guild?.id ?? '');
 
@@ -43,7 +45,7 @@ export default async function playlistsCommandHandler(
 		select,
 	);
 
-	const response = await interaction.editReply({
+	const response = await interaction.reply({
 		content: 'Choose which playlists you want to enqueue:',
 		components: [row],
 	});

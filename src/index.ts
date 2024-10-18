@@ -1,11 +1,25 @@
 import('./utils/sentry');
 
-import { type ButtonBuilder, Client, GatewayIntentBits } from 'discord.js';
+import {
+	ActionRowBuilder,
+	ActivityType,
+	ButtonBuilder,
+	ButtonStyle,
+	Client,
+	EmbedBuilder,
+	GatewayIntentBits,
+	PresenceUpdateStatus,
+} from 'discord.js';
+import { BOT_CHANNEL_ID } from './constants/channelIds';
+import useAutocompleteHandler from './hooks/useAutocompleteHandler';
+import useCommandHandlers from './hooks/useCommandHandlers';
 import useDebugListeners from './hooks/useDebugListeners';
 import { StatsHandler } from './utils/StatsHandler';
 import getEnvironmentVariable from './utils/getEnvironmentVariable';
+import getReleaseDetails from './utils/getReleaseDetails';
 import initializeCommands from './utils/initializeCommands';
 import getInitializedPlayer from './utils/initializePlayer';
+import logger from './utils/logger';
 import resetPresence from './utils/resetPresence';
 
 const statsHandler = StatsHandler.getInstance();
@@ -27,15 +41,6 @@ const statsHandler = StatsHandler.getInstance();
 	const player = await getInitializedPlayer(client);
 
 	player.events.on('playerStart', async (queue, track) => {
-		const {
-			EmbedBuilder,
-			ButtonBuilder,
-			ButtonStyle,
-			ActionRowBuilder,
-			ActivityType,
-			PresenceUpdateStatus,
-		} = await import('discord.js');
-
 		const embed = new EmbedBuilder()
 			.setTitle(track.title)
 			.setDescription('Playing it now.')
@@ -110,16 +115,6 @@ const statsHandler = StatsHandler.getInstance();
 	});
 
 	client.on('ready', async () => {
-		const [
-			{ default: logger },
-			{ default: getReleaseDetails },
-			{ BOT_CHANNEL_ID },
-		] = await Promise.all([
-			import('./utils/logger'),
-			import('./utils/getReleaseDetails'),
-			import('./constants/channelIds'),
-		]);
-
 		logger.info(`Logged in as ${client.user?.tag}!`);
 
 		const channel = client.channels.cache.get(BOT_CHANNEL_ID);
@@ -132,17 +127,9 @@ const statsHandler = StatsHandler.getInstance();
 	});
 
 	client.on('interactionCreate', async (interaction) => {
-		const { default: useAutocompleteHandler } = await import(
-			'./hooks/useAutocompleteHandler'
-		);
-
 		await useAutocompleteHandler(interaction);
 
 		if (!interaction.isChatInputCommand()) return;
-
-		const { default: useCommandHandlers } = await import(
-			'./hooks/useCommandHandlers'
-		);
 
 		await useCommandHandlers(interaction);
 	});

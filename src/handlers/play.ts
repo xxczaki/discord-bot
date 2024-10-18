@@ -1,6 +1,15 @@
-import type { QueueFilters } from 'discord-player';
-import type { ButtonBuilder, GuildMember } from 'discord.js';
+import { type QueueFilters, useMainPlayer, useQueue } from 'discord-player';
+import {
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+	EmbedBuilder,
+	type GuildMember,
+} from 'discord.js';
 import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
+import getTrackPosition from '../utils/getTrackPosition';
+import isYouTubeLink from '../utils/isYouTubeLink';
+import logger from '../utils/logger';
 
 export default async function playCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
@@ -8,18 +17,14 @@ export default async function playCommandHandler(
 	const channel = (interaction.member as GuildMember).voice.channel;
 
 	if (!channel) {
-		return interaction.editReply('You are not connected to a voice channel!');
+		return interaction.reply('You are not connected to a voice channel!');
 	}
+
+	await interaction.deferReply();
 
 	const query = interaction.options.getString('query', true);
 
 	try {
-		const [{ useMainPlayer, useQueue }, { default: isYouTubeLink }] =
-			await Promise.all([
-				import('discord-player'),
-				import('../utils/isYouTubeLink'),
-			]);
-
 		const player = useMainPlayer();
 		const queue = useQueue(interaction.guild?.id ?? '');
 
@@ -33,14 +38,6 @@ export default async function playCommandHandler(
 			},
 			requestedBy: interaction.user.id,
 		});
-
-		const [
-			{ EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder },
-			{ default: getTrackPosition },
-		] = await Promise.all([
-			import('discord.js'),
-			import('../utils/getTrackPosition'),
-		]);
 
 		const trackPosition = getTrackPosition(queue, track) + 1;
 
@@ -132,8 +129,6 @@ export default async function playCommandHandler(
 		if (error instanceof Error && error.name.includes('ERR_NO_RESULT')) {
 			return interaction.editReply('No results found for the given query.');
 		}
-
-		const { default: logger } = await import('../utils/logger');
 
 		logger.error(error);
 	}

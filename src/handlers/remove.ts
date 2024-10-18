@@ -16,9 +16,9 @@ export default async function removeCommandHandler(
 
 		queue?.removeTrack(trackNumber - 1);
 
-		await interaction.editReply(`Track "${trackToRemove.title}" removed.`);
+		await interaction.reply(`Track "${trackToRemove.title}" removed.`);
 	} catch {
-		await interaction.editReply(
+		await interaction.reply(
 			'Could not remove the track, is the specified id correct?',
 		);
 	}

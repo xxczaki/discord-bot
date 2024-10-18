@@ -45,7 +45,7 @@ export default async function filtersCommandHandler(
 		select,
 	);
 
-	const response = await interaction.editReply({
+	const response = await interaction.reply({
 		content: 'Choose which filters you want to toggle:',
 		components: [row],
 	});

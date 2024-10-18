@@ -26,17 +26,17 @@
 		"zlib-sync": "^0.1.9"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.9.3",
+		"@biomejs/biome": "1.9.4",
 		"@discordjs/rest": "^2.4.0",
-		"@sentry/esbuild-plugin": "^2.22.5",
+		"@sentry/esbuild-plugin": "^2.22.6",
 		"@sentry/node": "^8.34.0",
-		"@types/node": "^22.7.5",
+		"@types/node": "^22.7.6",
 		"date-fns": "^4.1.0",
 		"esbuild": "0.24.0",
 		"esbuild-plugin-pino": "^2.2.0",
 		"ioredis": "^5.4.1",
 		"p-queue": "^8.0.1",
-		"pino": "^9.4.0",
+		"pino": "^9.5.0",
 		"typescript": "^5.6.3",
 		"ulid": "^2.3.0"
 	},

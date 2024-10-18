@@ -7,8 +7,10 @@ export default async function sortCommandHandler(
 	const queue = useQueue(interaction.guild?.id ?? '');
 
 	if (!queue) {
-		return interaction.editReply('Queue is not defined.');
+		return interaction.reply('Queue is not defined.');
 	}
+
+	await interaction.deferReply();
 
 	queue.tracks.store = queue?.tracks.data.sort((a, b) => {
 		if (a.title < b.title) {

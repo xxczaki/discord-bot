@@ -1,5 +1,9 @@
-import { AudioFilters, type Player } from 'discord-player';
+import { SpotifyExtractor } from '@discord-player/extractor';
+import { AudioFilters, Player } from 'discord-player';
+import { YoutubeiExtractor } from 'discord-player-youtubei';
 import type { Client } from 'discord.js';
+import { RedisQueryCache } from './RedisQueryCache';
+import redis from './redis';
 
 let initializedPlayer: Player;
 
@@ -8,20 +12,6 @@ AudioFilters.define('normalize', 'loudnorm=I=-14:LRA=11:TP=-1');
 
 export default async function getInitializedPlayer(client: Client<boolean>) {
 	if (!initializedPlayer) {
-		const [
-			{ Player },
-			{ RedisQueryCache },
-			{ default: redis },
-			{ YoutubeiExtractor },
-			{ SpotifyExtractor },
-		] = await Promise.all([
-			import('discord-player'),
-			import('./RedisQueryCache'),
-			import('./redis'),
-			import('discord-player-youtubei'),
-			import('@discord-player/extractor'),
-		]);
-
 		initializedPlayer = new Player(client, {
 			queryCache: new RedisQueryCache(redis),
 		});

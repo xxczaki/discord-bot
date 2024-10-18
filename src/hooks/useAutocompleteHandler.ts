@@ -1,4 +1,7 @@
+import { useMainPlayer } from 'discord-player';
 import type { CacheType, Interaction } from 'discord.js';
+import isYouTubeLink from '../utils/isYouTubeLink';
+import truncateString from '../utils/truncateString';
 
 export default async function useAutocompleteHandler(
 	interaction: Interaction<CacheType>,
@@ -12,11 +15,6 @@ export default async function useAutocompleteHandler(
 
 		if (query.length === 0) return interaction.respond([]);
 
-		const [{ useMainPlayer }, { default: isYouTubeLink }] = await Promise.all([
-			import('discord-player'),
-			import('../utils/isYouTubeLink'),
-		]);
-
 		const player = useMainPlayer();
 
 		const data = await player.search(query, {
@@ -25,8 +23,6 @@ export default async function useAutocompleteHandler(
 		});
 
 		if (!data.hasTracks()) return interaction.respond([]);
-
-		const { default: truncateString } = await import('../utils/truncateString');
 
 		const results = data.tracks
 			.filter((track) => track.url.length < 100)

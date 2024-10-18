@@ -11,7 +11,7 @@ export default async function avatarCommandHandler(
 
 	const queueEmbed = new EmbedBuilder()
 		.setDescription(`Server avatar of <@!${user.id}>`)
-		.setImage(user.avatarURL());
+		.setImage(user.avatarURL({ size: 256 }));
 
-	await interaction.editReply({ embeds: [queueEmbed] });
+	await interaction.reply({ embeds: [queueEmbed] });
 }

@@ -1,12 +1,16 @@
-import { useQueue } from 'discord-player';
-import type {
+import { addMilliseconds } from 'date-fns';
+import { QueueRepeatMode, useQueue } from 'discord-player';
+import {
+	ActionRowBuilder,
 	ButtonBuilder,
-	CacheType,
-	ChatInputCommandInteraction,
+	ButtonStyle,
+	type CacheType,
+	type ChatInputCommandInteraction,
 	EmbedBuilder,
-	InteractionResponse,
-	Message,
+	type InteractionResponse,
+	type Message,
 } from 'discord.js';
+import getTrackPosition from '../utils/getTrackPosition';
 
 export default async function queueCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
@@ -17,19 +21,15 @@ export default async function queueCommandHandler(
 	const currentTrack = queue?.currentTrack;
 
 	if (!currentTrack && tracks.length === 0) {
-		return interaction.editReply(
-			'The queue is empty and nothing is being played.',
-		);
+		return interaction.reply('The queue is empty and nothing is being played.');
 	}
+
+	await interaction.deferReply();
 
 	let descriptionLength = 0;
 	let currentDescriptionIndex = 0;
 	let index = 0;
 	const embedDescriptions: string[][] = [[]];
-
-	const { default: getTrackPosition } = await import(
-		'../utils/getTrackPosition'
-	);
 
 	for (const track of tracks) {
 		if (descriptionLength > 2000) {
@@ -47,16 +47,6 @@ export default async function queueCommandHandler(
 		embedDescriptions[currentDescriptionIndex][index] = entry;
 		index++;
 	}
-
-	const [
-		{ EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder },
-		{ QueueRepeatMode },
-		{ addMilliseconds },
-	] = await Promise.all([
-		import('discord.js'),
-		import('discord-player'),
-		import('date-fns/addMilliseconds'),
-	]);
 
 	const queueEmbed = new EmbedBuilder()
 		.setTitle('Queue')
@@ -161,8 +151,6 @@ async function componentResponseListener(
 		next
 			.setCustomId(`${nextPage}`)
 			.setDisabled(nextPage + 1 > embedDescriptions.length);
-
-		const { ActionRowBuilder } = await import('discord.js');
 
 		const updatedRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
 			previous,
