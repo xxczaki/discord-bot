@@ -131,6 +131,14 @@ function getPossiblePositions(xPositions: string[], oPositions: string[]) {
 async function getOPositions(xPositions: string[], oPositions: string[]) {
 	const possiblePositions = getPossiblePositions(xPositions, oPositions);
 
+	for (const position of possiblePositions) {
+		const merged = [...oPositions, position];
+
+		if (isGameOverByWin(merged)) {
+			return merged;
+		}
+	}
+
 	return [
 		...oPositions,
 		possiblePositions[randomInt(0, possiblePositions.length - 1)],
