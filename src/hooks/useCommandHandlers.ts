@@ -13,6 +13,7 @@ import {
 	playlistsCommandHandler,
 	purgeCommandHandler,
 	queueCommandHandler,
+	recoverCommandHandler,
 	removeCommandHandler,
 	resumeCommandHandler,
 	shuffleCommandHandler,
@@ -114,6 +115,10 @@ export default async function useCommandHandlers(
 		}
 		case 'tic_tac_toe': {
 			await ticTacToeCommandHandler(interaction);
+			break;
+		}
+		case 'recover': {
+			await recoverCommandHandler(interaction);
 			break;
 		}
 		default:

@@ -2,19 +2,19 @@ import { ulid } from 'ulid';
 import redis from './redis';
 
 export class StatsHandler {
-	private static instance: StatsHandler;
+	static #instance: StatsHandler;
 
 	private constructor() {}
 
-	public static getInstance(): StatsHandler {
-		if (!StatsHandler.instance) {
-			StatsHandler.instance = new StatsHandler();
+	static getInstance(): StatsHandler {
+		if (!StatsHandler.#instance) {
+			StatsHandler.#instance = new StatsHandler();
 		}
 
-		return StatsHandler.instance;
+		return StatsHandler.#instance;
 	}
 
-	public async saveStat(
+	async saveStat(
 		type: 'play',
 		payload: { title: string; author: string; requestedById?: string },
 	) {
@@ -24,7 +24,7 @@ export class StatsHandler {
 		);
 	}
 
-	public getStats(type: 'play') {
+	getStats(type: 'play') {
 		return redis.scanStream({
 			match: `discord-player:stats:${type}:*`,
 			count: 500,

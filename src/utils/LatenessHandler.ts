@@ -3,19 +3,19 @@ import { ulid } from 'ulid';
 import redis from './redis';
 
 export class LatenessHandler {
-	private static instance: LatenessHandler;
+	static #instance: LatenessHandler;
 
 	private constructor() {}
 
-	public static getInstance(): LatenessHandler {
-		if (!LatenessHandler.instance) {
-			LatenessHandler.instance = new LatenessHandler();
+	static getInstance(): LatenessHandler {
+		if (!LatenessHandler.#instance) {
+			LatenessHandler.#instance = new LatenessHandler();
 		}
 
-		return LatenessHandler.instance;
+		return LatenessHandler.#instance;
 	}
 
-	public async start(expected: Date) {
+	async start(expected: Date) {
 		if (await this.isLocked) {
 			return;
 		}
@@ -23,7 +23,7 @@ export class LatenessHandler {
 		await redis.set('discord-player:lateness-lock', expected.toString());
 	}
 
-	public async end(actual: Date | null) {
+	async end(actual: Date | null) {
 		if (!(await this.isLocked)) {
 			return;
 		}
@@ -52,11 +52,11 @@ export class LatenessHandler {
 			.exec();
 	}
 
-	public get isLocked() {
+	get isLocked() {
 		return redis.exists('discord-player:lateness-lock');
 	}
 
-	public getStats() {
+	getStats() {
 		return redis.scanStream({
 			match: 'discord-player:lateness:*',
 			count: 10,

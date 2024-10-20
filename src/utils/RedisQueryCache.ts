@@ -16,15 +16,16 @@ import {
 import type { Redis } from 'ioredis';
 
 export class RedisQueryCache implements QueryCacheProvider<Track> {
-	public EXPIRY_TIMEOUT = 3600 * 5;
-	public constructor(public redis: Redis) {}
+	EXPIRY_TIMEOUT = 3600 * 5;
 
-	private createKey(id: string) {
+	constructor(public redis: Redis) {}
+
+	#createKey(id: string) {
 		return `discord-player:query-cache:${id}` as const;
 	}
 
-	public async addData(data: SearchResult): Promise<void> {
-		const key = this.createKey(data.query);
+	async addData(data: SearchResult): Promise<void> {
+		const key = this.#createKey(data.query);
 		const serialized = JSON.stringify(
 			data.playlist
 				? serialize(data.playlist)
@@ -34,12 +35,10 @@ export class RedisQueryCache implements QueryCacheProvider<Track> {
 		await this.redis.setex(key, this.EXPIRY_TIMEOUT, serialized);
 	}
 
-	public async getData(): Promise<
-		DiscordPlayerQueryResultCache<Track<unknown>>[]
-	> {
+	async getData(): Promise<DiscordPlayerQueryResultCache<Track<unknown>>[]> {
 		const player = useMainPlayer();
 
-		const data = await this.redis.keys(this.createKey('*'));
+		const data = await this.redis.keys(this.#createKey('*'));
 
 		const serialized = await this.redis.mget(data);
 
@@ -55,13 +54,11 @@ export class RedisQueryCache implements QueryCacheProvider<Track> {
 		return res;
 	}
 
-	public async resolve(
-		context: QueryCacheResolverContext,
-	): Promise<SearchResult> {
+	async resolve(context: QueryCacheResolverContext): Promise<SearchResult> {
 		const player = useMainPlayer();
 
 		try {
-			const key = this.createKey(context.query);
+			const key = this.#createKey(context.query);
 
 			const serialized = await this.redis.get(key);
 			if (!serialized) throw new Error('No data found');

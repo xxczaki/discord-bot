@@ -14,6 +14,7 @@ import { BOT_CHANNEL_ID } from './constants/channelIds';
 import useAutocompleteHandler from './hooks/useAutocompleteHandler';
 import useCommandHandlers from './hooks/useCommandHandlers';
 import useDebugListeners from './hooks/useDebugListeners';
+import { QueueRecoveryService } from './utils/QueueRecoveryService';
 import { StatsHandler } from './utils/StatsHandler';
 import getEnvironmentVariable from './utils/getEnvironmentVariable';
 import getReleaseDetails from './utils/getReleaseDetails';
@@ -23,6 +24,7 @@ import logger from './utils/logger';
 import resetPresence from './utils/resetPresence';
 
 const statsHandler = StatsHandler.getInstance();
+const queueRecoveryService = QueueRecoveryService.getInstance();
 
 (async () => {
 	await initializeCommands();
@@ -75,6 +77,8 @@ const statsHandler = StatsHandler.getInstance();
 			status: PresenceUpdateStatus.Online,
 		});
 
+		await queueRecoveryService.saveQueue(queue.tracks.toJSON());
+
 		try {
 			const answer = await response.awaitMessageComponent({
 				time: 60_000, // 1 minute
@@ -107,10 +111,14 @@ const statsHandler = StatsHandler.getInstance();
 	player.events.on('emptyQueue', async (queue) => {
 		await queue.metadata.channel.send('Queue finished, leaving…');
 
+		await queueRecoveryService.deleteQueue();
+
 		resetPresence(client);
 	});
 
 	player.events.on('queueDelete', async () => {
+		await queueRecoveryService.deleteQueue();
+
 		resetPresence(client);
 	});
 
