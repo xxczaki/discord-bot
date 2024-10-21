@@ -22,23 +22,19 @@ export class QueueRecoveryService {
 		await redis.del('discord-player:queue');
 	}
 
-	async getNumberOfTracks() {
+	async getContents() {
 		const tracks = await redis.get('discord-player:queue');
 
 		if (!tracks) {
-			return 0;
+			return [];
 		}
 
 		try {
 			const parsed = JSON.parse(tracks) as TrackJSON[];
 
-			return parsed.length;
+			return parsed;
 		} catch (error) {
-			return 0;
+			return [];
 		}
-	}
-
-	get isRecoverable() {
-		return redis.exists('discord-player:queue');
 	}
 }
