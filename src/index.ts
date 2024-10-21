@@ -117,8 +117,6 @@ const queueRecoveryService = QueueRecoveryService.getInstance();
 	});
 
 	player.events.on('queueDelete', async () => {
-		await queueRecoveryService.deleteQueue();
-
 		resetPresence(client);
 	});
 
