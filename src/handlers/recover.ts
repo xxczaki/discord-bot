@@ -54,12 +54,11 @@ export default async function recoverCommandHandler(
 
 		await answer.deferUpdate();
 
-		await queueRecoveryService.deleteQueue();
-
 		switch (answer.customId) {
 			case 'proceed':
 				return enqueueTracks(answer, tracks);
 			default:
+				await queueRecoveryService.deleteQueue();
 				return interaction.editReply({
 					content: 'The queue will not be recovered.',
 					components: [],
