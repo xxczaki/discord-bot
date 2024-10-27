@@ -22,6 +22,7 @@ import initializeCommands from './utils/initializeCommands';
 import getInitializedPlayer from './utils/initializePlayer';
 import logger from './utils/logger';
 import resetPresence from './utils/resetPresence';
+import saveQueue from './utils/saveQueue';
 
 const statsHandler = StatsHandler.getInstance();
 const queueRecoveryService = QueueRecoveryService.getInstance();
@@ -77,8 +78,6 @@ const queueRecoveryService = QueueRecoveryService.getInstance();
 			status: PresenceUpdateStatus.Online,
 		});
 
-		await queueRecoveryService.saveQueue(queue.tracks.toJSON());
-
 		try {
 			const answer = await response.awaitMessageComponent({
 				time: 60_000, // 1 minute
@@ -118,6 +117,10 @@ const queueRecoveryService = QueueRecoveryService.getInstance();
 
 	player.events.on('queueDelete', async () => {
 		resetPresence(client);
+	});
+
+	player.events.on('voiceStateUpdate', async (queue) => {
+		await saveQueue(queue);
 	});
 
 	client.on('ready', async () => {

@@ -14,8 +14,18 @@ export class QueueRecoveryService {
 		return QueueRecoveryService.#instance;
 	}
 
-	async saveQueue(tracks: Track[]) {
-		await redis.set('discord-player:queue', JSON.stringify(tracks));
+	async saveQueue(
+		currentTrack: (TrackJSON & { progress?: number }) | null,
+		tracks: Track[],
+	) {
+		if (!currentTrack) {
+			return redis.set('discord-player:queue', JSON.stringify(tracks));
+		}
+
+		await redis.set(
+			'discord-player:queue',
+			JSON.stringify([currentTrack, ...tracks]),
+		);
 	}
 
 	async deleteQueue() {

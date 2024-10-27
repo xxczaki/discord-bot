@@ -28,7 +28,6 @@ export default async function enqueueTracks(
 	}
 
 	const playlistQueue = new Queue({ concurrency: availableParallelism() });
-	const trackUrlsArray = tracks.map((track) => track.url);
 	const player = useMainPlayer();
 
 	let enqueued = 0;
@@ -41,7 +40,7 @@ export default async function enqueueTracks(
 			components: [],
 			embeds: [
 				embed.setDescription(
-					`${trackUrlsArray.length - playlistQueue.pending}/${trackUrlsArray.length} track(s) processed and added to the queue so far.`,
+					`${tracks.length - playlistQueue.pending}/${tracks.length} track(s) processed and added to the queue so far.`,
 				),
 			],
 		});
@@ -50,7 +49,27 @@ export default async function enqueueTracks(
 	playlistQueue.on('idle', async () => {
 		const queue = useQueue(interaction.guild?.id ?? '');
 
-		queue?.tracks.shuffle();
+		if (!queue) {
+			return interaction.editReply({
+				content: 'The queue is empty.',
+				embeds: [],
+			});
+		}
+
+		queue.tracks.store = queue?.tracks.data.sort((a, b) => {
+			const correspondingAId = tracks.find(({ url }) => url === a.url) ?? a.id;
+			const correspondingBId = tracks.find(({ url }) => url === b.url) ?? b.id;
+
+			if (correspondingAId < correspondingBId) {
+				return -1;
+			}
+
+			if (correspondingAId > correspondingBId) {
+				return 1;
+			}
+
+			return 0;
+		});
 
 		await interaction.editReply({
 			content: null,
@@ -59,7 +78,7 @@ export default async function enqueueTracks(
 					.setTitle('✅ Track(s) loaded')
 					.setDescription(
 						`${enqueued} track(s) had been processed and added to the queue.\n${
-							trackUrlsArray.length - enqueued
+							tracks.length - enqueued
 						} skipped.`,
 					),
 			],
@@ -67,9 +86,9 @@ export default async function enqueueTracks(
 	});
 
 	await playlistQueue.addAll(
-		trackUrlsArray.map((song) => async () => {
-			const promise = player.play(voiceChannel, song, {
-				searchEngine: isYouTubeLink(song) ? 'youtubeVideo' : 'spotifySong',
+		tracks.map(({ url, ...rest }) => async () => {
+			const promise = player.play(voiceChannel, url, {
+				searchEngine: isYouTubeLink(url) ? 'youtubeVideo' : 'spotifySong',
 				nodeOptions: {
 					metadata: interaction,
 					defaultFFmpegFilters: ['normalize' as keyof QueueFilters],
@@ -79,7 +98,14 @@ export default async function enqueueTracks(
 
 			try {
 				enqueued++;
-				return await promise;
+
+				const result = await promise;
+
+				if ('progress' in rest) {
+					await result.queue.node.seek(rest.progress as number);
+				}
+
+				return result;
 			} catch {
 				enqueued--;
 			}
