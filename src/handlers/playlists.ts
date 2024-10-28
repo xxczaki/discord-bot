@@ -1,4 +1,3 @@
-import { useQueue } from 'discord-player';
 import {
 	ActionRowBuilder,
 	type CacheType,
@@ -27,10 +26,6 @@ export default async function playlistsCommandHandler(
 			components: [],
 		});
 	}
-
-	const queue = useQueue(interaction.guild?.id ?? '');
-
-	queue?.filters.ffmpeg.setInputArgs(['-threads', '4']);
 
 	const playlists = await getPlaylists(channel);
 

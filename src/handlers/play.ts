@@ -1,3 +1,4 @@
+import { availableParallelism } from 'node:os';
 import { type QueueFilters, useMainPlayer, useQueue } from 'discord-player';
 import {
 	ActionRowBuilder,
@@ -28,7 +29,12 @@ export default async function playCommandHandler(
 		const player = useMainPlayer();
 		const queue = useQueue(interaction.guild?.id ?? '');
 
-		queue?.filters.ffmpeg.setInputArgs(['-threads', '4']);
+		queue?.filters.ffmpeg.setInputArgs([
+			'-threads',
+			(availableParallelism() - 2).toString(),
+			'-ar',
+			'22050',
+		]);
 
 		const { track } = await player.play(channel, query, {
 			searchEngine: isYouTubeLink(query) ? 'youtubeVideo' : 'spotifySong',

@@ -46,11 +46,19 @@ export default async function enqueuePlaylists(
 
 	const playlistQueue = new Queue({ concurrency: availableParallelism() });
 	const songsArray = songs.trim().split('\n');
-	const player = useMainPlayer();
 
 	let enqueued = 0;
 
 	const embed = new EmbedBuilder().setTitle('⏳ Processing playlist(s)…');
+
+	const queue = useQueue(interaction.guild?.id ?? '');
+
+	queue?.filters.ffmpeg.setInputArgs([
+		'-threads',
+		(availableParallelism() - 2).toString(),
+		'-ar',
+		'22050',
+	]);
 
 	playlistQueue.on('next', async () => {
 		await interaction.editReply({
@@ -65,8 +73,6 @@ export default async function enqueuePlaylists(
 	});
 
 	playlistQueue.on('idle', async () => {
-		const queue = useQueue(interaction.guild?.id ?? '');
-
 		queue?.tracks.shuffle();
 
 		await interaction.editReply({
@@ -85,6 +91,8 @@ export default async function enqueuePlaylists(
 			],
 		});
 	});
+
+	const player = useMainPlayer();
 
 	await playlistQueue.addAll(
 		songsArray.map((song) => async () => {
