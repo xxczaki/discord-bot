@@ -1,6 +1,7 @@
 import { useMainPlayer } from 'discord-player';
 import type { Client } from 'discord.js';
 import logger from '../utils/logger';
+import { createServer } from 'node:net';
 
 export default function useDebugListeners(client: Client<boolean>) {
 	process.on('unhandledRejection', (reason) => {
@@ -22,4 +23,8 @@ export default function useDebugListeners(client: Client<boolean>) {
 
 	player.on('debug', (message) => logger.debug({}, message));
 	player.events.on('debug', (_, message) => logger.debug({}, message));
+
+	const server = createServer();
+
+	server.listen(8000);
 }
