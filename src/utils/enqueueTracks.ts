@@ -13,10 +13,11 @@ import {
 } from 'discord.js';
 import Queue from 'p-queue';
 import isYouTubeLink from './isYouTubeLink';
+import logger from './logger';
 
 export default async function enqueueTracks(
 	interaction: ButtonInteraction<CacheType>,
-	tracks: TrackJSON[],
+	tracks: Array<TrackJSON & { progress?: number | undefined }>,
 ) {
 	const voiceChannel = (interaction.member as GuildMember).voice.channel;
 
@@ -27,26 +28,26 @@ export default async function enqueueTracks(
 		});
 	}
 
-	const playlistQueue = new Queue({ concurrency: availableParallelism() });
+	const tracksQueue = new Queue({ concurrency: availableParallelism() });
 	const player = useMainPlayer();
 
 	let enqueued = 0;
 
 	const embed = new EmbedBuilder().setTitle('⏳ Processing track(s)…');
 
-	playlistQueue.on('next', async () => {
+	tracksQueue.on('next', async () => {
 		await interaction.editReply({
 			content: null,
 			components: [],
 			embeds: [
 				embed.setDescription(
-					`${tracks.length - playlistQueue.pending}/${tracks.length} track(s) processed and added to the queue so far.`,
+					`${tracks.length - tracksQueue.pending}/${tracks.length} track(s) processed and added to the queue so far.`,
 				),
 			],
 		});
 	});
 
-	playlistQueue.on('idle', async () => {
+	tracksQueue.on('idle', async () => {
 		const queue = useQueue(interaction.guild?.id ?? '');
 
 		if (!queue) {
@@ -85,8 +86,28 @@ export default async function enqueueTracks(
 		});
 	});
 
-	await playlistQueue.addAll(
-		tracks.map(({ url, ...rest }) => async () => {
+	const [firstTrack, ...toQueue] = tracks;
+
+	try {
+		const { url, progress } = firstTrack;
+
+		await player.play(voiceChannel, url, {
+			searchEngine: isYouTubeLink(url) ? 'youtubeVideo' : 'spotifySong',
+			nodeOptions: {
+				metadata: interaction,
+				defaultFFmpegFilters: ['normalize' as keyof QueueFilters],
+			},
+			audioPlayerOptions: {
+				seek: progress,
+			},
+			requestedBy: interaction.user.id,
+		});
+	} catch (error) {
+		logger.error(error, 'Queue recovery error (first track)');
+	}
+
+	await tracksQueue.addAll(
+		toQueue.map(({ url }) => async () => {
 			const promise = player.play(voiceChannel, url, {
 				searchEngine: isYouTubeLink(url) ? 'youtubeVideo' : 'spotifySong',
 				nodeOptions: {
@@ -99,15 +120,10 @@ export default async function enqueueTracks(
 			try {
 				enqueued++;
 
-				const result = await promise;
-
-				if ('progress' in rest) {
-					await result.queue.node.seek(rest.progress as number);
-				}
-
-				return result;
-			} catch {
+				return await promise;
+			} catch (error) {
 				enqueued--;
+				logger.error(error, 'Queue recovery error (subsequent tracks)');
 			}
 		}),
 	);

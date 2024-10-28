@@ -1,7 +1,7 @@
+import { createServer } from 'node:net';
 import { useMainPlayer } from 'discord-player';
 import type { Client } from 'discord.js';
 import logger from '../utils/logger';
-import { createServer } from 'node:net';
 
 export default function useDebugListeners(client: Client<boolean>) {
 	process.on('unhandledRejection', (reason) => {

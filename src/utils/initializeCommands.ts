@@ -11,16 +11,16 @@ const rest = new REST({ version: '10' }).setToken(token);
 
 export default async function initializeCommands() {
 	try {
-		logger.info('Started refreshing application (/) commands.');
+		logger.info('Started refreshing application ommands.');
 
 		await rest.put(Routes.applicationCommands(clientId), {
 			body: COMMANDS,
 			signal: AbortSignal.timeout(10_000),
 		});
 
-		logger.info('Successfully reloaded application (/) commands.');
+		logger.info('Successfully reloaded application commands.');
 	} catch (error) {
-		logger.error('Application commands refresh failure', error);
+		logger.error(error, 'Application commands refresh failure');
 		Sentry.captureException(error);
 	}
 }

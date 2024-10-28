@@ -17,7 +17,7 @@ export default async function saveQueue(queue: GuildQueue<unknown> | null) {
 	await queueRecoveryService.saveQueue(
 		{
 			...currentTrack,
-			progress: (queue.node.getTimestamp()?.progress ?? 0) * 1000,
+			progress: queue.node.getTimestamp()?.current.value ?? 0,
 		},
 		queue.tracks.toJSON(),
 	);
