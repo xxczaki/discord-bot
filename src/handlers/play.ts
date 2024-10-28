@@ -32,8 +32,6 @@ export default async function playCommandHandler(
 		queue?.filters.ffmpeg.setInputArgs([
 			'-threads',
 			(availableParallelism() - 2).toString(),
-			'-ar',
-			'22050',
 		]);
 
 		const { track } = await player.play(channel, query, {

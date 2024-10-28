@@ -56,8 +56,6 @@ export default async function enqueuePlaylists(
 	queue?.filters.ffmpeg.setInputArgs([
 		'-threads',
 		(availableParallelism() - 2).toString(),
-		'-ar',
-		'22050',
 	]);
 
 	playlistQueue.on('next', async () => {
