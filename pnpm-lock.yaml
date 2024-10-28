@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  libsodium-wrappers: npm:sodium-native@4.2.2
+  libsodium-wrappers: npm:sodium-native@4.2.0
 
 importers:
 
@@ -30,8 +30,8 @@ importers:
         specifier: ^14.16.3
         version: 14.16.3(bufferutil@4.0.8)(utf-8-validate@6.0.4)
       sodium-native:
-        specifier: ^4.2.2
-        version: 4.2.2
+        specifier: 4.2.0
+        version: 4.2.0
       utf-8-validate:
         specifier: ^6.0.4
         version: 6.0.4
@@ -1442,8 +1442,8 @@ packages:
   signal-exit@3.0.7:
     resolution: {integrity: sha512-wnD2ZE+l+SPC/uoS0vXeE9L1+0wuaMqKlfz9AMUo38JsyLSBWSFcHR1Rri62LZc12vLr1gb3jl7iwQhgwpAbGQ==}
 
-  sodium-native@4.2.2:
-    resolution: {integrity: sha512-/gYaDtIK76FRcW0oBhIKJvLCDp706rJugd8wxJUBdbutgWrDlviG4tp8k+HfIRdy0Z+MbQE32ZGr4RPu1vXSsw==}
+  sodium-native@4.2.0:
+    resolution: {integrity: sha512-rdJRAf/RE/IRFUUoUsz10slNAQDTGz5ChpIeR1Ti0BtGYstl6Uok4hHALPBdnFcLml6qXJ2pDd0/De09mPa6mg==}
 
   sonic-boom@4.1.0:
     resolution: {integrity: sha512-NGipjjRicyJJ03rPiZCJYjwlsuP2d1/5QUviozRXC7S3WdVWNK5e3Ojieb9CCyfhq2UC+3+SRd9nG3I2lPRvUw==}
@@ -2559,7 +2559,7 @@ snapshots:
       '@discord-player/utils': 0.2.2
       '@web-scrobbler/metadata-filter': 3.2.0
       discord-voip: 0.1.3(@discordjs/opus@0.9.0)(bufferutil@4.0.8)(utf-8-validate@6.0.4)
-      libsodium-wrappers: sodium-native@4.2.2
+      libsodium-wrappers: sodium-native@4.2.0
     transitivePeerDependencies:
       - '@discordjs/opus'
       - bufferutil
@@ -3083,7 +3083,7 @@ snapshots:
 
   signal-exit@3.0.7: {}
 
-  sodium-native@4.2.2:
+  sodium-native@4.2.0:
     dependencies:
       node-gyp-build: 4.8.2
 
