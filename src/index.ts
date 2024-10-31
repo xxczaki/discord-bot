@@ -1,5 +1,6 @@
 import('./utils/sentry');
 
+import { Util } from 'discord-player';
 import {
 	ActionRowBuilder,
 	ActivityType,
@@ -121,6 +122,14 @@ const queueRecoveryService = QueueRecoveryService.getInstance();
 
 	player.events.on('voiceStateUpdate', async (queue) => {
 		await saveQueue(queue);
+
+		if (!queue.channel) {
+			return;
+		}
+
+		if (Util.isVoiceEmpty(queue.channel)) {
+			queue.delete();
+		}
 	});
 
 	client.on('ready', async () => {
