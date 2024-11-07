@@ -1,7 +1,7 @@
 FROM node:22-alpine AS base
 
 RUN apk update --no-cache && \
-		apk add --no-cache python3 make g++ && \
+		apk add --no-cache python3 make g++ gcompat && \
 		corepack enable
 
 
