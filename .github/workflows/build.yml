@@ -13,5 +13,5 @@ jobs:
         with:
           push: true
           tags: rg.pl-waw.scw.cloud/main-cr/discord-bot
-          build-args:
-            - SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
+          build-args: |
+            SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
