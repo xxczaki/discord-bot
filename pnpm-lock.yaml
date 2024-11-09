@@ -24,8 +24,8 @@ importers:
         specifier: ^6.7.1
         version: 6.7.1(@discord-player/extractor@4.5.1)(@discordjs/opus@0.9.0)(bufferutil@4.0.8)(utf-8-validate@6.0.5)
       discord-player-youtubei:
-        specifier: ^1.3.4
-        version: 1.3.4
+        specifier: ^1.3.5
+        version: 1.3.5
       discord.js:
         specifier: ^14.16.3
         version: 14.16.3(bufferutil@4.0.8)(utf-8-validate@6.0.5)
@@ -61,8 +61,8 @@ importers:
         specifier: 0.24.0
         version: 0.24.0
       esbuild-plugin-pino:
-        specifier: ^2.2.0
-        version: 2.2.0(esbuild@0.24.0)
+        specifier: ^2.2.1
+        version: 2.2.1(esbuild@0.24.0)
       ioredis:
         specifier: ^5.4.1
         version: 5.4.1
@@ -811,9 +811,6 @@ packages:
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
 
-  bgutils-js@3.1.0:
-    resolution: {integrity: sha512-2S80c/B4OQFubJLD5ddRRp74utrvjA70x9U0RsIVK7gJaDnaPrbw+bnXWxnEnc0euLznmO9jxOtTTC7FxGmv6w==}
-
   binary-extensions@2.3.0:
     resolution: {integrity: sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw==}
     engines: {node: '>=8'}
@@ -924,8 +921,8 @@ packages:
   discord-api-types@0.37.97:
     resolution: {integrity: sha512-No1BXPcVkyVD4ZVmbNgDKaBoqgeQ+FJpzZ8wqHkfmBnTZig1FcH3iPPersiK1TUIAzgClh2IvOuVUYfcWLQAOA==}
 
-  discord-player-youtubei@1.3.4:
-    resolution: {integrity: sha512-8CHI32h7BR+9wX2gMfpnnmbkhfERzelOQtLJ285ZUMP9pfg2iBdzJZAFk6oecHzEtPQhe/fv9qZukiy1C97LVQ==}
+  discord-player-youtubei@1.3.5:
+    resolution: {integrity: sha512-yx7tExZUwR0MgtjZxFXmv5wVq8bYUALfzub0JiRCPcYkmo4aT6WHf2ZK1g/RGQ4nYuy6nud/zNIT0yoe1XuihQ==}
     hasBin: true
 
   discord-player@6.7.1:
@@ -968,10 +965,10 @@ packages:
     resolution: {integrity: sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw==}
     engines: {node: '>=0.12'}
 
-  esbuild-plugin-pino@2.2.0:
-    resolution: {integrity: sha512-6T92eXmkHwad/PGeXb/DyJhwxsVUsASQyEP84QTPBuzhDp1eGRXr9CK2y/VCKiEbO2TX2v4zZ6M40W46eZZPQg==}
+  esbuild-plugin-pino@2.2.1:
+    resolution: {integrity: sha512-aVy1BxxzkeFlWhUyRtt/G94p3fqwnydpePFz9GjWccJ/NiZf+3BCFjHlojwy2KO2AYfWsBxL7ie80HN9rwFBDg==}
     peerDependencies:
-      esbuild: ^0.17.1 || ^0.18.0 || ^0.19.0 || ^0.20.0 || ^0.21.0
+      esbuild: '>=0.17.1 <=0.24.0'
 
   esbuild@0.24.0:
     resolution: {integrity: sha512-FuLPevChGDshgSicjisSooU0cemp/sGXR841D5LHMB7mTVOmsEHcAxaH3irL53+8YDIeVNQEySh4DaYU/iuPqQ==}
@@ -1058,10 +1055,6 @@ packages:
   globals@11.12.0:
     resolution: {integrity: sha512-WOBp/EEGUiIsJSp7wcv/y6MO+lV9UoncWqxuFfm8eBwzWNgyfBd6Gz+IeKQ9jCmyhoH99g15M3T+QaVHFjizVA==}
     engines: {node: '>=4'}
-
-  happy-dom@15.7.4:
-    resolution: {integrity: sha512-r1vadDYGMtsHAAsqhDuk4IpPvr6N8MGKy5ntBo7tSdim+pWDxus2PNqOcOt8LuDZ4t3KJHE+gCuzupcx/GKnyQ==}
-    engines: {node: '>=18.0.0'}
 
   has-flag@3.0.0:
     resolution: {integrity: sha512-sKJf1+ceQBr4SMkvQnBDNDtf4TXpVhVGateu0t918bl30FnbE2m4vNLX+VWe/dpjlb+HugGYzW7uQXH98HPEYw==}
@@ -1585,20 +1578,12 @@ packages:
   webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
 
-  webidl-conversions@7.0.0:
-    resolution: {integrity: sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==}
-    engines: {node: '>=12'}
-
   webpack-sources@3.2.3:
     resolution: {integrity: sha512-/DyMEOrDgLKKIG0fmvtz+4dUX/3Ghozwgm6iPp8KRhvn+eQf9+Q7GWxVNMk3+uCPWfdXYC4ExGBckIXdFEfH1w==}
     engines: {node: '>=10.13.0'}
 
   webpack-virtual-modules@0.5.0:
     resolution: {integrity: sha512-kyDivFZ7ZM0BVOUteVbDFhlRt7Ah/CSPwJdi8hBpkK7QLumUqdLtVfm/PX/hkcnrvr0i77fO5+TjZ94Pe+C9iw==}
-
-  whatwg-mimetype@3.0.0:
-    resolution: {integrity: sha512-nt+N2dzIutVRxARx1nghPKGv1xHikU7HKdfafKkLNLindmPU/ch3U31NOCGGA/dmPcmb1VlofO0vnKAcsm0o/Q==}
-    engines: {node: '>=12'}
 
   whatwg-url@5.0.0:
     resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
@@ -2475,8 +2460,6 @@ snapshots:
 
   balanced-match@1.0.2: {}
 
-  bgutils-js@3.1.0: {}
-
   binary-extensions@2.3.0: {}
 
   boolbase@1.0.0: {}
@@ -2575,10 +2558,8 @@ snapshots:
 
   discord-api-types@0.37.97: {}
 
-  discord-player-youtubei@1.3.4:
+  discord-player-youtubei@1.3.5:
     dependencies:
-      bgutils-js: 3.1.0
-      happy-dom: 15.7.4
       tiny-typed-emitter: 2.1.0
       undici: 6.20.1
       youtubei.js: 11.0.1
@@ -2661,7 +2642,7 @@ snapshots:
 
   entities@4.5.0: {}
 
-  esbuild-plugin-pino@2.2.0(esbuild@0.24.0):
+  esbuild-plugin-pino@2.2.1(esbuild@0.24.0):
     dependencies:
       esbuild: 0.24.0
 
@@ -2777,12 +2758,6 @@ snapshots:
       path-scurry: 1.11.1
 
   globals@11.12.0: {}
-
-  happy-dom@15.7.4:
-    dependencies:
-      entities: 4.5.0
-      webidl-conversions: 7.0.0
-      whatwg-mimetype: 3.0.0
 
   has-flag@3.0.0: {}
 
@@ -3242,13 +3217,9 @@ snapshots:
 
   webidl-conversions@3.0.1: {}
 
-  webidl-conversions@7.0.0: {}
-
   webpack-sources@3.2.3: {}
 
   webpack-virtual-modules@0.5.0: {}
-
-  whatwg-mimetype@3.0.0: {}
 
   whatwg-url@5.0.0:
     dependencies:
