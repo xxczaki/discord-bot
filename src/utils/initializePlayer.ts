@@ -1,4 +1,5 @@
 import {
+	AppleMusicExtractor,
 	BridgeProvider,
 	BridgeSource,
 	SpotifyExtractor,
@@ -23,10 +24,11 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 			bridgeProvider,
 		});
 
+		await initializedPlayer.extractors.register(AppleMusicExtractor, {});
 		await initializedPlayer.extractors.register(SpotifyExtractor, {});
 		await initializedPlayer.extractors.register(YoutubeiExtractor, {});
 		await initializedPlayer.extractors.loadDefault((extractor) =>
-			['SpotifyExtractor', 'YoutubeiExtractor'].includes(extractor),
+			['AppleMusicExtractor', 'SpotifyExtractor', 'YoutubeiExtractor'].includes(extractor),
 		);
 	}
 
