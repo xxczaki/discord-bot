@@ -74,7 +74,7 @@ export default async function queueCommandHandler(
 			{
 				name: 'Duration',
 				value: !queue?.estimatedDuration
-					? '0:00'
+					? 'N/A'
 					: `${formatDistance(now, afterQueueEnds)}`,
 				inline: true,
 			},
