@@ -1,14 +1,14 @@
 import { SpotifyExtractor } from '@discord-player/extractor';
-import { AudioFilters, Player } from 'discord-player';
+import { Player } from 'discord-player';
 import { YoutubeiExtractor } from 'discord-player-youtubei';
 import type { Client } from 'discord.js';
 import { RedisQueryCache } from './RedisQueryCache';
+import defineCustomFilters from './defineCustomFilters';
 import redis from './redis';
 
 let initializedPlayer: Player;
 
-// Internal normalizer
-AudioFilters.define('normalize', 'loudnorm=I=-14:LRA=11:TP=-1');
+defineCustomFilters();
 
 export default async function getInitializedPlayer(client: Client<boolean>) {
 	if (!initializedPlayer) {

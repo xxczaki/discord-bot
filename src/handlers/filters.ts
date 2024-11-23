@@ -29,7 +29,7 @@ export default async function filtersCommandHandler(
 
 	const activeFilters =
 		queue?.filters.ffmpeg.filters.filter(
-			(name) => !['normalize', 'tempo'].includes(name), // internal filters
+			(name) => !name.startsWith('_'), // exclude the custom filters
 		) ?? [];
 
 	const filters = getFilters(activeFilters);
@@ -78,6 +78,7 @@ export default async function filtersCommandHandler(
 			components: [],
 		});
 	} catch {
+	} finally {
 		await response.delete();
 	}
 }

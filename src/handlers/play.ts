@@ -38,7 +38,7 @@ export default async function playCommandHandler(
 			searchEngine: isYouTubeLink(query) ? 'youtubeVideo' : 'spotifySong',
 			nodeOptions: {
 				metadata: interaction,
-				defaultFFmpegFilters: ['normalize' as keyof QueueFilters],
+				defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
 			},
 			requestedBy: interaction.user.id,
 		});

@@ -98,7 +98,7 @@ export default async function enqueuePlaylists(
 				searchEngine: isYouTubeLink(song) ? 'youtubeVideo' : 'spotifySearch',
 				nodeOptions: {
 					metadata: interaction,
-					defaultFFmpegFilters: ['normalize' as keyof QueueFilters],
+					defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
 				},
 				requestedBy: interaction.user.id,
 			});

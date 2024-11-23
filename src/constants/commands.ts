@@ -125,17 +125,7 @@ const COMMANDS: ApplicationCommandData[] = [
 	},
 	{
 		name: 'tempo',
-		description: 'Sets the tempo of the player.',
-		options: [
-			{
-				name: 'value',
-				description: 'Desired tempo, base is 1',
-				type: 10,
-				minValue: 0,
-				maxValue: 2,
-				required: true,
-			},
-		],
+		description: 'Allows changing the playback speed of the player.',
 	},
 	{
 		name: 'lateness',

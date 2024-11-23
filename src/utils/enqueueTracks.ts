@@ -95,7 +95,7 @@ export default async function enqueueTracks(
 			searchEngine: isYouTubeLink(url) ? 'youtubeVideo' : 'spotifySong',
 			nodeOptions: {
 				metadata: interaction,
-				defaultFFmpegFilters: ['normalize' as keyof QueueFilters],
+				defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
 			},
 			audioPlayerOptions: {
 				seek: progress,
@@ -112,7 +112,7 @@ export default async function enqueueTracks(
 				searchEngine: isYouTubeLink(url) ? 'youtubeVideo' : 'spotifySong',
 				nodeOptions: {
 					metadata: interaction,
-					defaultFFmpegFilters: ['normalize' as keyof QueueFilters],
+					defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
 				},
 				requestedBy: interaction.user.id,
 			});
