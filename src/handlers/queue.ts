@@ -88,7 +88,7 @@ export default async function queueCommandHandler(
 		.setFooter({
 			text: !embedDescriptions.length
 				? ''
-				: `Page 1/${embedDescriptions.length}`,
+				: `Page 1/${embedDescriptions.length} ${queue.repeatMode === QueueRepeatMode.QUEUE ? '· Repeat enabled 🔁' : ''}`,
 		});
 
 	const previous = new ButtonBuilder()
@@ -154,7 +154,7 @@ async function componentResponseListener(
 		queueEmbed
 			.setDescription(embedDescriptions[pageNumber].join('\n') || null)
 			.setFooter({
-				text: `Page ${pageNumber + 1}/${embedDescriptions.length}`,
+				text: `Page ${pageNumber + 1}/${embedDescriptions.length} ${queue.repeatMode === QueueRepeatMode.QUEUE ? '· Repeat enabled 🔁' : ''}`,
 			});
 
 		const previousPage = pageNumber - 1;
