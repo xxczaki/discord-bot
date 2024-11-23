@@ -40,8 +40,6 @@ const queueRecoveryService = QueueRecoveryService.getInstance();
 		],
 	});
 
-	resetPresence(client);
-
 	const player = await getInitializedPlayer(client);
 
 	player.events.on('playerStart', async (queue, track) => {
@@ -152,7 +150,9 @@ const queueRecoveryService = QueueRecoveryService.getInstance();
 		await useCommandHandlers(interaction);
 	});
 
-	client.login(getEnvironmentVariable('TOKEN'));
+	await client.login(getEnvironmentVariable('TOKEN'));
+
+	resetPresence(client);
 
 	useDebugListeners(client);
 })();

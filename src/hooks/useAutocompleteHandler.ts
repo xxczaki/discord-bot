@@ -18,7 +18,7 @@ export default async function useAutocompleteHandler(
 		const player = useMainPlayer();
 
 		const data = await player.search(query, {
-			searchEngine: isYouTubeLink(query) ? 'youtubeVideo' : 'spotifySearch',
+			searchEngine: isYouTubeLink(query) ? 'youtubeVideo' : 'appleMusicSearch',
 			requestedBy: interaction.user,
 		});
 
