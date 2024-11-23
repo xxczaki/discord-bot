@@ -58,25 +58,24 @@ const COMMANDS: ApplicationCommandData[] = [
 	},
 	{
 		name: 'queue',
-		description: 'Get information about the current queue.',
+		description: "Checks what's currently playing and what will play next.",
 	},
 	{
 		name: 'shuffle',
 		description: 'Shuffles the queue.',
 	},
 	{
-		name: 'loop',
-		description: 'Loop controls.',
+		name: 'repeat',
+		description: 'Controls the repeat mode.',
 		options: [
 			{
-				name: 'loop_mode',
-				description: 'Mode of the loop you want to use',
+				name: 'repeat_mode',
+				description: 'The desired repeat mode',
 				type: 4,
 				choices: [
 					{ name: 'off', value: 0 },
 					{ name: 'track', value: 1 },
 					{ name: 'queue', value: 2 },
-					{ name: 'autoplay', value: 3 },
 				],
 				required: true,
 			},

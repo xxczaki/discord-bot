@@ -9,7 +9,7 @@ await esbuild.build({
 	target: 'node20',
 	external: [
 		'@discord-player/extractor',
-		'@discordjs/opus',
+		'mediaplex',
 		'bufferutil',
 		'discord-player',
 		'discord-player-youtubei',

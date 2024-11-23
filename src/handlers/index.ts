@@ -4,7 +4,7 @@ export { default as deduplicateCommandHandler } from './deduplicate';
 export { default as filtersCommandHandler } from './filters';
 export { default as flushQueryCacheCommandHandler } from './flushQueryCache';
 export { default as latenessCommandHandler } from './lateness';
-export { default as loopCommandHandler } from './loop';
+export { default as repeatCommandHandler } from './repeat';
 export { default as moveCommandHandler } from './move';
 export { default as pauseCommandHandler } from './pause';
 export { default as playCommandHandler } from './play';

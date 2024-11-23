@@ -6,7 +6,6 @@ import {
 	filtersCommandHandler,
 	flushQueryCacheCommandHandler,
 	latenessCommandHandler,
-	loopCommandHandler,
 	moveCommandHandler,
 	pauseCommandHandler,
 	playCommandHandler,
@@ -15,6 +14,7 @@ import {
 	queueCommandHandler,
 	recoverCommandHandler,
 	removeCommandHandler,
+	repeatCommandHandler,
 	resumeCommandHandler,
 	shuffleCommandHandler,
 	skipCommandHandler,
@@ -65,8 +65,8 @@ export default async function useCommandHandlers(
 			await shuffleCommandHandler(interaction);
 			break;
 		}
-		case 'loop': {
-			await loopCommandHandler(interaction);
+		case 'repeat': {
+			await repeatCommandHandler(interaction);
 			break;
 		}
 		case 'volume': {

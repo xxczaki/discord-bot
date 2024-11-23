@@ -1,5 +1,5 @@
-import { addMilliseconds } from 'date-fns';
-import { QueueRepeatMode, useQueue } from 'discord-player';
+import { addMilliseconds, formatDistance } from 'date-fns';
+import { type GuildQueue, QueueRepeatMode, useQueue } from 'discord-player';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -20,7 +20,7 @@ export default async function queueCommandHandler(
 	const tracks = queue?.tracks.toArray() ?? [];
 	const currentTrack = queue?.currentTrack;
 
-	if (!currentTrack && tracks.length === 0) {
+	if (!currentTrack) {
 		return interaction.reply('The queue is empty and nothing is being played.');
 	}
 
@@ -48,42 +48,43 @@ export default async function queueCommandHandler(
 		index++;
 	}
 
+	const nowPlayingEmbed = new EmbedBuilder()
+		.setTitle(currentTrack.title)
+		.setDescription(queue?.node.createProgressBar())
+		.setURL(currentTrack.url)
+		.setAuthor({ name: currentTrack.author })
+		.setThumbnail(currentTrack.thumbnail);
+
+	const now = new Date();
+	const afterQueueEnds = addMilliseconds(new Date(), queue.estimatedDuration);
+
+	const trackEndsAt = afterQueueEnds.toLocaleTimeString('pl', {
+		hour: '2-digit',
+		minute: '2-digit',
+	});
+
 	const queueEmbed = new EmbedBuilder()
-		.setTitle('Queue')
+		.setTitle('Up next')
 		.addFields([
 			{
-				name: 'State',
-				value: queue?.node.isPaused() ? '⚠️ paused' : 'playing',
-				inline: true,
-			},
-			{
-				name: 'Loop mode',
-				value: `\`${QueueRepeatMode[queue?.repeatMode ?? 0]}\``,
-				inline: true,
-			},
-			{
-				name: 'Number of tracks',
+				name: 'Tracks',
 				value: `${queue?.size ?? '*unknown*'}`,
 				inline: true,
 			},
 			{
-				name: 'Total duration',
+				name: 'Duration',
 				value: !queue?.estimatedDuration
 					? '0:00'
-					: `${queue.durationFormatted} (will end at \`${addMilliseconds(
-							new Date(),
-							queue.estimatedDuration,
-						).toLocaleTimeString('pl')}\`)`,
+					: `${formatDistance(now, afterQueueEnds)}`,
+				inline: true,
 			},
 			{
-				name: 'Currently playing',
-				// value: queue?.node.createProgressBar() ?? '',
-				value: !currentTrack
-					? '*nothing*'
-					: `"${currentTrack.title}" by ${currentTrack.author} (*${currentTrack.duration}*)`,
+				name: 'Ending time',
+				value: !queue?.estimatedDuration ? 'N/A' : trackEndsAt,
+				inline: true,
 			},
 		])
-		.setDescription(embedDescriptions[0].join('\n') || null)
+		.setDescription(embedDescriptions[0].join('\n') || 'The queue is empty.')
 		.setFooter({
 			text: !embedDescriptions.length
 				? ''
@@ -107,11 +108,14 @@ export default async function queueCommandHandler(
 	);
 
 	const response = await interaction.editReply({
-		embeds: [queueEmbed],
+		content: `**Currently playing ${queue.repeatMode === QueueRepeatMode.TRACK ? 'on repeat 🔁' : ''}**`,
+		embeds: [nowPlayingEmbed, queueEmbed],
 		components: [row],
 	});
 
 	await componentResponseListener(response, {
+		queue,
+		nowPlayingEmbed,
 		queueEmbed,
 		embedDescriptions,
 		previous,
@@ -120,6 +124,8 @@ export default async function queueCommandHandler(
 }
 
 type ListenerProps = {
+	queue: GuildQueue;
+	nowPlayingEmbed: EmbedBuilder;
 	queueEmbed: EmbedBuilder;
 	embedDescriptions: string[][];
 	previous: ButtonBuilder;
@@ -130,7 +136,14 @@ async function componentResponseListener(
 	response: InteractionResponse<boolean> | Message<boolean>,
 	properties: ListenerProps,
 ) {
-	const { queueEmbed, embedDescriptions, previous, next } = properties;
+	const {
+		queue,
+		nowPlayingEmbed,
+		queueEmbed,
+		embedDescriptions,
+		previous,
+		next,
+	} = properties;
 
 	try {
 		const answer = await response.awaitMessageComponent({
@@ -158,7 +171,8 @@ async function componentResponseListener(
 		);
 
 		const nextResponse = await answer.update({
-			embeds: [queueEmbed],
+			content: `**Currently playing ${queue.repeatMode === QueueRepeatMode.TRACK ? 'on repeat 🔁' : ''}**`,
+			embeds: [nowPlayingEmbed, queueEmbed],
 			components: [updatedRow],
 		});
 
