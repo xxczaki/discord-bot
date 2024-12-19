@@ -1,4 +1,7 @@
-import { SpotifyExtractor } from '@discord-player/extractor';
+import {
+	SoundCloudExtractor,
+	SpotifyExtractor,
+} from '@discord-player/extractor';
 import { Player } from 'discord-player';
 import { YoutubeiExtractor } from 'discord-player-youtubei';
 import type { Client } from 'discord.js';
@@ -18,8 +21,11 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 
 		await initializedPlayer.extractors.register(SpotifyExtractor, {});
 		await initializedPlayer.extractors.register(YoutubeiExtractor, {});
+		await initializedPlayer.extractors.register(SoundCloudExtractor, {});
 		await initializedPlayer.extractors.loadDefault((extractor) =>
-			['SpotifyExtractor', 'YoutubeiExtractor'].includes(extractor),
+			['SpotifyExtractor', 'YoutubeiExtractor', 'SoundCloudExtractor'].includes(
+				extractor,
+			),
 		);
 	}
 

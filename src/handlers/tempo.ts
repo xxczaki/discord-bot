@@ -80,7 +80,7 @@ export default async function tempoCommandHandler(
 				] as Array<keyof QueueFilters>);
 			}
 
-			return answer.editReply({
+			return await answer.editReply({
 				content: 'The playback speed was modified.',
 				components: [],
 			});

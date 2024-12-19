@@ -67,7 +67,7 @@ export default async function filtersCommandHandler(
 
 			await queue?.filters.ffmpeg.toggle(toToggle);
 
-			return answer.editReply({
+			return await answer.editReply({
 				content: 'The selected filters were toggled.',
 				components: [],
 			});

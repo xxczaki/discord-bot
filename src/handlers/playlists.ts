@@ -1,5 +1,7 @@
 import {
 	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle,
 	type CacheType,
 	type ChatInputCommandInteraction,
 	type GuildMember,
@@ -36,13 +38,19 @@ export default async function playlistsCommandHandler(
 		.setMinValues(1)
 		.setMaxValues(10);
 
-	const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+	const cancel = new ButtonBuilder()
+		.setCustomId('cancel')
+		.setLabel('Cancel')
+		.setStyle(ButtonStyle.Secondary);
+
+	const selects = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 		select,
 	);
+	const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents(cancel);
 
 	const response = await interaction.reply({
 		content: 'Choose which playlists you want to enqueue:',
-		components: [row],
+		components: [selects, buttons],
 	});
 
 	try {
@@ -53,7 +61,11 @@ export default async function playlistsCommandHandler(
 		await answer.deferUpdate();
 
 		if (answer.isStringSelectMenu()) {
-			return enqueuePlaylists(answer);
+			return await enqueuePlaylists(answer);
+		}
+
+		if (answer.isButton()) {
+			return await response.delete();
 		}
 
 		await answer.editReply({

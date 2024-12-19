@@ -28,12 +28,19 @@ export default async function enqueueTracks(
 		});
 	}
 
-	const tracksQueue = new Queue({ concurrency: availableParallelism() });
+	const tracksQueue = new Queue();
 	const player = useMainPlayer();
 
 	let enqueued = 0;
 
 	const embed = new EmbedBuilder().setTitle('⏳ Processing track(s)…');
+
+	const queue = useQueue(interaction.guild?.id ?? '');
+
+	queue?.filters.ffmpeg.setInputArgs([
+		'-threads',
+		(availableParallelism() - 2).toString(),
+	]);
 
 	tracksQueue.on('next', async () => {
 		await interaction.editReply({
@@ -43,45 +50,6 @@ export default async function enqueueTracks(
 				embed.setDescription(
 					`${tracks.length - tracksQueue.pending}/${tracks.length} track(s) processed and added to the queue so far.`,
 				),
-			],
-		});
-	});
-
-	tracksQueue.on('idle', async () => {
-		const queue = useQueue(interaction.guild?.id ?? '');
-
-		if (!queue) {
-			return interaction.editReply({
-				content: 'The queue is empty.',
-				embeds: [],
-			});
-		}
-
-		queue.tracks.store = queue?.tracks.data.sort((a, b) => {
-			const correspondingAId = tracks.find(({ url }) => url === a.url) ?? a.id;
-			const correspondingBId = tracks.find(({ url }) => url === b.url) ?? b.id;
-
-			if (correspondingAId < correspondingBId) {
-				return -1;
-			}
-
-			if (correspondingAId > correspondingBId) {
-				return 1;
-			}
-
-			return 0;
-		});
-
-		await interaction.editReply({
-			content: null,
-			embeds: [
-				embed
-					.setTitle('✅ Track(s) loaded')
-					.setDescription(
-						`${enqueued} track(s) had been processed and added to the queue.\n${
-							tracks.length - enqueued
-						} skipped.`,
-					),
 			],
 		});
 	});
@@ -127,4 +95,41 @@ export default async function enqueueTracks(
 			}
 		}),
 	);
+
+	await tracksQueue.onIdle();
+
+	if (!queue) {
+		return interaction.editReply({
+			content: 'The queue is empty.',
+			embeds: [],
+		});
+	}
+
+	queue.tracks.store = queue?.tracks.data.sort((a, b) => {
+		const correspondingAId = tracks.find(({ url }) => url === a.url) ?? a.id;
+		const correspondingBId = tracks.find(({ url }) => url === b.url) ?? b.id;
+
+		if (correspondingAId < correspondingBId) {
+			return -1;
+		}
+
+		if (correspondingAId > correspondingBId) {
+			return 1;
+		}
+
+		return 0;
+	});
+
+	await interaction.editReply({
+		content: null,
+		embeds: [
+			embed
+				.setTitle('✅ Track(s) loaded')
+				.setDescription(
+					`${enqueued} track(s) had been processed and added to the queue.\n${
+						tracks.length - enqueued
+					} skipped.`,
+				),
+		],
+	});
 }

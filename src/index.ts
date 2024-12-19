@@ -85,7 +85,7 @@ const queueRecoveryService = QueueRecoveryService.getInstance();
 			if (answer.customId === 'skip') {
 				queue?.node.skip();
 
-				return answer.update({
+				return await answer.update({
 					content: 'Track skipped.',
 					embeds: [],
 					components: [],
@@ -136,9 +136,9 @@ const queueRecoveryService = QueueRecoveryService.getInstance();
 		const channel = client.channels.cache.get(BOT_CHANNEL_ID);
 
 		if (channel?.isSendable()) {
-			channel.send({
-				content: `ℹ️ Deployment successful, ready to play.\n\nSource: ${getReleaseDetails()}.`,
-			});
+			await channel.send(
+				`ℹ️ Deployment successful, ready to play.\n\nSource: ${getReleaseDetails()}.`,
+			);
 		}
 	});
 

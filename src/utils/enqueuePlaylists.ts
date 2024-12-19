@@ -1,6 +1,9 @@
 import { availableParallelism } from 'node:os';
 import { type QueueFilters, useMainPlayer, useQueue } from 'discord-player';
 import {
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle,
 	type CacheType,
 	EmbedBuilder,
 	type GuildMember,
@@ -44,7 +47,7 @@ export default async function enqueuePlaylists(
 		});
 	}
 
-	const playlistQueue = new Queue({ concurrency: availableParallelism() });
+	const playlistQueue = new Queue();
 	const songsArray = songs.trim().split('\n');
 
 	let enqueued = 0;
@@ -70,26 +73,6 @@ export default async function enqueuePlaylists(
 		});
 	});
 
-	playlistQueue.on('idle', async () => {
-		queue?.tracks.shuffle();
-
-		await interaction.editReply({
-			content: null,
-			embeds: [
-				embed
-					.setTitle('✅ Playlist(s) loaded')
-					.setDescription(
-						`${enqueued} song(s) had been processed and added to the queue.\n${
-							songsArray.length - enqueued
-						} skipped.`,
-					)
-					.setFooter({
-						text: 'The queue was automatically shuffled for you.',
-					}),
-			],
-		});
-	});
-
 	const player = useMainPlayer();
 
 	await playlistQueue.addAll(
@@ -111,4 +94,43 @@ export default async function enqueuePlaylists(
 			}
 		}),
 	);
+
+	await playlistQueue.onIdle();
+
+	const shuffle = new ButtonBuilder()
+		.setCustomId('shuffle')
+		.setLabel('Shuffle')
+		.setStyle(ButtonStyle.Secondary);
+
+	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(shuffle);
+
+	const response = await interaction.editReply({
+		content: null,
+		embeds: [
+			embed
+				.setTitle('✅ Playlist(s) loaded')
+				.setDescription(
+					`${enqueued} song(s) had been processed and added to the queue.\n${
+						songsArray.length - enqueued
+					} skipped.`,
+				),
+		],
+		components: [row],
+	});
+
+	try {
+		const answer = await response.awaitMessageComponent({
+			time: 60_000, // 1 minute
+		});
+
+		await answer.deferUpdate();
+
+		if (answer.isButton()) {
+			queue?.tracks.shuffle();
+		}
+
+		await response.edit({ components: [] });
+	} catch {
+		await response.delete();
+	}
 }

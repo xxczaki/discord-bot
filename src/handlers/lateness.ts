@@ -51,18 +51,18 @@ export default async function latenessCommandHandler(
 			switch (answer.customId) {
 				case 'arrived':
 					await lateness.end(new Date());
-					return answer.update({
+					return await answer.update({
 						content: '✅ Measurement stopped',
 						components: [],
 					});
 				case 'not-arrived':
 					await lateness.end(null);
-					return answer.update({
+					return await answer.update({
 						content: '✅ Measurement stopped',
 						components: [],
 					});
 				default:
-					return answer.update({
+					return await answer.update({
 						content: '⏳ Continuing to measure lateness',
 						components: [],
 					});
