@@ -49,10 +49,7 @@ const queueRecoveryService = QueueRecoveryService.getInstance();
 			.setURL(track.url)
 			.setAuthor({ name: track.author })
 			.setThumbnail(track.thumbnail)
-			.addFields(
-				{ name: 'Duration', value: track.duration, inline: true },
-				{ name: 'Source', value: track.source, inline: true },
-			);
+			.addFields({ name: 'Duration', value: track.duration, inline: true });
 
 		const skip = new ButtonBuilder()
 			.setCustomId('skip')

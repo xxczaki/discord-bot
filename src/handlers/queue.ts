@@ -1,5 +1,10 @@
 import { addMilliseconds, formatDistance } from 'date-fns';
-import { type GuildQueue, QueueRepeatMode, useQueue } from 'discord-player';
+import {
+	type GuildQueue,
+	QueueRepeatMode,
+	type Track,
+	useQueue,
+} from 'discord-player';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -32,7 +37,7 @@ export default async function queueCommandHandler(
 	const embedDescriptions: string[][] = [[]];
 
 	for (const track of tracks) {
-		if (descriptionLength > 2000) {
+		if (descriptionLength > 1900) {
 			descriptionLength = 0;
 			embedDescriptions.push([]);
 			currentDescriptionIndex++;
@@ -48,13 +53,6 @@ export default async function queueCommandHandler(
 		index++;
 	}
 
-	const nowPlayingEmbed = new EmbedBuilder()
-		.setTitle(currentTrack.title)
-		.setDescription(queue?.node.createProgressBar())
-		.setURL(currentTrack.url)
-		.setAuthor({ name: currentTrack.author })
-		.setThumbnail(currentTrack.thumbnail);
-
 	const now = new Date();
 	const afterQueueEnds = addMilliseconds(new Date(), queue.estimatedDuration);
 
@@ -64,11 +62,11 @@ export default async function queueCommandHandler(
 	});
 
 	const queueEmbed = new EmbedBuilder()
-		.setTitle('Up next')
+		.setTitle('Queue')
 		.addFields([
 			{
 				name: 'Tracks',
-				value: `${queue?.size ?? '*unknown*'}`,
+				value: `${(queue?.size ?? 0) + 1}`,
 				inline: true,
 			},
 			{
@@ -84,12 +82,15 @@ export default async function queueCommandHandler(
 				inline: true,
 			},
 		])
-		.setDescription(embedDescriptions[0].join('\n') || 'The queue is empty.')
+		.setDescription(
+			`0. ▶️${queue.repeatMode === QueueRepeatMode.TRACK ? '🔁' : ''} "${currentTrack.title}" by ${currentTrack.author} (*${currentTrack.duration}*)\n${embedDescriptions[0].join('\n')}`,
+		)
 		.setFooter({
 			text: !embedDescriptions.length
 				? ''
 				: `Page 1/${embedDescriptions.length} ${queue.repeatMode === QueueRepeatMode.QUEUE ? '· Repeat enabled 🔁' : ''}`,
-		});
+		})
+		.setThumbnail(currentTrack.thumbnail);
 
 	const previous = new ButtonBuilder()
 		.setCustomId('0')
@@ -108,14 +109,13 @@ export default async function queueCommandHandler(
 	);
 
 	const response = await interaction.editReply({
-		content: `**Currently playing ${queue.repeatMode === QueueRepeatMode.TRACK ? 'on repeat 🔁' : ''}**`,
-		embeds: [nowPlayingEmbed, queueEmbed],
+		embeds: [queueEmbed],
 		components: [row],
 	});
 
 	await componentResponseListener(response, {
+		currentTrack,
 		queue,
-		nowPlayingEmbed,
 		queueEmbed,
 		embedDescriptions,
 		previous,
@@ -124,8 +124,8 @@ export default async function queueCommandHandler(
 }
 
 type ListenerProps = {
+	currentTrack: Track;
 	queue: GuildQueue;
-	nowPlayingEmbed: EmbedBuilder;
 	queueEmbed: EmbedBuilder;
 	embedDescriptions: string[][];
 	previous: ButtonBuilder;
@@ -136,14 +136,8 @@ async function componentResponseListener(
 	response: InteractionResponse<boolean> | Message<boolean>,
 	properties: ListenerProps,
 ) {
-	const {
-		queue,
-		nowPlayingEmbed,
-		queueEmbed,
-		embedDescriptions,
-		previous,
-		next,
-	} = properties;
+	const { currentTrack, queue, queueEmbed, embedDescriptions, previous, next } =
+		properties;
 
 	try {
 		const answer = await response.awaitMessageComponent({
@@ -152,7 +146,9 @@ async function componentResponseListener(
 		const pageNumber = Number.parseInt(answer.customId, 10);
 
 		queueEmbed
-			.setDescription(embedDescriptions[pageNumber].join('\n') || null)
+			.setDescription(
+				`0. ▶️${queue.repeatMode === QueueRepeatMode.TRACK ? '🔁' : ''} "${currentTrack.title}" by ${currentTrack.author} (*${currentTrack.duration}*)\n${embedDescriptions[pageNumber].join('\n')}`,
+			)
 			.setFooter({
 				text: `Page ${pageNumber + 1}/${embedDescriptions.length} ${queue.repeatMode === QueueRepeatMode.QUEUE ? '· Repeat enabled 🔁' : ''}`,
 			});
@@ -171,8 +167,7 @@ async function componentResponseListener(
 		);
 
 		const nextResponse = await answer.update({
-			content: `**Currently playing ${queue.repeatMode === QueueRepeatMode.TRACK ? 'on repeat 🔁' : ''}**`,
-			embeds: [nowPlayingEmbed, queueEmbed],
+			embeds: [queueEmbed],
 			components: [updatedRow],
 		});
 

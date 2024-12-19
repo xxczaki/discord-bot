@@ -27,7 +27,7 @@ export default async function recoverCommandHandler(
 
 	const tracks = await queueRecoveryService.getContents();
 
-	if (!tracks) {
+	if (tracks.length === 0) {
 		return interaction.editReply('Nothing to recover.');
 	}
 

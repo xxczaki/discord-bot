@@ -54,13 +54,6 @@ export default async function enqueuePlaylists(
 
 	const embed = new EmbedBuilder().setTitle('⏳ Processing playlist(s)…');
 
-	const queue = useQueue(interaction.guild?.id ?? '');
-
-	queue?.filters.ffmpeg.setInputArgs([
-		'-threads',
-		(availableParallelism() - 2).toString(),
-	]);
-
 	playlistQueue.on('next', async () => {
 		await interaction.editReply({
 			content: null,
@@ -118,6 +111,13 @@ export default async function enqueuePlaylists(
 		components: [row],
 	});
 
+	const queue = useQueue(interaction.guild?.id ?? '');
+
+	queue?.filters.ffmpeg.setInputArgs([
+		'-threads',
+		(availableParallelism() - 2).toString(),
+	]);
+
 	try {
 		const answer = await response.awaitMessageComponent({
 			time: 60_000, // 1 minute
@@ -125,7 +125,7 @@ export default async function enqueuePlaylists(
 
 		await answer.deferUpdate();
 
-		if (answer.isButton()) {
+		if (answer.customId === 'shuffle') {
 			queue?.tracks.shuffle();
 		}
 

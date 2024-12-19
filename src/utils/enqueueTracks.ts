@@ -35,13 +35,6 @@ export default async function enqueueTracks(
 
 	const embed = new EmbedBuilder().setTitle('⏳ Processing track(s)…');
 
-	const queue = useQueue(interaction.guild?.id ?? '');
-
-	queue?.filters.ffmpeg.setInputArgs([
-		'-threads',
-		(availableParallelism() - 2).toString(),
-	]);
-
 	tracksQueue.on('next', async () => {
 		await interaction.editReply({
 			content: null,
@@ -97,6 +90,13 @@ export default async function enqueueTracks(
 	);
 
 	await tracksQueue.onIdle();
+
+	const queue = useQueue(interaction.guild?.id ?? '');
+
+	queue?.filters.ffmpeg.setInputArgs([
+		'-threads',
+		(availableParallelism() - 2).toString(),
+	]);
 
 	if (!queue) {
 		return interaction.editReply({

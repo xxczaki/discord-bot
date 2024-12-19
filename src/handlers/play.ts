@@ -27,12 +27,6 @@ export default async function playCommandHandler(
 
 	try {
 		const player = useMainPlayer();
-		const queue = useQueue(interaction.guild?.id ?? '');
-
-		queue?.filters.ffmpeg.setInputArgs([
-			'-threads',
-			(availableParallelism() - 2).toString(),
-		]);
 
 		const { track } = await player.play(channel, query, {
 			searchEngine: isYouTubeLink(query) ? 'youtubeVideo' : 'spotifySong',
@@ -43,6 +37,13 @@ export default async function playCommandHandler(
 			requestedBy: interaction.user.id,
 		});
 
+		const queue = useQueue(interaction.guild?.id ?? '');
+
+		queue?.filters.ffmpeg.setInputArgs([
+			'-threads',
+			(availableParallelism() - 2).toString(),
+		]);
+
 		const trackPosition = getTrackPosition(queue, track) + 1;
 
 		const embed = new EmbedBuilder()
@@ -51,10 +52,7 @@ export default async function playCommandHandler(
 			.setURL(track.url)
 			.setAuthor({ name: track.author })
 			.setThumbnail(track.thumbnail)
-			.addFields(
-				{ name: 'Duration', value: track.duration, inline: true },
-				{ name: 'Source', value: track.source, inline: true },
-			);
+			.addFields({ name: 'Duration', value: track.duration, inline: true });
 
 		const isInQueue = queue?.tracks.some(({ id }) => id === track.id);
 

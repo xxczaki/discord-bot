@@ -6,8 +6,8 @@ export default async function moveCommandHandler(
 ) {
 	const queue = useQueue(interaction.guild?.id ?? '');
 
-	const from = interaction.options.getInteger('from', true) - 1;
-	const to = interaction.options.getInteger('to', true) - 1;
+	const from = interaction.options.getInteger('from', true) - 2;
+	const to = interaction.options.getInteger('to', true) - 2;
 
 	if (from === to) {
 		return interaction.reply('Nothing to move.');
@@ -20,10 +20,17 @@ export default async function moveCommandHandler(
 			throw 'fallthrough to catch block';
 		}
 
+		if (to < 0) {
+			queue?.moveTrack(trackToMove, 0);
+			queue?.node.skip();
+
+			return await interaction.reply('Skipping the current track.');
+		}
+
 		queue?.moveTrack(from, to);
 
 		await interaction.reply(
-			`Moved "${trackToMove.title}" to position \`${to + 1}\`.`,
+			`Moved "${trackToMove.title}" to position \`${to + 2}\`.`,
 		);
 	} catch {
 		await interaction.reply(
