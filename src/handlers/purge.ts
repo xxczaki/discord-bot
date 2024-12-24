@@ -7,7 +7,9 @@ export default async function purgeCommandHandler(
 ) {
 	const queue = useQueue(interaction.guild?.id ?? '');
 
-	await saveQueue(queue);
+	if (!queue?.isEmpty()) {
+		await saveQueue(queue);
+	}
 
 	queue?.delete();
 

@@ -47,7 +47,7 @@ export default async function enqueuePlaylists(
 		});
 	}
 
-	const playlistQueue = new Queue();
+	const playlistQueue = new Queue({ concurrency: 1 });
 	const songsArray = songs.trim().split('\n');
 
 	let enqueued = 0;

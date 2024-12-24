@@ -28,7 +28,7 @@ export default async function enqueueTracks(
 		});
 	}
 
-	const tracksQueue = new Queue();
+	const tracksQueue = new Queue({ concurrency: 1 });
 	const player = useMainPlayer();
 
 	let enqueued = 0;
