@@ -40,4 +40,4 @@ jobs:
           ARGOCD_SERVER: ${{ vars.ARGOCD_SERVER }}
           ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
         run: |
-          argocd app sync homelab --resource apps/Deployment:discord-bot --force --server $ARGOCD_SERVER
+          argocd app sync homelab --resource apps:Deployment:discord-bot --force --server $ARGOCD_SERVER
