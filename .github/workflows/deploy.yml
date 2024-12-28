@@ -35,12 +35,9 @@ jobs:
           curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
           install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
           rm argocd-linux-amd64
-      - name: Log in to ArgoCD
+      - name: Delete pod
         env:
           ARGOCD_SERVER: ${{ vars.ARGOCD_SERVER }}
           ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
         run: |
-          argocd login $ARGOCD_SERVER --auth-token $ARGOCD_AUTH_TOKEN
-      - name: Delete pod
-        run: |
-          argocd app delete-resource homelab --kind Pod --resource-name discord-bot-d466d6779-54c4d
+          argocd app delete-resource homelab --server $ARGOCD_SERVER --kind Pod --resource-name discord-bot-d466d6779-54c4d
