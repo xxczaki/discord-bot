@@ -20,7 +20,7 @@ jobs:
           push: true
           tags: xxczaki/discord-bot:latest
   argo:
-    name: Delete password
+    name: Sync
     runs-on: ubuntu-latest
     needs: docker
     steps:
@@ -35,9 +35,9 @@ jobs:
           curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
           install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
           rm argocd-linux-amd64
-      - name: Delete pod
+      - name: Sync
         env:
           ARGOCD_SERVER: ${{ vars.ARGOCD_SERVER }}
           ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
         run: |
-          argocd app delete-resource homelab --server $ARGOCD_SERVER --kind Pod --resource-name discord-bot-d466d6779-54c4d
+          argocd app sync homelab --resource apps/Deployment:discord-bot --force --server $ARGOCD_SERVER
