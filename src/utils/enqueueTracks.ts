@@ -12,7 +12,6 @@ import {
 	type GuildMember,
 } from 'discord.js';
 import Queue from 'p-queue';
-import isYouTubeLink from './isYouTubeLink';
 import logger from './logger';
 
 export default async function enqueueTracks(
@@ -28,7 +27,7 @@ export default async function enqueueTracks(
 		});
 	}
 
-	const tracksQueue = new Queue({ concurrency: 1 });
+	const tracksQueue = new Queue();
 	const player = useMainPlayer();
 
 	let enqueued = 0;
@@ -53,7 +52,6 @@ export default async function enqueueTracks(
 		const { url, progress } = firstTrack;
 
 		await player.play(voiceChannel, url, {
-			searchEngine: isYouTubeLink(url) ? 'youtubeVideo' : 'spotifySong',
 			nodeOptions: {
 				metadata: interaction,
 				defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
@@ -70,7 +68,6 @@ export default async function enqueueTracks(
 	await tracksQueue.addAll(
 		toQueue.map(({ url }) => async () => {
 			const promise = player.play(voiceChannel, url, {
-				searchEngine: isYouTubeLink(url) ? 'youtubeVideo' : 'spotifySong',
 				nodeOptions: {
 					metadata: interaction,
 					defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
@@ -92,11 +89,6 @@ export default async function enqueueTracks(
 	await tracksQueue.onIdle();
 
 	const queue = useQueue(interaction.guild?.id ?? '');
-
-	queue?.filters.ffmpeg.setInputArgs([
-		'-threads',
-		(availableParallelism() - 2).toString(),
-	]);
 
 	if (!queue) {
 		return interaction.editReply({

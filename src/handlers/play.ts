@@ -9,7 +9,6 @@ import {
 } from 'discord.js';
 import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
 import getTrackPosition from '../utils/getTrackPosition';
-import isYouTubeLink from '../utils/isYouTubeLink';
 import logger from '../utils/logger';
 
 export default async function playCommandHandler(
@@ -29,7 +28,6 @@ export default async function playCommandHandler(
 		const player = useMainPlayer();
 
 		const { track } = await player.play(channel, query, {
-			searchEngine: isYouTubeLink(query) ? 'youtubeVideo' : 'spotifySong',
 			nodeOptions: {
 				metadata: interaction,
 				defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
@@ -39,11 +37,6 @@ export default async function playCommandHandler(
 
 		const queue = useQueue(interaction.guild?.id ?? '');
 
-		queue?.filters.ffmpeg.setInputArgs([
-			'-threads',
-			(availableParallelism() - 2).toString(),
-		]);
-
 		const trackPosition = getTrackPosition(queue, track) + 1;
 
 		const embed = new EmbedBuilder()
@@ -51,8 +44,16 @@ export default async function playCommandHandler(
 			.setDescription(`Added to queue (position ${trackPosition}).`)
 			.setURL(track.url)
 			.setAuthor({ name: track.author })
-			.setThumbnail(track.thumbnail)
-			.addFields({ name: 'Duration', value: track.duration, inline: true });
+			.setThumbnail(URL.canParse(track.thumbnail) ? track.thumbnail : null)
+			.setColor(track.source === 'soundcloud' ? '#ff5500' : '#ff0000')
+			.addFields([
+				{ name: 'Duration', value: track.duration, inline: true },
+				{
+					name: 'Source',
+					value: track.source === 'soundcloud' ? 'SoundCloud' : 'YouTube',
+					inline: true,
+				},
+			]);
 
 		const isInQueue = queue?.tracks.some(({ id }) => id === track.id);
 

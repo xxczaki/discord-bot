@@ -7,13 +7,13 @@ RUN apk update --no-cache && \
 
 FROM base AS build
 
-ARG RAILWAY_GIT_COMMIT_SHA
+ARG GIT_COMMIT_SHA
 ARG SENTRY_AUTH_TOKEN
 
 COPY src ./src/
 COPY package.json pnpm-lock.yaml esbuild.mjs ./
 RUN pnpm install --frozen-lockfile && \
-    SENTRY_RELEASE_NAME=$RAILWAY_GIT_COMMIT_SHA SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN pnpm build && \
+    SENTRY_RELEASE_NAME=$GIT_COMMIT_SHA SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN pnpm build && \
 		pnpm prune --prod
 
 

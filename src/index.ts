@@ -48,8 +48,16 @@ const queueRecoveryService = QueueRecoveryService.getInstance();
 			.setDescription('Playing it now.')
 			.setURL(track.url)
 			.setAuthor({ name: track.author })
-			.setThumbnail(track.thumbnail)
-			.addFields({ name: 'Duration', value: track.duration, inline: true });
+			.setThumbnail(URL.canParse(track.thumbnail) ? track.thumbnail : null)
+			.setColor(track.source === 'soundcloud' ? '#ff5500' : '#ff0000')
+			.addFields([
+				{ name: 'Duration', value: track.duration, inline: true },
+				{
+					name: 'Source',
+					value: track.source === 'soundcloud' ? 'SoundCloud' : 'YouTube',
+					inline: true,
+				},
+			]);
 
 		const skip = new ButtonBuilder()
 			.setCustomId('skip')

@@ -45,7 +45,7 @@ export default async function queueCommandHandler(
 
 		const position = getTrackPosition(queue, track);
 		const entry = `${
-			currentDescriptionIndex === 0 ? position : position + 1
+			currentDescriptionIndex === 0 ? position : position + 2
 		}. "${track.title}" by ${track.author} (*${track.duration}*)`;
 
 		descriptionLength += entry.length;
@@ -83,14 +83,16 @@ export default async function queueCommandHandler(
 			},
 		])
 		.setDescription(
-			`0. ▶️${queue.repeatMode === QueueRepeatMode.TRACK ? '🔁' : ''} "${currentTrack.title}" by ${currentTrack.author} (*${currentTrack.duration}*)\n${embedDescriptions[0].join('\n')}`,
+			`0. ${queue.node.isPaused() ? '⏸️' : '▶️'}${queue.repeatMode === QueueRepeatMode.TRACK ? '🔁' : ''} "${currentTrack.title}" by ${currentTrack.author} (*${currentTrack.duration}*)\n${embedDescriptions[0].join('\n')}`,
 		)
 		.setFooter({
 			text: !embedDescriptions.length
 				? ''
 				: `Page 1/${embedDescriptions.length} ${queue.repeatMode === QueueRepeatMode.QUEUE ? '· Repeat enabled 🔁' : ''}`,
 		})
-		.setThumbnail(currentTrack.thumbnail);
+		.setThumbnail(
+			URL.canParse(currentTrack.thumbnail) ? currentTrack.thumbnail : null,
+		);
 
 	const previous = new ButtonBuilder()
 		.setCustomId('0')
@@ -145,9 +147,11 @@ async function componentResponseListener(
 		});
 		const pageNumber = Number.parseInt(answer.customId, 10);
 
+		const initialTrackInfo = `0. ${queue.node.isPaused() ? '⏸️' : '▶️'}${queue.repeatMode === QueueRepeatMode.TRACK ? '🔁' : ''} "${currentTrack.title}" by ${currentTrack.author} (*${currentTrack.duration}*)`;
+
 		queueEmbed
 			.setDescription(
-				`0. ▶️${queue.repeatMode === QueueRepeatMode.TRACK ? '🔁' : ''} "${currentTrack.title}" by ${currentTrack.author} (*${currentTrack.duration}*)\n${embedDescriptions[pageNumber].join('\n')}`,
+				`${pageNumber === 0 ? initialTrackInfo : ''}\n${embedDescriptions[pageNumber].join('\n')}`,
 			)
 			.setFooter({
 				text: `Page ${pageNumber + 1}/${embedDescriptions.length} ${queue.repeatMode === QueueRepeatMode.QUEUE ? '· Repeat enabled 🔁' : ''}`,

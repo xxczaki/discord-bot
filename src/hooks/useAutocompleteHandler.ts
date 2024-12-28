@@ -1,6 +1,5 @@
 import { useMainPlayer } from 'discord-player';
 import type { CacheType, Interaction } from 'discord.js';
-import isYouTubeLink from '../utils/isYouTubeLink';
 import truncateString from '../utils/truncateString';
 
 export default async function useAutocompleteHandler(
@@ -17,8 +16,10 @@ export default async function useAutocompleteHandler(
 
 		const player = useMainPlayer();
 
-		const data = await player.search(query, {
-			searchEngine: isYouTubeLink(query) ? 'youtubeVideo' : 'spotifySearch',
+		const data = await player.search(query.replace('!sc', ''), {
+			searchEngine: query.startsWith('!sc')
+				? 'soundcloudSearch'
+				: 'spotifySearch',
 			requestedBy: interaction.user,
 		});
 
@@ -31,7 +32,7 @@ export default async function useAutocompleteHandler(
 				name: `"${truncateString(track.title, 40)}" by ${truncateString(
 					track.author,
 					40,
-				)} (${track.duration})`,
+				)}`,
 				value: track.url,
 			}));
 

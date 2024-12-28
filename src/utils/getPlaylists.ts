@@ -18,15 +18,18 @@ export default async function getPlaylists(channel: TextBasedChannel) {
 			}
 
 			const songs = cleanUpPlaylistContent(message).split('\n');
+			const soundCloud = songs.filter((song) => song.startsWith('!sc'));
 
-			return { id, entriesNo: songs.length };
+			return { id, entriesNo: songs.length, soundCloud: soundCloud.length };
 		})
 		.slice(0, 25)
 		.sort(({ id: a }, { id: b }) => a.charCodeAt(0) - b.charCodeAt(0))
-		.map(({ id, entriesNo }) => {
+		.map(({ id, entriesNo, soundCloud }) => {
 			return new StringSelectMenuOptionBuilder()
 				.setLabel(id)
-				.setDescription(getNumberOfSongs(entriesNo))
+				.setDescription(
+					`${getNumberOfSongs(entriesNo)} (${Math.floor((soundCloud / entriesNo) * 100)}% SoundCloud)`,
+				)
 				.setValue(id);
 		});
 }

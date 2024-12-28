@@ -12,7 +12,7 @@ import {
 import Queue from 'p-queue';
 import { PLAYLISTS_CHANNEL_ID } from '../constants/channelIds';
 import cleanUpPlaylistContent from './cleanUpPlaylistContent';
-import isYouTubeLink from './isYouTubeLink';
+import determineSearchEngine from './determineSearchEngine';
 
 export default async function enqueuePlaylists(
 	interaction: StringSelectMenuInteraction<CacheType>,
@@ -47,7 +47,7 @@ export default async function enqueuePlaylists(
 		});
 	}
 
-	const playlistQueue = new Queue({ concurrency: 1 });
+	const playlistQueue = new Queue();
 	const songsArray = songs.trim().split('\n');
 
 	let enqueued = 0;
@@ -70,8 +70,8 @@ export default async function enqueuePlaylists(
 
 	await playlistQueue.addAll(
 		songsArray.map((song) => async () => {
-			const promise = player.play(voiceChannel, song, {
-				searchEngine: isYouTubeLink(song) ? 'youtubeVideo' : 'spotifySearch',
+			const promise = player.play(voiceChannel, song.replace('!sc', ''), {
+				searchEngine: determineSearchEngine(song),
 				nodeOptions: {
 					metadata: interaction,
 					defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
@@ -112,11 +112,6 @@ export default async function enqueuePlaylists(
 	});
 
 	const queue = useQueue(interaction.guild?.id ?? '');
-
-	queue?.filters.ffmpeg.setInputArgs([
-		'-threads',
-		(availableParallelism() - 2).toString(),
-	]);
 
 	try {
 		const answer = await response.awaitMessageComponent({
