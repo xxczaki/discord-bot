@@ -17,6 +17,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
+          platforms: linux/arm64
           push: true
           tags: xxczaki/discord-bot:latest
   argo:
