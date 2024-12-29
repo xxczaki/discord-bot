@@ -33,4 +33,7 @@ await esbuild.build({
 	outdir: 'dist',
 	minify: true,
 	sourcemap: true,
+	define: {
+		'process.env.GIT_COMMIT_SHA': process.env.SENTRY_RELEASE_NAME ?? '',
+	},
 });
