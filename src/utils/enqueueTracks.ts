@@ -1,4 +1,3 @@
-import { availableParallelism } from 'node:os';
 import {
 	type QueueFilters,
 	type TrackJSON,
@@ -27,7 +26,7 @@ export default async function enqueueTracks(
 		});
 	}
 
-	const tracksQueue = new Queue();
+	const tracksQueue = new Queue({ concurrency: 16 });
 	const player = useMainPlayer();
 
 	let enqueued = 0;

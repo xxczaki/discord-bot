@@ -6,12 +6,20 @@ export default async function moveCommandHandler(
 ) {
 	const queue = useQueue(interaction.guild?.id ?? '');
 
-	const from = interaction.options.getInteger('from', true) - 2;
+	const query = interaction.options.getString('query', true);
+	const from = Number.parseInt(query, 10) - 2;
+
+	if (Number.isNaN(from)) {
+		return interaction.reply('Please provide a number.');
+	}
+
 	const to = interaction.options.getInteger('to', true) - 2;
 
 	if (from === to) {
 		return interaction.reply('Nothing to move.');
 	}
+
+	console.log(from);
 
 	try {
 		const trackToMove = queue?.tracks.at(from);

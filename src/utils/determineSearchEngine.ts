@@ -5,5 +5,5 @@ export default function determineSearchEngine(query: string): SearchQueryType {
 		return 'soundcloud';
 	}
 
-	return 'auto';
+	return 'spotifySearch';
 }

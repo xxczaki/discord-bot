@@ -4,7 +4,7 @@ import {
 	type ChatInputCommandInteraction,
 	EmbedBuilder,
 } from 'discord.js';
-import getReleaseDetails from '../utils/getReleaseDetails';
+import getReleaseDetails from '../utils/getCommitLink';
 
 export default async function debugCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,

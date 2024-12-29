@@ -5,18 +5,29 @@ export default async function removeCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
 ) {
 	const queue = useQueue(interaction.guild?.id ?? '');
-	const trackNumber = interaction.options.getInteger('track_id', true);
+	const query = interaction.options.getString('query', true);
+	const trackNumber = Number.parseInt(query, 10);
+
+	if (Number.isNaN(trackNumber)) {
+		return interaction.reply('Please provide a number.');
+	}
 
 	try {
-		const trackToRemove = queue?.tracks.at(trackNumber - 1);
+		const trackToRemove = queue?.tracks.at(trackNumber - 2);
 
 		if (!trackToRemove) {
 			throw 'fallthrough to catch block';
 		}
 
-		queue?.removeTrack(trackNumber - 1);
+		if (trackNumber === 1) {
+			queue?.node.skip();
 
-		await interaction.reply(`Track "${trackToRemove.title}" removed.`);
+			await interaction.reply('Skipping the current track.');
+		} else {
+			queue?.removeTrack(trackNumber - 2);
+
+			await interaction.reply(`Track "${trackToRemove.title}" removed.`);
+		}
 	} catch {
 		await interaction.reply(
 			'Could not remove the track, is the specified id correct?',

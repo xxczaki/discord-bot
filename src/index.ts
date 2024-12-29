@@ -11,14 +11,14 @@ import {
 	GatewayIntentBits,
 	PresenceUpdateStatus,
 } from 'discord.js';
-import { BOT_CHANNEL_ID } from './constants/channelIds';
+import { BOT_DEBUG_CHANNEL_ID } from './constants/channelIds';
 import useAutocompleteHandler from './hooks/useAutocompleteHandler';
 import useCommandHandlers from './hooks/useCommandHandlers';
 import useDebugListeners from './hooks/useDebugListeners';
 import { QueueRecoveryService } from './utils/QueueRecoveryService';
 import { StatsHandler } from './utils/StatsHandler';
+import getCommitLink from './utils/getCommitLink';
 import getEnvironmentVariable from './utils/getEnvironmentVariable';
-import getReleaseDetails from './utils/getReleaseDetails';
 import initializeCommands from './utils/initializeCommands';
 import getInitializedPlayer from './utils/initializePlayer';
 import logger from './utils/logger';
@@ -138,11 +138,13 @@ const queueRecoveryService = QueueRecoveryService.getInstance();
 	client.on('ready', async () => {
 		logger.info(`Logged in as ${client.user?.tag}!`);
 
-		const channel = client.channels.cache.get(BOT_CHANNEL_ID);
+		const channel = client.channels.cache.get(BOT_DEBUG_CHANNEL_ID);
+		const commitHash = process.env.GIT_COMMIT_SHA;
+		const wasDeploymentManual = !commitHash;
 
-		if (channel?.isSendable()) {
+		if (channel?.isSendable() && !wasDeploymentManual) {
 			await channel.send(
-				`ℹ️ Deployment successful, ready to play.\n\nSource: ${getReleaseDetails()}.`,
+				`🎶 Ready to play, running commit ${getCommitLink(commitHash)}.`,
 			);
 		}
 	});

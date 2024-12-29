@@ -1,4 +1,3 @@
-import { availableParallelism } from 'node:os';
 import { type QueueFilters, useMainPlayer, useQueue } from 'discord-player';
 import {
 	ActionRowBuilder,
@@ -47,7 +46,7 @@ export default async function enqueuePlaylists(
 		});
 	}
 
-	const playlistQueue = new Queue();
+	const playlistQueue = new Queue({ concurrency: 16 });
 	const songsArray = songs.trim().split('\n');
 
 	let enqueued = 0;

@@ -31,10 +31,11 @@ const COMMANDS: ApplicationCommandData[] = [
 		description: 'Removes track from the queue.',
 		options: [
 			{
-				name: 'track_id',
-				description: 'Position of the track you want to remove',
-				type: 4,
+				name: 'query',
+				description: 'The track you want to remove',
+				type: 3,
 				required: true,
+				autocomplete: true,
 			},
 		],
 	},
@@ -43,10 +44,11 @@ const COMMANDS: ApplicationCommandData[] = [
 		description: 'Moves track in the queue to a different position.',
 		options: [
 			{
-				name: 'from',
-				description: 'Initial position',
-				type: 4,
+				name: 'query',
+				description: 'The track that should be moved',
+				type: 3,
 				required: true,
+				autocomplete: true,
 			},
 			{
 				name: 'to',
@@ -109,7 +111,7 @@ const COMMANDS: ApplicationCommandData[] = [
 	},
 	{
 		name: 'deduplicate',
-		description: 'Removes duplicates from the queue (based on the URLs).',
+		description: 'Removes duplicates from the queue (based on the track URLs).',
 	},
 	{
 		name: 'sort',
