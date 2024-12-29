@@ -20,6 +20,8 @@ jobs:
           platforms: linux/arm64
           push: true
           tags: xxczaki/discord-bot:latest
+          cache-from: type=registry,ref=xxczaki/discord-bot:latest
+          cache-to: type=inline
   k8s:
     name: Delete pod
     runs-on: ubuntu-latest
@@ -34,7 +36,7 @@ jobs:
       - name: Download kubectl
         run: |
           curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+          install -m 0755 kubectl /usr/local/bin/kubectl
       - name: Delete pod
         env:
           KUBECONFIG: ${{ secrets.KUBECONFIG }}
