@@ -46,7 +46,7 @@ export default async function useAutocompleteHandler(
 				name: `"${truncateString(track.title, 40)}" by ${truncateString(
 					track.author,
 					40,
-				)} (*${track.duration}*)`,
+				)}`,
 				value: track.url,
 			}));
 
@@ -71,7 +71,7 @@ export default async function useAutocompleteHandler(
 				name: `${position}. "${truncateString(track.title, 40)}" by ${truncateString(
 					track.author,
 					40,
-				)} (*${track.duration}*)`,
+				)}`,
 				value: position.toString(),
 			};
 		});

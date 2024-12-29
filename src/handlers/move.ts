@@ -19,8 +19,6 @@ export default async function moveCommandHandler(
 		return interaction.reply('Nothing to move.');
 	}
 
-	console.log(from);
-
 	try {
 		const trackToMove = queue?.tracks.at(from);
 
