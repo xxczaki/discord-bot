@@ -22,6 +22,10 @@ jobs:
           tags: xxczaki/discord-bot:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          secrets: |
+            SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
+          build-args: |
+            GIT_COMMIT_SHA=${{ github.sha }}
   k8s:
     name: Delete pod
     runs-on: ubuntu-latest
