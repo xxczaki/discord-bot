@@ -20,8 +20,8 @@ jobs:
           platforms: linux/arm64
           push: true
           tags: xxczaki/discord-bot:latest
-  argo:
-    name: Sync
+  k8s:
+    name: Delete pod
     runs-on: ubuntu-latest
     needs: docker
     steps:
@@ -31,14 +31,12 @@ jobs:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
           tags: tag:ci
-      - name: Download ArgoCD CLI
+      - name: Download kubectl
         run: |
-          curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-          install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
-          rm argocd-linux-amd64
-      - name: Sync
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+      - name: Delete pod
         env:
-          ARGOCD_SERVER: ${{ vars.ARGOCD_SERVER }}
-          ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
+          KUBECONFIG: ${{ secrets.KUBECONFIG }}
         run: |
-          argocd app sync homelab --resource apps:Deployment:discord-bot --force --server $ARGOCD_SERVER
+          kubectl delete pods -l app=discord-bot
