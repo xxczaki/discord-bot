@@ -1,6 +1,7 @@
 import { useMainPlayer, useQueue } from 'discord-player';
 import type { CacheType, Interaction } from 'discord.js';
 import Fuse from 'fuse.js';
+import determineSearchEngine from '../utils/determineSearchEngine';
 import getTrackPosition from '../utils/getTrackPosition';
 import truncateString from '../utils/truncateString';
 
@@ -31,9 +32,7 @@ export default async function useAutocompleteHandler(
 		const player = useMainPlayer();
 
 		const data = await player.search(query.replace('!sc', ''), {
-			searchEngine: query.startsWith('!sc')
-				? 'soundcloudSearch'
-				: 'spotifySearch',
+			searchEngine: determineSearchEngine(query),
 			requestedBy: interaction.user,
 		});
 

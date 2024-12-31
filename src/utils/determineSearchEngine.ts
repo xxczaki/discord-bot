@@ -5,14 +5,11 @@ export default function determineSearchEngine(query: string): SearchQueryType {
 		return 'soundcloud';
 	}
 
-	if (query.includes('https://soundcloud.com/')) {
+	if (query.includes('soundcloud.com')) {
 		return 'soundcloudTrack';
 	}
 
-	if (
-		query.includes('https://youtube.com/') ||
-		query.includes('https://youtu.be/')
-	) {
+	if (query.includes('youtube.com') || query.includes('youtu.be')) {
 		return 'youtubeVideo';
 	}
 

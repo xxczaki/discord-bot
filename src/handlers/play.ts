@@ -7,6 +7,7 @@ import {
 	type GuildMember,
 } from 'discord.js';
 import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
+import determineSearchEngine from '../utils/determineSearchEngine';
 import getTrackPosition from '../utils/getTrackPosition';
 import logger from '../utils/logger';
 
@@ -26,7 +27,8 @@ export default async function playCommandHandler(
 	try {
 		const player = useMainPlayer();
 
-		const { track } = await player.play(channel, query, {
+		const { track } = await player.play(channel, query.replace('!sc', ''), {
+			searchEngine: determineSearchEngine(query),
 			nodeOptions: {
 				metadata: interaction,
 				defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
