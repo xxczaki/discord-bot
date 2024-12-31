@@ -1,4 +1,3 @@
-import { availableParallelism } from 'node:os';
 import { type QueueFilters, useMainPlayer, useQueue } from 'discord-player';
 import {
 	ActionRowBuilder,

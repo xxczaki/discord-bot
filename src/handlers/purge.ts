@@ -1,6 +1,8 @@
 import { useQueue } from 'discord-player';
 import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
-import saveQueue from '../utils/saveQueue';
+import { QueueRecoveryService } from '../utils/QueueRecoveryService';
+
+const queueRecoveryService = QueueRecoveryService.getInstance();
 
 export default async function purgeCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
@@ -8,7 +10,7 @@ export default async function purgeCommandHandler(
 	const queue = useQueue(interaction.guild?.id ?? '');
 
 	if (!queue?.isEmpty()) {
-		await saveQueue(queue);
+		await queueRecoveryService.saveQueue(queue);
 	}
 
 	queue?.delete();

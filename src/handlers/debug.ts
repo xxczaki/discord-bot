@@ -4,7 +4,10 @@ import {
 	type ChatInputCommandInteraction,
 	EmbedBuilder,
 } from 'discord.js';
-import getReleaseDetails from '../utils/getCommitLink';
+import getCommitLink from '../utils/getCommitLink';
+
+const commitHash = process.env.GIT_COMMIT_SHA;
+const wasDeploymentManual = !commitHash;
 
 export default async function debugCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
@@ -23,7 +26,7 @@ export default async function debugCommandHandler(
 			},
 			{
 				name: 'Release',
-				value: getReleaseDetails(),
+				value: wasDeploymentManual ? 'N/A' : getCommitLink(commitHash),
 				inline: true,
 			},
 		])

@@ -23,7 +23,6 @@ import initializeCommands from './utils/initializeCommands';
 import getInitializedPlayer from './utils/initializePlayer';
 import logger from './utils/logger';
 import resetPresence from './utils/resetPresence';
-import saveQueue from './utils/saveQueue';
 
 const statsHandler = StatsHandler.getInstance();
 const queueRecoveryService = QueueRecoveryService.getInstance();
@@ -124,7 +123,7 @@ const queueRecoveryService = QueueRecoveryService.getInstance();
 	});
 
 	player.events.on('voiceStateUpdate', async (queue) => {
-		await saveQueue(queue);
+		await queueRecoveryService.saveQueue(queue);
 
 		if (!queue.channel) {
 			return;
