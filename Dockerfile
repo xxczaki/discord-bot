@@ -10,7 +10,7 @@ FROM base AS build
 ARG GIT_COMMIT_SHA
 
 COPY src ./src/
-COPY pnpm-lock.yaml esbuild.mjs ./
+COPY package.json pnpm-lock.yaml esbuild.mjs ./
 RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN,env=SENTRY_AUTH_TOKEN \
     pnpm fetch && \
 		pnpm install --offline && \
