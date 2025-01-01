@@ -25,5 +25,5 @@ export default async function deduplicateCommandHandler(
 		return interaction.editReply('No duplicates were found.');
 	}
 
-	await interaction.editReply(`Removed ${removed} duplicates.`);
+	await interaction.editReply(`Removed ${removed} duplicate(s).`);
 }
