@@ -13,8 +13,8 @@ COPY src ./src/
 COPY package.json pnpm-lock.yaml esbuild.mjs ./
 RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN,env=SENTRY_AUTH_TOKEN \
     pnpm fetch && \
-		pnpm install --offline && \
-		SENTRY_RELEASE_NAME=$GIT_COMMIT_SHA pnpm build && \
+		pnpm install --offline
+RUN SENTRY_RELEASE_NAME=$GIT_COMMIT_SHA pnpm build && \
 		pnpm prune --prod
 
 

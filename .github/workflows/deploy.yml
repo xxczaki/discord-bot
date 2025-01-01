@@ -26,7 +26,7 @@ jobs:
           push: true
           tags: xxczaki/discord-bot:latest
           cache-from: type=gha
-          cache-to: type=gha,mode=min
+          cache-to: type=gha,mode=max
           sbom: true
           secrets: |
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
