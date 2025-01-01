@@ -7,14 +7,18 @@ RUN apk update --no-cache && \
 
 FROM base AS build
 
+COPY pnpm-lock.yaml ./
+RUN pnpm fetch
+
+COPY package.json ./
+RUN pnpm install --offline
+
 ARG GIT_COMMIT_SHA
 
 COPY src ./src/
-COPY package.json pnpm-lock.yaml esbuild.mjs ./
-RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN,env=SENTRY_AUTH_TOKEN \
-    pnpm fetch && \
-		pnpm install --offline
-RUN SENTRY_RELEASE_NAME=$GIT_COMMIT_SHA pnpm build && \
+COPY esbuild.mjs ./
+RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN,env=SENTRY_AUTH_TOKEN \ 
+		SENTRY_RELEASE_NAME=$GIT_COMMIT_SHA pnpm build && \
 		pnpm prune --prod
 
 
