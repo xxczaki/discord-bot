@@ -1,10 +1,17 @@
 import {
 	type GuildQueue,
-	type TrackJSON,
+	type Player,
+	type SerializedTrack,
+	type Track,
 	deserialize,
 	serialize,
 } from 'discord-player';
 import redis from './redis';
+
+const DEFAULT_CONTENTS = {
+	tracks: [],
+	progress: 0,
+};
 
 export class QueueRecoveryService {
 	static #instance: QueueRecoveryService;
@@ -24,46 +31,58 @@ export class QueueRecoveryService {
 			return;
 		}
 
-		const currentTrack = queue.currentTrack;
-		const serializedTracks = queue.tracks.map(serialize);
+		const tracks = [queue.currentTrack, ...queue.tracks.store]
+			.filter(Boolean)
+			.map((track) => serialize(track));
 
-		if (!currentTrack) {
-			return redis.set(
-				'discord-player:queue',
-				JSON.stringify(serializedTracks),
-			);
-		}
+		const pipeline = redis.pipeline();
 
-		const serializedCurrentTrack = {
-			...serialize(currentTrack),
-			progress: queue.node.getTimestamp()?.current.value ?? 0,
-		};
-
-		await redis.set(
-			'discord-player:queue',
-			JSON.stringify([serializedCurrentTrack, ...serializedTracks]),
+		pipeline.set('discord-player:queue', JSON.stringify(tracks));
+		pipeline.set(
+			'discord-player:progress',
+			queue.node.getTimestamp()?.current.value ?? 0,
 		);
+
+		await pipeline.exec();
 	}
 
 	async deleteQueue() {
-		await redis.del('discord-player:queue');
+		const pipeline = redis.pipeline();
+
+		pipeline.del('discord-player:queue');
+		pipeline.del('discord-player:progress');
+
+		await pipeline.exec();
 	}
 
-	async getContents(): Promise<
-		(TrackJSON & { progress?: number | undefined })[]
-	> {
-		const tracks = await redis.get('discord-player:queue');
+	async getContents(player: Player) {
+		const pipeline = redis.pipeline();
 
-		if (!tracks) {
-			return [];
+		pipeline.get('discord-player:queue');
+		pipeline.get('discord-player:progress');
+
+		const result = await pipeline.exec();
+
+		if (!result) {
+			return DEFAULT_CONTENTS;
 		}
 
-		try {
-			const parsed = JSON.parse(tracks);
+		const [[, tracks], [, progress]] = result as [
+			[error: Error | null, tracks: string],
+			[error: Error | null, progress: number],
+		];
 
-			return parsed.map(deserialize);
+		try {
+			const parsedTracks = JSON.parse(tracks) as SerializedTrack[];
+
+			return {
+				tracks: parsedTracks.map((track) =>
+					deserialize(player, track),
+				) as Track[],
+				progress,
+			};
 		} catch (error) {
-			return [];
+			return DEFAULT_CONTENTS;
 		}
 	}
 }

@@ -36,7 +36,7 @@ export default async function playCommandHandler(
 			requestedBy: interaction.user.id,
 		});
 
-		const queue = useQueue(interaction.guild?.id ?? '');
+		const queue = useQueue();
 
 		const trackPosition = getTrackPosition(queue, track) + 1;
 

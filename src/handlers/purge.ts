@@ -7,7 +7,7 @@ const queueRecoveryService = QueueRecoveryService.getInstance();
 export default async function purgeCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
 ) {
-	const queue = useQueue(interaction.guild?.id ?? '');
+	const queue = useQueue();
 
 	if (!queue?.isEmpty()) {
 		await queueRecoveryService.saveQueue(queue);

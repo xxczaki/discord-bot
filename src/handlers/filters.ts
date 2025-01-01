@@ -25,7 +25,7 @@ const FILTERS: OptionData[] = [
 export default async function filtersCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
 ) {
-	const queue = useQueue(interaction.guild?.id ?? '');
+	const queue = useQueue();
 
 	const activeFilters =
 		queue?.filters.ffmpeg.filters.filter(

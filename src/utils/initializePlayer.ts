@@ -28,11 +28,11 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 				generate_session_locally: true,
 			},
 		});
-		await initializedPlayer.extractors.loadDefault((extractor) =>
-			['YoutubeiExtractor', 'SpotifyExtractor', 'SoundCloudExtractor'].includes(
-				extractor,
-			),
-		);
+		await initializedPlayer.extractors.loadMulti([
+			YoutubeiExtractor,
+			SpotifyExtractor,
+			SoundCloudExtractor,
+		]);
 	}
 
 	return initializedPlayer;

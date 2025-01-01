@@ -4,7 +4,7 @@ import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
 export default async function skipCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
 ) {
-	const queue = useQueue(interaction.guild?.id ?? '');
+	const queue = useQueue();
 
 	queue?.node.skip();
 

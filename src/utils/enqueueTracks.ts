@@ -1,6 +1,6 @@
 import {
 	type QueueFilters,
-	type TrackJSON,
+	type Track,
 	useMainPlayer,
 	useQueue,
 } from 'discord-player';
@@ -15,7 +15,8 @@ import logger from './logger';
 
 export default async function enqueueTracks(
 	interaction: ButtonInteraction<CacheType>,
-	tracks: Array<TrackJSON & { progress?: number | undefined }>,
+	tracks: Track[],
+	progress: number,
 ) {
 	const voiceChannel = (interaction.member as GuildMember).voice.channel;
 
@@ -48,9 +49,7 @@ export default async function enqueueTracks(
 	const [firstTrack, ...toQueue] = tracks;
 
 	try {
-		const { url, progress } = firstTrack;
-
-		await player.play(voiceChannel, url, {
+		await player.play(voiceChannel, firstTrack.url, {
 			nodeOptions: {
 				metadata: interaction,
 				defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
@@ -87,7 +86,7 @@ export default async function enqueueTracks(
 
 	await tracksQueue.onIdle();
 
-	const queue = useQueue(interaction.guild?.id ?? '');
+	const queue = useQueue();
 
 	if (!queue) {
 		return interaction.editReply({

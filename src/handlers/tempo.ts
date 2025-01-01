@@ -11,7 +11,7 @@ import {
 export default async function tempoCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
 ) {
-	const queue = useQueue(interaction.guild?.id ?? '');
+	const queue = useQueue();
 
 	const activeTempo = queue?.filters.ffmpeg.filters.find((name) =>
 		name?.startsWith('_tempo'),

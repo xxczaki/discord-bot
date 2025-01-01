@@ -20,7 +20,7 @@ import getTrackPosition from '../utils/getTrackPosition';
 export default async function queueCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
 ) {
-	const queue = useQueue(interaction.guild?.id ?? '');
+	const queue = useQueue();
 
 	const tracks = queue?.tracks.toArray() ?? [];
 	const currentTrack = queue?.currentTrack;

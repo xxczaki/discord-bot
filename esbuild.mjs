@@ -13,7 +13,6 @@ await esbuild.build({
 		'discord-player',
 		'discord-player-youtubei',
 		'discord.js',
-		'mediaplex',
 		'sodium-native',
 		'utf-8-validate',
 		'zlib-sync',

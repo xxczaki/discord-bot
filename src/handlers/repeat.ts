@@ -4,10 +4,10 @@ import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
 export default async function repeatCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
 ) {
-	const queue = useQueue(interaction.guild?.id ?? '');
+	const queue = useQueue();
 	const mode = interaction.options.getInteger('repeat_mode', true);
 
-	queue?.setRepeatMode(mode);
+	queue?.setRepeatMode(mode as QueueRepeatMode);
 
 	switch (mode) {
 		case QueueRepeatMode.OFF:

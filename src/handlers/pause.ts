@@ -4,7 +4,7 @@ import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
 export default async function pauseCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
 ) {
-	const queue = useQueue(interaction.guild?.id ?? '');
+	const queue = useQueue();
 
 	if (queue?.node.isPaused()) {
 		return interaction.reply('The track is already paused.');

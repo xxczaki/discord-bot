@@ -4,7 +4,7 @@ import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
 export default async function moveCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
 ) {
-	const queue = useQueue(interaction.guild?.id ?? '');
+	const queue = useQueue();
 
 	const query = interaction.options.getString('query', true);
 	const from = Number.parseInt(query, 10) - 2;

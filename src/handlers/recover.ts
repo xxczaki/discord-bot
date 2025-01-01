@@ -1,4 +1,4 @@
-import { useQueue } from 'discord-player';
+import { useMainPlayer, useQueue } from 'discord-player';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -15,7 +15,7 @@ const queueRecoveryService = QueueRecoveryService.getInstance();
 export default async function recoverCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
 ) {
-	const queue = useQueue(interaction.guild?.id ?? '');
+	const queue = useQueue();
 
 	if (queue) {
 		return interaction.reply(
@@ -25,7 +25,8 @@ export default async function recoverCommandHandler(
 
 	await interaction.deferReply();
 
-	const tracks = await queueRecoveryService.getContents();
+	const player = useMainPlayer();
+	const { tracks, progress } = await queueRecoveryService.getContents(player);
 
 	if (tracks.length === 0) {
 		return interaction.editReply('Nothing to recover.');
@@ -56,7 +57,7 @@ export default async function recoverCommandHandler(
 
 		switch (answer.customId) {
 			case 'proceed':
-				return await enqueueTracks(answer, tracks);
+				return await enqueueTracks(answer, tracks, progress);
 			default:
 				return await interaction.editReply({
 					content: 'The queue will not be recovered.',

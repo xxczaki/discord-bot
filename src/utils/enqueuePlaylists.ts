@@ -110,7 +110,7 @@ export default async function enqueuePlaylists(
 		components: [row],
 	});
 
-	const queue = useQueue(interaction.guild?.id ?? '');
+	const queue = useQueue();
 
 	try {
 		const answer = await response.awaitMessageComponent({

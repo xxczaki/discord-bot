@@ -56,7 +56,7 @@ export default async function useAutocompleteHandler(
 		interaction.commandName === 'remove' ||
 		interaction.commandName === 'move'
 	) {
-		const queue = useQueue(interaction.guild?.id ?? '');
+		const queue = useQueue();
 		const currentTrack = queue?.currentTrack;
 
 		if (!queue || queue.isEmpty() || !currentTrack)

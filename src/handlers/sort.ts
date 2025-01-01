@@ -4,7 +4,7 @@ import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
 export default async function sortCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
 ) {
-	const queue = useQueue(interaction.guild?.id ?? '');
+	const queue = useQueue();
 
 	if (!queue) {
 		return interaction.reply('The queue is empty.');

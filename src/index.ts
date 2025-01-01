@@ -149,11 +149,21 @@ const queueRecoveryService = QueueRecoveryService.getInstance();
 	});
 
 	client.on('interactionCreate', async (interaction) => {
-		await useAutocompleteHandler(interaction);
+		if (!interaction.guild) {
+			throw new TypeError('Guild is not defined!');
+		}
 
-		if (!interaction.isChatInputCommand()) return;
+		const context = {
+			guild: interaction.guild,
+		};
 
-		await useCommandHandlers(interaction);
+		player.context.provide(context, async () => {
+			await useAutocompleteHandler(interaction);
+
+			if (!interaction.isChatInputCommand()) return;
+
+			await useCommandHandlers(interaction);
+		});
 	});
 
 	await client.login(getEnvironmentVariable('TOKEN'));
