@@ -8,45 +8,32 @@ import {
 	type ButtonInteraction,
 	type CacheType,
 	EmbedBuilder,
-	type GuildMember,
+	type VoiceBasedChannel,
 } from 'discord.js';
 import Queue from 'p-queue';
 import logger from './logger';
 
+type Props = {
+	tracks: Track[];
+	progress: number;
+	voiceChannel: VoiceBasedChannel;
+};
+
 export default async function enqueueTracks(
 	interaction: ButtonInteraction<CacheType>,
-	tracks: Track[],
-	progress: number,
+	{ tracks, progress, voiceChannel }: Props,
 ) {
-	const voiceChannel = (interaction.member as GuildMember).voice.channel;
-
-	if (!voiceChannel) {
-		return interaction.editReply({
-			content: 'You are not connected to a voice channel!',
-			components: [],
-		});
-	}
-
-	const tracksQueue = new Queue({ concurrency: 16 });
 	const player = useMainPlayer();
-
-	let enqueued = 0;
-
-	const embed = new EmbedBuilder().setTitle('⏳ Processing track(s)…');
-
-	tracksQueue.on('next', async () => {
-		await interaction.editReply({
-			content: null,
-			components: [],
-			embeds: [
-				embed.setDescription(
-					`${tracks.length - tracksQueue.pending}/${tracks.length} track(s) processed and added to the queue so far.`,
-				),
-			],
-		});
-	});
-
 	const [firstTrack, ...toQueue] = tracks;
+
+	const embed = new EmbedBuilder()
+		.setTitle('⏳ Processing track(s)')
+		.setDescription('Loading the initial track…');
+
+	await interaction.reply({
+		components: [],
+		embeds: [embed],
+	});
 
 	try {
 		await player.play(voiceChannel, firstTrack.url, {
@@ -62,6 +49,22 @@ export default async function enqueueTracks(
 	} catch (error) {
 		logger.error(error, 'Queue recovery error (first track)');
 	}
+
+	let enqueued = 0;
+
+	const tracksQueue = new Queue();
+
+	tracksQueue.on('next', async () => {
+		await interaction.editReply({
+			content: null,
+			components: [],
+			embeds: [
+				embed.setDescription(
+					`${tracks.length - tracksQueue.pending}/${tracks.length} track(s) processed and added to the queue so far.`,
+				),
+			],
+		});
+	});
 
 	await tracksQueue.addAll(
 		toQueue.map(({ url }) => async () => {
@@ -113,13 +116,11 @@ export default async function enqueueTracks(
 	await interaction.editReply({
 		content: null,
 		embeds: [
-			embed
-				.setTitle('✅ Track(s) loaded')
-				.setDescription(
-					`${enqueued} track(s) had been processed and added to the queue.\n${
-						tracks.length - enqueued
-					} skipped.`,
-				),
+			embed.setTitle('✅ Track(s) loaded').setDescription(
+				`${enqueued} track(s) had been processed and added to the queue.\n${
+					tracks.length - enqueued - 1 // excludes `queue.currentTrack`
+				} skipped.`,
+			),
 		],
 	});
 }

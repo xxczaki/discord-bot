@@ -3,10 +3,10 @@ import {
 	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonStyle,
-	EmbedBuilder,
 	type GuildMember,
 } from 'discord.js';
 import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
+import createTrackEmbed from '../utils/createTrackEmbed';
 import determineSearchEngine from '../utils/determineSearchEngine';
 import getTrackPosition from '../utils/getTrackPosition';
 import logger from '../utils/logger';
@@ -40,21 +40,10 @@ export default async function playCommandHandler(
 
 		const trackPosition = getTrackPosition(queue, track) + 1;
 
-		const embed = new EmbedBuilder()
-			.setTitle(track.title)
-			.setDescription(`Added to queue (position ${trackPosition}).`)
-			.setURL(track.url)
-			.setAuthor({ name: track.author })
-			.setThumbnail(URL.canParse(track.thumbnail) ? track.thumbnail : null)
-			.setColor(track.source === 'soundcloud' ? '#ff5500' : '#ff0000')
-			.addFields([
-				{ name: 'Duration', value: track.duration, inline: true },
-				{
-					name: 'Source',
-					value: track.source === 'soundcloud' ? 'SoundCloud' : 'YouTube',
-					inline: true,
-				},
-			]);
+		const embed = createTrackEmbed(
+			track,
+			`Added to queue (position ${trackPosition}).`,
+		);
 
 		const isInQueue = queue?.tracks.some(({ id }) => id === track.id);
 

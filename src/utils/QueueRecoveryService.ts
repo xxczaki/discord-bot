@@ -27,7 +27,7 @@ export class QueueRecoveryService {
 	}
 
 	async saveQueue(queue: GuildQueue<unknown> | null) {
-		if (!queue) {
+		if (!queue || queue.size === 0) {
 			return;
 		}
 

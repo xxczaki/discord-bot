@@ -6,6 +6,7 @@ import {
 	type CacheType,
 	type ChatInputCommandInteraction,
 	type ComponentType,
+	type GuildMember,
 } from 'discord.js';
 import { QueueRecoveryService } from '../utils/QueueRecoveryService';
 import enqueueTracks from '../utils/enqueueTracks';
@@ -15,6 +16,15 @@ const queueRecoveryService = QueueRecoveryService.getInstance();
 export default async function recoverCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
 ) {
+	const voiceChannel = (interaction.member as GuildMember).voice.channel;
+
+	if (!voiceChannel) {
+		return interaction.editReply({
+			content: 'You are not connected to a voice channel!',
+			components: [],
+		});
+	}
+
 	const queue = useQueue();
 
 	if (queue) {
@@ -53,11 +63,9 @@ export default async function recoverCommandHandler(
 			time: 60_000, // 1 minute
 		});
 
-		await answer.deferUpdate();
-
 		switch (answer.customId) {
 			case 'proceed':
-				return await enqueueTracks(answer, tracks, progress);
+				return await enqueueTracks(answer, { tracks, progress, voiceChannel });
 			default:
 				return await interaction.editReply({
 					content: 'The queue will not be recovered.',

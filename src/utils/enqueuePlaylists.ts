@@ -5,8 +5,8 @@ import {
 	ButtonStyle,
 	type CacheType,
 	EmbedBuilder,
-	type GuildMember,
 	type StringSelectMenuInteraction,
+	type VoiceBasedChannel,
 } from 'discord.js';
 import Queue from 'p-queue';
 import { PLAYLISTS_CHANNEL_ID } from '../constants/channelIds';
@@ -15,17 +15,27 @@ import determineSearchEngine from './determineSearchEngine';
 
 export default async function enqueuePlaylists(
 	interaction: StringSelectMenuInteraction<CacheType>,
+	voiceChannel: VoiceBasedChannel,
 ) {
 	const playlistIds = interaction.values.map((value) => `id="${value}"`);
 	const playlistsChannel =
 		interaction.client.channels.cache.get(PLAYLISTS_CHANNEL_ID);
 
 	if (!playlistsChannel?.isTextBased()) {
-		return interaction.editReply({
+		return interaction.reply({
 			content: 'Invalid playlists channel type!',
 			components: [],
 		});
 	}
+
+	const embed = new EmbedBuilder()
+		.setTitle('⏳ Processing playlist(s)')
+		.setDescription('Fetching all the songs…');
+
+	await interaction.reply({
+		components: [],
+		embeds: [embed],
+	});
 
 	const messages = await playlistsChannel.messages.fetch({
 		limit: 30,
@@ -37,21 +47,10 @@ export default async function enqueuePlaylists(
 		.map((message) => cleanUpPlaylistContent(message.content))
 		.join('\n');
 
-	const voiceChannel = (interaction.member as GuildMember).voice.channel;
-
-	if (!voiceChannel) {
-		return interaction.editReply({
-			content: 'You are not connected to a voice channel!',
-			components: [],
-		});
-	}
-
-	const playlistQueue = new Queue({ concurrency: 16 });
+	const playlistQueue = new Queue();
 	const songsArray = songs.trim().split('\n');
 
 	let enqueued = 0;
-
-	const embed = new EmbedBuilder().setTitle('⏳ Processing playlist(s)…');
 
 	playlistQueue.on('next', async () => {
 		await interaction.editReply({
@@ -116,8 +115,6 @@ export default async function enqueuePlaylists(
 		const answer = await response.awaitMessageComponent({
 			time: 60_000, // 1 minute
 		});
-
-		await answer.deferUpdate();
 
 		if (answer.customId === 'shuffle') {
 			queue?.tracks.shuffle();

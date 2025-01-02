@@ -58,17 +58,15 @@ export default async function playlistsCommandHandler(
 			time: 60_000, // 1 minute
 		});
 
-		await answer.deferUpdate();
-
 		if (answer.isStringSelectMenu()) {
-			return await enqueuePlaylists(answer);
+			return await enqueuePlaylists(answer, voiceChannel);
 		}
 
 		if (answer.isButton()) {
 			return await response.delete();
 		}
 
-		await answer.editReply({
+		await answer.reply({
 			content: 'No playlists were selected, aborting…',
 			components: [],
 		});

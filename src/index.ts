@@ -7,7 +7,6 @@ import {
 	ButtonBuilder,
 	ButtonStyle,
 	Client,
-	EmbedBuilder,
 	GatewayIntentBits,
 	PresenceUpdateStatus,
 } from 'discord.js';
@@ -17,6 +16,7 @@ import useCommandHandlers from './hooks/useCommandHandlers';
 import useDebugListeners from './hooks/useDebugListeners';
 import { QueueRecoveryService } from './utils/QueueRecoveryService';
 import { StatsHandler } from './utils/StatsHandler';
+import createTrackEmbed from './utils/createTrackEmbed';
 import getCommitLink from './utils/getCommitLink';
 import getEnvironmentVariable from './utils/getEnvironmentVariable';
 import initializeCommands from './utils/initializeCommands';
@@ -42,21 +42,7 @@ const queueRecoveryService = QueueRecoveryService.getInstance();
 	const player = await getInitializedPlayer(client);
 
 	player.events.on('playerStart', async (queue, track) => {
-		const embed = new EmbedBuilder()
-			.setTitle(track.title)
-			.setDescription('Playing it now.')
-			.setURL(track.url)
-			.setAuthor({ name: track.author })
-			.setThumbnail(URL.canParse(track.thumbnail) ? track.thumbnail : null)
-			.setColor(track.source === 'soundcloud' ? '#ff5500' : '#ff0000')
-			.addFields([
-				{ name: 'Duration', value: track.duration, inline: true },
-				{
-					name: 'Source',
-					value: track.source === 'soundcloud' ? 'SoundCloud' : 'YouTube',
-					inline: true,
-				},
-			]);
+		const embed = createTrackEmbed(track, 'Playing it now.');
 
 		const skip = new ButtonBuilder()
 			.setCustomId('skip')
@@ -80,6 +66,8 @@ const queueRecoveryService = QueueRecoveryService.getInstance();
 			],
 			status: PresenceUpdateStatus.Online,
 		});
+
+		await queueRecoveryService.saveQueue(queue);
 
 		try {
 			const answer = await response.awaitMessageComponent({
