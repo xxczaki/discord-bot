@@ -19,7 +19,7 @@ export default async function ticTacToeCommandHandler(
 		content:
 			"The game begins and it's your turn. Choose where to place your symbol:",
 		components: rows,
-		ephemeral: true,
+		flags: ['Ephemeral'],
 	});
 
 	try {

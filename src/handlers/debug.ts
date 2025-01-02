@@ -32,5 +32,5 @@ export default async function debugCommandHandler(
 		])
 		.setFooter({ text: 'Event loop lag should be under 20ms.' });
 
-	await interaction.reply({ embeds: [queueEmbed], ephemeral: true });
+	await interaction.reply({ embeds: [queueEmbed], flags: ['Ephemeral'] });
 }
