@@ -18,7 +18,7 @@ ARG GIT_COMMIT_SHA
 COPY src ./src/
 COPY esbuild.mjs ./
 RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN,env=SENTRY_AUTH_TOKEN \ 
-		SENTRY_RELEASE_NAME=$GIT_COMMIT_SHA pnpm build && \
+		SENTRY_RELEASE_NAME=$GIT_COMMIT_SHA pnpm build
 
 RUN pnpm prune --prod
 
