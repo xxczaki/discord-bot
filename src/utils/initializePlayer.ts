@@ -21,13 +21,8 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 
 		await initializedPlayer.extractors.register(SpotifyExtractor, {});
 		await initializedPlayer.extractors.register(SoundCloudExtractor, {});
-		await initializedPlayer.extractors.register(YoutubeiExtractor, {
-			innertubeConfigRaw: {
-				lang: 'pl',
-				location: 'PL',
-				generate_session_locally: true,
-			},
-		});
+		await initializedPlayer.extractors.register(YoutubeiExtractor, {});
+
 		await initializedPlayer.extractors.loadMulti([
 			YoutubeiExtractor,
 			SpotifyExtractor,

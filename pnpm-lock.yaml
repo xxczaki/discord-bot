@@ -6,7 +6,6 @@ settings:
 
 overrides:
   libsodium-wrappers: npm:sodium-native@4.3.1
-  youtubei.js: github:LuanRT/YouTube.js
 
 importers:
 
@@ -50,8 +49,8 @@ importers:
         specifier: ^8.46.0
         version: 8.47.0
       '@types/node':
-        specifier: ^22.10.3
-        version: 22.10.3
+        specifier: ^22.10.5
+        version: 22.10.5
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
@@ -849,8 +848,8 @@ packages:
   '@types/mysql@2.15.26':
     resolution: {integrity: sha512-DSLCOXhkvfS5WNNPbfn2KdICAmk8lLc+/PNvnPnF7gOdMZCxopXduqv0OQ13y/yA/zXTSikZZqVgybUxOEg6YQ==}
 
-  '@types/node@22.10.3':
-    resolution: {integrity: sha512-DifAyw4BkrufCILvD3ucnuN8eydUfc/C1GlyrnI+LK6543w5/L3VeVgf05o3B4fqSXP1dKYLOZsKfutpxPzZrw==}
+  '@types/node@22.10.5':
+    resolution: {integrity: sha512-F8Q+SeGimwOo86fiovQh8qiXfFEh2/ocYv7tU5pJ3EXMSSxk1Joj5wefpFK2fHTf/N6HKGSxIDBT9f3gCxXPkQ==}
 
   '@types/pg-pool@2.0.6':
     resolution: {integrity: sha512-TaAUE5rq2VQYxab5Ts7WZhKNmuN78Q6PiFonTDdpbx8a1H0M1vhy3rhiMjl+e2iHmogyMw7jZF4FrE6eJUy5HQ==}
@@ -1019,8 +1018,8 @@ packages:
     resolution: {integrity: sha512-HVQE3AAb/pxF8fQAoiqpvg9i3evqug3hoiwakOyZAwJm+6vZehbkYXZ0l4JxS+I3QxM97v5aaRNhj8v5oBhekw==}
     engines: {node: '>=0.10'}
 
-  discord-api-types@0.37.114:
-    resolution: {integrity: sha512-9b9oOpktWSmE6ooToc46wfw151SHC/+idmnZvtwpEzW85BijUspQxj4W2uOmo+nZVTdEyb3fku58k+4rHKpdSQ==}
+  discord-api-types@0.37.115:
+    resolution: {integrity: sha512-ivPnJotSMrXW8HLjFu+0iCVs8zP6KSliMelhr7HgcB2ki1QzpORkb26m71l1pzSnnGfm7gb5n/VtRTtpw8kXFA==}
 
   discord-player-youtubei@1.3.7:
     resolution: {integrity: sha512-EZ/ezfUC32VKtKY7CGcEdgeb/V/p9CyQoLwwjuiLxYSaeI4patGVGlCQP0v4cyK2yCJefDmfgjol0lXFwB1KrQ==}
@@ -1471,8 +1470,8 @@ packages:
     resolution: {integrity: sha512-NXzu9aQJTAzbBqOt2hwsR63ea7yvxJc0PwN/zobNAudYfb1B7R08SzB4TsLeSbUCuG467NhnoT0oO6w1qRO+BA==}
     engines: {node: '>=18'}
 
-  p-timeout@6.1.3:
-    resolution: {integrity: sha512-UJUyfKbwvr/uZSV6btANfb+0t/mOhKV/KXcCUTp8FcQI+v/0d+wXqH4htrW0E4rR6WiEO/EPvUFiV9D5OI4vlw==}
+  p-timeout@6.1.4:
+    resolution: {integrity: sha512-MyIV3ZA/PmyBN/ud8vV9XzwTrNtR4jFrObymZYnZqMmW0zA8Z17vnT0rBgFE/TlohB+YCHqXMgZzb3Csp49vqg==}
     engines: {node: '>=14.16'}
 
   package-json-from-dist@1.0.1:
@@ -1900,9 +1899,8 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/f3c777b31638cc9c6ce7f4b7ba566ff0534b47dc:
-    resolution: {tarball: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/f3c777b31638cc9c6ce7f4b7ba566ff0534b47dc}
-    version: 12.2.0
+  youtubei.js@12.2.0:
+    resolution: {integrity: sha512-G+50qrbJCToMYhu8jbaHiS3Vf+RRul+CcDbz3hEGwHkGPh+zLiWwD6SS+YhYF+2/op4ZU5zDYQJrGqJ+wKh7Gw==}
 
   zlib-sync@0.1.9:
     resolution: {integrity: sha512-DinB43xCjVwIBDpaIvQqHbmDsnYnSt6HJ/yiB2MZQGTqgPcwBSZqLkimXwK8BvdjQ/MaZysb5uEenImncqvCqQ==}
@@ -2075,7 +2073,7 @@ snapshots:
       '@discordjs/formatters': 0.6.0
       '@discordjs/util': 1.1.1
       '@sapphire/shapeshift': 4.0.0
-      discord-api-types: 0.37.114
+      discord-api-types: 0.37.115
       fast-deep-equal: 3.1.3
       ts-mixer: 6.0.4
       tslib: 2.8.1
@@ -2086,7 +2084,7 @@ snapshots:
 
   '@discordjs/formatters@0.6.0':
     dependencies:
-      discord-api-types: 0.37.114
+      discord-api-types: 0.37.115
 
   '@discordjs/rest@2.4.2':
     dependencies:
@@ -2095,7 +2093,7 @@ snapshots:
       '@sapphire/async-queue': 1.5.5
       '@sapphire/snowflake': 3.5.5
       '@vladfrangu/async_event_emitter': 2.4.6
-      discord-api-types: 0.37.114
+      discord-api-types: 0.37.115
       magic-bytes.js: 1.10.0
       tslib: 2.8.1
       undici: 6.19.8
@@ -2110,7 +2108,7 @@ snapshots:
       '@sapphire/async-queue': 1.5.5
       '@types/ws': 8.5.13
       '@vladfrangu/async_event_emitter': 2.4.6
-      discord-api-types: 0.37.114
+      discord-api-types: 0.37.115
       tslib: 2.8.1
       ws: 8.18.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)
     transitivePeerDependencies:
@@ -2701,15 +2699,15 @@ snapshots:
 
   '@types/connect@3.4.36':
     dependencies:
-      '@types/node': 22.10.3
+      '@types/node': 22.10.5
 
   '@types/estree@1.0.6': {}
 
   '@types/mysql@2.15.26':
     dependencies:
-      '@types/node': 22.10.3
+      '@types/node': 22.10.5
 
-  '@types/node@22.10.3':
+  '@types/node@22.10.5':
     dependencies:
       undici-types: 6.20.0
 
@@ -2719,7 +2717,7 @@ snapshots:
 
   '@types/pg@8.6.1':
     dependencies:
-      '@types/node': 22.10.3
+      '@types/node': 22.10.5
       pg-protocol: 1.7.0
       pg-types: 2.2.0
 
@@ -2727,11 +2725,11 @@ snapshots:
 
   '@types/tedious@4.0.14':
     dependencies:
-      '@types/node': 22.10.3
+      '@types/node': 22.10.5
 
   '@types/ws@8.5.13':
     dependencies:
-      '@types/node': 22.10.3
+      '@types/node': 22.10.5
 
   '@vladfrangu/async_event_emitter@2.4.6': {}
 
@@ -2860,13 +2858,13 @@ snapshots:
 
   denque@2.1.0: {}
 
-  discord-api-types@0.37.114: {}
+  discord-api-types@0.37.115: {}
 
   discord-player-youtubei@1.3.7:
     dependencies:
       tiny-typed-emitter: 2.1.0
       undici: 7.2.0
-      youtubei.js: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/f3c777b31638cc9c6ce7f4b7ba566ff0534b47dc
+      youtubei.js: 12.2.0
 
   discord-player@7.0.0(@discord-player/extractor@7.0.0)(mediaplex@1.0.0):
     dependencies:
@@ -2913,7 +2911,7 @@ snapshots:
       '@discordjs/util': 1.1.1
       '@discordjs/ws': 1.2.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)
       '@sapphire/snowflake': 3.5.3
-      discord-api-types: 0.37.114
+      discord-api-types: 0.37.115
       fast-deep-equal: 3.1.3
       lodash.snakecase: 4.1.1
       tslib: 2.8.1
@@ -3308,9 +3306,9 @@ snapshots:
   p-queue@8.0.1:
     dependencies:
       eventemitter3: 5.0.1
-      p-timeout: 6.1.3
+      p-timeout: 6.1.4
 
-  p-timeout@6.1.3: {}
+  p-timeout@6.1.4: {}
 
   package-json-from-dist@1.0.1: {}
 
@@ -3705,7 +3703,7 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/f3c777b31638cc9c6ce7f4b7ba566ff0534b47dc:
+  youtubei.js@12.2.0:
     dependencies:
       '@bufbuild/protobuf': 2.2.3
       jintr: 3.2.0
