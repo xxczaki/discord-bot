@@ -9,6 +9,7 @@ await esbuild.build({
 	target: 'node20',
 	external: [
 		'@discord-player/extractor',
+		'@sentry/profiling-node',
 		'bufferutil',
 		'discord-player',
 		'discord-player-youtubei',
