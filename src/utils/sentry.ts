@@ -8,3 +8,5 @@ Sentry.init({
 	tracesSampleRate: 1.0,
 	profilesSampleRate: 1.0,
 });
+
+Sentry.profiler.startProfiler();
