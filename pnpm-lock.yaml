@@ -46,8 +46,8 @@ importers:
         specifier: ^2.4.2
         version: 2.4.2
       '@sentry/esbuild-plugin':
-        specifier: ^2.22.7
-        version: 2.22.7
+        specifier: ^2.23.0
+        version: 2.23.0
       '@sentry/node':
         specifier: ^8.48.0
         version: 8.48.0
@@ -76,8 +76,8 @@ importers:
         specifier: ^9.6.0
         version: 9.6.0
       typescript:
-        specifier: ^5.7.2
-        version: 5.7.2
+        specifier: ^5.7.3
+        version: 5.7.3
       ulid:
         specifier: ^2.3.0
         version: 2.3.0
@@ -763,12 +763,12 @@ packages:
     resolution: {integrity: sha512-xzvBr1Q1c4lCe7i6sRnrofxeO1QTP/LKQ6A6qy0iB4x5yfiSfARMEQEghojzTNALDTcv8En04qYNIco9/K9eZQ==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
 
-  '@sentry/babel-plugin-component-annotate@2.22.7':
-    resolution: {integrity: sha512-aa7XKgZMVl6l04NY+3X7BP7yvQ/s8scn8KzQfTLrGRarziTlMGrsCOBQtCNWXOPEbtxAIHpZ9dsrAn5EJSivOQ==}
+  '@sentry/babel-plugin-component-annotate@2.23.0':
+    resolution: {integrity: sha512-+uLqaCKeYmH/W2YUV1XHkFEtpHdx/aFjCQahPVsvXyqg13dfkR6jaygPL4DB5DJtUSmPFCUE3MEk9ZO5JlhJYg==}
     engines: {node: '>= 14'}
 
-  '@sentry/bundler-plugin-core@2.22.7':
-    resolution: {integrity: sha512-ouQh5sqcB8vsJ8yTTe0rf+iaUkwmeUlGNFi35IkCFUQlWJ22qS6OfvNjOqFI19e6eGUXks0c/2ieFC4+9wJ+1g==}
+  '@sentry/bundler-plugin-core@2.23.0':
+    resolution: {integrity: sha512-Qbw+jZFK63w+V193l0eCFKLzGba2Iu93Fx8kCRzZ3uqjky002H8U3pu4mKgcc11J+u8QTjfNZGUyXsxz0jv2mg==}
     engines: {node: '>= 14'}
 
   '@sentry/cli-darwin@2.39.1':
@@ -821,8 +821,8 @@ packages:
     resolution: {integrity: sha512-VGwYgTfLpvJ5LRO5A+qWo1gpo6SfqaGXL9TOzVgBucAdpzbrYHpZ87sEarDVq/4275uk1b0S293/mfsskFczyw==}
     engines: {node: '>=14.18'}
 
-  '@sentry/esbuild-plugin@2.22.7':
-    resolution: {integrity: sha512-KqbYxdBvbwsKOHipAL+r6Pw5+0ktX8OUr8L+eCkHVN/HGnZm3nGSAuUl2qYJOEzf1uiqLiYlmEfNGkiLmrR7XQ==}
+  '@sentry/esbuild-plugin@2.23.0':
+    resolution: {integrity: sha512-TYSbU9fJPKV9nJMDIDsMo+elyVxvFWgCm/EaEMRDnISt+Xkz0EX8/k/MbK871tLW3wCE44GdNX0xblPSR5zE8Q==}
     engines: {node: '>= 14'}
 
   '@sentry/node@8.48.0':
@@ -1805,8 +1805,8 @@ packages:
       typescript:
         optional: true
 
-  typescript@5.7.2:
-    resolution: {integrity: sha512-i5t66RHxDvVN40HfDd1PsEThGNnlMCMT3jMUuoh9/0TaqWevNontacunWyN02LA9/fIbEWlcHZcgTKb9QoaLfg==}
+  typescript@5.7.3:
+    resolution: {integrity: sha512-84MVSjMEHP+FQRPy3pX9sTVV/INIex71s9TL2Gm5FG/WG1SqXeKyZ0k7/blY/4FdOzI12CBy1vGc4og/eus0fw==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -2595,12 +2595,12 @@ snapshots:
 
   '@sapphire/snowflake@3.5.5': {}
 
-  '@sentry/babel-plugin-component-annotate@2.22.7': {}
+  '@sentry/babel-plugin-component-annotate@2.23.0': {}
 
-  '@sentry/bundler-plugin-core@2.22.7':
+  '@sentry/bundler-plugin-core@2.23.0':
     dependencies:
       '@babel/core': 7.26.0
-      '@sentry/babel-plugin-component-annotate': 2.22.7
+      '@sentry/babel-plugin-component-annotate': 2.23.0
       '@sentry/cli': 2.39.1
       dotenv: 16.4.7
       find-up: 5.0.0
@@ -2653,9 +2653,9 @@ snapshots:
 
   '@sentry/core@8.48.0': {}
 
-  '@sentry/esbuild-plugin@2.22.7':
+  '@sentry/esbuild-plugin@2.23.0':
     dependencies:
-      '@sentry/bundler-plugin-core': 2.22.7
+      '@sentry/bundler-plugin-core': 2.23.0
       unplugin: 1.0.1
       uuid: 9.0.1
     transitivePeerDependencies:
@@ -2918,8 +2918,8 @@ snapshots:
       '@discord-player/opus': 7.0.0
       '@discord-player/utils': 7.0.0
       '@types/ws': 8.5.13
-      tsup: 8.3.5(typescript@5.7.2)
-      typescript: 5.7.2
+      tsup: 8.3.5(typescript@5.7.3)
+      typescript: 5.7.3
     transitivePeerDependencies:
       - '@microsoft/api-extractor'
       - '@swc/core'
@@ -3621,7 +3621,7 @@ snapshots:
 
   tslib@2.8.1: {}
 
-  tsup@8.3.5(typescript@5.7.2):
+  tsup@8.3.5(typescript@5.7.3):
     dependencies:
       bundle-require: 5.1.0(esbuild@0.24.2)
       cac: 6.7.14
@@ -3640,14 +3640,14 @@ snapshots:
       tinyglobby: 0.2.10
       tree-kill: 1.2.2
     optionalDependencies:
-      typescript: 5.7.2
+      typescript: 5.7.3
     transitivePeerDependencies:
       - jiti
       - supports-color
       - tsx
       - yaml
 
-  typescript@5.7.2: {}
+  typescript@5.7.3: {}
 
   ulid@2.3.0: {}
 
