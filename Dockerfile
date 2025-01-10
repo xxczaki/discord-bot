@@ -38,4 +38,4 @@ WORKDIR /dist
 
 USER 1000:1000
 
-CMD ["node", "index.js"]
+CMD ["node", "--import", "./utils/sentry.js", "index.js"]

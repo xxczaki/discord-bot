@@ -3,7 +3,7 @@ import * as esbuild from 'esbuild';
 import esbuildPluginPino from 'esbuild-plugin-pino';
 
 await esbuild.build({
-	entryPoints: ['src/index.ts'],
+	entryPoints: ['src/index.ts', 'src/utils/sentry.ts'],
 	bundle: true,
 	platform: 'node',
 	target: 'node22',

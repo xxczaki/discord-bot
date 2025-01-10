@@ -1,5 +1,3 @@
-import('./utils/sentry');
-
 import { Util } from 'discord-player';
 import {
 	ActionRowBuilder,
