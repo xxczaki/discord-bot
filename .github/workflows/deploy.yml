@@ -52,4 +52,4 @@ jobs:
           KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
         run: |
           echo "$KUBE_CONFIG" > kubeconf.conf
-          kubectl delete pods -l app=discord-bot --kubeconfig kubeconf.conf
+          kubectl delete pods -l app=discord-bot --kubeconfig kubeconf.conf --namespace discord-bot
