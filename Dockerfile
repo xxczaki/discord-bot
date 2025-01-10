@@ -27,6 +27,9 @@ FROM node:22-alpine
 
 ENV TZ="Europe/Warsaw"
 
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nonroot -u 1001
+
 RUN apk update --no-cache && \
 		apk add --no-cache ffmpeg
 
@@ -35,5 +38,7 @@ COPY --from=build dist ./dist/
 COPY --from=build node_modules ./dist/node_modules/
 
 WORKDIR /dist
+
+USER nonroot
 
 CMD ["node", "index.js"]
