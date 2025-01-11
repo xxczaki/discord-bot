@@ -13,5 +13,9 @@ export default function determineSearchEngine(query: string): SearchQueryType {
 		return 'youtubeVideo';
 	}
 
-	return 'youtubeSearch';
+	if (query.startsWith('!yt')) {
+		return 'youtubeSearch';
+	}
+
+	return 'spotifySearch';
 }
