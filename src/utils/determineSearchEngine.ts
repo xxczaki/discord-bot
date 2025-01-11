@@ -13,5 +13,5 @@ export default function determineSearchEngine(query: string): SearchQueryType {
 		return 'youtubeVideo';
 	}
 
-	return 'spotifySearch';
+	return 'youtubeSearch';
 }
