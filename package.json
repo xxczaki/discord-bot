@@ -43,7 +43,8 @@
 	},
 	"pnpm": {
 		"overrides": {
-			"libsodium-wrappers": "npm:sodium-native@4.3.1"
+			"libsodium-wrappers": "npm:sodium-native@4.3.1",
+			"youtubei.js": "github:LuanRT/YouTube.js"
 		}
 	}
 }

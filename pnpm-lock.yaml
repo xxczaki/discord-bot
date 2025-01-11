@@ -6,6 +6,7 @@ settings:
 
 overrides:
   libsodium-wrappers: npm:sodium-native@4.3.1
+  youtubei.js: github:LuanRT/YouTube.js
 
 importers:
 
@@ -1915,8 +1916,9 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  youtubei.js@12.2.0:
-    resolution: {integrity: sha512-G+50qrbJCToMYhu8jbaHiS3Vf+RRul+CcDbz3hEGwHkGPh+zLiWwD6SS+YhYF+2/op4ZU5zDYQJrGqJ+wKh7Gw==}
+  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/50539bca9c45ff9fb8666d5a532bf1530778ce80:
+    resolution: {tarball: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/50539bca9c45ff9fb8666d5a532bf1530778ce80}
+    version: 12.2.0
 
   zlib-sync@0.1.9:
     resolution: {integrity: sha512-DinB43xCjVwIBDpaIvQqHbmDsnYnSt6HJ/yiB2MZQGTqgPcwBSZqLkimXwK8BvdjQ/MaZysb5uEenImncqvCqQ==}
@@ -2891,7 +2893,7 @@ snapshots:
     dependencies:
       tiny-typed-emitter: 2.1.0
       undici: 7.2.0
-      youtubei.js: 12.2.0
+      youtubei.js: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/50539bca9c45ff9fb8666d5a532bf1530778ce80
 
   discord-player@7.0.0(@discord-player/extractor@7.0.0)(mediaplex@1.0.0):
     dependencies:
@@ -3734,7 +3736,7 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  youtubei.js@12.2.0:
+  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/50539bca9c45ff9fb8666d5a532bf1530778ce80:
     dependencies:
       '@bufbuild/protobuf': 2.2.3
       jintr: 3.2.0
