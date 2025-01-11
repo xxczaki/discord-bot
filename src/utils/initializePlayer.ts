@@ -19,9 +19,9 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 			queryCache: new RedisQueryCache(redis),
 		});
 
+		await initializedPlayer.extractors.register(YoutubeiExtractor, {});
 		await initializedPlayer.extractors.register(SpotifyExtractor, {});
 		await initializedPlayer.extractors.register(SoundCloudExtractor, {});
-		await initializedPlayer.extractors.register(YoutubeiExtractor, {});
 
 		await initializedPlayer.extractors.loadMulti([
 			YoutubeiExtractor,
