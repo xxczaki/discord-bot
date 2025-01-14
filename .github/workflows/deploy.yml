@@ -46,7 +46,7 @@ jobs:
         env:
           TAG: ${{ github.sha }}
         run: |
-          sed -i -e 's/image: .*/'"image: xxczaki/discord-bot:$TAG/" ./discord-bot-deployment.yaml
+          sed -i 's/image: .*/'"image: xxczaki\/discord-bot:$TAG/" ./discord-bot-deployment.yaml
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Update xxczaki/discord-bot image tag
