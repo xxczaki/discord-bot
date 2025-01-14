@@ -17,5 +17,9 @@ export default function determineSearchEngine(query: string): SearchQueryType {
 		return 'youtubeSearch';
 	}
 
+	if (query.includes('spotify.com')) {
+		return 'spotifySong';
+	}
+
 	return 'spotifySearch';
 }
