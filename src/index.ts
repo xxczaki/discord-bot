@@ -156,5 +156,7 @@ const queueRecoveryService = QueueRecoveryService.getInstance();
 
 	resetPresence(client);
 
-	useDebugListeners(client);
+	if (process.env.NODE_ENV !== 'development') {
+		useDebugListeners(client);
+	}
 })();
