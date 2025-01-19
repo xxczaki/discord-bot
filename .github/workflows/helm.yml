@@ -46,7 +46,7 @@ jobs:
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.6.0
         with:
-          config: cr.yaml
+          charts_dir: helm
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           CR_KEY: Antoni Kępiński <spam+artifacthub@xxczaki.com>
