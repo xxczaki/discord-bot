@@ -25,6 +25,7 @@ jobs:
         uses: crazy-max/ghaction-import-gpg@v6
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
 
       - name: Export GPG key to legacy format
         run: gpg --export-secret-keys > ~/.gnupg/pubring.gpg
