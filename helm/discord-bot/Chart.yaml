@@ -31,5 +31,5 @@ dependencies:
 
 annotations:
   artifacthub.io/signKey: |
-    fingerprint: 670EBE237E59DB1A54CC81602E0FAB8159D0A119
+    fingerprint: 9C365333A7EBFC6AED1A0B2B28C62A078051AE35
     url: https://xxczaki.github.io/discord-bot/key.asc
