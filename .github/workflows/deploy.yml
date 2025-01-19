@@ -1,5 +1,12 @@
 name: Deploy
-on: push
+
+on:
+  workflow_run:
+    workflows: ["Lint"]
+    branches: [main]
+    types: 
+      - completed
+
 jobs:
   docker:
     name: Build image and push it to Docker Hub

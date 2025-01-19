@@ -1,5 +1,7 @@
 name: Lint
+
 on: push
+
 jobs:
   lint:
     name: Lint with Biome CLI
