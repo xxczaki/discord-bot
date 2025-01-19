@@ -1,6 +1,24 @@
 apiVersion: v1
 entries:
   discord-bot:
+  - annotations:
+      artifacthub.io/signKey: |
+        fingerprint: 9C365333A7EBFC6AED1A0B2B28C62A078051AE35
+        url: https://xxczaki.github.io/discord-bot/key.asc
+    apiVersion: v2
+    appVersion: 1.0.0
+    created: "2025-01-19T23:35:23.164448183Z"
+    dependencies:
+    - name: redis
+      repository: https://charts.bitnami.com/bitnami
+      version: ~20.6.3
+    description: "\U0001F3B5 Music bot for my private Discord server, powered by discord-player"
+    digest: 34b9a68ec11e0b1692c61f554c54d3c28d68cdd65b0f9c7eb704406c3e02d187
+    name: discord-bot
+    type: application
+    urls:
+    - https://github.com/xxczaki/discord-bot/releases/download/discord-bot-0.0.2/discord-bot-0.0.2.tgz
+    version: 0.0.2
   - apiVersion: v2
     appVersion: 1.0.0
     created: "2025-01-19T22:03:31.68443555Z"
@@ -17,4 +35,4 @@ entries:
     urls:
     - https://github.com/xxczaki/discord-bot/releases/download/discord-bot-0.0.1/discord-bot-0.0.1.tgz
     version: 0.0.1
-generated: "2025-01-19T22:03:31.684444256Z"
+generated: "2025-01-19T23:35:23.164457431Z"
