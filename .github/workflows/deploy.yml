@@ -42,6 +42,8 @@ jobs:
   github-helm:
     name: Update image tag in values.yaml
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     needs: docker
     steps:
       - name: Checkout
