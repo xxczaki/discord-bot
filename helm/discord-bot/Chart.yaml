@@ -28,3 +28,8 @@ dependencies:
 - name: redis
   version: ~20.6.3
   repository: https://charts.bitnami.com/bitnami
+
+annotations:
+  artifacthub.io/signKey: |
+    fingerprint: 670EBE237E59DB1A54CC81602E0FAB8159D0A119
+    url: https://xxczaki.github.io/discord-bot/key.asc
