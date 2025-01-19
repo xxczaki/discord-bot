@@ -1,0 +1,47 @@
+{
+	"$schema": "https://json-schema.org/draft-07/schema#",
+	"title": "Values",
+	"type": "object",
+	"required": ["secrets", "env"],
+	"properties": {
+		"secrets": {
+			"type": "object",
+			"required": ["token", "sentryDsn"],
+			"properties": {
+				"token": {
+					"type": "object",
+					"required": ["name", "key"],
+					"properties": {
+						"name": {
+							"type": "string"
+						},
+						"key": {
+							"type": "string"
+						}
+					}
+				},
+				"sentryDsn": {
+					"type": "object",
+					"required": ["name", "key"],
+					"properties": {
+						"name": {
+							"type": "string"
+						},
+						"key": {
+							"type": "string"
+						}
+					}
+				}
+			}
+		},
+		"env": {
+			"type": "object",
+			"required": ["clientId"],
+			"properties": {
+				"clientId": {
+					"type": "string"
+				}
+			}
+		}
+	}
+}
