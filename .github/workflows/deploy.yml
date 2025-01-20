@@ -70,9 +70,7 @@ jobs:
         env:
           PREVIOUS_VERSION: ${{ steps.previousTag.outputs.tag }}
         with:
-          cmd: |
-            NEXT_VERSION=${PREVIOUS_VERSION%.*}.$((${PREVIOUS_VERSION##*.} + 1))
-            yq -i '.version = env(NEXT_VERSION)' 'helm/discord-bot/Chart.yaml'
+          cmd: NEXT_VERSION=${PREVIOUS_VERSION%.*}.$((${PREVIOUS_VERSION##*.} + 1)) yq -i '.version = strenv(NEXT_VERSION)' 'helm/discord-bot/Chart.yaml'
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Update Helm chart
