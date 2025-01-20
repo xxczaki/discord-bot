@@ -4,10 +4,10 @@
 
 secrets:
   token:
-    name: secret
+    name: secrets
     key: token
   sentryDsn:
-    name: secret
+    name: secrets
     key: sentryDsn
 
 env:
