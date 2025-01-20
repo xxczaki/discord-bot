@@ -39,8 +39,8 @@ jobs:
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
           build-args: |
             GIT_COMMIT_SHA=${{ github.sha }}
-  github-helm:
-    name: Update image tag in values.yaml
+  helm:
+    name: Update image tag in values.yaml and bump versions
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -48,11 +48,31 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Modify image tag
+      - name: Update image tag and appVersion
+        uses: mikefarah/yq@master
         env:
           TAG: ${{ github.sha }}
-        run: |
-          sed -i 's/tag: .*/'"tag: $TAG/" ./helm/discord-bot/values.yaml
+        with:
+          cmd: |
+            yq -i '.tag = "$TAG"' 'helm/discord-bot/values.yaml'
+            yq -i '.appVersion = "$TAG"' 'helm/discord-bot/Chart.yaml'
+      - name: Get previous tag
+        id: previousTag
+        uses: WyriHaximus/github-action-get-previous-tag@v1
+      - name: Get current version
+        id: currentVersion
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq '.version' helm/discord-bot/Chart.yaml
+      - name: Update chart version
+        uses: mikefarah/yq@master
+        if: steps.previousTag.outputs.tag != steps.currentVersion.outputs.result
+        env:
+          PREVIOUS_VERSION: ${{ steps.previousTag.outputs.tag }}
+        with:
+          cmd: |
+            NEXT_VERSION=${PREVIOUS_VERSION%.*}.$((${PREVIOUS_VERSION##*.} + 1))
+            yq -i '.version = $NEXT_VERSION' 'helm/discord-bot/values.yaml'
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: Update values.yaml image tag
+          commit_message: Update Helm chart

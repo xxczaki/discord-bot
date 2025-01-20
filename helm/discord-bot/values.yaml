@@ -17,7 +17,7 @@ redis:
   architecture: 'standalone'
   auth:
     enabled: false
-
+  commonConfiguration: ""
 
 # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
 image:
