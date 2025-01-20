@@ -25,8 +25,8 @@ importers:
         specifier: ^7.1.0
         version: 7.1.0(@discord-player/extractor@7.1.0)(mediaplex@1.0.0)
       discord-player-youtubei:
-        specifier: ^1.3.7
-        version: 1.3.7
+        specifier: ^1.4.1
+        version: 1.4.1
       discord.js:
         specifier: ^14.17.3
         version: 14.17.3(bufferutil@4.0.9)(utf-8-validate@6.0.5)
@@ -1034,8 +1034,8 @@ packages:
   discord-api-types@0.37.115:
     resolution: {integrity: sha512-ivPnJotSMrXW8HLjFu+0iCVs8zP6KSliMelhr7HgcB2ki1QzpORkb26m71l1pzSnnGfm7gb5n/VtRTtpw8kXFA==}
 
-  discord-player-youtubei@1.3.7:
-    resolution: {integrity: sha512-EZ/ezfUC32VKtKY7CGcEdgeb/V/p9CyQoLwwjuiLxYSaeI4patGVGlCQP0v4cyK2yCJefDmfgjol0lXFwB1KrQ==}
+  discord-player-youtubei@1.4.1:
+    resolution: {integrity: sha512-cYgal164kVdi+05nNIdpGmAwWYNR7aQYGgMaWgr5cofPvFFR/NRAYKg+GZrTE+M/DA3YOOdsJ8kZUNpJqMRQVA==}
     hasBin: true
 
   discord-player@7.1.0:
@@ -2889,7 +2889,7 @@ snapshots:
 
   discord-api-types@0.37.115: {}
 
-  discord-player-youtubei@1.3.7:
+  discord-player-youtubei@1.4.1:
     dependencies:
       tiny-typed-emitter: 2.1.0
       undici: 7.2.0
