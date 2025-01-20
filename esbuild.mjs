@@ -25,6 +25,7 @@ await esbuild.build({
 			org: 'parsify-technologies',
 			project: 'icc-discord-bot',
 			telemetry: false,
+			silent: true,
 			release: {
 				name: process.env.SENTRY_RELEASE_NAME,
 			},
