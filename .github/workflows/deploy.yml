@@ -48,7 +48,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: xxczaki/charts
-          token: ${{ secrets.PAT }}
+          token: ${{ secrets.GH_PAT }}
           fetch-depth: 0
       - name: Update image tag and appVersion
         uses: mikefarah/yq@master
