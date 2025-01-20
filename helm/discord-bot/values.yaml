@@ -9,16 +9,13 @@ secrets:
   sentryDsn:
     name: secrets
     key: sentryDsn
-
 env:
   clientId: ""
-
 redis:
   architecture: 'standalone'
   auth:
     enabled: false
   commonConfiguration: ""
-
 # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
 image:
   repository: xxczaki/discord-bot
@@ -26,19 +23,16 @@ image:
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   tag: 7e85aa4536b5b5019592f71a3a598e11c43b3a42
-
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets:
-- name: registry-credentials
-
+  - name: registry-credentials
 securityContext:
   allowPrivilegeEscalation: false
   runAsNonRoot: true
   capabilities:
-    drop: [ "ALL" ]
+    drop: ["ALL"]
   seccompProfile:
     type: RuntimeDefault
-
 resources:
   requests:
     memory: "128Mi"
@@ -46,7 +40,6 @@ resources:
   limits:
     memory: "512Mi"
     cpu: "400m"
-
 # This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 readinessProbe:
   tcpSocket:
@@ -58,3 +51,5 @@ livenessProbe:
     port: 8000
   initialDelaySeconds: 10
   periodSeconds: 10
+tag: $TAG
+version: null
