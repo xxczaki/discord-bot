@@ -31,13 +31,6 @@ image:
 imagePullSecrets:
 - name: registry-credentials
 
-# This is for setting Kubernetes Annotations to a Pod.
-# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-podAnnotations: {}
-# This is for setting Kubernetes Labels to a Pod.
-# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-podLabels: {}
-
 securityContext:
   allowPrivilegeEscalation: false
   runAsNonRoot: true
@@ -65,5 +58,3 @@ livenessProbe:
     port: 8000
   initialDelaySeconds: 10
   periodSeconds: 10
-
-nodeSelector: {}
