@@ -48,6 +48,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Update image tag and appVersion
         uses: mikefarah/yq@master
         with:
@@ -64,7 +66,7 @@ jobs:
           cmd: yq '.version' helm/discord-bot/Chart.yaml
       - name: Update chart version
         uses: mikefarah/yq@master
-        if: steps.previousTag.outputs.tag == steps.currentVersion.outputs.result
+        if: steps.previousTag.outputs.tag == "discord-bot-${{ steps.currentVersion.outputs.result }}"
         env:
           PREVIOUS_VERSION: ${{ steps.previousTag.outputs.tag }}
         with:
