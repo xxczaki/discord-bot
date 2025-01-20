@@ -50,12 +50,10 @@ jobs:
         uses: actions/checkout@v4
       - name: Update image tag and appVersion
         uses: mikefarah/yq@master
-        env:
-          TAG: ${{ github.sha }}
         with:
           cmd: |
-            yq -i '.tag = "$TAG"' 'helm/discord-bot/values.yaml'
-            yq -i '.appVersion = "$TAG"' 'helm/discord-bot/Chart.yaml'
+            yq -i '.tag = "${{ github.sha }}"' 'helm/discord-bot/values.yaml'
+            yq -i '.appVersion = "${{ github.sha }}"' 'helm/discord-bot/Chart.yaml'
       - name: Get previous tag
         id: previousTag
         uses: WyriHaximus/github-action-get-previous-tag@v1
