@@ -68,7 +68,7 @@ jobs:
         uses: mikefarah/yq@master
         if: steps.previousTag.outputs.tag == "discord-bot-${{ steps.currentVersion.outputs.result }}"
         env:
-          PREVIOUS_VERSION: ${{ steps.previousTag.outputs.tag }}
+          PREVIOUS_VERSION: ${{ steps.currentVersion.outputs.result }}
         with:
           cmd: NEXT_VERSION=${PREVIOUS_VERSION%.*}.$((${PREVIOUS_VERSION##*.} + 1)) yq -i '.version = strenv(NEXT_VERSION)' 'helm/discord-bot/Chart.yaml'
       - uses: stefanzweifel/git-auto-commit-action@v5
