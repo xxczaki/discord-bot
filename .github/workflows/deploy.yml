@@ -64,7 +64,7 @@ jobs:
           cmd: yq '.version' helm/discord-bot/Chart.yaml
       - name: Update chart version
         uses: mikefarah/yq@master
-        if: steps.previousTag.outputs.tag != steps.currentVersion.outputs.result
+        if: steps.previousTag.outputs.tag == steps.currentVersion.outputs.result
         env:
           PREVIOUS_VERSION: ${{ steps.previousTag.outputs.tag }}
         with:
