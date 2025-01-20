@@ -34,7 +34,7 @@ spec:
           - name: CLIENT_ID
             value: {{ .Values.env.clientId }}
           - name: REDIS_URL
-            value: redis://redis-master.{{ .Release.Namespace }}.svc.cluster.local:6379
+            value: redis://discord-bot-redis-master.{{ .Release.Namespace }}.svc.cluster.local:6379
           - name: NODE_ENV
             value: "production"
           - name: SENTRY_DSN
