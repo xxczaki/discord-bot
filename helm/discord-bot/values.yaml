@@ -51,5 +51,5 @@ livenessProbe:
     port: 8000
   initialDelaySeconds: 10
   periodSeconds: 10
-tag: $TAG
+tag: 153a89822727f5b36d72210bf3fb00b483ab3330
 version: null
