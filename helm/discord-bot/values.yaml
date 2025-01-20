@@ -5,20 +5,17 @@ secrets:
   sentryDsn:
     name: secrets
     key: sentryDsn
-
 env:
   clientId: ""
-
 redis:
   architecture: 'standalone'
   auth:
     enabled: false
   commonConfiguration: ""
-
 image:
   repository: xxczaki/discord-bot
   pullPolicy: Always
-  tag: ad73734f4d1194b2799180e6e28d68d5845c8880
+  tag: 23c7db62d8780e7b3670f0a1810949a7e6e9daca
 imagePullSecrets:
   - name: registry-credentials
 securityContext:
@@ -28,7 +25,6 @@ securityContext:
     drop: ["ALL"]
   seccompProfile:
     type: RuntimeDefault
-
 resources:
   requests:
     memory: "128Mi"
@@ -36,7 +32,6 @@ resources:
   limits:
     memory: "512Mi"
     cpu: "400m"
-
 readinessProbe:
   tcpSocket:
     port: 8000

@@ -29,7 +29,7 @@ version: 0.2.3
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: ad73734f4d1194b2799180e6e28d68d5845c8880
+appVersion: 23c7db62d8780e7b3670f0a1810949a7e6e9daca
 dependencies:
   - name: redis
     version: ~20.6.3
