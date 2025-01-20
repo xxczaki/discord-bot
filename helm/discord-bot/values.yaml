@@ -51,5 +51,5 @@ livenessProbe:
     port: 8000
   initialDelaySeconds: 10
   periodSeconds: 10
-tag: 957465db204c0a906df99ce10c1d9910510e8795
+tag: ad73734f4d1194b2799180e6e28d68d5845c8880
 version: null
