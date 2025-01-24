@@ -27,18 +27,26 @@ jobs:
         uses: docker/setup-buildx-action@v3
       - name: Build and push
         uses: docker/build-push-action@v6
+        id: push
         with:
           context: .
-          platforms: linux/arm64
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: xxczaki/discord-bot:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          provenance: mode=max
           sbom: true
           secrets: |
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
           build-args: |
             GIT_COMMIT_SHA=${{ github.sha }}
+      - name: Attest
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: index.docker.io/xxczaki/discord-bot
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
   helm:
     name: Update Helm chart in xxczaki/charts
     runs-on: ubuntu-latest
