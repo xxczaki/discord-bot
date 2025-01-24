@@ -13,10 +13,11 @@ RUN pnpm fetch
 COPY package.json ./
 RUN pnpm install --offline
 
-ARG GIT_COMMIT_SHA
-
 COPY src ./src/
 COPY esbuild.mjs ./
+
+ARG GIT_COMMIT_SHA
+
 RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN,env=SENTRY_AUTH_TOKEN \ 
 		SENTRY_RELEASE_NAME=$GIT_COMMIT_SHA pnpm build
 
