@@ -41,12 +41,6 @@ jobs:
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
           build-args: |
             GIT_COMMIT_SHA=${{ github.sha }}
-      - name: Attest
-        uses: actions/attest-build-provenance@v2
-        with:
-          subject-name: index.docker.io/xxczaki/discord-bot
-          subject-digest: ${{ steps.push.outputs.digest }}
-          push-to-registry: true
   helm:
     name: Update Helm chart in xxczaki/charts
     runs-on: ubuntu-latest
