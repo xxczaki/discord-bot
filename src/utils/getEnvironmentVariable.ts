@@ -3,7 +3,10 @@ type EnvironmentVariableNames =
 	| 'CLIENT_ID'
 	| 'REDIS_URL'
 	| 'NODE_ENV'
-	| 'SENTRY_DSN';
+	| 'SENTRY_DSN'
+	| 'PLAYLISTS_CHANNEL_ID'
+	| 'BOT_DEBUG_CHANNEL_ID'
+	| 'OWNER_USER_ID';
 
 export default function getEnvironmentVariable(name: EnvironmentVariableNames) {
 	const rawVariable = process.env[name];

@@ -7,14 +7,16 @@ import {
 	type GuildMember,
 	StringSelectMenuBuilder,
 } from 'discord.js';
-import { PLAYLISTS_CHANNEL_ID } from '../constants/channelIds';
 import enqueuePlaylists from '../utils/enqueuePlaylists';
+import getEnvironmentVariable from '../utils/getEnvironmentVariable';
 import getPlaylists from '../utils/getPlaylists';
 
 export default async function playlistsCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
 ) {
-	const channel = interaction.client.channels.cache.get(PLAYLISTS_CHANNEL_ID);
+	const channel = interaction.client.channels.cache.get(
+		getEnvironmentVariable('PLAYLISTS_CHANNEL_ID'),
+	);
 
 	if (!channel?.isTextBased()) {
 		return interaction.reply('Invalid playlists channel type!');

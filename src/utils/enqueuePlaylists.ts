@@ -9,17 +9,18 @@ import {
 	type VoiceBasedChannel,
 } from 'discord.js';
 import Queue from 'p-queue';
-import { PLAYLISTS_CHANNEL_ID } from '../constants/channelIds';
 import cleanUpPlaylistContent from './cleanUpPlaylistContent';
 import determineSearchEngine from './determineSearchEngine';
+import getEnvironmentVariable from './getEnvironmentVariable';
 
 export default async function enqueuePlaylists(
 	interaction: StringSelectMenuInteraction<CacheType>,
 	voiceChannel: VoiceBasedChannel,
 ) {
 	const playlistIds = interaction.values.map((value) => `id="${value}"`);
-	const playlistsChannel =
-		interaction.client.channels.cache.get(PLAYLISTS_CHANNEL_ID);
+	const playlistsChannel = interaction.client.channels.cache.get(
+		getEnvironmentVariable('PLAYLISTS_CHANNEL_ID'),
+	);
 
 	if (!playlistsChannel?.isTextBased()) {
 		return interaction.reply({

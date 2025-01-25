@@ -8,7 +8,6 @@ import {
 	GatewayIntentBits,
 	PresenceUpdateStatus,
 } from 'discord.js';
-import { BOT_DEBUG_CHANNEL_ID } from './constants/channelIds';
 import useAutocompleteHandler from './hooks/useAutocompleteHandler';
 import useCommandHandlers from './hooks/useCommandHandlers';
 import useDebugListeners from './hooks/useDebugListeners';
@@ -123,7 +122,9 @@ const queueRecoveryService = QueueRecoveryService.getInstance();
 	client.on('ready', async () => {
 		logger.info(`Logged in as ${client.user?.tag}!`);
 
-		const channel = client.channels.cache.get(BOT_DEBUG_CHANNEL_ID);
+		const channel = client.channels.cache.get(
+			getEnvironmentVariable('BOT_DEBUG_CHANNEL_ID'),
+		);
 		const commitHash = process.env.GIT_COMMIT_SHA;
 		const wasDeploymentManual = !commitHash;
 

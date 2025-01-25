@@ -1,8 +1,10 @@
 import { type Server, createServer } from 'node:net';
 import { useMainPlayer } from 'discord-player';
 import type { Client } from 'discord.js';
-import { BOT_DEBUG_CHANNEL_ID } from '../constants/channelIds';
+import getEnvironmentVariable from '../utils/getEnvironmentVariable';
 import logger from '../utils/logger';
+
+const botDebugChannelId = getEnvironmentVariable('BOT_DEBUG_CHANNEL_ID');
 
 const server = createServer();
 
@@ -35,7 +37,7 @@ function initializeUnhandledErrorReporter(
 		logger.error(payload, 'Uncaught exception/rejection');
 		server.close();
 
-		const channel = client.channels.cache.get(BOT_DEBUG_CHANNEL_ID);
+		const channel = client.channels.cache.get(botDebugChannelId);
 
 		if (channel?.isSendable()) {
 			await channel.send(
@@ -49,7 +51,7 @@ function initializePlayerErrorReporter(client: Client<boolean>) {
 	return async (error: Error) => {
 		logger.error(error, 'Player error');
 
-		const channel = client.channels.cache.get(BOT_DEBUG_CHANNEL_ID);
+		const channel = client.channels.cache.get(botDebugChannelId);
 
 		if (channel?.isSendable()) {
 			await channel.send(

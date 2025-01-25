@@ -1,16 +1,18 @@
 import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
-import { OWNER_USER_ID } from '../constants/userIds';
+import getEnvironmentVariable from '../utils/getEnvironmentVariable';
 import logger from '../utils/logger';
 import redis from '../utils/redis';
+
+const ownerUserid = getEnvironmentVariable('OWNER_USER_ID');
 
 export default async function flushQueryCacheCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
 ) {
 	const userId = interaction.member?.user.id;
 
-	if (userId !== OWNER_USER_ID) {
+	if (userId !== ownerUserid) {
 		return interaction.reply(
-			`Only <@!${OWNER_USER_ID}> is allowed to run this command.`,
+			`Only <@!${ownerUserid}> is allowed to run this command.`,
 		);
 	}
 
