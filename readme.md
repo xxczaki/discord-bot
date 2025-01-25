@@ -6,7 +6,7 @@
 
 ## Features
 
-- Music playback, including from YouTube and SoundCloud
+- Music playback from YouTube
 - Search powered by Spotify
 - Based entirely on slash commands
 - Playlists stored on a dedicated channel
