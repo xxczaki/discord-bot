@@ -16,8 +16,8 @@ importers:
         specifier: ^7.1.0
         version: 7.1.0
       '@sentry/profiling-node':
-        specifier: ^8.51.0
-        version: 8.51.0
+        specifier: ^8.52.0
+        version: 8.52.0
       bufferutil:
         specifier: ^4.0.9
         version: 4.0.9
@@ -25,8 +25,8 @@ importers:
         specifier: ^7.1.0
         version: 7.1.0(@discord-player/extractor@7.1.0)(mediaplex@1.0.0)
       discord-player-youtubei:
-        specifier: ^1.4.1
-        version: 1.4.1
+        specifier: ^1.4.2
+        version: 1.4.2
       discord.js:
         specifier: ^14.17.3
         version: 14.17.3(bufferutil@4.0.9)(utf-8-validate@6.0.5)
@@ -50,11 +50,11 @@ importers:
         specifier: ^3.1.0
         version: 3.1.0
       '@sentry/node':
-        specifier: ^8.51.0
-        version: 8.51.0
+        specifier: ^8.52.0
+        version: 8.52.0
       '@types/node':
-        specifier: ^22.10.10
-        version: 22.10.10
+        specifier: ^22.12.0
+        version: 22.12.0
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
@@ -818,20 +818,20 @@ packages:
     engines: {node: '>= 10'}
     hasBin: true
 
-  '@sentry/core@8.51.0':
-    resolution: {integrity: sha512-Go0KxCYLw+OBIlLSv5YsYX+x9NW43fNVcyB6rhkSp2Q5Zme3tAE6KtZFvyu4SO7G/903wisW5Q6qV6UuK/ee4A==}
+  '@sentry/core@8.52.0':
+    resolution: {integrity: sha512-2j3B7IKmseTKFm6AyheJ+RSgXqIsx+3blFSuxpkdvsEt60Lbzva2uDkCENfBDOclioo1kvHgsyuXLfWW4A+wwA==}
     engines: {node: '>=14.18'}
 
   '@sentry/esbuild-plugin@3.1.0':
     resolution: {integrity: sha512-r8O4LdCQEggDc31ivXAwnzeedtgDQvDidornDmEUvdHSgwmU0QPhcUU/qzqk9AkwaVHO39X1mexkmMJPp59KSg==}
     engines: {node: '>= 14'}
 
-  '@sentry/node@8.51.0':
-    resolution: {integrity: sha512-KfXk3QaeNXmJgUUCDAwZW7cdZ+1GvRXNdTPLpWbAKGaNulAeimck5fGGL8FRMSF0sMz6BT6Ku7u6DUaZTtbB7w==}
+  '@sentry/node@8.52.0':
+    resolution: {integrity: sha512-k+GuWbLDcqIS766zF+TvVRnfbshNy6XKRd+HRNIEaeYa9Tm4LH/ZgCxz39AhFAQGWlZUHm/G2KkCt3AvgswJEg==}
     engines: {node: '>=14.18'}
 
-  '@sentry/opentelemetry@8.51.0':
-    resolution: {integrity: sha512-SvH/rl/P+S7EKXIZA6kq2HzFYfXKQx8Ytgx4WZJV+katsdaDay24QtycYE+PaqbotAkV6MOMECEb8a9XXttQcg==}
+  '@sentry/opentelemetry@8.52.0':
+    resolution: {integrity: sha512-NbGPsCZmXQW/B2wlgIjeIn9bCsNKhZGenB0DLK8ZIS/eDOI0JRBjHWMpLS9H9Q0xqgFBjyp+Gwyu3nEZcN4lXw==}
     engines: {node: '>=14.18'}
     peerDependencies:
       '@opentelemetry/api': ^1.9.0
@@ -840,8 +840,8 @@ packages:
       '@opentelemetry/sdk-trace-base': ^1.29.0
       '@opentelemetry/semantic-conventions': ^1.28.0
 
-  '@sentry/profiling-node@8.51.0':
-    resolution: {integrity: sha512-5tyb48P+wxmeqjk8vMv35aXoHQOV9InO3dQI1lLdQl5AzeHMyl+7CfW+LKc31u3V6Uqgr0ZAAafH1xS7gickSw==}
+  '@sentry/profiling-node@8.52.0':
+    resolution: {integrity: sha512-Omr2VFptPGM/+rMLcuzksTkMrCIXCUL2dHWoqbmA2+IRqX4QxDCzfxGCN7sw6yeQni3GpVyPkSMFc9oa3TiFDA==}
     engines: {node: '>=14.18'}
     hasBin: true
 
@@ -857,8 +857,8 @@ packages:
   '@types/mysql@2.15.26':
     resolution: {integrity: sha512-DSLCOXhkvfS5WNNPbfn2KdICAmk8lLc+/PNvnPnF7gOdMZCxopXduqv0OQ13y/yA/zXTSikZZqVgybUxOEg6YQ==}
 
-  '@types/node@22.10.10':
-    resolution: {integrity: sha512-X47y/mPNzxviAGY5TcYPtYL8JsY3kAq2n8fMmKoRCxq/c4v4pyGNCzM2R6+M5/umG4ZfHuT+sgqDYqWc9rJ6ww==}
+  '@types/node@22.12.0':
+    resolution: {integrity: sha512-Fll2FZ1riMjNmlmJOdAyY5pUbkftXslB5DgEzlIuNaiWhXd00FhWxVC/r4yV/4wBb9JfImTu+jiSvXTkJ7F/gA==}
 
   '@types/pg-pool@2.0.6':
     resolution: {integrity: sha512-TaAUE5rq2VQYxab5Ts7WZhKNmuN78Q6PiFonTDdpbx8a1H0M1vhy3rhiMjl+e2iHmogyMw7jZF4FrE6eJUy5HQ==}
@@ -1034,8 +1034,8 @@ packages:
   discord-api-types@0.37.115:
     resolution: {integrity: sha512-ivPnJotSMrXW8HLjFu+0iCVs8zP6KSliMelhr7HgcB2ki1QzpORkb26m71l1pzSnnGfm7gb5n/VtRTtpw8kXFA==}
 
-  discord-player-youtubei@1.4.1:
-    resolution: {integrity: sha512-cYgal164kVdi+05nNIdpGmAwWYNR7aQYGgMaWgr5cofPvFFR/NRAYKg+GZrTE+M/DA3YOOdsJ8kZUNpJqMRQVA==}
+  discord-player-youtubei@1.4.2:
+    resolution: {integrity: sha512-LEE6rnqOVuLwdkAjQC0xc/J4xOmBm2o5UPEZBjSFA1xVthx3y3VbCp4Y83j//OO0LWa/XU5szOQ9LXytISQxcg==}
     hasBin: true
 
   discord-player@7.1.0:
@@ -1916,8 +1916,8 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/6d57353a8021430a5253e2fb2c974ca98d731791:
-    resolution: {tarball: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/6d57353a8021430a5253e2fb2c974ca98d731791}
+  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/1c1577e85fd46cbfa15bcee6531d9aafdda787e5:
+    resolution: {tarball: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/1c1577e85fd46cbfa15bcee6531d9aafdda787e5}
     version: 13.0.0
 
   zlib-sync@0.1.9:
@@ -2653,7 +2653,7 @@ snapshots:
       - encoding
       - supports-color
 
-  '@sentry/core@8.51.0': {}
+  '@sentry/core@8.52.0': {}
 
   '@sentry/esbuild-plugin@3.1.0':
     dependencies:
@@ -2664,7 +2664,7 @@ snapshots:
       - encoding
       - supports-color
 
-  '@sentry/node@8.51.0':
+  '@sentry/node@8.52.0':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/context-async-hooks': 1.30.0(@opentelemetry/api@1.9.0)
@@ -2698,25 +2698,25 @@ snapshots:
       '@opentelemetry/sdk-trace-base': 1.30.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.28.0
       '@prisma/instrumentation': 5.22.0
-      '@sentry/core': 8.51.0
-      '@sentry/opentelemetry': 8.51.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@1.30.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.56.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.28.0)
+      '@sentry/core': 8.52.0
+      '@sentry/opentelemetry': 8.52.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@1.30.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.56.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.28.0)
       import-in-the-middle: 1.12.0
     transitivePeerDependencies:
       - supports-color
 
-  '@sentry/opentelemetry@8.51.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@1.30.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.56.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.28.0)':
+  '@sentry/opentelemetry@8.52.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@1.30.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.56.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.28.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.30.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.56.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-base': 1.30.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.28.0
-      '@sentry/core': 8.51.0
+      '@sentry/core': 8.52.0
 
-  '@sentry/profiling-node@8.51.0':
+  '@sentry/profiling-node@8.52.0':
     dependencies:
-      '@sentry/core': 8.51.0
-      '@sentry/node': 8.51.0
+      '@sentry/core': 8.52.0
+      '@sentry/node': 8.52.0
       detect-libc: 2.0.3
       node-abi: 3.71.0
     transitivePeerDependencies:
@@ -2726,15 +2726,15 @@ snapshots:
 
   '@types/connect@3.4.36':
     dependencies:
-      '@types/node': 22.10.10
+      '@types/node': 22.12.0
 
   '@types/estree@1.0.6': {}
 
   '@types/mysql@2.15.26':
     dependencies:
-      '@types/node': 22.10.10
+      '@types/node': 22.12.0
 
-  '@types/node@22.10.10':
+  '@types/node@22.12.0':
     dependencies:
       undici-types: 6.20.0
 
@@ -2744,7 +2744,7 @@ snapshots:
 
   '@types/pg@8.6.1':
     dependencies:
-      '@types/node': 22.10.10
+      '@types/node': 22.12.0
       pg-protocol: 1.7.0
       pg-types: 2.2.0
 
@@ -2752,11 +2752,11 @@ snapshots:
 
   '@types/tedious@4.0.14':
     dependencies:
-      '@types/node': 22.10.10
+      '@types/node': 22.12.0
 
   '@types/ws@8.5.13':
     dependencies:
-      '@types/node': 22.10.10
+      '@types/node': 22.12.0
 
   '@vladfrangu/async_event_emitter@2.4.6': {}
 
@@ -2889,11 +2889,11 @@ snapshots:
 
   discord-api-types@0.37.115: {}
 
-  discord-player-youtubei@1.4.1:
+  discord-player-youtubei@1.4.2:
     dependencies:
       tiny-typed-emitter: 2.1.0
       undici: 7.2.0
-      youtubei.js: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/6d57353a8021430a5253e2fb2c974ca98d731791
+      youtubei.js: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/1c1577e85fd46cbfa15bcee6531d9aafdda787e5
 
   discord-player@7.1.0(@discord-player/extractor@7.1.0)(mediaplex@1.0.0):
     dependencies:
@@ -3736,7 +3736,7 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/6d57353a8021430a5253e2fb2c974ca98d731791:
+  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/1c1577e85fd46cbfa15bcee6531d9aafdda787e5:
     dependencies:
       '@bufbuild/protobuf': 2.2.3
       jintr: 3.2.0
