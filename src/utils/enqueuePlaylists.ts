@@ -13,6 +13,9 @@ import Queue from 'p-queue';
 import cleanUpPlaylistContent from './cleanUpPlaylistContent';
 import determineSearchEngine from './determineSearchEngine';
 import getEnvironmentVariable from './getEnvironmentVariable';
+import pluralize from './pluralize';
+
+const pluralizeEntries = pluralize('entry', 'entries');
 
 export default async function enqueuePlaylists(
 	interaction: StringSelectMenuInteraction<CacheType>,
@@ -31,7 +34,7 @@ export default async function enqueuePlaylists(
 	}
 
 	const embed = new EmbedBuilder()
-		.setTitle('⏳ Processing playlist(s)')
+		.setTitle('⏳ Processing')
 		.setDescription('Fetching all the songs…');
 
 	await interaction.reply({
@@ -55,12 +58,14 @@ export default async function enqueuePlaylists(
 	let enqueued = 0;
 
 	playlistQueue.on('next', async () => {
+		const progress = songsArray.length - playlistQueue.pending;
+
 		await interaction.editReply({
 			content: null,
 			components: [],
 			embeds: [
 				embed.setDescription(
-					`${songsArray.length - playlistQueue.pending}/${songsArray.length} song(s) processed and added to the queue so far.`,
+					pluralizeEntries`${progress}/${songsArray.length} ${null} processed and added to the queue so far.`,
 				),
 			],
 		});
@@ -102,9 +107,9 @@ export default async function enqueuePlaylists(
 		content: null,
 		embeds: [
 			embed
-				.setTitle('✅ Playlist(s) loaded')
+				.setTitle('✅ Done')
 				.setDescription(
-					`${enqueued} song(s) had been processed and added to the queue.\n${
+					pluralizeEntries`${enqueued} ${null} had been processed and added to the queue.\n${
 						songsArray.length - enqueued
 					} skipped.`,
 				),

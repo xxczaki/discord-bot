@@ -4,6 +4,9 @@ import {
 } from 'discord.js';
 import cleanUpPlaylistContent from './cleanUpPlaylistContent';
 import isUrlSpotifyPlaylist from './isUrlSpotifyPlaylist';
+import pluralize from './pluralize';
+
+const pluralizeSongs = pluralize('song', 'songs');
 
 export default async function getPlaylists(channel: TextBasedChannel) {
 	const rawMessages = await channel.messages.fetch({ limit: 25, cache: true });
@@ -39,19 +42,14 @@ function getPlaylistDescription(songs: string[]) {
 		const adjustedSongsLength = songs.length - spotifyPlaylists.length;
 		const numberOfSongs =
 			adjustedSongsLength > 0
-				? `(+ ${pluralize(adjustedSongsLength, 'song', 'songs')})`
+				? pluralizeSongs`(+ ${adjustedSongsLength} ${null})`
 				: '';
 
-		return `${pluralize(spotifyPlaylists.length, 'Spotify playlist', 'Spotify playlists')} ${numberOfSongs}`.trim();
+		return pluralize(
+			'Spotify playlist',
+			'Spotify playlists',
+		)`${spotifyPlaylists.length} ${null} ${numberOfSongs}`.trim();
 	}
 
-	return pluralize(songs.length, 'song', 'songs');
-}
-
-function pluralize(number: number, ifOne: string, ifMany: string) {
-	if (number === 1) {
-		return `${number} ${ifOne}`;
-	}
-
-	return `${number} ${ifMany}`;
+	return pluralizeSongs`${songs.length} ${null}`;
 }

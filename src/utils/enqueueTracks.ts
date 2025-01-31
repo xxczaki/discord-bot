@@ -14,12 +14,15 @@ import {
 import Queue from 'p-queue';
 import determineSearchEngine from './determineSearchEngine';
 import logger from './logger';
+import pluralize from './pluralize';
 
 type Props = {
 	tracks: Track[];
 	progress: number;
 	voiceChannel: VoiceBasedChannel;
 };
+
+const pluralizeTracks = pluralize('track', 'tracks');
 
 export default async function enqueueTracks(
 	interaction: ButtonInteraction<CacheType>,
@@ -29,7 +32,7 @@ export default async function enqueueTracks(
 	const [{ url: firstTrackUrl }, ...toQueue] = tracks;
 
 	const embed = new EmbedBuilder()
-		.setTitle('⏳ Processing track(s)')
+		.setTitle('⏳ Processing')
 		.setDescription('Loading the initial track…');
 
 	await interaction.reply({
@@ -71,7 +74,7 @@ export default async function enqueueTracks(
 			components: [],
 			embeds: [
 				embed.setDescription(
-					`${tracks.length - tracksQueue.pending}/${tracks.length} track(s) processed and added to the queue so far.`,
+					pluralizeTracks`${tracks.length - tracksQueue.pending}/${tracks.length} ${null} processed and added to the queue so far.`,
 				),
 			],
 		});
@@ -129,8 +132,8 @@ export default async function enqueueTracks(
 	await interaction.editReply({
 		content: null,
 		embeds: [
-			embed.setTitle('✅ Track(s) loaded').setDescription(
-				`${enqueued} track(s) had been processed and added to the queue.\n${
+			embed.setTitle('✅ Done').setDescription(
+				pluralizeTracks`${enqueued} ${null} had been processed and added to the queue.\n${
 					tracks.length - enqueued - 1 // excludes `queue.currentTrack`
 				} skipped.`,
 			),

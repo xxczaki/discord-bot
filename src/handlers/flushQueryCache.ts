@@ -1,6 +1,7 @@
 import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
 import getEnvironmentVariable from '../utils/getEnvironmentVariable';
 import logger from '../utils/logger';
+import pluralize from '../utils/pluralize';
 import redis from '../utils/redis';
 
 const ownerUserid = getEnvironmentVariable('OWNER_USER_ID');
@@ -43,7 +44,10 @@ export default async function flushQueryCacheCommandHandler(
 
 		stream.on('end', async () => {
 			await interaction.editReply(
-				`✅ Flushed a total of ${deleted} key(s) from the query cache.`,
+				pluralize(
+					'key',
+					'keys',
+				)`✅ Flushed a total of ${deleted} ${null} from the query cache.`,
 			);
 
 			resolve(void 'empty');

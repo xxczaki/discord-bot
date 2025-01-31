@@ -10,6 +10,7 @@ import {
 } from 'discord.js';
 import { QueueRecoveryService } from '../utils/QueueRecoveryService';
 import enqueueTracks from '../utils/enqueueTracks';
+import pluralize from '../utils/pluralize';
 
 const queueRecoveryService = QueueRecoveryService.getInstance();
 
@@ -54,7 +55,10 @@ export default async function recoverCommandHandler(
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(yes, cancel);
 
 	const response = await interaction.editReply({
-		content: `Found a queue to recover, with ${tracks.length} track(s).\n`,
+		content: pluralize(
+			'track',
+			'tracks',
+		)`Found a queue to recover, with ${tracks.length} ${null}.\n`,
 		components: [row],
 	});
 

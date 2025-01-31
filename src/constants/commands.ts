@@ -119,7 +119,7 @@ const COMMANDS: ApplicationCommandData[] = [
 				type: 3,
 				choices: [
 					{
-						name: 'Approximate string matching (title, author)',
+						name: 'Title fuzzy matching',
 						value: 'fuzzy',
 					},
 					{ name: 'Bridged URL exactness', value: 'bridged' },

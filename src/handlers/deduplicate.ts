@@ -2,8 +2,11 @@ import { type Track, useQueue } from 'discord-player';
 import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
 import Fuse from 'fuse.js';
 import isObject from '../utils/isObject';
+import pluralize from '../utils/pluralize';
 
 const ALGORITHMS = ['fuzzy', 'bridged', 'source'] as const;
+
+const pluralizeDuplicates = pluralize('duplicate', 'duplicates');
 
 export default async function deduplicateCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
@@ -29,17 +32,14 @@ export default async function deduplicateCommandHandler(
 	switch (algorithm) {
 		case 'fuzzy': {
 			const fuse = new Fuse(fullQueue, {
-				keys: ['title', 'author'],
-				threshold: 0.1,
+				keys: ['title'],
+				threshold: 0.05,
 			});
 
 			let removed = 0;
 
 			for (const track of fullQueue) {
-				const matches = fuse.search({
-					title: track.title,
-					author: track.author,
-				});
+				const matches = fuse.search(track.title);
 
 				if (matches.length < 1) {
 					continue;
@@ -61,7 +61,9 @@ export default async function deduplicateCommandHandler(
 				return interaction.editReply('No duplicates were found.');
 			}
 
-			return interaction.editReply(`Removed ${removed} duplicate(s).`);
+			return interaction.editReply(
+				pluralizeDuplicates`Removed ${removed} ${null}.`,
+			);
 		}
 		case 'bridged':
 		case 'source': {
@@ -90,7 +92,9 @@ export default async function deduplicateCommandHandler(
 				return interaction.editReply('No duplicates were found.');
 			}
 
-			return interaction.editReply(`Removed ${removed} duplicate(s).`);
+			return interaction.editReply(
+				pluralizeDuplicates`Removed ${removed} ${null}.`,
+			);
 		}
 		default:
 			return interaction.editReply(
