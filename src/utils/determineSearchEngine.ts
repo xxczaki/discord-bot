@@ -1,4 +1,5 @@
 import type { SearchQueryType } from 'discord-player';
+import isUrlSpotifyPlaylist from './isUrlSpotifyPlaylist';
 
 export default function determineSearchEngine(query: string): SearchQueryType {
 	if (query.includes('youtube.com') || query.includes('youtu.be')) {
@@ -9,7 +10,7 @@ export default function determineSearchEngine(query: string): SearchQueryType {
 		return 'youtubeSearch';
 	}
 
-	if (query.includes('spotify.com/playlist')) {
+	if (isUrlSpotifyPlaylist(query)) {
 		return 'spotifyPlaylist';
 	}
 

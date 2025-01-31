@@ -1,3 +1,4 @@
+import { availableParallelism } from 'node:os';
 import {
 	type QueueFilters,
 	type Track,
@@ -11,6 +12,7 @@ import {
 	type VoiceBasedChannel,
 } from 'discord.js';
 import Queue from 'p-queue';
+import determineSearchEngine from './determineSearchEngine';
 import logger from './logger';
 
 type Props = {
@@ -24,7 +26,7 @@ export default async function enqueueTracks(
 	{ tracks, progress, voiceChannel }: Props,
 ) {
 	const player = useMainPlayer();
-	const [firstTrack, ...toQueue] = tracks;
+	const [{ url: firstTrackUrl }, ...toQueue] = tracks;
 
 	const embed = new EmbedBuilder()
 		.setTitle('⏳ Processing track(s)')
@@ -36,15 +38,24 @@ export default async function enqueueTracks(
 	});
 
 	try {
-		await player.play(voiceChannel, firstTrack.url, {
+		await player.play(voiceChannel, firstTrackUrl, {
+			searchEngine: determineSearchEngine(firstTrackUrl),
 			nodeOptions: {
 				metadata: interaction,
 				defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
+				preferBridgedMetadata: true,
 			},
 			audioPlayerOptions: {
 				seek: progress,
 			},
 			requestedBy: interaction.user.id,
+		});
+
+		await interaction.editReply({
+			components: [],
+			embeds: [
+				embed.setDescription('Starting to process the rest of the tracks…'),
+			],
 		});
 	} catch (error) {
 		logger.error(error, 'Queue recovery error (first track)');
@@ -52,7 +63,7 @@ export default async function enqueueTracks(
 
 	let enqueued = 0;
 
-	const tracksQueue = new Queue();
+	const tracksQueue = new Queue({ concurrency: availableParallelism() });
 
 	tracksQueue.on('next', async () => {
 		await interaction.editReply({
@@ -69,9 +80,11 @@ export default async function enqueueTracks(
 	await tracksQueue.addAll(
 		toQueue.map(({ url }) => async () => {
 			const promise = player.play(voiceChannel, url, {
+				searchEngine: determineSearchEngine(url),
 				nodeOptions: {
 					metadata: interaction,
 					defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
+					preferBridgedMetadata: true,
 				},
 				requestedBy: interaction.user.id,
 			});

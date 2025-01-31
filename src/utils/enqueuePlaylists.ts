@@ -1,3 +1,4 @@
+import { availableParallelism } from 'node:os';
 import { type QueueFilters, useMainPlayer, useQueue } from 'discord-player';
 import {
 	ActionRowBuilder,
@@ -48,7 +49,7 @@ export default async function enqueuePlaylists(
 		.map((message) => cleanUpPlaylistContent(message.content))
 		.join('\n');
 
-	const playlistQueue = new Queue();
+	const playlistQueue = new Queue({ concurrency: availableParallelism() });
 	const songsArray = songs.trim().split('\n');
 
 	let enqueued = 0;
@@ -69,11 +70,12 @@ export default async function enqueuePlaylists(
 
 	await playlistQueue.addAll(
 		songsArray.map((song) => async () => {
-			const promise = player.play(voiceChannel, song.replace('!sc', ''), {
+			const promise = player.play(voiceChannel, song, {
 				searchEngine: determineSearchEngine(song),
 				nodeOptions: {
 					metadata: interaction,
 					defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
+					preferBridgedMetadata: true,
 				},
 				requestedBy: interaction.user.id,
 			});

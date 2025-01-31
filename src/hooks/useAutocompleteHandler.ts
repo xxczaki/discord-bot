@@ -31,8 +31,9 @@ export default async function useAutocompleteHandler(
 
 		const player = useMainPlayer();
 
-		const data = await player.search(query.replace('!sc', ''), {
+		const data = await player.search(query, {
 			searchEngine: determineSearchEngine(query),
+			fallbackSearchEngine: 'youtubeSearch',
 			requestedBy: interaction.user,
 		});
 

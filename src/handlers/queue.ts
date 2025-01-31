@@ -1,4 +1,8 @@
-import { addMilliseconds, formatDistance } from 'date-fns';
+import {
+	addMilliseconds,
+	differenceInCalendarDays,
+	formatDistance,
+} from 'date-fns';
 import {
 	type GuildQueue,
 	QueueRepeatMode,
@@ -16,6 +20,7 @@ import {
 	type Message,
 } from 'discord.js';
 import getTrackPosition from '../utils/getTrackPosition';
+import getTrackThumbnail from '../utils/getTrackThumbnail';
 
 export default async function queueCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
@@ -55,11 +60,15 @@ export default async function queueCommandHandler(
 
 	const now = new Date();
 	const afterQueueEnds = addMilliseconds(new Date(), queue.estimatedDuration);
+	const dayDifference = differenceInCalendarDays(afterQueueEnds, now);
 
 	const trackEndsAt = afterQueueEnds.toLocaleTimeString('pl', {
 		hour: '2-digit',
 		minute: '2-digit',
 	});
+
+	const endingTime =
+		dayDifference === 0 ? trackEndsAt : `${trackEndsAt} (+${dayDifference})`;
 
 	const queueEmbed = new EmbedBuilder()
 		.setTitle('Queue')
@@ -78,7 +87,7 @@ export default async function queueCommandHandler(
 			},
 			{
 				name: 'Ending time',
-				value: !queue?.estimatedDuration ? 'N/A' : trackEndsAt,
+				value: !queue?.estimatedDuration ? 'N/A' : endingTime,
 				inline: true,
 			},
 		])
@@ -90,9 +99,7 @@ export default async function queueCommandHandler(
 				? ''
 				: `Page 1/${embedDescriptions.length} ${queue.repeatMode === QueueRepeatMode.QUEUE ? '· Repeat enabled 🔁' : ''}`,
 		})
-		.setThumbnail(
-			URL.canParse(currentTrack.thumbnail) ? currentTrack.thumbnail : null,
-		);
+		.setThumbnail(getTrackThumbnail(currentTrack));
 
 	const previous = new ButtonBuilder()
 		.setCustomId('0')

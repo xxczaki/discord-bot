@@ -111,7 +111,23 @@ const COMMANDS: ApplicationCommandData[] = [
 	},
 	{
 		name: 'deduplicate',
-		description: 'Removes duplicates from the queue (based on the track URLs).',
+		description: 'Removes duplicates from the queue.',
+		options: [
+			{
+				name: 'algorithm',
+				description: 'The deduplication algorithm',
+				type: 3,
+				choices: [
+					{
+						name: 'Approximate string matching (title, author)',
+						value: 'fuzzy',
+					},
+					{ name: 'Bridged URL exactness', value: 'bridged' },
+					{ name: 'Source URL exactness (legacy)', value: 'source' },
+				],
+				required: true,
+			},
+		],
 	},
 	{
 		name: 'sort',

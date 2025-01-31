@@ -27,11 +27,12 @@ export default async function playCommandHandler(
 	try {
 		const player = useMainPlayer();
 
-		const { track } = await player.play(channel, query.replace('!sc', ''), {
+		const { track } = await player.play(channel, query, {
 			searchEngine: determineSearchEngine(query),
 			nodeOptions: {
 				metadata: interaction,
 				defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
+				preferBridgedMetadata: true,
 			},
 			requestedBy: interaction.user.id,
 		});
