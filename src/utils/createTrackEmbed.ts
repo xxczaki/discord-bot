@@ -3,7 +3,11 @@ import { EmbedBuilder } from 'discord.js';
 import isObject from '../utils/isObject';
 import getTrackThumbnail from './getTrackThumbnail';
 
-export default function createTrackEmbed(track: Track, description: string) {
+export default function createTrackEmbed(
+	track: Track,
+	description: string,
+	isCached?: boolean,
+) {
 	const embed = new EmbedBuilder()
 		.setTitle(track.title)
 		.setDescription(description)
@@ -23,6 +27,12 @@ export default function createTrackEmbed(track: Track, description: string) {
 			inline: true,
 		});
 	}
+
+	embed.addFields({
+		name: 'Cached',
+		value: isCached ? '✅' : '❌',
+		inline: true,
+	});
 
 	return embed;
 }

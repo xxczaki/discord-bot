@@ -4,3 +4,4 @@ dist/
 infra/kubernetes/secrets.yaml
 .terraform
 infra/kubeconfig-cluster.yaml
+.DS_Store

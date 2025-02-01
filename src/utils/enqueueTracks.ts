@@ -46,7 +46,7 @@ export default async function enqueueTracks(
 			nodeOptions: {
 				metadata: interaction,
 				defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
-				preferBridgedMetadata: true,
+				enableStreamInterceptor: true,
 			},
 			audioPlayerOptions: {
 				seek: progress,
@@ -87,7 +87,7 @@ export default async function enqueueTracks(
 				nodeOptions: {
 					metadata: interaction,
 					defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
-					preferBridgedMetadata: true,
+					enableStreamInterceptor: true,
 				},
 				requestedBy: interaction.user.id,
 			});

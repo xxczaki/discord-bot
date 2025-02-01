@@ -1,10 +1,9 @@
 import { type Track, useQueue } from 'discord-player';
 import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
-import Fuse from 'fuse.js';
 import isObject from '../utils/isObject';
 import pluralize from '../utils/pluralize';
 
-const ALGORITHMS = ['fuzzy', 'bridged', 'source'] as const;
+const ALGORITHMS = ['bridged', 'source'] as const;
 
 const pluralizeDuplicates = pluralize('duplicate', 'duplicates');
 
@@ -30,41 +29,6 @@ export default async function deduplicateCommandHandler(
 	let fullQueue = [queue.currentTrack ?? [], ...queue.tracks.store].flat();
 
 	switch (algorithm) {
-		case 'fuzzy': {
-			const fuse = new Fuse(fullQueue, {
-				keys: ['title'],
-				threshold: 0.05,
-			});
-
-			let removed = 0;
-
-			for (const track of fullQueue) {
-				const matches = fuse.search(track.title);
-
-				if (matches.length < 1) {
-					continue;
-				}
-
-				for (const match of matches) {
-					if (match.refIndex === 0) {
-						continue;
-					}
-
-					queue.removeTrack(match.item);
-					removed++;
-
-					fuse.removeAt(match.refIndex);
-				}
-			}
-
-			if (removed === 0) {
-				return interaction.editReply('No duplicates were found.');
-			}
-
-			return interaction.editReply(
-				pluralizeDuplicates`Removed ${removed} ${null}.`,
-			);
-		}
 		case 'bridged':
 		case 'source': {
 			let removed = 0;

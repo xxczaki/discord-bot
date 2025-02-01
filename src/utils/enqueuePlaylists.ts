@@ -80,7 +80,7 @@ export default async function enqueuePlaylists(
 				nodeOptions: {
 					metadata: interaction,
 					defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
-					preferBridgedMetadata: true,
+					enableStreamInterceptor: true,
 				},
 				requestedBy: interaction.user.id,
 			});

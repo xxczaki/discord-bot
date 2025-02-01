@@ -118,10 +118,6 @@ const COMMANDS: ApplicationCommandData[] = [
 				description: 'The deduplication algorithm',
 				type: 3,
 				choices: [
-					{
-						name: 'Title fuzzy matching',
-						value: 'fuzzy',
-					},
 					{ name: 'Bridged URL exactness', value: 'bridged' },
 					{ name: 'Source URL exactness (legacy)', value: 'source' },
 				],
