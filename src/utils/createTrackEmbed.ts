@@ -6,7 +6,6 @@ import getTrackThumbnail from './getTrackThumbnail';
 export default function createTrackEmbed(
 	track: Track,
 	description: string,
-	isCached?: boolean,
 ) {
 	const embed = new EmbedBuilder()
 		.setTitle(track.title)
@@ -27,12 +26,6 @@ export default function createTrackEmbed(
 			inline: true,
 		});
 	}
-
-	embed.addFields({
-		name: 'Cached',
-		value: isCached ? '✅' : '❌',
-		inline: true,
-	});
 
 	return embed;
 }
