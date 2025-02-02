@@ -1,12 +1,4 @@
-import { createWriteStream, existsSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import {
-	QueryType,
-	type QueueFilters,
-	useMainPlayer,
-	useQueue,
-} from 'discord-player';
+import { type QueueFilters, useMainPlayer, useQueue } from 'discord-player';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -32,38 +24,17 @@ export default async function playCommandHandler(
 
 	const query = interaction.options.getString('query', true);
 
-	const fileName = Buffer.from(query).toString('base64url');
-	const filePath = join(tmpdir(), `${fileName}.pcm`);
-	const isCached = existsSync(filePath);
-
 	try {
 		const player = useMainPlayer();
 
-		const interceptor = player.createStreamInterceptor({
-			async shouldIntercept() {
-				return true;
-			},
-		});
-
-		const unsubscribe = interceptor.onStream(
-			async (_queue, _track, _format, stream) => {
-				const out = createWriteStream(filePath);
-
-				stream.interceptors.add(out);
-			},
-		);
-
-		const { track } = await player.play(channel, isCached ? filePath : query, {
-			searchEngine: isCached ? QueryType.FILE : determineSearchEngine(query),
+		const { track } = await player.play(channel, query, {
+			searchEngine: determineSearchEngine(query),
 			nodeOptions: {
 				metadata: interaction,
 				defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
-				enableStreamInterceptor: !isCached,
 			},
 			requestedBy: interaction.user.id,
 		});
-
-		unsubscribe();
 
 		const queue = useQueue();
 
