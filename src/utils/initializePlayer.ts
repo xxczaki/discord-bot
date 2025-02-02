@@ -1,6 +1,6 @@
 import {
-	SpotifyExtractor,
 	AttachmentExtractor,
+	SpotifyExtractor,
 } from '@discord-player/extractor';
 import { Player } from 'discord-player';
 import { YoutubeiExtractor } from 'discord-player-youtubei';

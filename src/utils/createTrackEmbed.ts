@@ -3,10 +3,7 @@ import { EmbedBuilder } from 'discord.js';
 import isObject from '../utils/isObject';
 import getTrackThumbnail from './getTrackThumbnail';
 
-export default function createTrackEmbed(
-	track: Track,
-	description: string,
-) {
+export default function createTrackEmbed(track: Track, description: string) {
 	const embed = new EmbedBuilder()
 		.setTitle(track.title)
 		.setDescription(description)
