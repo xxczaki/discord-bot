@@ -10,3 +10,6 @@ Sentry.init({
 });
 
 Sentry.profiler.startProfiler();
+
+// Exporting only to silence an esbuild warning
+export default Sentry;

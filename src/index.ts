@@ -24,7 +24,8 @@ import resetPresence from './utils/resetPresence';
 const statsHandler = StatsHandler.getInstance();
 const queueRecoveryService = QueueRecoveryService.getInstance();
 
-(async () => {
+// Exporting only to silence an esbuild warning
+export default (async () => {
 	await initializeCommands();
 
 	const client = new Client({

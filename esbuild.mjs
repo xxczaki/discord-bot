@@ -19,7 +19,6 @@ await esbuild.build({
 		'zlib-sync',
 	],
 	plugins: [
-		esbuildPluginPino({ transports: [] }),
 		sentryEsbuildPlugin({
 			authToken: process.env.SENTRY_AUTH_TOKEN,
 			org: 'parsify-technologies',
