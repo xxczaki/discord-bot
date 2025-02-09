@@ -1,5 +1,5 @@
 import { type Server, createServer } from 'node:net';
-import { useMainPlayer } from 'discord-player';
+import { type GuildQueue, useMainPlayer } from 'discord-player';
 import type { Client } from 'discord.js';
 import getEnvironmentVariable from '../utils/getEnvironmentVariable';
 import logger from '../utils/logger';
@@ -21,9 +21,9 @@ export default function useDebugListeners(client: Client<boolean>) {
 	const player = useMainPlayer();
 	const reportPlayerError = initializePlayerErrorReporter(client);
 
-	player.on('error', reportPlayerError);
-	player.events.on('error', async (_, error) => reportPlayerError(error));
-	player.events.on('playerError', async (_, error) => reportPlayerError(error));
+	player.on('error', async (error) => reportPlayerError(undefined, error));
+	player.events.on('error', reportPlayerError);
+	player.events.on('playerError', reportPlayerError);
 
 	player.on('debug', (message) => logger.debug({}, message));
 	player.events.on('debug', (_, message) => logger.debug({}, message));
@@ -48,14 +48,18 @@ function initializeUnhandledErrorReporter(
 }
 
 function initializePlayerErrorReporter(client: Client<boolean>) {
-	return async (error: Error) => {
+	return async (queue: GuildQueue | undefined, error: Error) => {
 		logger.error(error, 'Player error');
 
 		const channel = client.channels.cache.get(botDebugChannelId);
 
+		if (queue) {
+			queue.delete();
+		}
+
 		if (channel?.isSendable()) {
 			await channel.send(
-				'🛑 Encountered a player error, consider:\n- skipping the current track with `/skip`, or:\n- purging the queue with `/purge`.\n\nTo recover the queue later on, use `/recover`.',
+				'🛑 Encountered a player error – use `/recover` to resume the music playback.',
 			);
 		}
 	};
