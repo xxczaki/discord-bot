@@ -11,7 +11,7 @@ const rest = new REST({ version: '10' }).setToken(token);
 
 export default async function initializeCommands() {
 	try {
-		logger.info('Started refreshing application ommands.');
+		logger.info('Started refreshing application commands.');
 
 		await rest.put(Routes.applicationCommands(clientId), {
 			body: COMMANDS,
