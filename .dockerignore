@@ -1,7 +1,7 @@
 node_modules
 .env
 Dockerfile
-docker-compose.yml
+compose.yaml
 biome.json
 license
 .vscode
