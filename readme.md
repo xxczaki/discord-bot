@@ -15,7 +15,7 @@
 - Redis-backed playback statistics
 - Tic-tac-toe
 - Integration with Sentry
-- Logging powered by Pino, with an optional Grafana Loki integration
+- Extensive logging powered by Pino
 - Easy deployment with a Helm chart
 
 ## Deployment

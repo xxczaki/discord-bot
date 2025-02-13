@@ -14,13 +14,12 @@ await esbuild.build({
 		'discord-player',
 		'discord-player-youtubei',
 		'discord.js',
-		'pino-loki',
 		'sodium-native',
 		'utf-8-validate',
 		'zlib-sync',
 	],
 	plugins: [
-		esbuildPluginPino({ transports: ['pino-loki'] }),
+		esbuildPluginPino({ transports: [] }),
 		sentryEsbuildPlugin({
 			authToken: process.env.SENTRY_AUTH_TOKEN,
 			org: 'parsify-technologies',
