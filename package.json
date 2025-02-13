@@ -17,6 +17,7 @@
 		"discord-player": "^7.1.0",
 		"discord-player-youtubei": "^1.4.2",
 		"discord.js": "^14.18.0",
+		"pino-loki": "^2.5.0",
 		"sodium-native": "^4.3.1",
 		"utf-8-validate": "^6.0.5",
 		"zlib-sync": "^0.1.9"
@@ -34,7 +35,6 @@
 		"ioredis": "^5.5.0",
 		"p-queue": "^8.1.0",
 		"pino": "^9.6.0",
-		"pino-loki": "^2.5.0",
 		"typescript": "^5.7.3",
 		"ulid": "^2.3.0"
 	},

@@ -30,6 +30,9 @@ importers:
       discord.js:
         specifier: ^14.18.0
         version: 14.18.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)
+      pino-loki:
+        specifier: ^2.5.0
+        version: 2.5.0
       sodium-native:
         specifier: ^4.3.1
         version: 4.3.1
@@ -76,9 +79,6 @@ importers:
       pino:
         specifier: ^9.6.0
         version: 9.6.0
-      pino-loki:
-        specifier: ^2.5.0
-        version: 2.5.0
       typescript:
         specifier: ^5.7.3
         version: 5.7.3
