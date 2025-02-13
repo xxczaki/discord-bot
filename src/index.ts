@@ -20,6 +20,7 @@ import getCommitLink from './utils/getCommitLink';
 import getEnvironmentVariable from './utils/getEnvironmentVariable';
 import initializeCommands from './utils/initializeCommands';
 import getInitializedPlayer from './utils/initializePlayer';
+import isObject from './utils/isObject';
 import logger from './utils/logger';
 import resetPresence from './utils/resetPresence';
 
@@ -108,7 +109,12 @@ export default (async () => {
 				{
 					name: `"${track.title}" by ${track.author}`,
 					type: ActivityType.Listening,
-					url: track.url,
+					url:
+						isObject(track.metadata) &&
+						isObject(track.metadata.bridge) &&
+						track.metadata.bridge?.url
+							? `${track.metadata.bridge.url}`
+							: undefined,
 				},
 			],
 			status: PresenceUpdateStatus.Online,
