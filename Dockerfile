@@ -1,7 +1,6 @@
 FROM node:22-alpine AS base
 
-RUN apk update --no-cache && \
-		apk add --no-cache python3 make g++ && \
+RUN apk add --no-cache python3 make g++ && \
 		npm install --global corepack@0.31.0 && \
 		corepack enable
 
@@ -26,8 +25,7 @@ FROM node:22-alpine
 
 ENV TZ="Europe/Warsaw"
 
-RUN apk update --no-cache && \
-		apk add --no-cache ffmpeg
+RUN apk add --no-cache ffmpeg
 
 COPY --from=build package.json ./dist/
 COPY --from=build dist ./dist/
