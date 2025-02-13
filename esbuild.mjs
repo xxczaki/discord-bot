@@ -3,7 +3,7 @@ import * as esbuild from 'esbuild';
 import esbuildPluginPino from 'esbuild-plugin-pino';
 
 await esbuild.build({
-	entryPoints: ['src/index.ts', 'src/utils/sentry.ts'],
+	entryPoints: ['src/index.ts'],
 	bundle: true,
 	platform: 'node',
 	target: 'node22',
@@ -19,6 +19,7 @@ await esbuild.build({
 		'zlib-sync',
 	],
 	plugins: [
+		esbuildPluginPino({ transports: ['pino-loki'] }),
 		sentryEsbuildPlugin({
 			authToken: process.env.SENTRY_AUTH_TOKEN,
 			org: 'parsify-technologies',

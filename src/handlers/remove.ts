@@ -9,7 +9,10 @@ export default async function removeCommandHandler(
 	const trackNumber = Number.parseInt(query, 10);
 
 	if (Number.isNaN(trackNumber)) {
-		return interaction.reply('Please provide a number.');
+		return interaction.reply({
+			content: 'Please provide a number.',
+			flags: ['Ephemeral'],
+		});
 	}
 
 	try {
@@ -29,8 +32,9 @@ export default async function removeCommandHandler(
 			await interaction.reply(`Track "${trackToRemove.title}" removed.`);
 		}
 	} catch {
-		await interaction.reply(
-			'Could not remove the track, is the specified id correct?',
-		);
+		await interaction.reply({
+			content: 'Could not remove the track, is the specified id correct?',
+			flags: ['Ephemeral'],
+		});
 	}
 }

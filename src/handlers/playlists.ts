@@ -19,7 +19,10 @@ export default async function playlistsCommandHandler(
 	);
 
 	if (!channel?.isTextBased()) {
-		return interaction.reply('Invalid playlists channel type!');
+		return interaction.reply({
+			content: 'Invalid playlists channel type!',
+			flags: ['Ephemeral'],
+		});
 	}
 
 	const voiceChannel = (interaction.member as GuildMember).voice.channel;
@@ -28,6 +31,7 @@ export default async function playlistsCommandHandler(
 		return interaction.reply({
 			content: 'You are not connected to a voice channel!',
 			components: [],
+			flags: ['Ephemeral'],
 		});
 	}
 
@@ -53,6 +57,7 @@ export default async function playlistsCommandHandler(
 	const response = await interaction.reply({
 		content: 'Choose which playlists you want to enqueue:',
 		components: [selects, buttons],
+		flags: ['Ephemeral'],
 	});
 
 	try {

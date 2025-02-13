@@ -1,3 +1,5 @@
+import './utils/instrument';
+
 import { Util } from 'discord-player';
 import {
 	ActionRowBuilder,
@@ -35,9 +37,56 @@ export default (async () => {
 			GatewayIntentBits.GuildPresences,
 			GatewayIntentBits.MessageContent,
 		],
+		presence: {
+			activities: [
+				{
+					name: 'Idle, use /play to get started',
+					type: ActivityType.Custom,
+				},
+			],
+			status: PresenceUpdateStatus.Idle,
+		},
 	});
 
+	client.on('ready', async () => {
+		logger.info(`Logged in as ${client.user?.tag}!`);
+
+		const channel = client.channels.cache.get(
+			getEnvironmentVariable('BOT_DEBUG_CHANNEL_ID'),
+		);
+		const commitHash = process.env.GIT_COMMIT_SHA;
+		const wasDeploymentManual = !commitHash;
+
+		if (channel?.isSendable() && !wasDeploymentManual) {
+			await channel.send(
+				`🎶 Ready to play, running commit ${getCommitLink(commitHash)}.`,
+			);
+		}
+	});
+
+	await client.login(getEnvironmentVariable('TOKEN'));
+
 	const player = await getInitializedPlayer(client);
+
+	useDebugListeners(client);
+
+	client.on('interactionCreate', async (interaction) => {
+		if (!interaction.guild) {
+			throw new TypeError('Guild is not defined!');
+		}
+
+		const context = {
+			guild: interaction.guild,
+		};
+
+		player.context.provide(context, async () => {
+			await useAutocompleteHandler(interaction);
+
+			if (!interaction.isChatInputCommand()) return;
+
+			await useCommandHandlers(interaction);
+		});
+	});
 
 	player.events.on('playerStart', async (queue, track) => {
 		const embed = createTrackEmbed(track, 'Playing it now.');
@@ -119,46 +168,4 @@ export default (async () => {
 			queue.delete();
 		}
 	});
-
-	client.on('ready', async () => {
-		logger.info(`Logged in as ${client.user?.tag}!`);
-
-		const channel = client.channels.cache.get(
-			getEnvironmentVariable('BOT_DEBUG_CHANNEL_ID'),
-		);
-		const commitHash = process.env.GIT_COMMIT_SHA;
-		const wasDeploymentManual = !commitHash;
-
-		if (channel?.isSendable() && !wasDeploymentManual) {
-			await channel.send(
-				`🎶 Ready to play, running commit ${getCommitLink(commitHash)}.`,
-			);
-		}
-	});
-
-	client.on('interactionCreate', async (interaction) => {
-		if (!interaction.guild) {
-			throw new TypeError('Guild is not defined!');
-		}
-
-		const context = {
-			guild: interaction.guild,
-		};
-
-		player.context.provide(context, async () => {
-			await useAutocompleteHandler(interaction);
-
-			if (!interaction.isChatInputCommand()) return;
-
-			await useCommandHandlers(interaction);
-		});
-	});
-
-	await client.login(getEnvironmentVariable('TOKEN'));
-
-	resetPresence(client);
-
-	if (process.env.NODE_ENV !== 'development') {
-		useDebugListeners(client);
-	}
 })();

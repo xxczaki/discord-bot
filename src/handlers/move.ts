@@ -10,13 +10,19 @@ export default async function moveCommandHandler(
 	const from = Number.parseInt(query, 10) - 2;
 
 	if (Number.isNaN(from)) {
-		return interaction.reply('Please provide a number.');
+		return interaction.reply({
+			content: 'Please provide a number.',
+			flags: ['Ephemeral'],
+		});
 	}
 
 	const to = interaction.options.getInteger('to', true) - 2;
 
 	if (from === to) {
-		return interaction.reply('Nothing to move.');
+		return interaction.reply({
+			content: 'Nothing to move.',
+			flags: ['Ephemeral'],
+		});
 	}
 
 	try {
@@ -39,8 +45,9 @@ export default async function moveCommandHandler(
 			`Moved "${trackToMove.title}" to position \`${to + 2}\`.`,
 		);
 	} catch {
-		await interaction.reply(
-			'Could not move the track, are the specified positions correct?',
-		);
+		await interaction.reply({
+			content: 'Could not move the track, are the specified positions correct?',
+			flags: ['Ephemeral'],
+		});
 	}
 }

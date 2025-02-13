@@ -7,14 +7,15 @@
 ## Features
 
 - Music playback from YouTube
-- Search powered by Spotify
+- Cached search powered by Spotify or YouTube
 - Based entirely on slash commands
 - Playlists stored on a dedicated channel
-- Spotify-like normalization
+- Spotify-like volume normalization
 - Recovery mechanism to continue listening after an error
-- Playback statistics
+- Redis-backed playback statistics
 - Tic-tac-toe
 - Integration with Sentry
+- Logging powered by Pino, with an optional Grafana Loki integration
 - Easy deployment with a Helm chart
 
 ## Deployment

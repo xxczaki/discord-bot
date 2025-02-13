@@ -7,7 +7,9 @@ export default async function pauseCommandHandler(
 	const queue = useQueue();
 
 	if (queue?.node.isPaused()) {
-		return interaction.reply('The track is already paused.');
+		return interaction.reply(
+			'The track is already paused. Maybe you want to `/resume` it instead?',
+		);
 	}
 
 	queue?.node.setPaused(true);

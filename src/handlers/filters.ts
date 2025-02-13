@@ -48,6 +48,7 @@ export default async function filtersCommandHandler(
 	const response = await interaction.reply({
 		content: 'Choose which filters you want to toggle:',
 		components: [row],
+		flags: ['Ephemeral'],
 	});
 
 	try {

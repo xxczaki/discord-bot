@@ -12,21 +12,21 @@
 	"packageManager": "pnpm@10.3.0",
 	"dependencies": {
 		"@discord-player/extractor": "^7.1.0",
-		"@sentry/profiling-node": "^8.54.0",
+		"@sentry/profiling-node": "^9.0.1",
 		"bufferutil": "^4.0.9",
 		"discord-player": "^7.1.0",
 		"discord-player-youtubei": "^1.4.2",
-		"discord.js": "^14.17.3",
+		"discord.js": "^14.18.0",
 		"sodium-native": "^4.3.1",
 		"utf-8-validate": "^6.0.5",
 		"zlib-sync": "^0.1.9"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
-		"@discordjs/rest": "^2.4.2",
+		"@discordjs/rest": "^2.4.3",
 		"@sentry/esbuild-plugin": "^3.1.2",
-		"@sentry/node": "^8.54.0",
-		"@types/node": "^22.13.1",
+		"@sentry/node": "^9.0.1",
+		"@types/node": "^22.13.2",
 		"date-fns": "^4.1.0",
 		"esbuild": "^0.25.0",
 		"esbuild-plugin-pino": "^2.2.1",
@@ -34,6 +34,7 @@
 		"ioredis": "^5.5.0",
 		"p-queue": "^8.1.0",
 		"pino": "^9.6.0",
+		"pino-loki": "^2.5.0",
 		"typescript": "^5.7.3",
 		"ulid": "^2.3.0"
 	},
@@ -44,10 +45,13 @@
 		},
 		"onlyBuiltDependencies": [
 			"esbuild",
+			"@sentry/cli",
 			"@sentry/profiling-node",
+			"@sentry-internal/node-cpu-profiler",
 			"@biomejs/biome",
 			"utf-8-validate",
-			"bufferutil"
+			"bufferutil",
+			"zlib-sync"
 		]
 	}
 }

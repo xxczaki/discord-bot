@@ -20,9 +20,10 @@ export default async function recoverCommandHandler(
 	const voiceChannel = (interaction.member as GuildMember).voice.channel;
 
 	if (!voiceChannel) {
-		return interaction.editReply({
+		return interaction.reply({
 			content: 'You are not connected to a voice channel!',
 			components: [],
+			flags: ['Ephemeral'],
 		});
 	}
 

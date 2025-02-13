@@ -16,7 +16,7 @@ import {
 import type { Redis } from 'ioredis';
 
 export class RedisQueryCache implements QueryCacheProvider<Track> {
-	EXPIRY_TIMEOUT_MS = 1000 * 60 * 15; // 15 minutes
+	static EXPIRY_TIMEOUT_MS = 1000 * 60 * 15; // 15 minutes
 
 	constructor(public redis: Redis) {}
 
@@ -32,7 +32,7 @@ export class RedisQueryCache implements QueryCacheProvider<Track> {
 				: data.tracks.map((track) => serialize(track)),
 		);
 
-		await this.redis.setex(key, this.EXPIRY_TIMEOUT_MS, serialized);
+		await this.redis.setex(key, RedisQueryCache.EXPIRY_TIMEOUT_MS, serialized);
 	}
 
 	async getData(): Promise<DiscordPlayerQueryResultCache<Track<unknown>>[]> {

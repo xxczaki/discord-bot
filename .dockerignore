@@ -1,5 +1,4 @@
 node_modules
-fly.toml
 .env
 Dockerfile
 docker-compose.yml
@@ -7,5 +6,8 @@ biome.json
 license
 .vscode
 .gitub
-infra
 .github
+readme.md
+.nvmrc
+.gitignore
+.dockerignore

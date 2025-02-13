@@ -39,7 +39,10 @@ function initializeUnhandledErrorReporter(
 
 		const channel = client.channels.cache.get(botDebugChannelId);
 
-		if (channel?.isSendable()) {
+		if (
+			channel?.isSendable() &&
+			getEnvironmentVariable('NODE_ENV') !== 'development'
+		) {
 			await channel.send(
 				'☠️ Encountered a fatal error, the bot will restart promptly – consider using `/recover` afterward.',
 			);
@@ -57,7 +60,10 @@ function initializePlayerErrorReporter(client: Client<boolean>) {
 			queue.delete();
 		}
 
-		if (channel?.isSendable()) {
+		if (
+			channel?.isSendable() &&
+			getEnvironmentVariable('NODE_ENV') !== 'development'
+		) {
 			await channel.send(
 				'🛑 Encountered a player error – use `/recover` to resume the music playback.',
 			);

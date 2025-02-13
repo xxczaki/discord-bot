@@ -12,9 +12,10 @@ export default async function flushQueryCacheCommandHandler(
 	const userId = interaction.member?.user.id;
 
 	if (userId !== ownerUserid) {
-		return interaction.reply(
-			`Only <@!${ownerUserid}> is allowed to run this command.`,
-		);
+		return interaction.reply({
+			content: `Only <@!${ownerUserid}> is allowed to run this command.`,
+			flags: ['Ephemeral'],
+		});
 	}
 
 	const stream = redis.scanStream({

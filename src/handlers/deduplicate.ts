@@ -13,15 +13,19 @@ export default async function deduplicateCommandHandler(
 	const queue = useQueue();
 
 	if (!queue) {
-		return interaction.reply('The queue is empty.');
+		return interaction.reply({
+			content: 'The queue is empty.',
+			flags: ['Ephemeral'],
+		});
 	}
 
 	const algorithm = interaction.options.getString('algorithm', true);
 
 	if (!ALGORITHMS.includes(algorithm as (typeof ALGORITHMS)[number])) {
-		return interaction.reply(
-			'Incorrect deduplication algorithm specified, aborting…',
-		);
+		return interaction.reply({
+			content: 'Incorrect deduplication algorithm specified, aborting…',
+			flags: ['Ephemeral'],
+		});
 	}
 
 	await interaction.deferReply();

@@ -1,24 +1,26 @@
 {
 	"compilerOptions": {
-		"target": "ES2021",
-		"useDefineForClassFields": true,
+		// Enable latest features
+		"lib": ["ESNext"],
+		"target": "ESNext",
 		"module": "ESNext",
-		"lib": ["ES2021"],
-		"skipLibCheck": true,
+		"moduleDetection": "force",
+		"allowJs": true,
 
-		/* Bundler mode */
+		// Bundler mode
 		"moduleResolution": "bundler",
 		"allowImportingTsExtensions": true,
-		"resolveJsonModule": true,
-		"isolatedModules": true,
+		"verbatimModuleSyntax": true,
 		"noEmit": true,
 
-		/* Linting */
+		// Best practices
 		"strict": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
+		"skipLibCheck": true,
 		"noFallthroughCasesInSwitch": true,
-		"verbatimModuleSyntax": true
+
+		// Some stricter flags
+		"noUnusedLocals": true,
+		"noUnusedParameters": true
 	},
 	"include": ["src"]
 }

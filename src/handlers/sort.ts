@@ -7,7 +7,10 @@ export default async function sortCommandHandler(
 	const queue = useQueue();
 
 	if (!queue) {
-		return interaction.reply('The queue is empty.');
+		return interaction.reply({
+			content: 'The queue is empty.',
+			flags: ['Ephemeral'],
+		});
 	}
 
 	await interaction.deferReply();

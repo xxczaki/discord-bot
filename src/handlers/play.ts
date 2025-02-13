@@ -17,7 +17,10 @@ export default async function playCommandHandler(
 	const channel = (interaction.member as GuildMember).voice.channel;
 
 	if (!channel) {
-		return interaction.reply('You are not connected to a voice channel!');
+		return interaction.reply({
+			content: 'You are not connected to a voice channel!',
+			flags: ['Ephemeral'],
+		});
 	}
 
 	await interaction.deferReply();

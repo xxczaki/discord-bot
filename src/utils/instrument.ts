@@ -9,7 +9,5 @@ Sentry.init({
 	profilesSampleRate: 1.0,
 });
 
-Sentry.profiler.startProfiler();
-
 // Exporting only to silence an esbuild warning
 export default Sentry;
