@@ -8,11 +8,8 @@ RUN apk update --no-cache && \
 
 FROM base AS build
 
-COPY pnpm-lock.yaml ./
-RUN pnpm fetch
-
-COPY package.json ./
-RUN pnpm install --offline
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm fetch && pnpm install --offline
 
 COPY src ./src/
 COPY esbuild.mjs ./
