@@ -18,7 +18,6 @@
 		"discord-player-youtubei": "^1.4.2",
 		"discord.js": "^14.18.0",
 		"sodium-native": "^4.3.2",
-		"utf-8-validate": "^6.0.5",
 		"zlib-sync": "^0.1.9"
 	},
 	"devDependencies": {
@@ -48,7 +47,6 @@
 			"@sentry/profiling-node",
 			"@sentry-internal/node-cpu-profiler",
 			"@biomejs/biome",
-			"utf-8-validate",
 			"bufferutil",
 			"zlib-sync"
 		]

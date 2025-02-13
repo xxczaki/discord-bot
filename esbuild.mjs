@@ -15,7 +15,6 @@ await esbuild.build({
 		'discord-player-youtubei',
 		'discord.js',
 		'sodium-native',
-		'utf-8-validate',
 		'zlib-sync',
 	],
 	plugins: [

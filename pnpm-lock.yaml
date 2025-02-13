@@ -33,9 +33,6 @@ importers:
       sodium-native:
         specifier: ^4.3.2
         version: 4.3.2
-      utf-8-validate:
-        specifier: ^6.0.5
-        version: 6.0.5
       zlib-sync:
         specifier: ^0.1.9
         version: 0.1.9
@@ -3967,6 +3964,7 @@ snapshots:
   utf-8-validate@6.0.5:
     dependencies:
       node-gyp-build: 4.8.4
+    optional: true
 
   uuid@9.0.1: {}
 
