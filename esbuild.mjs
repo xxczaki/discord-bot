@@ -22,8 +22,8 @@ await esbuild.build({
 		esbuildPluginPino({ transports: [] }),
 		sentryEsbuildPlugin({
 			authToken: process.env.SENTRY_AUTH_TOKEN,
-			org: 'parsify-technologies',
-			project: 'icc-discord-bot',
+			org: 'parsify-tech',
+			project: 'discord-bot',
 			telemetry: false,
 			silent: true,
 			release: {
