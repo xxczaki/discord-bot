@@ -46,7 +46,7 @@ jobs:
           flavor: |
             latest=true
           tags: |
-            type=sha,format=long
+            type=sha,prefix=,format=long
       - name: Build and push
         uses: docker/build-push-action@v6
         id: push
@@ -68,12 +68,6 @@ jobs:
         uses: actions/attest-build-provenance@v2
         with:
           subject-name: ghcr.io/xxczaki/discord-bot
-          subject-digest: ${{ steps.push.outputs.digest }}
-          push-to-registry: true
-      - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v2
-        with:
-          subject-name: index.docker.io/xxczaki/discord-bot
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
 
