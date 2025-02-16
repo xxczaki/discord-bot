@@ -14,6 +14,7 @@ import { YoutubeiExtractor } from 'discord-player-youtubei';
 import type { Client } from 'discord.js';
 import { RedisQueryCache } from './RedisQueryCache';
 import defineCustomFilters from './defineCustomFilters';
+import isObject from './isObject';
 import redis from './redis';
 
 let initializedPlayer: Player;
@@ -30,7 +31,10 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 			const filePath = `/opus-cache/${Buffer.from(track.url).toString('base64url')}.opus`;
 
 			if (existsSync(filePath)) {
-				track.setMetadata({ isFromCache: true });
+				track.setMetadata({
+					...(isObject(track.metadata) ? track.metadata : {}),
+					isFromCache: true,
+				});
 
 				return createReadStream(filePath);
 			}

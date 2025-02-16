@@ -1,3 +1,4 @@
+import { captureException } from '@sentry/node';
 import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
 import getEnvironmentVariable from '../utils/getEnvironmentVariable';
 import logger from '../utils/logger';
@@ -37,6 +38,7 @@ export default async function flushQueryCacheCommandHandler(
 					deleted++;
 				} catch (error) {
 					logger.error(error);
+					captureException(error);
 				}
 			}
 

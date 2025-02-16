@@ -1,3 +1,4 @@
+import { captureException } from '@sentry/node';
 import { differenceInMinutes, format } from 'date-fns';
 import {
 	ActionRowBuilder,
@@ -121,6 +122,7 @@ export default async function latenessCommandHandler(
 						stats[expected.getTime()] = identifier;
 					} catch (error) {
 						logger.error(error);
+						captureException(error);
 					}
 				}
 

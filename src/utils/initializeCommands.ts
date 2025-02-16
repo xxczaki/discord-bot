@@ -1,3 +1,4 @@
+import { captureException } from '@sentry/node';
 import { REST, Routes } from 'discord.js';
 import COMMANDS from '../constants/commands';
 import getEnvironmentVariable from './getEnvironmentVariable';
@@ -20,5 +21,6 @@ export default async function initializeCommands() {
 		logger.info('Successfully reloaded application commands.');
 	} catch (error) {
 		logger.error(error, 'Application commands refresh failure');
+		captureException(error);
 	}
 }

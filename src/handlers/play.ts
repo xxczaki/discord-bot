@@ -1,3 +1,4 @@
+import { captureException } from '@sentry/node';
 import { type QueueFilters, useMainPlayer, useQueue } from 'discord-player';
 import {
 	ActionRowBuilder,
@@ -127,5 +128,6 @@ export default async function playCommandHandler(
 		}
 
 		logger.error(error);
+		captureException(error);
 	}
 }

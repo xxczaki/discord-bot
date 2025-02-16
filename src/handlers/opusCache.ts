@@ -1,6 +1,6 @@
 import { readdir, stat } from 'node:fs/promises';
 import { join } from 'node:path';
-import * as Sentry from '@sentry/node';
+import { captureException } from '@sentry/node';
 import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
 import prettyBytes from 'pretty-bytes';
 import getEnvironmentVariable from '../utils/getEnvironmentVariable';
@@ -41,7 +41,7 @@ export default async function opusCacheCommandHandler(
 		);
 	} catch (error) {
 		logger.error(error);
-		Sentry.captureException(error);
+		captureException(error);
 
 		await interaction.editReply(
 			'🛑 Something went wrong when trying to read the cache directory.',

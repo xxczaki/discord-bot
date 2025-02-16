@@ -7,6 +7,7 @@
 ## Features
 
 - Music playback from YouTube
+	- On-disk Opus file cache for subsequent streams
 - Cached search powered by Spotify or YouTube
 - Based entirely on slash commands
 - Playlists stored on a dedicated channel

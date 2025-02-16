@@ -1,3 +1,4 @@
+import { captureException } from '@sentry/node';
 import {
 	type CacheType,
 	type ChatInputCommandInteraction,
@@ -58,6 +59,7 @@ export default async function statsCommandHandler(
 					requestedStatsMap[value.requestedById] = 1;
 				} catch (error) {
 					logger.error(error);
+					captureException(error);
 				}
 			}
 

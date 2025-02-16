@@ -1,4 +1,5 @@
 import { availableParallelism } from 'node:os';
+import { captureException } from '@sentry/node';
 import {
 	type QueueFilters,
 	type Track,
@@ -61,6 +62,7 @@ export default async function enqueueTracks(
 		});
 	} catch (error) {
 		logger.error(error, 'Queue recovery error (first track)');
+		captureException(error);
 	}
 
 	let enqueued = 0;
@@ -97,6 +99,7 @@ export default async function enqueueTracks(
 			} catch (error) {
 				enqueued--;
 				logger.error(error, 'Queue recovery error (subsequent tracks)');
+				captureException(error);
 			}
 		}),
 	);

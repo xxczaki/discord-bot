@@ -1,4 +1,5 @@
 import { type Server, createServer } from 'node:net';
+import { captureException } from '@sentry/node';
 import { type GuildQueue, useMainPlayer } from 'discord-player';
 import type { Client } from 'discord.js';
 import getEnvironmentVariable from '../utils/getEnvironmentVariable';
@@ -16,7 +17,10 @@ export default function useDebugListeners(client: Client<boolean>) {
 	process.on('unhandledRejection', reportUnhandledError);
 	process.on('uncaughtException', reportUnhandledError);
 
-	client.on('error', (error) => logger.error(error, 'Client error'));
+	client.on('error', (error) => {
+		logger.error(error, 'Client error');
+		captureException(error);
+	});
 
 	const player = useMainPlayer();
 	const reportPlayerError = initializePlayerErrorReporter(client);
@@ -35,6 +39,7 @@ function initializeUnhandledErrorReporter(
 ) {
 	return async (payload: unknown) => {
 		logger.error(payload, 'Uncaught exception/rejection');
+		captureException(payload);
 		server.close();
 
 		const channel = client.channels.cache.get(botDebugChannelId);
@@ -53,6 +58,7 @@ function initializeUnhandledErrorReporter(
 function initializePlayerErrorReporter(client: Client<boolean>) {
 	return async (queue: GuildQueue | undefined, error: Error) => {
 		logger.error(error, 'Player error');
+		captureException(error);
 
 		const channel = client.channels.cache.get(botDebugChannelId);
 
