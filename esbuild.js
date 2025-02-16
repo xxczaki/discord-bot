@@ -6,6 +6,7 @@ await esbuild.build({
 	entryPoints: ['src/index.ts'],
 	bundle: true,
 	platform: 'node',
+	format: 'esm',
 	target: 'node22',
 	external: [
 		'@discord-player/extractor',
@@ -16,6 +17,12 @@ await esbuild.build({
 		'discord.js',
 		'sodium-native',
 		'zlib-sync',
+
+		// Dependencies incompatible with ESM bundling
+		'@sentry/node',
+		'pino',
+		'ioredis',
+		'ulid'
 	],
 	plugins: [
 		esbuildPluginPino({ transports: [] }),

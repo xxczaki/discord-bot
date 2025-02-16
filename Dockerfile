@@ -11,7 +11,7 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm fetch && pnpm install --offline
 
 COPY src ./src/
-COPY esbuild.mjs ./
+COPY esbuild.js ./
 
 ARG GIT_COMMIT_SHA
 

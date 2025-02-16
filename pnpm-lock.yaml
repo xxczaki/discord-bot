@@ -15,6 +15,9 @@ importers:
       '@discord-player/extractor':
         specifier: ^7.1.0
         version: 7.1.0
+      '@sentry/node':
+        specifier: ^9.1.0
+        version: 9.1.0
       '@sentry/profiling-node':
         specifier: ^9.1.0
         version: 9.1.0
@@ -30,9 +33,18 @@ importers:
       discord.js:
         specifier: ^14.18.0
         version: 14.18.0(bufferutil@4.0.9)
+      ioredis:
+        specifier: ^5.5.0
+        version: 5.5.0
+      pino:
+        specifier: ^9.6.0
+        version: 9.6.0
       sodium-native:
         specifier: ^4.3.2
         version: 4.3.2
+      ulid:
+        specifier: ^2.3.0
+        version: 2.3.0
       zlib-sync:
         specifier: ^0.1.9
         version: 0.1.9
@@ -46,9 +58,6 @@ importers:
       '@sentry/esbuild-plugin':
         specifier: ^3.1.2
         version: 3.1.2
-      '@sentry/node':
-        specifier: ^9.1.0
-        version: 9.1.0
       '@types/node':
         specifier: ^22.13.2
         version: 22.13.4
@@ -64,15 +73,9 @@ importers:
       fuse.js:
         specifier: ^7.1.0
         version: 7.1.0
-      ioredis:
-        specifier: ^5.5.0
-        version: 5.5.0
       p-queue:
         specifier: ^8.1.0
         version: 8.1.0
-      pino:
-        specifier: ^9.6.0
-        version: 9.6.0
       pino-pretty:
         specifier: ^13.0.0
         version: 13.0.0
@@ -82,9 +85,6 @@ importers:
       typescript:
         specifier: ^5.7.3
         version: 5.7.3
-      ulid:
-        specifier: ^2.3.0
-        version: 2.3.0
 
 packages:
 
