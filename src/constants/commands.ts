@@ -176,6 +176,10 @@ const COMMANDS: ApplicationCommandData[] = [
 		name: 'recover',
 		description: 'Attempts to recover a queue – useful in case of an error.',
 	},
+	{
+		name: 'opus_cache',
+		description: 'Fetches information about the Opus file cache.',
+	},
 ];
 
 export default COMMANDS;

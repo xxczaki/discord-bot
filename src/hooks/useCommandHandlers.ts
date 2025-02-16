@@ -7,6 +7,7 @@ import {
 	flushQueryCacheCommandHandler,
 	latenessCommandHandler,
 	moveCommandHandler,
+	opusCacheHandler,
 	pauseCommandHandler,
 	playCommandHandler,
 	playlistsCommandHandler,
@@ -119,6 +120,10 @@ export default async function useCommandHandlers(
 		}
 		case 'recover': {
 			await recoverCommandHandler(interaction);
+			break;
+		}
+		case 'opus_cache': {
+			await opusCacheHandler(interaction);
 			break;
 		}
 		default:
