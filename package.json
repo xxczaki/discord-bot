@@ -9,7 +9,7 @@
 		"lint": "biome check --write ./src",
 		"tsc": "tsc --noEmit"
 	},
-	"packageManager": "pnpm@10.3.0",
+	"packageManager": "pnpm@10.4.0",
 	"dependencies": {
 		"@discord-player/extractor": "^7.1.0",
 		"@sentry/profiling-node": "^9.1.0",
