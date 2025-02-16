@@ -1,5 +1,5 @@
 import pino from 'pino';
 
-const logger = pino({ level: 'debug' });
+const logger = pino();
 
 export default logger;

@@ -12,11 +12,17 @@ export default function createTrackEmbed(track: Track, description: string) {
 		.setAuthor({ name: track.author })
 		.setFields({ name: 'Duration', value: track.duration, inline: true });
 
-	if (!isObject(track.metadata) || !isObject(track.metadata.bridge)) {
+	if (!isObject(track.metadata)) {
 		return embed;
 	}
 
-	if (track.metadata.bridge?.url) {
+	if (track.metadata.isFromCache) {
+		embed.setFooter({
+			text: '♻️ Streaming from an offline cache',
+		});
+	}
+
+	if (isObject(track.metadata.bridge) && track.metadata.bridge?.url) {
 		embed.addFields({
 			name: 'Bridged URL',
 			value: `[YouTube](${track.metadata.bridge.url})`,
