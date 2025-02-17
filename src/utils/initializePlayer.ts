@@ -1,9 +1,6 @@
 import { createReadStream, createWriteStream, existsSync } from 'node:fs';
 import { Readable } from 'node:stream';
-import {
-	AttachmentExtractor,
-	SpotifyExtractor,
-} from '@discord-player/extractor';
+import { SpotifyExtractor } from '@discord-player/extractor';
 import {
 	InterceptedStream,
 	Player,
@@ -14,7 +11,7 @@ import { YoutubeiExtractor } from 'discord-player-youtubei';
 import type { Client } from 'discord.js';
 import { RedisQueryCache } from './RedisQueryCache';
 import defineCustomFilters from './defineCustomFilters';
-import isObject from './isObject';
+import getOpusCacheTrackPath from './getOpusCacheTrackPath';
 import redis from './redis';
 
 let initializedPlayer: Player;
@@ -28,11 +25,10 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 		});
 
 		onBeforeCreateStream(async (track) => {
-			const filePath = `/opus-cache/${Buffer.from(track.url).toString('base64url')}.opus`;
+			const filePath = getOpusCacheTrackPath(track.url);
 
 			if (existsSync(filePath)) {
 				track.setMetadata({
-					...(isObject(track.metadata) ? track.metadata : {}),
 					isFromCache: true,
 				});
 
@@ -51,7 +47,7 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 			const readable = isReadable ? stream : stream.stream;
 			const interceptor = new InterceptedStream();
 
-			const filePath = `/opus-cache/${Buffer.from(track.url).toString('base64url')}.opus`;
+			const filePath = getOpusCacheTrackPath(track.url);
 
 			interceptor.interceptors.add(createWriteStream(filePath));
 
@@ -67,12 +63,10 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 
 		await initializedPlayer.extractors.register(YoutubeiExtractor, {});
 		await initializedPlayer.extractors.register(SpotifyExtractor, {});
-		await initializedPlayer.extractors.register(AttachmentExtractor, {});
 
 		await initializedPlayer.extractors.loadMulti([
 			YoutubeiExtractor,
 			SpotifyExtractor,
-			AttachmentExtractor,
 		]);
 	}
 

@@ -1,23 +1,30 @@
 import type { Track } from 'discord-player';
 import isObject from './isObject';
 
+/*
+	Prefer Spotify thumbnails unless it's the default one with their logo.
+
+	In that case, try to use the YouTube thumbnail.
+*/
 export default function getTrackThumbnail(track: Track) {
-	const sourceThumbnail = URL.canParse(track.thumbnail)
-		? track.thumbnail
-		: null;
-
-	if (!isObject(track.metadata) || !isObject(track.metadata.bridge)) {
-		return sourceThumbnail;
+	if (!URL.canParse(track.thumbnail)) {
+		return null;
 	}
 
-	if (
-		// Prefer Spotify thumbnails unless it's the default one with their logo
-		track.thumbnail.includes('twitter_card-default') &&
-		typeof track.metadata.bridge?.thumbnail === 'string' &&
-		URL.canParse(track.metadata.bridge.thumbnail)
-	) {
-		return track.metadata.bridge.thumbnail;
+	if (track.thumbnail.includes('twitter_card-default')) {
+		if (!isObject(track.metadata) || !isObject(track.metadata.bridge)) {
+			return null;
+		}
+
+		if (
+			typeof track.metadata.bridge?.thumbnail === 'string' &&
+			URL.canParse(track.metadata.bridge.thumbnail)
+		) {
+			return track.metadata.bridge.thumbnail;
+		}
+
+		return null;
 	}
 
-	return sourceThumbnail;
+	return track.thumbnail;
 }

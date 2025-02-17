@@ -73,6 +73,9 @@ importers:
       fuse.js:
         specifier: ^7.1.0
         version: 7.1.0
+      memoize:
+        specifier: ^10.0.0
+        version: 10.0.0
       p-queue:
         specifier: ^8.1.0
         version: 8.1.0
@@ -1748,6 +1751,14 @@ packages:
   mediaplex@1.0.0:
     resolution: {integrity: sha512-2vj7Px34rNUmHKilpAagU7jNhKIyoG8/wZ/cvJQzUdhvul8ef03NOK3No3LWVZEF1Pi27VSFOwBvawli/B86hA==}
     engines: {node: '>= 10'}
+
+  memoize@10.0.0:
+    resolution: {integrity: sha512-H6cBLgsi6vMWOcCpvVCdFFnl3kerEXbrYh9q+lY6VXvQSmM6CkmV08VOwT+WE2tzIEqRPFfAq3fm4v/UIW6mSA==}
+    engines: {node: '>=18'}
+
+  mimic-function@5.0.1:
+    resolution: {integrity: sha512-VP79XUPxV2CigYP3jWwAUFSku2aKqBH7uTAapFWCBqutsbmDo96KY5o8uh6U+/YSIn5OxJnXp73beVkpqMIGhA==}
+    engines: {node: '>=18'}
 
   minimatch@8.0.4:
     resolution: {integrity: sha512-W0Wvr9HyFXZRGIDgCicunpQ299OKXs9RgZfaukz4qAW/pJhcpUfupc9c+OObPOFueNy8VSrZgEmDtk6Kh4WzDA==}
@@ -3901,6 +3912,12 @@ snapshots:
       mediaplex-win32-arm64-msvc: 1.0.0
       mediaplex-win32-ia32-msvc: 1.0.0
       mediaplex-win32-x64-msvc: 1.0.0
+
+  memoize@10.0.0:
+    dependencies:
+      mimic-function: 5.0.1
+
+  mimic-function@5.0.1: {}
 
   minimatch@8.0.4:
     dependencies:

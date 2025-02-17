@@ -1,6 +1,6 @@
 import './utils/instrument';
 
-import { Util } from 'discord-player';
+import { useQueue } from 'discord-player';
 import {
 	ActionRowBuilder,
 	ActivityType,
@@ -16,6 +16,7 @@ import useDebugListeners from './hooks/useDebugListeners';
 import { QueueRecoveryService } from './utils/QueueRecoveryService';
 import { StatsHandler } from './utils/StatsHandler';
 import createTrackEmbed from './utils/createTrackEmbed';
+import deleteOpusCacheEntry from './utils/deleteOpusCacheEntry';
 import getCommitLink from './utils/getCommitLink';
 import getEnvironmentVariable from './utils/getEnvironmentVariable';
 import initializeCommands from './utils/initializeCommands';
@@ -87,6 +88,24 @@ export default (async () => {
 
 			await useCommandHandlers(interaction);
 		});
+	});
+
+	client.on('voiceStateUpdate', async (oldState) => {
+		const queue = useQueue(oldState.guild.id);
+
+		await queueRecoveryService.saveQueue(queue);
+
+		const track = queue?.currentTrack;
+
+		if (!track) {
+			return;
+		}
+
+		if (isObject(track.metadata) && track.metadata.isFromCache) {
+			return;
+		}
+
+		await deleteOpusCacheEntry(track.url);
 	});
 
 	player.events.on('playerStart', async (queue, track) => {
@@ -163,15 +182,11 @@ export default (async () => {
 		resetPresence(client);
 	});
 
-	player.events.on('voiceStateUpdate', async (queue) => {
-		await queueRecoveryService.saveQueue(queue);
-
-		if (!queue.channel) {
+	player.events.on('playerSkip', async (_queue, track) => {
+		if (isObject(track.metadata) && track.metadata.isFromCache) {
 			return;
 		}
 
-		if (Util.isVoiceEmpty(queue.channel)) {
-			queue.delete();
-		}
+		await deleteOpusCacheEntry(track.url);
 	});
 })();

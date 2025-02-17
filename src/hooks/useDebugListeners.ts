@@ -2,7 +2,9 @@ import { type Server, createServer } from 'node:net';
 import { captureException } from '@sentry/node';
 import { type GuildQueue, useMainPlayer } from 'discord-player';
 import type { Client } from 'discord.js';
+import deleteOpusCacheEntry from '../utils/deleteOpusCacheEntry';
 import getEnvironmentVariable from '../utils/getEnvironmentVariable';
+import isObject from '../utils/isObject';
 import logger from '../utils/logger';
 
 const botDebugChannelId = getEnvironmentVariable('BOT_DEBUG_CHANNEL_ID');
@@ -63,6 +65,16 @@ function initializePlayerErrorReporter(client: Client<boolean>) {
 		const channel = client.channels.cache.get(botDebugChannelId);
 
 		if (queue) {
+			const track = queue.currentTrack;
+
+			if (
+				track &&
+				isObject(track.metadata) &&
+				!('isFromCache' in track.metadata)
+			) {
+				await deleteOpusCacheEntry(track.url);
+			}
+
 			queue.delete();
 		}
 
