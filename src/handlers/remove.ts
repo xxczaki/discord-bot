@@ -6,7 +6,7 @@ export default async function removeCommandHandler(
 ) {
 	const queue = useQueue();
 	const query = interaction.options.getString('query', true);
-	const trackNumber = Number.parseInt(query, 10);
+	const trackNumber = Number.parseInt(query, 10) - 2;
 
 	if (Number.isNaN(trackNumber)) {
 		return interaction.reply({
@@ -16,18 +16,18 @@ export default async function removeCommandHandler(
 	}
 
 	try {
-		const trackToRemove = queue?.tracks.at(trackNumber - 2);
+		const trackToRemove = queue?.tracks.at(trackNumber);
 
 		if (!trackToRemove) {
 			throw 'fallthrough to catch block';
 		}
 
-		if (trackNumber === 1) {
+		if (trackNumber < 0) {
 			queue?.node.skip();
 
 			await interaction.reply('Skipping the current track.');
 		} else {
-			queue?.removeTrack(trackNumber - 2);
+			queue?.removeTrack(trackNumber);
 
 			await interaction.reply(`Track "${trackToRemove.title}" removed.`);
 		}

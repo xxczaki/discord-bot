@@ -2,12 +2,15 @@ import type { QueueFilters } from 'discord-player';
 import { useQueue } from 'discord-player';
 import {
 	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle,
 	type CacheType,
 	type ChatInputCommandInteraction,
 	type SelectMenuComponentOptionData,
 	StringSelectMenuBuilder,
 	StringSelectMenuOptionBuilder,
 } from 'discord.js';
+import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
 
 type OptionData = SelectMenuComponentOptionData & { value: keyof QueueFilters };
 
@@ -41,47 +44,56 @@ export default async function filtersCommandHandler(
 		.setMinValues(0)
 		.setMaxValues(3);
 
-	const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+	const cancel = new ButtonBuilder()
+		.setCustomId('cancel')
+		.setLabel('Cancel')
+		.setStyle(ButtonStyle.Secondary);
+
+	const selects = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 		select,
 	);
+	const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents(cancel);
 
 	const response = await interaction.reply({
 		content: 'Choose which filters you want to toggle:',
-		components: [row],
+		components: [selects, buttons],
 		flags: ['Ephemeral'],
 	});
 
-	try {
-		const answer = await response.awaitMessageComponent({
-			time: 60_000, // 1 minute
-		});
+	const answer = await response.awaitMessageComponent({
+		time: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
+	});
 
-		if (answer.isStringSelectMenu()) {
-			const toToggle = [
-				...answer.values.filter(
-					(value) => !activeFilters.includes(value as keyof QueueFilters),
-				),
-				...activeFilters.filter((value) => !answer.values.includes(value)),
-			] as Array<keyof QueueFilters>;
+	if (answer.isButton()) {
+		return response.delete();
+	}
 
-			await answer.deferReply();
+	if (answer.isStringSelectMenu()) {
+		const toToggle = [
+			...answer.values.filter(
+				(value) => !activeFilters.includes(value as keyof QueueFilters),
+			),
+			...activeFilters.filter((value) => !answer.values.includes(value)),
+		] as Array<keyof QueueFilters>;
 
-			await queue?.filters.ffmpeg.toggle(toToggle);
+		await answer.deferReply();
 
-			return await answer.editReply({
-				content: 'The selected filters were toggled.',
-				components: [],
-			});
-		}
+		await queue?.filters.ffmpeg.toggle(toToggle);
 
-		await answer.editReply({
-			content: 'No filters were selected, aborting…',
+		await response.delete();
+
+		return answer.editReply({
+			content: 'The selected filters were toggled.',
 			components: [],
 		});
-	} catch {
-	} finally {
-		await response.delete();
 	}
+
+	await response.delete();
+
+	return answer.editReply({
+		content: 'No filters were selected, aborting…',
+		components: [],
+	});
 }
 
 function getFilters(activeFilters: Array<keyof QueueFilters>) {

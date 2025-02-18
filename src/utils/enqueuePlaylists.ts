@@ -10,6 +10,7 @@ import {
 	type VoiceBasedChannel,
 } from 'discord.js';
 import Queue from 'p-queue';
+import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
 import cleanUpPlaylistContent from './cleanUpPlaylistContent';
 import determineSearchEngine from './determineSearchEngine';
 import getEnvironmentVariable from './getEnvironmentVariable';
@@ -120,7 +121,7 @@ export default async function enqueuePlaylists(
 
 	try {
 		const answer = await response.awaitMessageComponent({
-			time: 60_000, // 1 minute
+			time: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
 		});
 
 		if (answer.customId === 'shuffle') {

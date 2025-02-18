@@ -6,20 +6,8 @@ import determineSearchEngine from '../utils/determineSearchEngine';
 import getTrackPosition from '../utils/getTrackPosition';
 import truncateString from '../utils/truncateString';
 
-const FUSE_CACHE_TTL_MS = 1000 * 60; // 1 minute
-
-let fuse:
-	| {
-			instance: Fuse<{
-				name: string;
-				value: string;
-			}>;
-			ttl: number;
-	  }
-	| undefined;
-
 async function useAutocompleteHandler(interaction: Interaction<CacheType>) {
-	if (!interaction.isAutocomplete()) {
+	if (!interaction.isAutocomplete() || interaction.responded) {
 		return;
 	}
 
@@ -75,12 +63,7 @@ async function useAutocompleteHandler(interaction: Interaction<CacheType>) {
 			};
 		});
 
-		if (!fuse || Date.now() - fuse.ttl > FUSE_CACHE_TTL_MS) {
-			fuse = {
-				instance: new Fuse(list, { keys: ['name'] }),
-				ttl: Date.now(),
-			};
-		}
+		const fuse = new Fuse(list, { keys: ['name'] });
 
 		const query = interaction.options.getString('query', true);
 
@@ -88,7 +71,7 @@ async function useAutocompleteHandler(interaction: Interaction<CacheType>) {
 			return interaction.respond(list.slice(0, 25));
 		}
 
-		const matches = fuse.instance.search(query);
+		const matches = fuse.search(query);
 		const results = matches.slice(0, 25).map(({ item }) => item);
 
 		return interaction.respond(results);

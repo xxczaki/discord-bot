@@ -7,6 +7,7 @@ import {
 	type GuildMember,
 	StringSelectMenuBuilder,
 } from 'discord.js';
+import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
 import enqueuePlaylists from '../utils/enqueuePlaylists';
 import getEnvironmentVariable from '../utils/getEnvironmentVariable';
 import getPlaylists from '../utils/getPlaylists';
@@ -60,24 +61,24 @@ export default async function playlistsCommandHandler(
 		flags: ['Ephemeral'],
 	});
 
-	try {
-		const answer = await response.awaitMessageComponent({
-			time: 60_000, // 1 minute
-		});
+	const answer = await response.awaitMessageComponent({
+		time: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
+	});
 
-		if (answer.isStringSelectMenu()) {
-			return await enqueuePlaylists(answer, voiceChannel);
-		}
-
-		if (answer.isButton()) {
-			return await response.delete();
-		}
-
-		await answer.reply({
-			content: 'No playlists were selected, aborting…',
-			components: [],
-		});
-	} finally {
-		await response.delete();
+	if (answer.isButton()) {
+		return response.delete();
 	}
+
+	if (answer.isStringSelectMenu()) {
+		await response.delete();
+
+		return enqueuePlaylists(answer, voiceChannel);
+	}
+
+	await response.delete();
+
+	return answer.reply({
+		content: 'No playlists were selected, aborting…',
+		components: [],
+	});
 }

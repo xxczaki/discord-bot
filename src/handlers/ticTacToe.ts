@@ -7,6 +7,7 @@ import {
 	type CacheType,
 	type ChatInputCommandInteraction,
 } from 'discord.js';
+import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
 
 const GRID_SIZE = 3;
 const EMPTY_CHARACTER = '‎';
@@ -24,7 +25,7 @@ export default async function ticTacToeCommandHandler(
 
 	try {
 		const answer = await response.awaitMessageComponent({
-			time: 60_000, // 1 minute
+			time: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
 		});
 
 		if (answer.isButton()) {
@@ -205,7 +206,7 @@ async function nextMove(
 
 	try {
 		const answer = await response.awaitMessageComponent({
-			time: 60_000, // 1 minute
+			time: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
 		});
 
 		if (answer.isButton()) {

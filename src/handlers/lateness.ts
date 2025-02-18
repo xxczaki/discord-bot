@@ -8,6 +8,7 @@ import {
 	type ChatInputCommandInteraction,
 	EmbedBuilder,
 } from 'discord.js';
+import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
 import { LatenessHandler } from '../utils/LatenessHandler';
 import logger from '../utils/logger';
 import redis from '../utils/redis';
@@ -46,7 +47,7 @@ export default async function latenessCommandHandler(
 
 		try {
 			const answer = await response.awaitMessageComponent({
-				time: 60_000, // 1 minute
+				time: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
 			});
 
 			switch (answer.customId) {

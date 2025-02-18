@@ -7,6 +7,7 @@ import {
 	type GuildMember,
 } from 'discord.js';
 import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
+import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
 import createTrackEmbed from '../utils/createTrackEmbed';
 import determineSearchEngine from '../utils/determineSearchEngine';
 import getTrackPosition from '../utils/getTrackPosition';
@@ -82,7 +83,7 @@ export default async function playCommandHandler(
 
 		try {
 			const answer = await response.awaitMessageComponent({
-				time: 60_000, // 1 minute
+				time: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
 			});
 
 			switch (answer.customId) {

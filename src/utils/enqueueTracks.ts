@@ -10,6 +10,7 @@ import {
 	type ButtonInteraction,
 	type CacheType,
 	EmbedBuilder,
+	type Message,
 	type VoiceBasedChannel,
 } from 'discord.js';
 import Queue from 'p-queue';
@@ -21,14 +22,21 @@ type Props = {
 	tracks: Track[];
 	progress: number;
 	voiceChannel: VoiceBasedChannel;
+	interaction: {
+		reply: ButtonInteraction<CacheType>['reply'] | Message['edit'];
+		editReply: ButtonInteraction<CacheType>['editReply'] | Message['edit'];
+		user: ButtonInteraction<CacheType>['user'] | Message['author'];
+	};
 };
 
 const pluralizeTracks = pluralize('track', 'tracks');
 
-export default async function enqueueTracks(
-	interaction: ButtonInteraction<CacheType>,
-	{ tracks, progress, voiceChannel }: Props,
-) {
+export default async function enqueueTracks({
+	tracks,
+	progress,
+	voiceChannel,
+	interaction,
+}: Props) {
 	const player = useMainPlayer();
 	const [{ url: firstTrackUrl }, ...toQueue] = tracks;
 

@@ -8,6 +8,7 @@ import {
 	type ComponentType,
 	type GuildMember,
 } from 'discord.js';
+import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
 import { QueueRecoveryService } from '../utils/QueueRecoveryService';
 import enqueueTracks from '../utils/enqueueTracks';
 import pluralize from '../utils/pluralize';
@@ -65,12 +66,21 @@ export default async function recoverCommandHandler(
 
 	try {
 		const answer = await response.awaitMessageComponent<ComponentType.Button>({
-			time: 60_000, // 1 minute
+			time: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
 		});
 
 		switch (answer.customId) {
 			case 'proceed':
-				return await enqueueTracks(answer, { tracks, progress, voiceChannel });
+				return await enqueueTracks({
+					tracks,
+					progress,
+					voiceChannel,
+					interaction: {
+						editReply: answer.editReply,
+						reply: answer.reply,
+						user: answer.user,
+					},
+				});
 			default:
 				return await interaction.editReply({
 					content: 'The queue will not be recovered.',

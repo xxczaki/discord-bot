@@ -7,6 +7,7 @@ import {
 	StringSelectMenuBuilder,
 	StringSelectMenuOptionBuilder,
 } from 'discord.js';
+import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
 
 export default async function tempoCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
@@ -61,7 +62,7 @@ export default async function tempoCommandHandler(
 
 	try {
 		const answer = await response.awaitMessageComponent({
-			time: 60_000, // 1 minute
+			time: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
 		});
 
 		if (answer.isStringSelectMenu()) {

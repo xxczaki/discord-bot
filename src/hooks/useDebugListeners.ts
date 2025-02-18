@@ -1,13 +1,17 @@
 import { type Server, createServer } from 'node:net';
 import { captureException } from '@sentry/node';
-import { type GuildQueue, useMainPlayer } from 'discord-player';
-import type { Client } from 'discord.js';
+import { type GuildQueue, type Player, useMainPlayer } from 'discord-player';
+import { type Client, EmbedBuilder } from 'discord.js';
+import { QueueRecoveryService } from '../utils/QueueRecoveryService';
 import deleteOpusCacheEntry from '../utils/deleteOpusCacheEntry';
+import enqueueTracks from '../utils/enqueueTracks';
 import getEnvironmentVariable from '../utils/getEnvironmentVariable';
 import isObject from '../utils/isObject';
 import logger from '../utils/logger';
 
 const botDebugChannelId = getEnvironmentVariable('BOT_DEBUG_CHANNEL_ID');
+
+const queueRecoveryService = QueueRecoveryService.getInstance();
 
 const server = createServer();
 
@@ -25,7 +29,7 @@ export default function useDebugListeners(client: Client<boolean>) {
 	});
 
 	const player = useMainPlayer();
-	const reportPlayerError = initializePlayerErrorReporter(client);
+	const reportPlayerError = initializePlayerErrorReporter(client, player);
 
 	player.on('error', async (error) => reportPlayerError(undefined, error));
 	player.events.on('error', reportPlayerError);
@@ -57,34 +61,78 @@ function initializeUnhandledErrorReporter(
 	};
 }
 
-function initializePlayerErrorReporter(client: Client<boolean>) {
+function initializePlayerErrorReporter(
+	client: Client<boolean>,
+	player: Player,
+) {
 	return async (queue: GuildQueue | undefined, error: Error) => {
 		logger.error(error, 'Player error');
-		captureException(error);
+		const sentryId = captureException(error);
 
-		const channel = client.channels.cache.get(botDebugChannelId);
+		const debugChannel = client.channels.cache.get(botDebugChannelId);
 
-		if (queue) {
-			const track = queue.currentTrack;
-
-			if (
-				track &&
-				isObject(track.metadata) &&
-				!('isFromCache' in track.metadata)
-			) {
-				await deleteOpusCacheEntry(track.url);
-			}
-
-			queue.delete();
+		if (!debugChannel?.isSendable()) {
+			return;
 		}
+
+		// getEnvironmentVariable('NODE_ENV') !== 'development'
+
+		const embed = new EmbedBuilder()
+			.setTitle('Player error')
+			.setDescription('Attempting to recover…')
+			.setColor('Red')
+			.setFields([
+				{
+					name: 'Sentry Issue ID',
+					value: sentryId ? `\`${sentryId}\`` : 'unavailable',
+				},
+			]);
+
+		const message = await debugChannel.send({ embeds: [embed] });
+
+		if (!queue) {
+			embed.setDescription('🛑 Unable to recover – no queue found.');
+			return message.edit({ embeds: [embed] });
+		}
+
+		const track = queue.currentTrack;
 
 		if (
-			channel?.isSendable() &&
-			getEnvironmentVariable('NODE_ENV') !== 'development'
+			track &&
+			isObject(track.metadata) &&
+			!('isFromCache' in track.metadata)
 		) {
-			await channel.send(
-				'🛑 Encountered a player error – use `/recover` to resume the music playback.',
-			);
+			await deleteOpusCacheEntry(track.url);
 		}
+
+		if (!queue.channel) {
+			embed.setDescription(
+				'🛑 Unable to recover – the queue has no voice channel associated with it.\n\nTip: try using the `/recover` command.',
+			);
+			return message.edit({ embeds: [embed] });
+		}
+
+		const { tracks, progress } = await queueRecoveryService.getContents(player);
+
+		if (tracks.length === 0) {
+			queue.delete();
+
+			embed.setDescription('🛑 Found nothing to recover.');
+			return message.edit({ embeds: [embed] });
+		}
+
+		await enqueueTracks({
+			tracks,
+			progress,
+			voiceChannel: queue.channel,
+			interaction: {
+				editReply: message.edit,
+				reply: message.edit,
+				user: message.author,
+			},
+		});
+
+		embed.setDescription('✅Recovery successful');
+		await message.edit({ embeds: [embed] });
 	};
 }

@@ -10,6 +10,7 @@ import {
 	GatewayIntentBits,
 	PresenceUpdateStatus,
 } from 'discord.js';
+import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from './constants/miscellaneous';
 import useAutocompleteHandler from './hooks/useAutocompleteHandler';
 import useCommandHandlers from './hooks/useCommandHandlers';
 import useDebugListeners from './hooks/useDebugListeners';
@@ -143,7 +144,7 @@ export default (async () => {
 
 		try {
 			const answer = await response.awaitMessageComponent({
-				time: 60_000, // 1 minute
+				time: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
 			});
 
 			if (answer.customId === 'skip') {

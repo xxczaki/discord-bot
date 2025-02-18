@@ -19,6 +19,7 @@ import {
 	type InteractionResponse,
 	type Message,
 } from 'discord.js';
+import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
 import getTrackPosition from '../utils/getTrackPosition';
 import getTrackThumbnail from '../utils/getTrackThumbnail';
 import isObject from '../utils/isObject';
@@ -164,7 +165,7 @@ async function componentResponseListener(
 
 	try {
 		const answer = await response.awaitMessageComponent({
-			time: 60_000, // 1 minute
+			time: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
 		});
 		const pageNumber = Number.parseInt(answer.customId, 10);
 
