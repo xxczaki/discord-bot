@@ -21,6 +21,7 @@ import {
 } from 'discord.js';
 import getTrackPosition from '../utils/getTrackPosition';
 import getTrackThumbnail from '../utils/getTrackThumbnail';
+import isObject from '../utils/isObject';
 
 export default async function queueCommandHandler(
 	interaction: ChatInputCommandInteraction<CacheType>,
@@ -48,10 +49,12 @@ export default async function queueCommandHandler(
 			currentDescriptionIndex++;
 		}
 
+		const isCached = isObject(track.metadata) && track.metadata.isFromCache;
+
 		const position = getTrackPosition(queue, track);
 		const entry = `${
 			currentDescriptionIndex === 0 ? position : position + 2
-		}. "${track.title}" by ${track.author} (*${track.duration}*)`;
+		}. ${isCached ? '♻️' : ''} "${track.title}" by ${track.author} (*${track.duration}*)`;
 
 		descriptionLength += entry.length;
 		embedDescriptions[currentDescriptionIndex][index] = entry;
@@ -69,6 +72,10 @@ export default async function queueCommandHandler(
 
 	const endingTime =
 		dayDifference === 0 ? trackEndsAt : `${trackEndsAt} (+${dayDifference})`;
+
+	const isCached =
+		isObject(currentTrack.metadata) &&
+		(currentTrack.metadata.isFromCache as boolean);
 
 	const queueEmbed = new EmbedBuilder()
 		.setTitle('Queue')
@@ -92,7 +99,7 @@ export default async function queueCommandHandler(
 			},
 		])
 		.setDescription(
-			`0. ${queue.node.isPaused() ? '⏸️' : '▶️'}${queue.repeatMode === QueueRepeatMode.TRACK ? '🔁' : ''} "${currentTrack.title}" by ${currentTrack.author} (*${currentTrack.duration}*)\n${embedDescriptions[0].join('\n')}`,
+			`0. ${queue.node.isPaused() ? '⏸️' : '▶️'}${queue.repeatMode === QueueRepeatMode.TRACK ? '🔁' : ''}${isCached ? '♻️' : ''} "${currentTrack.title}" by ${currentTrack.author} (*${currentTrack.duration}*)\n${embedDescriptions[0].join('\n')}`,
 		)
 		.setFooter({
 			text: !embedDescriptions.length
@@ -124,6 +131,7 @@ export default async function queueCommandHandler(
 
 	await componentResponseListener(response, {
 		currentTrack,
+		isCached,
 		queue,
 		queueEmbed,
 		embedDescriptions,
@@ -134,6 +142,7 @@ export default async function queueCommandHandler(
 
 type ListenerProps = {
 	currentTrack: Track;
+	isCached: boolean;
 	queue: GuildQueue;
 	queueEmbed: EmbedBuilder;
 	embedDescriptions: string[][];
@@ -145,8 +154,15 @@ async function componentResponseListener(
 	response: InteractionResponse<boolean> | Message<boolean>,
 	properties: ListenerProps,
 ) {
-	const { currentTrack, queue, queueEmbed, embedDescriptions, previous, next } =
-		properties;
+	const {
+		currentTrack,
+		isCached,
+		queue,
+		queueEmbed,
+		embedDescriptions,
+		previous,
+		next,
+	} = properties;
 
 	try {
 		const answer = await response.awaitMessageComponent({
@@ -154,7 +170,7 @@ async function componentResponseListener(
 		});
 		const pageNumber = Number.parseInt(answer.customId, 10);
 
-		const initialTrackInfo = `0. ${queue.node.isPaused() ? '⏸️' : '▶️'}${queue.repeatMode === QueueRepeatMode.TRACK ? '🔁' : ''} "${currentTrack.title}" by ${currentTrack.author} (*${currentTrack.duration}*)`;
+		const initialTrackInfo = `0. ${queue.node.isPaused() ? '⏸️' : '▶️'}${queue.repeatMode === QueueRepeatMode.TRACK ? '🔁' : ''}${isCached ? '♻️' : ''} "${currentTrack.title}" by ${currentTrack.author} (*${currentTrack.duration}*)`;
 
 		queueEmbed
 			.setDescription(

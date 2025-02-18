@@ -76,6 +76,9 @@ importers:
       memoize:
         specifier: ^10.0.0
         version: 10.0.0
+      p-debounce:
+        specifier: ^4.0.0
+        version: 4.0.0
       p-queue:
         specifier: ^8.1.0
         version: 8.1.0
@@ -1845,6 +1848,10 @@ packages:
   once@1.4.0:
     resolution: {integrity: sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==}
 
+  p-debounce@4.0.0:
+    resolution: {integrity: sha512-4Ispi9I9qYGO4lueiLDhe4q4iK5ERK8reLsuzH6BPaXn53EGaua8H66PXIFGrW897hwjXp+pVLrm/DLxN0RF0A==}
+    engines: {node: '>=12'}
+
   p-limit@3.1.0:
     resolution: {integrity: sha512-TYOanM3wGwNGsZN2cVTYPArw454xnXj5qmWF1bEoAc4+cU/ol7GVh7odevjp1FNHduHc3KZMcFduxU5Xc6uJRQ==}
     engines: {node: '>=10'}
@@ -2319,8 +2326,8 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/5394edc9bdde32ca96cd6f796d903827dccfbe76:
-    resolution: {tarball: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/5394edc9bdde32ca96cd6f796d903827dccfbe76}
+  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/0cb92d9620c13bf6b719b384f917ad2a658e15b1:
+    resolution: {tarball: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/0cb92d9620c13bf6b719b384f917ad2a658e15b1}
     version: 13.0.0
 
   zlib-sync@0.1.9:
@@ -3464,7 +3471,7 @@ snapshots:
     dependencies:
       tiny-typed-emitter: 2.1.0
       undici: 7.3.0
-      youtubei.js: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/5394edc9bdde32ca96cd6f796d903827dccfbe76
+      youtubei.js: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/0cb92d9620c13bf6b719b384f917ad2a658e15b1
 
   discord-player@7.2.0-dev.2(@discord-player/extractor@7.1.0)(mediaplex@1.0.0)(postcss@8.5.2)(tsx@4.19.2):
     dependencies:
@@ -3987,6 +3994,8 @@ snapshots:
     dependencies:
       wrappy: 1.0.2
 
+  p-debounce@4.0.0: {}
+
   p-limit@3.1.0:
     dependencies:
       yocto-queue: 0.1.0
@@ -4448,7 +4457,7 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/5394edc9bdde32ca96cd6f796d903827dccfbe76:
+  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/0cb92d9620c13bf6b719b384f917ad2a658e15b1:
     dependencies:
       '@bufbuild/protobuf': 2.2.3
       jintr: 3.2.0

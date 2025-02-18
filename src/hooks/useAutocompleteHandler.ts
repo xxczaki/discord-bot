@@ -1,6 +1,7 @@
 import { useMainPlayer, useQueue } from 'discord-player';
 import type { CacheType, Interaction } from 'discord.js';
 import Fuse from 'fuse.js';
+import debounce from 'p-debounce';
 import determineSearchEngine from '../utils/determineSearchEngine';
 import getTrackPosition from '../utils/getTrackPosition';
 import truncateString from '../utils/truncateString';
@@ -17,9 +18,7 @@ let fuse:
 	  }
 	| undefined;
 
-export default async function useAutocompleteHandler(
-	interaction: Interaction<CacheType>,
-) {
+async function useAutocompleteHandler(interaction: Interaction<CacheType>) {
 	if (!interaction.isAutocomplete()) {
 		return;
 	}
@@ -95,3 +94,5 @@ export default async function useAutocompleteHandler(
 		return interaction.respond(results);
 	}
 }
+
+export default debounce(useAutocompleteHandler, 250);

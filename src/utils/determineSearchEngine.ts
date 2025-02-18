@@ -1,7 +1,8 @@
 import type { SearchQueryType } from 'discord-player';
+import memoize from 'memoize';
 import isUrlSpotifyPlaylist from './isUrlSpotifyPlaylist';
 
-export default function determineSearchEngine(query: string): SearchQueryType {
+function determineSearchEngine(query: string): SearchQueryType {
 	if (query.includes('youtube.com') || query.includes('youtu.be')) {
 		return 'youtubeVideo';
 	}
@@ -20,3 +21,5 @@ export default function determineSearchEngine(query: string): SearchQueryType {
 
 	return 'spotifySearch';
 }
+
+export default memoize(determineSearchEngine);
