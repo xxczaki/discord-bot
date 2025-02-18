@@ -1,4 +1,5 @@
-import type { Track } from 'discord-player';
+import { type Track, serialize } from 'discord-player';
+import memoize from 'memoize';
 import isObject from './isObject';
 
 /*
@@ -6,7 +7,7 @@ import isObject from './isObject';
 
 	In that case, try to use the YouTube thumbnail.
 */
-export default function getTrackThumbnail(track: Track) {
+function getTrackThumbnail(track: Track) {
 	if (!URL.canParse(track.thumbnail)) {
 		return null;
 	}
@@ -28,3 +29,7 @@ export default function getTrackThumbnail(track: Track) {
 
 	return track.thumbnail;
 }
+
+export default memoize(getTrackThumbnail, {
+	cacheKey: ([track]) => serialize(track),
+});

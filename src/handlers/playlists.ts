@@ -77,7 +77,7 @@ export default async function playlistsCommandHandler(
 			content: 'No playlists were selected, aborting…',
 			components: [],
 		});
-	} catch {
+	} finally {
 		await response.delete();
 	}
 }

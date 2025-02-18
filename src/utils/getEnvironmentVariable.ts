@@ -1,3 +1,5 @@
+import memoize from 'memoize';
+
 type EnvironmentVariableNames =
 	| 'TOKEN'
 	| 'CLIENT_ID'
@@ -8,7 +10,7 @@ type EnvironmentVariableNames =
 	| 'BOT_DEBUG_CHANNEL_ID'
 	| 'OWNER_USER_ID';
 
-export default function getEnvironmentVariable(name: EnvironmentVariableNames) {
+function getEnvironmentVariable(name: EnvironmentVariableNames) {
 	const rawVariable = process.env[name];
 
 	if (typeof rawVariable === 'undefined') {
@@ -17,3 +19,5 @@ export default function getEnvironmentVariable(name: EnvironmentVariableNames) {
 
 	return rawVariable;
 }
+
+export default memoize(getEnvironmentVariable);

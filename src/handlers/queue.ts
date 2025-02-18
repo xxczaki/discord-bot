@@ -49,12 +49,10 @@ export default async function queueCommandHandler(
 			currentDescriptionIndex++;
 		}
 
-		const isCached = isObject(track.metadata) && track.metadata.isFromCache;
-
 		const position = getTrackPosition(queue, track);
 		const entry = `${
 			currentDescriptionIndex === 0 ? position : position + 2
-		}. ${isCached ? '♻️' : ''} "${track.title}" by ${track.author} (*${track.duration}*)`;
+		}. "${track.title}" by ${track.author} (*${track.duration}*)`;
 
 		descriptionLength += entry.length;
 		embedDescriptions[currentDescriptionIndex][index] = entry;

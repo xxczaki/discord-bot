@@ -1,9 +1,10 @@
-import type { Track } from 'discord-player';
+import { type Track, serialize } from 'discord-player';
 import { EmbedBuilder } from 'discord.js';
+import memoize from 'memoize';
 import isObject from '../utils/isObject';
 import getTrackThumbnail from './getTrackThumbnail';
 
-export default function createTrackEmbed(track: Track, description: string) {
+function createTrackEmbed(track: Track, description: string) {
 	const embed = new EmbedBuilder()
 		.setTitle(track.title)
 		.setDescription(description)
@@ -32,3 +33,7 @@ export default function createTrackEmbed(track: Track, description: string) {
 
 	return embed;
 }
+
+export default memoize(createTrackEmbed, {
+	cacheKey: ([track]) => serialize(track),
+});
