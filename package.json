@@ -10,31 +10,31 @@
 		"lint": "biome check --write ./src",
 		"tsc": "tsc --noEmit"
 	},
-	"packageManager": "pnpm@10.4.0",
+	"packageManager": "pnpm@10.5.2",
 	"dependencies": {
 		"@discord-player/extractor": "^7.1.0",
-		"@sentry/node": "^9.1.0",
-		"@sentry/profiling-node": "^9.1.0",
+		"@sentry/node": "^9.2.0",
+		"@sentry/profiling-node": "^9.2.0",
 		"bufferutil": "^4.0.9",
 		"discord-player": "^7.2.0-dev.2",
 		"discord-player-youtubei": "^1.4.2",
 		"discord.js": "^14.18.0",
 		"ioredis": "^5.5.0",
 		"pino": "^9.6.0",
-		"sodium-native": "^4.3.2",
+		"sodium-native": "^4.3.3",
 		"ulid": "^2.3.0",
 		"zlib-sync": "^0.1.9"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
 		"@discordjs/rest": "^2.4.3",
-		"@sentry/esbuild-plugin": "^3.1.2",
-		"@types/node": "^22.13.2",
+		"@sentry/esbuild-plugin": "^3.2.1",
+		"@types/node": "^22.13.5",
 		"date-fns": "^4.1.0",
 		"esbuild": "^0.25.0",
 		"esbuild-plugin-pino": "^2.2.1",
 		"fuse.js": "^7.1.0",
-		"memoize": "^10.0.0",
+		"memoize": "^10.1.0",
 		"p-debounce": "^4.0.0",
 		"p-queue": "^8.1.0",
 		"pino-pretty": "^13.0.0",
@@ -43,7 +43,7 @@
 	},
 	"pnpm": {
 		"overrides": {
-			"libsodium-wrappers": "npm:sodium-native@4.3.1",
+			"libsodium-wrappers": "npm:sodium-native@4.3.3",
 			"youtubei.js": "github:LuanRT/YouTube.js"
 		},
 		"onlyBuiltDependencies": [
