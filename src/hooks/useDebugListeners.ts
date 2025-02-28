@@ -46,6 +46,7 @@ function initializeUnhandledErrorReporter(
 	return async (payload: unknown) => {
 		logger.error(payload, 'Uncaught exception/rejection');
 		captureException(payload);
+
 		server.close();
 
 		const channel = client.channels.cache.get(botDebugChannelId);
@@ -67,6 +68,7 @@ function initializePlayerErrorReporter(
 ) {
 	return async (queue: GuildQueue | undefined, error: Error) => {
 		logger.error(error, 'Player error');
+
 		const sentryId = captureException(error);
 
 		const debugChannel = client.channels.cache.get(botDebugChannelId);
@@ -74,8 +76,6 @@ function initializePlayerErrorReporter(
 		if (!debugChannel?.isSendable()) {
 			return;
 		}
-
-		// getEnvironmentVariable('NODE_ENV') !== 'development'
 
 		const embed = new EmbedBuilder()
 			.setTitle('Player error')
@@ -102,7 +102,7 @@ function initializePlayerErrorReporter(
 			isObject(track.metadata) &&
 			!('isFromCache' in track.metadata)
 		) {
-			await deleteOpusCacheEntry(track.url);
+			void deleteOpusCacheEntry(track.url);
 		}
 
 		if (!queue.channel) {

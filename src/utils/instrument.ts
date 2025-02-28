@@ -8,6 +8,3 @@ Sentry.init({
 	tracesSampleRate: 1.0,
 	profilesSampleRate: 1.0,
 });
-
-// Exporting only to silence an esbuild warning
-export default Sentry;
