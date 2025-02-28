@@ -107,7 +107,7 @@ const COMMANDS: ApplicationCommandData[] = [
 	{
 		name: 'playlists',
 		description:
-			'Allows enqueuening multiple songs in one go, using the playlists from from #listy-piosenek.',
+			'Allows enqueuening multiple songs in one go, using the playlists from a dedicated channel.',
 	},
 	{
 		name: 'deduplicate',

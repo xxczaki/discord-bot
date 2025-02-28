@@ -71,10 +71,7 @@ export default async function deduplicateCommandHandler(
 	}
 }
 
-function getTrackUrl(
-	track: Track,
-	type: Exclude<(typeof ALGORITHMS)[number], 'fuzzy'>,
-) {
+function getTrackUrl(track: Track, type: (typeof ALGORITHMS)[number]) {
 	switch (type) {
 		case 'source':
 			return track.url;
