@@ -10,7 +10,7 @@ import pluralize from './pluralize';
 const pluralizeSongs = pluralize('song', 'songs');
 
 async function getPlaylists(channel: TextBasedChannel) {
-	const rawMessages = await channel.messages.fetch({ limit: 25, cache: true });
+	const rawMessages = await channel.messages.fetch({ limit: 30, cache: false });
 	const messages = rawMessages.map((message) => message.content);
 
 	return messages

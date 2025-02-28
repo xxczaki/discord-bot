@@ -45,7 +45,7 @@ export default async function enqueuePlaylists(
 
 	const messages = await playlistsChannel.messages.fetch({
 		limit: 30,
-		cache: true,
+		cache: false,
 	});
 
 	const songs = messages
