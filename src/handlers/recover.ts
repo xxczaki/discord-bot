@@ -36,7 +36,7 @@ export default async function recoverCommandHandler(
 		);
 	}
 
-	await interaction.deferReply();
+	await interaction.reply('Looking up what can be recovered…');
 
 	const player = useMainPlayer();
 	const { tracks, progress } = await queueRecoveryService.getContents(player);

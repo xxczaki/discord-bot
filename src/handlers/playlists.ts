@@ -80,5 +80,6 @@ export default async function playlistsCommandHandler(
 	return answer.reply({
 		content: 'No playlists were selected, aborting…',
 		components: [],
+		flags: ['Ephemeral'],
 	});
 }

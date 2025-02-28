@@ -66,7 +66,7 @@ export default async function tempoCommandHandler(
 		});
 
 		if (answer.isStringSelectMenu()) {
-			await answer.deferReply();
+			await answer.reply('Modifying the playback speed…');
 
 			if (!activeTempo) {
 				await queue?.filters.ffmpeg.toggle(

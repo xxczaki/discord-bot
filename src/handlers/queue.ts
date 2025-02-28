@@ -36,7 +36,7 @@ export default async function queueCommandHandler(
 		return interaction.reply('The queue is empty and nothing is being played.');
 	}
 
-	await interaction.deferReply();
+	await interaction.reply('Fetching the queue…');
 
 	let descriptionLength = 0;
 	let currentDescriptionIndex = 0;

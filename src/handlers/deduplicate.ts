@@ -28,7 +28,7 @@ export default async function deduplicateCommandHandler(
 		});
 	}
 
-	await interaction.deferReply();
+	await interaction.reply('Searching for duplicates…');
 
 	let fullQueue = [queue.currentTrack ?? [], ...queue.tracks.store].flat();
 

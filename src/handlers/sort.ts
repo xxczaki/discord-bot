@@ -13,7 +13,7 @@ export default async function sortCommandHandler(
 		});
 	}
 
-	await interaction.deferReply();
+	await interaction.reply('Sorting the queue…');
 
 	queue.tracks.store = queue?.tracks.data.sort((a, b) => {
 		if (a.title < b.title) {

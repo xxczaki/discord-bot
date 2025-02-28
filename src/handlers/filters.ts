@@ -76,7 +76,10 @@ export default async function filtersCommandHandler(
 			...activeFilters.filter((value) => !answer.values.includes(value)),
 		] as Array<keyof QueueFilters>;
 
-		await answer.deferReply();
+		await answer.reply({
+			content: 'Toggling the selected filters…',
+			components: [],
+		});
 
 		await queue?.filters.ffmpeg.toggle(toToggle);
 

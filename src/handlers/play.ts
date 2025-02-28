@@ -25,7 +25,7 @@ export default async function playCommandHandler(
 		});
 	}
 
-	await interaction.deferReply();
+	await interaction.reply('Processing the track to play…');
 
 	const query = interaction.options.getString('query', true);
 
