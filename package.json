@@ -14,7 +14,6 @@
 	"dependencies": {
 		"@discord-player/extractor": "^7.1.0",
 		"@sentry/node": "^9.3.0",
-		"@sentry/profiling-node": "^9.3.0",
 		"bufferutil": "^4.0.9",
 		"discord-player": "^7.2.0-dev.2",
 		"discord-player-youtubei": "^1.4.2",
@@ -49,8 +48,6 @@
 		"onlyBuiltDependencies": [
 			"esbuild",
 			"@sentry/cli",
-			"@sentry/profiling-node",
-			"@sentry-internal/node-cpu-profiler",
 			"@biomejs/biome",
 			"bufferutil",
 			"zlib-sync"

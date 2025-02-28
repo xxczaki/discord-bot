@@ -10,7 +10,6 @@ await esbuild.build({
 	target: 'node22',
 	external: [
 		'@discord-player/extractor',
-		'@sentry/profiling-node',
 		'bufferutil',
 		'discord-player',
 		'discord-player-youtubei',
@@ -31,7 +30,6 @@ await esbuild.build({
 			org: 'parsify-tech',
 			project: 'discord-bot',
 			telemetry: false,
-			silent: true,
 			release: {
 				name: process.env.SENTRY_RELEASE_NAME,
 			},
