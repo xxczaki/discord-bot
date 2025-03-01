@@ -123,8 +123,6 @@ export default async function enqueueTracks({
 		});
 	}
 
-	queue.filters.ffmpeg.setInputArgs(['-threads', '4']);
-
 	queue.tracks.store = queue?.tracks.data.sort((a, b) => {
 		const correspondingAId = tracks.find(({ url }) => url === a.url) ?? a.id;
 		const correspondingBId = tracks.find(({ url }) => url === b.url) ?? b.id;

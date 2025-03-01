@@ -43,8 +43,6 @@ export default async function playCommandHandler(
 
 		const queue = useQueue();
 
-		queue?.filters.ffmpeg.setInputArgs(['-threads', '4']);
-
 		const trackPosition = getTrackPosition(queue, track) + 1;
 
 		const embed = createTrackEmbed(

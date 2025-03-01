@@ -119,8 +119,6 @@ export default async function enqueuePlaylists(
 
 	const queue = useQueue();
 
-	queue?.filters.ffmpeg.setInputArgs(['-threads', '4']);
-
 	try {
 		const answer = await response.awaitMessageComponent({
 			time: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
