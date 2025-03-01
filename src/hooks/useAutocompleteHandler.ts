@@ -1,9 +1,11 @@
+import { captureException } from '@sentry/node';
 import { useMainPlayer, useQueue } from 'discord-player';
 import type { CacheType, Interaction } from 'discord.js';
 import Fuse from 'fuse.js';
 import debounce from 'p-debounce';
 import determineSearchEngine from '../utils/determineSearchEngine';
 import getTrackPosition from '../utils/getTrackPosition';
+import logger from '../utils/logger';
 import truncateString from '../utils/truncateString';
 
 async function useAutocompleteHandler(interaction: Interaction<CacheType>) {
@@ -16,28 +18,35 @@ async function useAutocompleteHandler(interaction: Interaction<CacheType>) {
 
 		if (query.length === 0) return interaction.respond([]);
 
-		const player = useMainPlayer();
+		try {
+			const player = useMainPlayer();
 
-		const data = await player.search(query, {
-			searchEngine: determineSearchEngine(query),
-			fallbackSearchEngine: 'youtubeSearch',
-			requestedBy: interaction.user,
-		});
+			const data = await player.search(query, {
+				searchEngine: determineSearchEngine(query),
+				fallbackSearchEngine: 'youtubeSearch',
+				requestedBy: interaction.user,
+			});
 
-		if (!data.hasTracks()) return interaction.respond([]);
+			if (!data.hasTracks()) return interaction.respond([]);
 
-		const results = data.tracks
-			.filter((track) => track.url.length < 100)
-			.slice(0, 25)
-			.map((track) => ({
-				name: `"${truncateString(track.title, 40)}" by ${truncateString(
-					track.author,
-					40,
-				)} (${track.duration})`,
-				value: track.url,
-			}));
+			const results = data.tracks
+				.filter((track) => track.url.length < 100)
+				.slice(0, 25)
+				.map((track) => ({
+					name: `"${truncateString(track.title, 40)}" by ${truncateString(
+						track.author,
+						40,
+					)} (${track.duration})`,
+					value: track.url,
+				}));
 
-		return interaction.respond(results);
+			return interaction.respond(results);
+		} catch (error) {
+			logger.error(error, 'Search autocomplete fail');
+			captureException(error);
+
+			return interaction.respond([]);
+		}
 	}
 
 	if (

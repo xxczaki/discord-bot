@@ -56,8 +56,8 @@ importers:
         specifier: ^3.2.1
         version: 3.2.1
       '@types/node':
-        specifier: ^22.13.5
-        version: 22.13.5
+        specifier: ^22.13.8
+        version: 22.13.8
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
@@ -65,8 +65,8 @@ importers:
         specifier: ^0.25.0
         version: 0.25.0
       esbuild-plugin-pino:
-        specifier: ^2.2.1
-        version: 2.2.1(esbuild@0.25.0)
+        specifier: ^2.2.2
+        version: 2.2.2(esbuild@0.25.0)
       fuse.js:
         specifier: ^7.1.0
         version: 7.1.0
@@ -1133,8 +1133,8 @@ packages:
   '@types/mysql@2.15.26':
     resolution: {integrity: sha512-DSLCOXhkvfS5WNNPbfn2KdICAmk8lLc+/PNvnPnF7gOdMZCxopXduqv0OQ13y/yA/zXTSikZZqVgybUxOEg6YQ==}
 
-  '@types/node@22.13.5':
-    resolution: {integrity: sha512-+lTU0PxZXn0Dr1NBtC7Y8cR21AJr87dLLU953CWA6pMxxv/UDc7jYAY90upcrie1nRcD6XNG5HOYEDtgW5TxAg==}
+  '@types/node@22.13.8':
+    resolution: {integrity: sha512-G3EfaZS+iOGYWLLRCEAXdWK9my08oHNZ+FHluRiggIYJPOXzhOiDgpVCUHaUvyIC5/fj7C/p637jdzC666AOKQ==}
 
   '@types/pg-pool@2.0.6':
     resolution: {integrity: sha512-TaAUE5rq2VQYxab5Ts7WZhKNmuN78Q6PiFonTDdpbx8a1H0M1vhy3rhiMjl+e2iHmogyMw7jZF4FrE6eJUy5HQ==}
@@ -1404,10 +1404,10 @@ packages:
     resolution: {integrity: sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw==}
     engines: {node: '>=0.12'}
 
-  esbuild-plugin-pino@2.2.1:
-    resolution: {integrity: sha512-aVy1BxxzkeFlWhUyRtt/G94p3fqwnydpePFz9GjWccJ/NiZf+3BCFjHlojwy2KO2AYfWsBxL7ie80HN9rwFBDg==}
+  esbuild-plugin-pino@2.2.2:
+    resolution: {integrity: sha512-VABhtEBkjmv60Lz50Z44OH2NR1OA2HpKns86zR6FQQx5ctBl96p7Y28sv0/tBi+Ca5qMg0Y4k/OORgaSIarkhQ==}
     peerDependencies:
-      esbuild: '>=0.17.1 <=0.24.0'
+      esbuild: '>=0.25.0 <=0.25.0'
 
   esbuild@0.23.1:
     resolution: {integrity: sha512-VVNz/9Sa0bs5SELtn3f7qhJCDPCF5oMEl5cO9/SSinpE9hbPVvxbd572HH5AKiP7WD8INO53GgfDDhRjkylHEg==}
@@ -3234,15 +3234,15 @@ snapshots:
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 22.13.5
+      '@types/node': 22.13.8
 
   '@types/estree@1.0.6': {}
 
   '@types/mysql@2.15.26':
     dependencies:
-      '@types/node': 22.13.5
+      '@types/node': 22.13.8
 
-  '@types/node@22.13.5':
+  '@types/node@22.13.8':
     dependencies:
       undici-types: 6.20.0
 
@@ -3252,7 +3252,7 @@ snapshots:
 
   '@types/pg@8.6.1':
     dependencies:
-      '@types/node': 22.13.5
+      '@types/node': 22.13.8
       pg-protocol: 1.7.1
       pg-types: 2.2.0
 
@@ -3260,11 +3260,11 @@ snapshots:
 
   '@types/tedious@4.0.14':
     dependencies:
-      '@types/node': 22.13.5
+      '@types/node': 22.13.8
 
   '@types/ws@8.5.14':
     dependencies:
-      '@types/node': 22.13.5
+      '@types/node': 22.13.8
 
   '@vladfrangu/async_event_emitter@2.4.6': {}
 
@@ -3529,7 +3529,7 @@ snapshots:
 
   entities@4.5.0: {}
 
-  esbuild-plugin-pino@2.2.1(esbuild@0.25.0):
+  esbuild-plugin-pino@2.2.2(esbuild@0.25.0):
     dependencies:
       esbuild: 0.25.0
 
