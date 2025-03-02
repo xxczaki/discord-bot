@@ -108,7 +108,7 @@ client.on('voiceStateUpdate', async (oldState) => {
 });
 
 player.events.on('playerStart', async (queue, track) => {
-	const embed = createTrackEmbed(track, 'Playing it now.');
+	const embed = createTrackEmbed(queue, track, 'Playing it now.');
 
 	const skip = new ButtonBuilder()
 		.setCustomId('skip')
@@ -117,7 +117,7 @@ player.events.on('playerStart', async (queue, track) => {
 
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(skip);
 
-	const response = await queue.metadata.channel.send({
+	const response = await queue.metadata.interaction.channel.send({
 		embeds: [embed],
 		components: [row],
 	});
@@ -127,12 +127,7 @@ player.events.on('playerStart', async (queue, track) => {
 			{
 				name: `"${track.title}" by ${track.author}`,
 				type: ActivityType.Listening,
-				url:
-					isObject(track.metadata) &&
-					isObject(track.metadata.bridge) &&
-					track.metadata.bridge?.url
-						? `${track.metadata.bridge.url}`
-						: undefined,
+				url: track.url,
 			},
 		],
 		status: PresenceUpdateStatus.Online,
@@ -170,7 +165,7 @@ player.events.on('playerStart', async (queue, track) => {
 });
 
 player.events.on('emptyQueue', async (queue) => {
-	await queue.metadata.channel.send('Queue finished, leaving…');
+	await queue.metadata.interaction.channel.send('Queue finished, leaving…');
 
 	void queueRecoveryService.deleteQueue();
 

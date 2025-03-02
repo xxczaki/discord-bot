@@ -1,5 +1,10 @@
 import { availableParallelism } from 'node:os';
-import { type QueueFilters, useMainPlayer, useQueue } from 'discord-player';
+import {
+	type PlayerNodeInitializationResult,
+	type QueueFilters,
+	useMainPlayer,
+	useQueue,
+} from 'discord-player';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -58,19 +63,34 @@ export default async function enqueuePlaylists(
 
 	let enqueued = 0;
 
-	playlistQueue.on('next', async () => {
-		const progress = songsArray.length - playlistQueue.pending;
+	playlistQueue.on(
+		'completed',
+		async (result: PlayerNodeInitializationResult) => {
+			if (enqueued > 0) {
+				const existingQueries = result.queue.metadata?.queries ?? {};
 
-		await interaction.editReply({
-			content: null,
-			components: [],
-			embeds: [
-				embed.setDescription(
-					pluralizeEntries`${progress}/${songsArray.length} ${null} processed and added to the queue so far.`,
-				),
-			],
-		});
-	});
+				result.queue.setMetadata({
+					...result.queue.metadata,
+					queries: {
+						...existingQueries,
+						[result.track.id]: result.searchResult.query,
+					},
+				});
+			}
+
+			const progress = songsArray.length - playlistQueue.pending;
+
+			await interaction.editReply({
+				content: null,
+				components: [],
+				embeds: [
+					embed.setDescription(
+						pluralizeEntries`${progress}/${songsArray.length} ${null} processed and added to the queue so far.`,
+					),
+				],
+			});
+		},
+	);
 
 	const player = useMainPlayer();
 
@@ -79,10 +99,10 @@ export default async function enqueuePlaylists(
 			const promise = player.play(voiceChannel, song, {
 				searchEngine: determineSearchEngine(song),
 				nodeOptions: {
-					metadata: interaction,
+					metadata: { interaction, queries: { '0': song } },
 					defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
 				},
-				requestedBy: interaction.user.id,
+				requestedBy: interaction.user,
 			});
 
 			try {

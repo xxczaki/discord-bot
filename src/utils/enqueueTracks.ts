@@ -53,13 +53,13 @@ export default async function enqueueTracks({
 		await player.play(voiceChannel, firstTrackUrl, {
 			searchEngine: determineSearchEngine(firstTrackUrl),
 			nodeOptions: {
-				metadata: interaction,
+				metadata: { interaction },
 				defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
 			},
 			audioPlayerOptions: {
 				seek: progress,
 			},
-			requestedBy: interaction.user.id,
+			requestedBy: interaction.user,
 		});
 
 		await interaction.editReply({
@@ -77,7 +77,7 @@ export default async function enqueueTracks({
 
 	const tracksQueue = new Queue({ concurrency: availableParallelism() });
 
-	tracksQueue.on('next', async () => {
+	tracksQueue.on('completed', async () => {
 		await interaction.editReply({
 			content: null,
 			components: [],
@@ -94,10 +94,10 @@ export default async function enqueueTracks({
 			const promise = player.play(voiceChannel, url, {
 				searchEngine: determineSearchEngine(url),
 				nodeOptions: {
-					metadata: interaction,
+					metadata: { interaction },
 					defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
 				},
-				requestedBy: interaction.user.id,
+				requestedBy: interaction.user,
 			});
 
 			try {

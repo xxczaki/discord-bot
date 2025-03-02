@@ -29,6 +29,7 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 
 			if (existsSync(filePath)) {
 				track.setMetadata({
+					...(track.metadata ?? {}),
 					isFromCache: true,
 				});
 

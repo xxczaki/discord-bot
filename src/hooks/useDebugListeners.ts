@@ -47,8 +47,6 @@ function initializeUnhandledErrorReporter(
 		logger.error(payload, 'Uncaught exception/rejection');
 		captureException(payload);
 
-		server.close();
-
 		const channel = client.channels.cache.get(botDebugChannelId);
 
 		if (
@@ -58,6 +56,8 @@ function initializeUnhandledErrorReporter(
 			await channel.send(
 				'☠️ Encountered a fatal error, the bot will restart promptly – consider using `/recover` afterward.',
 			);
+
+			server.close();
 		}
 	};
 }
