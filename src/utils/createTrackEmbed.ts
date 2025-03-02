@@ -17,8 +17,8 @@ function createTrackEmbed(
 		.setAuthor({ name: track.author })
 		.setFields({ name: 'Duration', value: track.duration, inline: true });
 
-	const existingQueries = queue.metadata.queries;
-	const trackQuery = existingQueries[track.id] ?? existingQueries[0];
+	const existingQueries = queue.metadata?.queries;
+	const trackQuery = existingQueries?.[track.id] ?? existingQueries?.[0];
 
 	if (!URL.canParse(trackQuery)) {
 		embed.addFields({
