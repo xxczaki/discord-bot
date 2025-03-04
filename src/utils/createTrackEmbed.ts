@@ -20,21 +20,24 @@ function createTrackEmbed(
 	const existingQueries = queue.metadata?.queries;
 	const trackQuery = existingQueries?.[track.id] ?? existingQueries?.[0];
 
-	if (!URL.canParse(trackQuery)) {
+	if (trackQuery && !URL.canParse(trackQuery)) {
 		embed.addFields({
 			name: 'Query',
 			value: `\`${trackQuery}\``,
 		});
 	}
 
-	queue.setMetadata({
-		...queue.metadata,
-		queries: Object.fromEntries(
-			Object.entries(existingQueries ?? {}).filter(
-				([key]) => key !== track.id || key !== '0',
+	// Cleanup
+	if (existingQueries) {
+		queue.setMetadata({
+			...queue.metadata,
+			queries: Object.fromEntries(
+				Object.entries(existingQueries).filter(
+					([key]) => key !== track.id || key !== '0',
+				),
 			),
-		),
-	});
+		});
+	}
 
 	if (!isObject(track.metadata)) {
 		return embed;
