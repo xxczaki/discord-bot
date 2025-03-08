@@ -2,7 +2,6 @@ import {
 	StringSelectMenuOptionBuilder,
 	type TextBasedChannel,
 } from 'discord.js';
-import memoize from 'memoize';
 import cleanUpPlaylistContent from './cleanUpPlaylistContent';
 import isUrlSpotifyPlaylist from './isUrlSpotifyPlaylist';
 import pluralize from './pluralize';
@@ -10,7 +9,7 @@ import pluralize from './pluralize';
 const pluralizeSongs = pluralize('song', 'songs');
 
 async function getPlaylists(channel: TextBasedChannel) {
-	const rawMessages = await channel.messages.fetch({ limit: 30, cache: false });
+	const rawMessages = await channel.messages.fetch({ limit: 50, cache: false });
 	const messages = rawMessages.map((message) => message.content);
 
 	return messages
@@ -36,7 +35,7 @@ async function getPlaylists(channel: TextBasedChannel) {
 		);
 }
 
-export default memoize(getPlaylists, { cacheKey: ([channel]) => channel.id });
+export default getPlaylists;
 
 function getPlaylistDescription(songs: string[]) {
 	const spotifyPlaylists = songs.filter(isUrlSpotifyPlaylist);
