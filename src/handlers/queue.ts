@@ -126,6 +126,7 @@ export default async function queueCommandHandler(
 	const response = await interaction.editReply({
 		embeds: [queueEmbed],
 		components: [row],
+		content: null,
 	});
 
 	await componentResponseListener(response, {
