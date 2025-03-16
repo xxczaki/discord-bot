@@ -1,0 +1,17 @@
+{
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"timezone": "Europe/Warsaw",
+	"extends": ["config:recommended"],
+	"packageRules": [
+		{
+			"description": "Automerge non-major updates",
+			"matchUpdateTypes": ["minor", "patch"],
+			"matchCurrentVersion": "!/^0/",
+			"automerge": true
+		},
+		{
+			"description": "Only perform updates between 3 AM and 8 PM",
+			"schedule": ["* 3-20 * * *"]
+		}
+	]
+}
