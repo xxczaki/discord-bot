@@ -1,7 +1,6 @@
 FROM node:22-alpine AS base
 
 RUN apk add --no-cache python3 make g++ && \
-		npm install --global corepack@0.31.0 && \
 		corepack enable
 
 
