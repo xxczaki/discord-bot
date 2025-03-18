@@ -7,10 +7,6 @@ function determineSearchEngine(query: string): SearchQueryType {
 		return 'youtubeVideo';
 	}
 
-	if (query.startsWith('!yt')) {
-		return 'youtubeSearch';
-	}
-
 	if (isUrlSpotifyPlaylist(query)) {
 		return 'spotifyPlaylist';
 	}

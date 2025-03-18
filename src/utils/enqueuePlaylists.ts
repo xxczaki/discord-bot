@@ -67,9 +67,9 @@ export default async function enqueuePlaylists(
 		'completed',
 		async (result: PlayerNodeInitializationResult) => {
 			if (enqueued > 0) {
-				const existingQueries = result.queue.metadata?.queries ?? {};
+				const existingQueries = result?.queue.metadata?.queries ?? {};
 
-				result.queue.setMetadata({
+				result?.queue.setMetadata({
 					...result.queue.metadata,
 					queries: {
 						...existingQueries,

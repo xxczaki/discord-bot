@@ -130,7 +130,7 @@ export default async function playCommandHandler(
 			});
 		}
 	} catch (error) {
-		if (error instanceof Error && error.name.includes('ERR_NO_RESULT')) {
+		if (error instanceof Error && error.name.includes('No results found')) {
 			return interaction.editReply('No results found for the given query.');
 		}
 
