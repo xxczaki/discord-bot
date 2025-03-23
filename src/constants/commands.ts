@@ -7,7 +7,8 @@ const COMMANDS: ApplicationCommandData[] = [
 		options: [
 			{
 				name: 'query',
-				description: 'Query to use to search for your song',
+				description:
+					'Spotify search query (prefix with "youtube:" to search YouTube instead)',
 				type: 3,
 				required: true,
 				autocomplete: true,

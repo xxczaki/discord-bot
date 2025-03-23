@@ -9,6 +9,8 @@ import getEnvironmentVariable from '../utils/getEnvironmentVariable';
 import isObject from '../utils/isObject';
 import logger from '../utils/logger';
 
+const FATAL_ERROR_MESSAGE_DEBOUNCE = 1000 * 30; // 30 seconds
+
 const botDebugChannelId = getEnvironmentVariable('BOT_DEBUG_CHANNEL_ID');
 
 const queueRecoveryService = QueueRecoveryService.getInstance();
@@ -43,6 +45,8 @@ function initializeUnhandledErrorReporter(
 	client: Client<boolean>,
 	server: Server,
 ) {
+	let previousMessageTimestamp = 0;
+
 	return async (payload: unknown) => {
 		logger.error(payload, 'Uncaught exception/rejection');
 		captureException(payload);
@@ -51,11 +55,14 @@ function initializeUnhandledErrorReporter(
 
 		if (
 			channel?.isSendable() &&
-			getEnvironmentVariable('NODE_ENV') !== 'development'
+			getEnvironmentVariable('NODE_ENV') !== 'development' &&
+			Date.now() - previousMessageTimestamp > FATAL_ERROR_MESSAGE_DEBOUNCE
 		) {
 			await channel.send(
 				'☠️ Encountered a fatal error, the bot will restart promptly – consider using `/recover` afterward.',
 			);
+
+			previousMessageTimestamp = Date.now();
 
 			server.close();
 		}
