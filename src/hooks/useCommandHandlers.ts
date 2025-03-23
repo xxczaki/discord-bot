@@ -5,6 +5,7 @@ import {
 	deduplicateCommandHandler,
 	filtersCommandHandler,
 	flushQueryCacheCommandHandler,
+	helpCommandHandler,
 	latenessCommandHandler,
 	moveCommandHandler,
 	opusCacheHandler,
@@ -124,6 +125,10 @@ export default async function useCommandHandlers(
 		}
 		case 'opus_cache': {
 			await opusCacheHandler(interaction);
+			break;
+		}
+		case 'help': {
+			await helpCommandHandler(interaction);
 			break;
 		}
 		default:

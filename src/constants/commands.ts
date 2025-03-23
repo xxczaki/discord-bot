@@ -1,6 +1,17 @@
-import type { ApplicationCommandData } from 'discord.js';
+import type { ChatInputApplicationCommandData } from 'discord.js';
 
-const COMMANDS: ApplicationCommandData[] = [
+export const COMMAND_CATEGORIES = [
+	'Music',
+	'Utilities',
+	'Fun',
+	'Other',
+] as const;
+
+export type CategorizedCommand = ChatInputApplicationCommandData & {
+	category: (typeof COMMAND_CATEGORIES)[number];
+};
+
+export const RAW_COMMANDS: CategorizedCommand[] = [
 	{
 		name: 'play',
 		description: 'Plays some music.',
@@ -14,18 +25,22 @@ const COMMANDS: ApplicationCommandData[] = [
 				autocomplete: true,
 			},
 		],
+		category: 'Music',
 	},
 	{
 		name: 'pause',
 		description: 'Pauses the queue.',
+		category: 'Music',
 	},
 	{
 		name: 'resume',
 		description: 'Resumes the queue.',
+		category: 'Music',
 	},
 	{
 		name: 'skip',
 		description: 'Skips the current track.',
+		category: 'Music',
 	},
 	{
 		name: 'remove',
@@ -39,6 +54,7 @@ const COMMANDS: ApplicationCommandData[] = [
 				autocomplete: true,
 			},
 		],
+		category: 'Music',
 	},
 	{
 		name: 'move',
@@ -58,14 +74,17 @@ const COMMANDS: ApplicationCommandData[] = [
 				required: true,
 			},
 		],
+		category: 'Music',
 	},
 	{
 		name: 'queue',
 		description: "Checks what's currently playing and what will play next.",
+		category: 'Music',
 	},
 	{
 		name: 'shuffle',
 		description: 'Shuffles the queue.',
+		category: 'Music',
 	},
 	{
 		name: 'repeat',
@@ -83,6 +102,7 @@ const COMMANDS: ApplicationCommandData[] = [
 				required: true,
 			},
 		],
+		category: 'Music',
 	},
 	{
 		name: 'volume',
@@ -96,19 +116,23 @@ const COMMANDS: ApplicationCommandData[] = [
 				required: true,
 			},
 		],
+		category: 'Music',
 	},
 	{
 		name: 'purge',
 		description: 'Purges the queue.',
+		category: 'Music',
 	},
 	{
 		name: 'debug',
 		description: 'Shows debug information.',
+		category: 'Music',
 	},
 	{
 		name: 'playlists',
 		description:
 			'Allows enqueuening multiple songs in one go, using the playlists from a dedicated channel.',
+		category: 'Music',
 	},
 	{
 		name: 'deduplicate',
@@ -125,22 +149,27 @@ const COMMANDS: ApplicationCommandData[] = [
 				required: true,
 			},
 		],
+		category: 'Music',
 	},
 	{
 		name: 'sort',
 		description: 'Sorts queue in an alphabetical order.',
+		category: 'Music',
 	},
 	{
 		name: 'stats',
 		description: 'Shows certain statistics regarding bot usage.',
+		category: 'Music',
 	},
 	{
 		name: 'filters',
 		description: 'Allows toggling the audio filters.',
+		category: 'Music',
 	},
 	{
 		name: 'tempo',
 		description: 'Allows changing the playback speed of the player.',
+		category: 'Music',
 	},
 	{
 		name: 'lateness',
@@ -152,10 +181,12 @@ const COMMANDS: ApplicationCommandData[] = [
 				type: 3,
 			},
 		],
+		category: 'Utilities',
 	},
 	{
 		name: 'flush_query_cache',
 		description: 'Flushes the internal query cache.',
+		category: 'Other',
 	},
 	{
 		name: 'avatar',
@@ -168,19 +199,28 @@ const COMMANDS: ApplicationCommandData[] = [
 				required: true,
 			},
 		],
+		category: 'Utilities',
 	},
 	{
 		name: 'tic_tac_toe',
 		description: 'Allows you to play Tic-tac-toe with the bot itself.',
+		category: 'Fun',
 	},
 	{
 		name: 'recover',
 		description: 'Attempts to recover a queue – useful in case of an error.',
+		category: 'Music',
 	},
 	{
 		name: 'opus_cache',
 		description: 'Fetches information about the Opus file cache.',
+		category: 'Other',
+	},
+	{
+		name: 'help',
+		description: 'Shows the available commands and their purpose.',
+		category: 'Other',
 	},
 ];
 
-export default COMMANDS;
+export default RAW_COMMANDS.map(({ category, ...rest }) => rest);

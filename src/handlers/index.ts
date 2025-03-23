@@ -3,6 +3,7 @@ export { default as debugCommandHandler } from './debug';
 export { default as deduplicateCommandHandler } from './deduplicate';
 export { default as filtersCommandHandler } from './filters';
 export { default as flushQueryCacheCommandHandler } from './flushQueryCache';
+export { default as helpCommandHandler } from './help';
 export { default as latenessCommandHandler } from './lateness';
 export { default as moveCommandHandler } from './move';
 export { default as opusCacheHandler } from './opusCache';
