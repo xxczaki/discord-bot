@@ -41,7 +41,7 @@ const client = new Client({
 	presence: {
 		activities: [
 			{
-				name: 'Idle, use /play to get started',
+				name: 'Idle, use /help to get started',
 				type: ActivityType.Custom,
 			},
 		],
