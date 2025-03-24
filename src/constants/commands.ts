@@ -126,7 +126,7 @@ export const RAW_COMMANDS: CategorizedCommand[] = [
 	{
 		name: 'debug',
 		description: 'Shows debug information.',
-		category: 'Music',
+		category: 'Other',
 	},
 	{
 		name: 'playlists',
