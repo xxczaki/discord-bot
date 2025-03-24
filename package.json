@@ -13,7 +13,7 @@
 	"packageManager": "pnpm@10.6.5",
 	"dependencies": {
 		"@discord-player/extractor": "^7.1.0",
-		"@sentry/node": "^9.8.0",
+		"@sentry/node": "^9.9.0",
 		"bufferutil": "^4.0.9",
 		"discord-player": "^7.2.0-dev.2",
 		"discord-player-youtubei": "^1.4.2",
@@ -21,14 +21,14 @@
 		"ioredis": "^5.6.0",
 		"pino": "^9.6.0",
 		"sodium-native": "^4.3.3",
-		"ulid": "^2.4.0",
+		"ulid": "^3.0.0",
 		"zlib-sync": "^0.1.9"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
 		"@discordjs/rest": "^2.4.3",
 		"@sentry/esbuild-plugin": "^3.2.2",
-		"@types/node": "^22.13.11",
+		"@types/node": "^22.13.13",
 		"date-fns": "^4.1.0",
 		"esbuild": "^0.25.1",
 		"esbuild-plugin-pino": "^2.2.2",
