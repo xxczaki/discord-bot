@@ -40,7 +40,7 @@ function processRawCommand(command: CategorizedCommand) {
 	return {
 		text: `
 ┌ ${getCommandNotation(command)}
-│ ${command.description}
+├ ${command.description}
 	`.trim(),
 		category: command.category,
 	};
