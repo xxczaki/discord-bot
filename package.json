@@ -10,13 +10,13 @@
 		"lint": "biome check --write ./src",
 		"tsc": "tsc --noEmit"
 	},
-	"packageManager": "pnpm@10.6.5",
+	"packageManager": "pnpm@10.7.0",
 	"dependencies": {
 		"@discord-player/extractor": "^7.1.0",
-		"@sentry/node": "^9.9.0",
+		"@sentry/node": "^9.10.1",
 		"bufferutil": "^4.0.9",
 		"discord-player": "^7.2.0-dev.2",
-		"discord-player-youtubei": "^1.4.2",
+		"discord-player-youtubei": "^1.4.3",
 		"discord.js": "^14.18.0",
 		"ioredis": "^5.6.0",
 		"pino": "^9.6.0",
@@ -27,8 +27,8 @@
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
 		"@discordjs/rest": "^2.4.3",
-		"@sentry/esbuild-plugin": "^3.2.2",
-		"@types/node": "^22.13.13",
+		"@sentry/esbuild-plugin": "^3.2.4",
+		"@types/node": "^22.13.14",
 		"date-fns": "^4.1.0",
 		"esbuild": "^0.25.1",
 		"esbuild-plugin-pino": "^2.2.2",
