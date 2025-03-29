@@ -10,6 +10,7 @@ await esbuild.build({
 	target: 'node22',
 	external: [
 		'@discord-player/extractor',
+		'bgutils-js',
 		'bufferutil',
 		'discord-player',
 		'discord-player-youtubei',

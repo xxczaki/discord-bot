@@ -18,6 +18,9 @@ importers:
       '@sentry/node':
         specifier: ^9.10.1
         version: 9.10.1
+      bgutils-js:
+        specifier: ^3.2.0
+        version: 3.2.0
       bufferutil:
         specifier: ^4.0.9
         version: 4.0.9
@@ -58,9 +61,6 @@ importers:
       '@types/node':
         specifier: ^22.13.14
         version: 22.13.14
-      bgutils-js:
-        specifier: ^3.2.0
-        version: 3.2.0
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
