@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  libsodium-wrappers: npm:sodium-native@4.3.3
+  libsodium-wrappers: '-'
   youtubei.js: github:LuanRT/YouTube.js
 
 importers:
@@ -3724,7 +3724,6 @@ snapshots:
       '@discord-player/utils': 7.1.0
       '@web-scrobbler/metadata-filter': 3.2.0
       discord-voip: 7.1.0(postcss@8.5.2)(tsx@4.19.2)
-      libsodium-wrappers: sodium-native@4.3.3
       mediaplex: 1.0.0
     transitivePeerDependencies:
       - '@microsoft/api-extractor'
