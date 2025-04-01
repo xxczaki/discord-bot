@@ -40,8 +40,8 @@ importers:
         specifier: ^9.6.0
         version: 9.6.0
       sodium-native:
-        specifier: ^4.3.3
-        version: 4.3.3
+        specifier: ^5.0.0
+        version: 5.0.0
       ulid:
         specifier: ^3.0.0
         version: 3.0.0
@@ -59,8 +59,8 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4
       '@types/node':
-        specifier: ^22.13.14
-        version: 22.13.14
+        specifier: ^22.13.16
+        version: 22.13.16
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
@@ -1167,8 +1167,8 @@ packages:
   '@types/mysql@2.15.26':
     resolution: {integrity: sha512-DSLCOXhkvfS5WNNPbfn2KdICAmk8lLc+/PNvnPnF7gOdMZCxopXduqv0OQ13y/yA/zXTSikZZqVgybUxOEg6YQ==}
 
-  '@types/node@22.13.14':
-    resolution: {integrity: sha512-Zs/Ollc1SJ8nKUAgc7ivOEdIBM8JAKgrqqUYi2J997JuKO7/tpQC+WCetQ1sypiKCQWHdvdg9wBNpUPEWZae7w==}
+  '@types/node@22.13.16':
+    resolution: {integrity: sha512-15tM+qA4Ypml/N7kyRdvfRjBQT2RL461uF1Bldn06K0Nzn1lY3nAPgHlsVrJxdZ9WhZiW0Fmc1lOYMtDsAuB3w==}
 
   '@types/pg-pool@2.0.6':
     resolution: {integrity: sha512-TaAUE5rq2VQYxab5Ts7WZhKNmuN78Q6PiFonTDdpbx8a1H0M1vhy3rhiMjl+e2iHmogyMw7jZF4FrE6eJUy5HQ==}
@@ -2242,8 +2242,9 @@ packages:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
 
-  sodium-native@4.3.3:
-    resolution: {integrity: sha512-OnxSlN3uyY8D0EsLHpmm2HOFmKddQVvEMmsakCrXUzSd8kjjbzL413t4ZNF3n0UxSwNgwTyUvkmZHTfuCeiYSw==}
+  sodium-native@5.0.0:
+    resolution: {integrity: sha512-qT9hahdMllita1WLRCsHteVk3R3hp3tHRVHmyUlSXcFcUJj0KnWETmdDwqxmM5Argh2Qc0PhOOqvf5LcYAkT7A==}
+    engines: {bare: '>=1.16.0'}
 
   sonic-boom@4.2.0:
     resolution: {integrity: sha512-INb7TM37/mAcsGmc9hyyI6+QR3rR1zVRu36B0NeGXKnOOLiZOfER5SA+N7X7k3yUYRzLWafduTDvJAfDswwEww==}
@@ -2481,6 +2482,9 @@ packages:
 
   whatwg-url@7.1.0:
     resolution: {integrity: sha512-WUu7Rg1DroM7oQvGWfOiAK21n74Gg+T4elXEQYkOhtyLeWiJFoOGLXPKI/9gzIie9CtwVLm8wtw6YJdKyxSjeg==}
+
+  which-runtime@1.2.1:
+    resolution: {integrity: sha512-8feIHccQFH/whiA1fD1b4c5+Q7T4ry1g1oHYc2mHnFh81tTQFsCvy3zhS2geUapkFAVBddUT/AM1a3rbqJweFg==}
 
   which@2.0.2:
     resolution: {integrity: sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==}
@@ -3474,15 +3478,15 @@ snapshots:
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 22.13.14
+      '@types/node': 22.13.16
 
   '@types/estree@1.0.6': {}
 
   '@types/mysql@2.15.26':
     dependencies:
-      '@types/node': 22.13.14
+      '@types/node': 22.13.16
 
-  '@types/node@22.13.14':
+  '@types/node@22.13.16':
     dependencies:
       undici-types: 6.20.0
 
@@ -3492,7 +3496,7 @@ snapshots:
 
   '@types/pg@8.6.1':
     dependencies:
-      '@types/node': 22.13.14
+      '@types/node': 22.13.16
       pg-protocol: 1.7.1
       pg-types: 2.2.0
 
@@ -3500,11 +3504,11 @@ snapshots:
 
   '@types/tedious@4.0.14':
     dependencies:
-      '@types/node': 22.13.14
+      '@types/node': 22.13.16
 
   '@types/ws@8.5.14':
     dependencies:
-      '@types/node': 22.13.14
+      '@types/node': 22.13.16
 
   '@vladfrangu/async_event_emitter@2.4.6': {}
 
@@ -4592,9 +4596,10 @@ snapshots:
 
   signal-exit@4.1.0: {}
 
-  sodium-native@4.3.3:
+  sodium-native@5.0.0:
     dependencies:
       require-addon: 1.1.0
+      which-runtime: 1.2.1
 
   sonic-boom@4.2.0:
     dependencies:
@@ -4828,6 +4833,8 @@ snapshots:
       lodash.sortby: 4.7.0
       tr46: 1.0.1
       webidl-conversions: 4.0.2
+
+  which-runtime@1.2.1: {}
 
   which@2.0.2:
     dependencies:
