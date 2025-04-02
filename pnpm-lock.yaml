@@ -59,8 +59,8 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4
       '@types/node':
-        specifier: ^22.13.16
-        version: 22.13.16
+        specifier: ^22.13.17
+        version: 22.13.17
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
@@ -1167,8 +1167,8 @@ packages:
   '@types/mysql@2.15.26':
     resolution: {integrity: sha512-DSLCOXhkvfS5WNNPbfn2KdICAmk8lLc+/PNvnPnF7gOdMZCxopXduqv0OQ13y/yA/zXTSikZZqVgybUxOEg6YQ==}
 
-  '@types/node@22.13.16':
-    resolution: {integrity: sha512-15tM+qA4Ypml/N7kyRdvfRjBQT2RL461uF1Bldn06K0Nzn1lY3nAPgHlsVrJxdZ9WhZiW0Fmc1lOYMtDsAuB3w==}
+  '@types/node@22.13.17':
+    resolution: {integrity: sha512-nAJuQXoyPj04uLgu+obZcSmsfOenUg6DxPKogeUy6yNCFwWaj5sBF8/G/pNo8EtBJjAfSVgfIlugR/BCOleO+g==}
 
   '@types/pg-pool@2.0.6':
     resolution: {integrity: sha512-TaAUE5rq2VQYxab5Ts7WZhKNmuN78Q6PiFonTDdpbx8a1H0M1vhy3rhiMjl+e2iHmogyMw7jZF4FrE6eJUy5HQ==}
@@ -3478,15 +3478,15 @@ snapshots:
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 22.13.16
+      '@types/node': 22.13.17
 
   '@types/estree@1.0.6': {}
 
   '@types/mysql@2.15.26':
     dependencies:
-      '@types/node': 22.13.16
+      '@types/node': 22.13.17
 
-  '@types/node@22.13.16':
+  '@types/node@22.13.17':
     dependencies:
       undici-types: 6.20.0
 
@@ -3496,7 +3496,7 @@ snapshots:
 
   '@types/pg@8.6.1':
     dependencies:
-      '@types/node': 22.13.16
+      '@types/node': 22.13.17
       pg-protocol: 1.7.1
       pg-types: 2.2.0
 
@@ -3504,11 +3504,11 @@ snapshots:
 
   '@types/tedious@4.0.14':
     dependencies:
-      '@types/node': 22.13.16
+      '@types/node': 22.13.17
 
   '@types/ws@8.5.14':
     dependencies:
-      '@types/node': 22.13.16
+      '@types/node': 22.13.17
 
   '@vladfrangu/async_event_emitter@2.4.6': {}
 
