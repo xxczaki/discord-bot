@@ -2,8 +2,6 @@
 	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
 	"timezone": "Europe/Warsaw",
 	"extends": ["config:recommended", "customManagers:biomeVersions"],
-	"description": "Only perform updates between 3 AM and 8 PM",
-	"schedule": ["* 3-20 * * *"],
 	"rangeStrategy": "bump",
 	"packageRules": [
 		{
