@@ -28,8 +28,8 @@ importers:
         specifier: ^7.2.0-dev.2
         version: 7.2.0-dev.2(@discord-player/extractor@7.1.0)(mediaplex@1.0.0)(postcss@8.5.2)(tsx@4.19.2)
       discord-player-youtubei:
-        specifier: ^1.4.3
-        version: 1.4.3(bufferutil@4.0.9)
+        specifier: ^1.4.4
+        version: 1.4.4(bufferutil@4.0.9)
       discord.js:
         specifier: ^14.18.0
         version: 14.18.0(bufferutil@4.0.9)
@@ -1418,8 +1418,8 @@ packages:
   discord-api-types@0.37.119:
     resolution: {integrity: sha512-WasbGFXEB+VQWXlo6IpW3oUv73Yuau1Ig4AZF/m13tXcTKnMpc/mHjpztIlz4+BM9FG9BHQkEXiPto3bKduQUg==}
 
-  discord-player-youtubei@1.4.3:
-    resolution: {integrity: sha512-MbA5cDkYUTMWWOIBZjOvf33OVXq5iDhoDv+uQecsBTwNBCxgmf8KXqQQl7YUyPPaULS+97sGESSDDpr+6LK2Jw==}
+  discord-player-youtubei@1.4.4:
+    resolution: {integrity: sha512-1YoEH6NYHIWWZj4PzXlZfAke1A/RCjaCJ8JN1uxQLXMC8jwSm0oYJi6fs19A7KPxj3WpsujncVM5kOqt9qvLOQ==}
     hasBin: true
 
   discord-player@7.2.0-dev.2:
@@ -2532,8 +2532,8 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/9694a48270e75cd83bce03cab26f8ad0451168c2:
-    resolution: {tarball: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/9694a48270e75cd83bce03cab26f8ad0451168c2}
+  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/95d9211eae51c2d47468cacbed8cd9bdaa2fcd33:
+    resolution: {tarball: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/95d9211eae51c2d47468cacbed8cd9bdaa2fcd33}
     version: 13.3.0
 
   zlib-sync@0.1.9:
@@ -3708,12 +3708,12 @@ snapshots:
 
   discord-api-types@0.37.119: {}
 
-  discord-player-youtubei@1.4.3(bufferutil@4.0.9):
+  discord-player-youtubei@1.4.4(bufferutil@4.0.9):
     dependencies:
       jsdom: 26.0.0(bufferutil@4.0.9)
       tiny-typed-emitter: 2.1.0
       undici: 7.3.0
-      youtubei.js: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/9694a48270e75cd83bce03cab26f8ad0451168c2
+      youtubei.js: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/95d9211eae51c2d47468cacbed8cd9bdaa2fcd33
     transitivePeerDependencies:
       - bufferutil
       - canvas
@@ -4868,7 +4868,7 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/9694a48270e75cd83bce03cab26f8ad0451168c2:
+  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/95d9211eae51c2d47468cacbed8cd9bdaa2fcd33:
     dependencies:
       '@bufbuild/protobuf': 2.2.3
       jintr: 3.3.0
