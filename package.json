@@ -39,7 +39,7 @@
 		"p-queue": "^8.1.0",
 		"pino-pretty": "^13.0.0",
 		"pretty-bytes": "^6.1.1",
-		"typescript": "^5.8.2"
+		"typescript": "^5.8.3"
 	},
 	"pnpm": {
 		"overrides": {
