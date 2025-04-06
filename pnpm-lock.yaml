@@ -28,8 +28,8 @@ importers:
         specifier: ^7.2.0-dev.2
         version: 7.2.0-dev.2(@discord-player/extractor@7.1.0)(mediaplex@1.0.0)(postcss@8.5.2)(tsx@4.19.2)
       discord-player-youtubei:
-        specifier: ^1.4.4
-        version: 1.4.4(bufferutil@4.0.9)
+        specifier: ^1.4.5
+        version: 1.4.5(bufferutil@4.0.9)
       discord.js:
         specifier: ^14.18.0
         version: 14.18.0(bufferutil@4.0.9)
@@ -1418,8 +1418,8 @@ packages:
   discord-api-types@0.37.119:
     resolution: {integrity: sha512-WasbGFXEB+VQWXlo6IpW3oUv73Yuau1Ig4AZF/m13tXcTKnMpc/mHjpztIlz4+BM9FG9BHQkEXiPto3bKduQUg==}
 
-  discord-player-youtubei@1.4.4:
-    resolution: {integrity: sha512-1YoEH6NYHIWWZj4PzXlZfAke1A/RCjaCJ8JN1uxQLXMC8jwSm0oYJi6fs19A7KPxj3WpsujncVM5kOqt9qvLOQ==}
+  discord-player-youtubei@1.4.5:
+    resolution: {integrity: sha512-IN9MSrECnCJLMs9GjD2oVyXKL1OFtZ0rQHidUUVOFzLoAY5cktzE+4exoquyQTk+NKtUygOX7ihcRmVPktOqJA==}
     hasBin: true
 
   discord-player@7.2.0-dev.2:
@@ -3708,7 +3708,7 @@ snapshots:
 
   discord-api-types@0.37.119: {}
 
-  discord-player-youtubei@1.4.4(bufferutil@4.0.9):
+  discord-player-youtubei@1.4.5(bufferutil@4.0.9):
     dependencies:
       jsdom: 26.0.0(bufferutil@4.0.9)
       tiny-typed-emitter: 2.1.0
