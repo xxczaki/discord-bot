@@ -59,8 +59,8 @@ importers:
         specifier: ^3.3.1
         version: 3.3.1
       '@types/node':
-        specifier: ^22.14.0
-        version: 22.14.0
+        specifier: ^22.14.1
+        version: 22.14.1
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
@@ -1167,8 +1167,8 @@ packages:
   '@types/mysql@2.15.26':
     resolution: {integrity: sha512-DSLCOXhkvfS5WNNPbfn2KdICAmk8lLc+/PNvnPnF7gOdMZCxopXduqv0OQ13y/yA/zXTSikZZqVgybUxOEg6YQ==}
 
-  '@types/node@22.14.0':
-    resolution: {integrity: sha512-Kmpl+z84ILoG+3T/zQFyAJsU6EPTmOCj8/2+83fSN6djd6I4o7uOuGIH6vq3PrjY5BGitSbFuMN18j3iknubbA==}
+  '@types/node@22.14.1':
+    resolution: {integrity: sha512-u0HuPQwe/dHrItgHHpmw3N2fYCR6x4ivMNbPHRkBVP4CvN+kiRrKHWk3i8tXiO/joPwXLMYvF9TTF0eqgHIuOw==}
 
   '@types/pg-pool@2.0.6':
     resolution: {integrity: sha512-TaAUE5rq2VQYxab5Ts7WZhKNmuN78Q6PiFonTDdpbx8a1H0M1vhy3rhiMjl+e2iHmogyMw7jZF4FrE6eJUy5HQ==}
@@ -2532,8 +2532,8 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/14ea875c679b7cee3ff06a54e09e859f0cd38f98:
-    resolution: {tarball: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/14ea875c679b7cee3ff06a54e09e859f0cd38f98}
+  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/f8690118c3e4edbc22a6b9f59477a8e40e39d9a3:
+    resolution: {tarball: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/f8690118c3e4edbc22a6b9f59477a8e40e39d9a3}
     version: 13.3.0
 
   zlib-sync@0.1.9:
@@ -3478,15 +3478,15 @@ snapshots:
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 22.14.0
+      '@types/node': 22.14.1
 
   '@types/estree@1.0.6': {}
 
   '@types/mysql@2.15.26':
     dependencies:
-      '@types/node': 22.14.0
+      '@types/node': 22.14.1
 
-  '@types/node@22.14.0':
+  '@types/node@22.14.1':
     dependencies:
       undici-types: 6.21.0
 
@@ -3496,7 +3496,7 @@ snapshots:
 
   '@types/pg@8.6.1':
     dependencies:
-      '@types/node': 22.14.0
+      '@types/node': 22.14.1
       pg-protocol: 1.7.1
       pg-types: 2.2.0
 
@@ -3504,11 +3504,11 @@ snapshots:
 
   '@types/tedious@4.0.14':
     dependencies:
-      '@types/node': 22.14.0
+      '@types/node': 22.14.1
 
   '@types/ws@8.5.14':
     dependencies:
-      '@types/node': 22.14.0
+      '@types/node': 22.14.1
 
   '@vladfrangu/async_event_emitter@2.4.6': {}
 
@@ -3713,7 +3713,7 @@ snapshots:
       jsdom: 26.0.0(bufferutil@4.0.9)
       tiny-typed-emitter: 2.1.0
       undici: 7.3.0
-      youtubei.js: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/14ea875c679b7cee3ff06a54e09e859f0cd38f98
+      youtubei.js: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/f8690118c3e4edbc22a6b9f59477a8e40e39d9a3
     transitivePeerDependencies:
       - bufferutil
       - canvas
@@ -4868,7 +4868,7 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/14ea875c679b7cee3ff06a54e09e859f0cd38f98:
+  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/f8690118c3e4edbc22a6b9f59477a8e40e39d9a3:
     dependencies:
       '@bufbuild/protobuf': 2.2.3
       jintr: 3.3.0
