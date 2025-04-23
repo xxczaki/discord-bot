@@ -13,7 +13,7 @@
 	"packageManager": "pnpm@10.9.0",
 	"dependencies": {
 		"@discord-player/extractor": "^7.1.0",
-		"@sentry/node": "^9.13.0",
+		"@sentry/node": "^9.14.0",
 		"bgutils-js": "^3.2.0",
 		"bufferutil": "^4.0.9",
 		"discord-player": "^7.2.0-dev.2",

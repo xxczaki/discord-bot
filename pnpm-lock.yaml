@@ -16,8 +16,8 @@ importers:
         specifier: ^7.1.0
         version: 7.1.0
       '@sentry/node':
-        specifier: ^9.13.0
-        version: 9.13.0
+        specifier: ^9.14.0
+        version: 9.14.0
       bgutils-js:
         specifier: ^3.2.0
         version: 3.2.0
@@ -962,8 +962,8 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@prisma/instrumentation@6.5.0':
-    resolution: {integrity: sha512-morJDtFRoAp5d/KENEm+K6Y3PQcn5bCvpJ5a9y3V3DNMrNy/ZSn2zulPGj+ld+Xj2UYVoaMJ8DpBX/o6iF6OiA==}
+  '@prisma/instrumentation@6.6.0':
+    resolution: {integrity: sha512-M/a6njz3hbf2oucwdbjNKrSMLuyMCwgDrmTtkF1pm4Nm7CU45J/Hd6lauF2CDACTUYzu3ymcV7P0ZAhIoj6WRw==}
     peerDependencies:
       '@opentelemetry/api': ^1.8
 
@@ -1132,20 +1132,20 @@ packages:
     engines: {node: '>= 10'}
     hasBin: true
 
-  '@sentry/core@9.13.0':
-    resolution: {integrity: sha512-Zn1Qec5XNkNRE/M5QjL6YJLghETg6P188G/v2OzdHdHIRf0Y58/SnJilu3louF+ogos6kaSqqdMgzqKgZ8tCdg==}
+  '@sentry/core@9.14.0':
+    resolution: {integrity: sha512-OLfucnP3LAL5bxVNWc2RVOHCX7fk9Er5bWPCS+O5cPjqNUUz0HQHhVh2Vhei5C0kYZZM4vy4BQit5T9LrlOaNA==}
     engines: {node: '>=18'}
 
   '@sentry/esbuild-plugin@3.3.1':
     resolution: {integrity: sha512-NkzLpi6VYhvo+vBGuLIUNFcqA5atJIC7Eo1fwHYHmCo64FenPdWbPQOtsiyTpWEMgawrshw+7ipGkqm2X+h93g==}
     engines: {node: '>= 14'}
 
-  '@sentry/node@9.13.0':
-    resolution: {integrity: sha512-75UVkrED5b0BaazNQKCmF8NqeqjErxildPojDyC037JN+cVFMPr/kFFGGm7E+eCvA/j2pAPUzqifHp/PjykPcw==}
+  '@sentry/node@9.14.0':
+    resolution: {integrity: sha512-AWPc6O+zAdSgnsiKm6Nb1txyiKCOIBriJEONdXFSslgZgkm8EWAYRRHyS2Hkmnz0/5bEQ3jEffIw22qJuaHN+Q==}
     engines: {node: '>=18'}
 
-  '@sentry/opentelemetry@9.13.0':
-    resolution: {integrity: sha512-TLSP0n+sXKVcVkAM2ttVmXcAT2K3e9D5gdPfr6aCnW+KIGJuD7wzla/TIcTWFaVwUejbvXAB6IFpZ/qA8HFwyA==}
+  '@sentry/opentelemetry@9.14.0':
+    resolution: {integrity: sha512-NnHJjSQGpWaZ6+0QK9Xn1T3CTOM16Ij07VnSiGmVz3/IMsNC1/jndqc8p9BxEI+67XhZjOUUN0Ogpq1XRY7YeA==}
     engines: {node: '>=18'}
     peerDependencies:
       '@opentelemetry/api': ^1.9.0
@@ -1716,8 +1716,8 @@ packages:
   jackspeak@3.4.3:
     resolution: {integrity: sha512-OGlZQpz2yfahA/Rd1Y8Cd9SIEsqvXkLVoSw/cgwhnhFMDbsQFeZYoJJ7bIZBS9BcamUW96asq/npPWugM+RQBw==}
 
-  jintr@3.3.0:
-    resolution: {integrity: sha512-ZsaajJ4Hr5XR0tSPhOZOTjFhxA0qscKNSOs41NRjx7ZOGwpfdp8NKIBEUtvUPbA37JXyv1sJlgeOOZHjr3h76Q==}
+  jintr@3.3.1:
+    resolution: {integrity: sha512-nnOzyhf0SLpbWuZ270Omwbj5LcXUkTcZkVnK8/veJXtSZOiATM5gMZMdmzN75FmTyj+NVgrGaPdH12zIJ24oIA==}
 
   joycon@3.1.1:
     resolution: {integrity: sha512-34wB/Y7MW7bzjKRjUKTa46I2Z7eV62Rkhva+KkopW7Qvv/OSWBqvkSY7vusOPrNuZcUG3tApvdVgNB8POj3SPw==}
@@ -2533,9 +2533,9 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/ff1aa67b8bebd8e038ea77a124d0be0ed420bc55:
-    resolution: {tarball: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/ff1aa67b8bebd8e038ea77a124d0be0ed420bc55}
-    version: 13.3.0
+  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/a10c6a1c23200d0908cacfa65011dd5ce7954dff:
+    resolution: {tarball: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/a10c6a1c23200d0908cacfa65011dd5ce7954dff}
+    version: 13.4.0
 
   zlib-sync@0.1.9:
     resolution: {integrity: sha512-DinB43xCjVwIBDpaIvQqHbmDsnYnSt6HJ/yiB2MZQGTqgPcwBSZqLkimXwK8BvdjQ/MaZysb5uEenImncqvCqQ==}
@@ -3284,7 +3284,7 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@prisma/instrumentation@6.5.0(@opentelemetry/api@1.9.0)':
+  '@prisma/instrumentation@6.6.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.57.2(@opentelemetry/api@1.9.0)
@@ -3415,7 +3415,7 @@ snapshots:
       - encoding
       - supports-color
 
-  '@sentry/core@9.13.0': {}
+  '@sentry/core@9.14.0': {}
 
   '@sentry/esbuild-plugin@3.3.1':
     dependencies:
@@ -3426,7 +3426,7 @@ snapshots:
       - encoding
       - supports-color
 
-  '@sentry/node@9.13.0':
+  '@sentry/node@9.14.0':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/context-async-hooks': 1.30.1(@opentelemetry/api@1.9.0)
@@ -3458,14 +3458,14 @@ snapshots:
       '@opentelemetry/resources': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-base': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.30.0
-      '@prisma/instrumentation': 6.5.0(@opentelemetry/api@1.9.0)
-      '@sentry/core': 9.13.0
-      '@sentry/opentelemetry': 9.13.0(@opentelemetry/api@1.9.0)(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.30.0)
+      '@prisma/instrumentation': 6.6.0(@opentelemetry/api@1.9.0)
+      '@sentry/core': 9.14.0
+      '@sentry/opentelemetry': 9.14.0(@opentelemetry/api@1.9.0)(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.30.0)
       import-in-the-middle: 1.13.0
     transitivePeerDependencies:
       - supports-color
 
-  '@sentry/opentelemetry@9.13.0(@opentelemetry/api@1.9.0)(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.30.0)':
+  '@sentry/opentelemetry@9.14.0(@opentelemetry/api@1.9.0)(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.30.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/context-async-hooks': 1.30.1(@opentelemetry/api@1.9.0)
@@ -3473,7 +3473,7 @@ snapshots:
       '@opentelemetry/instrumentation': 0.57.2(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-base': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.30.0
-      '@sentry/core': 9.13.0
+      '@sentry/core': 9.14.0
 
   '@tokenizer/token@0.3.0': {}
 
@@ -3714,7 +3714,7 @@ snapshots:
       jsdom: 26.0.0(bufferutil@4.0.9)
       tiny-typed-emitter: 2.1.0
       undici: 7.3.0
-      youtubei.js: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/ff1aa67b8bebd8e038ea77a124d0be0ed420bc55
+      youtubei.js: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/a10c6a1c23200d0908cacfa65011dd5ce7954dff
     transitivePeerDependencies:
       - bufferutil
       - canvas
@@ -4134,7 +4134,7 @@ snapshots:
     optionalDependencies:
       '@pkgjs/parseargs': 0.11.0
 
-  jintr@3.3.0:
+  jintr@3.3.1:
     dependencies:
       acorn: 8.14.0
 
@@ -4869,10 +4869,10 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/ff1aa67b8bebd8e038ea77a124d0be0ed420bc55:
+  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/a10c6a1c23200d0908cacfa65011dd5ce7954dff:
     dependencies:
       '@bufbuild/protobuf': 2.2.3
-      jintr: 3.3.0
+      jintr: 3.3.1
       tslib: 2.8.1
       undici: 5.28.5
 
