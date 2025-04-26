@@ -27,7 +27,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
-		"@discordjs/rest": "^2.4.3",
+		"@discordjs/rest": "^2.5.0",
 		"@sentry/esbuild-plugin": "^3.3.1",
 		"@types/node": "^22.15.2",
 		"date-fns": "^4.1.0",
