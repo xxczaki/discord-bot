@@ -23,7 +23,7 @@
 		"pino": "^9.6.0",
 		"sodium-native": "^5.0.1",
 		"ulid": "^3.0.0",
-		"zlib-sync": "^0.1.9"
+		"zlib-sync": "^0.1.10"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",

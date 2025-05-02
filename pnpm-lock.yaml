@@ -46,8 +46,8 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0
       zlib-sync:
-        specifier: ^0.1.9
-        version: 0.1.9
+        specifier: ^0.1.10
+        version: 0.1.10
     devDependencies:
       '@biomejs/biome':
         specifier: 1.9.4
@@ -2533,12 +2533,12 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/92b8623374a126d60604a54fa4be67b460ddc5e3:
-    resolution: {tarball: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/92b8623374a126d60604a54fa4be67b460ddc5e3}
+  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/0f1fd7223c2e5c8e28637e84a1c00c6d88fad50f:
+    resolution: {tarball: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/0f1fd7223c2e5c8e28637e84a1c00c6d88fad50f}
     version: 13.4.0
 
-  zlib-sync@0.1.9:
-    resolution: {integrity: sha512-DinB43xCjVwIBDpaIvQqHbmDsnYnSt6HJ/yiB2MZQGTqgPcwBSZqLkimXwK8BvdjQ/MaZysb5uEenImncqvCqQ==}
+  zlib-sync@0.1.10:
+    resolution: {integrity: sha512-t7/pYg5tLBznL1RuhmbAt8rNp5tbhr+TSrJFnMkRtrGIaPJZ6Dc0uR4u3OoQI2d6cGlVI62E3Gy6gwkxyIqr/w==}
 
 snapshots:
 
@@ -3714,7 +3714,7 @@ snapshots:
       jsdom: 26.0.0(bufferutil@4.0.9)
       tiny-typed-emitter: 2.1.0
       undici: 7.3.0
-      youtubei.js: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/92b8623374a126d60604a54fa4be67b460ddc5e3
+      youtubei.js: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/0f1fd7223c2e5c8e28637e84a1c00c6d88fad50f
     transitivePeerDependencies:
       - bufferutil
       - canvas
@@ -4870,13 +4870,13 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/92b8623374a126d60604a54fa4be67b460ddc5e3:
+  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/0f1fd7223c2e5c8e28637e84a1c00c6d88fad50f:
     dependencies:
       '@bufbuild/protobuf': 2.2.3
       jintr: 3.3.1
       tslib: 2.8.1
       undici: 5.28.5
 
-  zlib-sync@0.1.9:
+  zlib-sync@0.1.10:
     dependencies:
       nan: 2.22.0
