@@ -12,9 +12,6 @@ importers:
 
   .:
     dependencies:
-      '@discord-player/extractor':
-        specifier: ^7.1.0
-        version: 7.1.0
       '@sentry/node':
         specifier: ^9.15.0
         version: 9.15.0
@@ -27,6 +24,9 @@ importers:
       discord-player:
         specifier: ^7.2.0-dev.2
         version: 7.2.0-dev.2(@discord-player/extractor@7.1.0)(mediaplex@1.0.0)(postcss@8.5.2)(tsx@4.19.2)
+      discord-player-spotify:
+        specifier: ^1.1.2
+        version: 1.1.2
       discord-player-youtubei:
         specifier: ^1.4.5
         version: 1.4.5(bufferutil@4.0.9)
@@ -86,8 +86,8 @@ importers:
         specifier: ^13.0.0
         version: 13.0.0
       pretty-bytes:
-        specifier: ^6.1.1
-        version: 6.1.1
+        specifier: ^7.0.0
+        version: 7.0.0
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -764,6 +764,10 @@ packages:
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
 
+  '@noble/hashes@1.7.1':
+    resolution: {integrity: sha512-B8XBPsn4vT/KJAGqDzbwztd+6Yte3P4V7iafm24bxgDe/mlRuK6xmWPuCNrKt2vDafZ8MfJLlchDG/vYafQEjQ==}
+    engines: {node: ^14.21.3 || >=16}
+
   '@opentelemetry/api-logs@0.57.2':
     resolution: {integrity: sha512-uIX52NnTM0iBh84MShlpouI7UKqkZ7MrUszTmaypHBu4r7NofznSnQRfJ+uUeDtQDj6w8eFGg5KBLDAwAPz1+A==}
     engines: {node: '>=14'}
@@ -1418,6 +1422,9 @@ packages:
   discord-api-types@0.38.1:
     resolution: {integrity: sha512-vsjsqjAuxsPhiwbPjTBeGQaDPlizFmSkU0mTzFGMgRxqCDIRBR7iTY74HacpzrDV0QtERHRKQEk1tq7drZUtHg==}
 
+  discord-player-spotify@1.1.2:
+    resolution: {integrity: sha512-jv53C2J5DrtkfQRqoY7zZ9QrgyTsIrdR0uAh3iCFqmxMJpiUf+iUOXKS/OwlcpN2ZEb57TYUJrSg4SVVcr18pw==}
+
   discord-player-youtubei@1.4.5:
     resolution: {integrity: sha512-IN9MSrECnCJLMs9GjD2oVyXKL1OFtZ0rQHidUUVOFzLoAY5cktzE+4exoquyQTk+NKtUygOX7ihcRmVPktOqJA==}
     hasBin: true
@@ -1968,6 +1975,9 @@ packages:
   node-html-parser@6.1.13:
     resolution: {integrity: sha512-qIsTMOY4C/dAa5Q5vsobRpOOvPfC4pB61UVW2uSwZNUp0QU/jCekTal1vMmbO0DgdHeLUJpv/ARmDqErVxA3Sg==}
 
+  node-html-parser@7.0.1:
+    resolution: {integrity: sha512-KGtmPY2kS0thCWGK0VuPyOS+pBKhhe8gXztzA2ilAOhbUbxa9homF1bOyKvhGzMLXUoRds9IOmr/v5lr/lqNmA==}
+
   node-releases@2.0.19:
     resolution: {integrity: sha512-xxOWJsBKtzAq7DY0J+DTzuz58K8e7sJbdgwkbMWQe8UYB6ekmsQ45q0M/tJDsGaZmbC+l7n57UV8Hl5tHxO9uw==}
 
@@ -1991,6 +2001,9 @@ packages:
 
   once@1.4.0:
     resolution: {integrity: sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==}
+
+  otpauth@9.4.0:
+    resolution: {integrity: sha512-fHIfzIG5RqCkK9cmV8WU+dPQr9/ebR5QOwGZn2JAr1RQF+lmAuLL2YdtdqvmBjNmgJlYk3KZ4a0XokaEhg1Jsw==}
 
   p-debounce@4.0.0:
     resolution: {integrity: sha512-4Ispi9I9qYGO4lueiLDhe4q4iK5ERK8reLsuzH6BPaXn53EGaua8H66PXIFGrW897hwjXp+pVLrm/DLxN0RF0A==}
@@ -2115,9 +2128,9 @@ packages:
     resolution: {integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==}
     engines: {node: '>=0.10.0'}
 
-  pretty-bytes@6.1.1:
-    resolution: {integrity: sha512-mQUvGU6aUFQ+rNvTIAcZuWGRT9a6f6Yrg9bHs4ImKF+HZCEK+plBvnAZYSIQztknZF2qnzNtr6F8s0+IuptdlQ==}
-    engines: {node: ^14.13.1 || >=16.0.0}
+  pretty-bytes@7.0.0:
+    resolution: {integrity: sha512-U5otLYPR3L0SVjHGrkEUx5mf7MxV2ceXeE7VwWPk+hyzC5drNohsOGNPDZqxCqyX1lkbEN4kl1LiI8QFd7r0ZA==}
+    engines: {node: '>=20'}
 
   process-warning@4.0.1:
     resolution: {integrity: sha512-3c2LzQ3rY9d0hc1emcsHhfT9Jwz0cChib/QN89oME2R451w5fy3f0afAhERFZAwrbDU43wk12d0ORBpDVME50Q==}
@@ -3030,6 +3043,8 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
+  '@noble/hashes@1.7.1': {}
+
   '@opentelemetry/api-logs@0.57.2':
     dependencies:
       '@opentelemetry/api': 1.9.0
@@ -3709,6 +3724,11 @@ snapshots:
 
   discord-api-types@0.38.1: {}
 
+  discord-player-spotify@1.1.2:
+    dependencies:
+      node-html-parser: 7.0.1
+      otpauth: 9.4.0
+
   discord-player-youtubei@1.4.5(bufferutil@4.0.9):
     dependencies:
       jsdom: 26.0.0(bufferutil@4.0.9)
@@ -4336,6 +4356,11 @@ snapshots:
       css-select: 5.1.0
       he: 1.2.0
 
+  node-html-parser@7.0.1:
+    dependencies:
+      css-select: 5.1.0
+      he: 1.2.0
+
   node-releases@2.0.19: {}
 
   normalize-path@3.0.0: {}
@@ -4353,6 +4378,10 @@ snapshots:
   once@1.4.0:
     dependencies:
       wrappy: 1.0.2
+
+  otpauth@9.4.0:
+    dependencies:
+      '@noble/hashes': 1.7.1
 
   p-debounce@4.0.0: {}
 
@@ -4470,7 +4499,7 @@ snapshots:
     dependencies:
       xtend: 4.0.2
 
-  pretty-bytes@6.1.1: {}
+  pretty-bytes@7.0.0: {}
 
   process-warning@4.0.1: {}
 

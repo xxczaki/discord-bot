@@ -9,10 +9,10 @@ await esbuild.build({
 	format: 'esm',
 	target: 'node22',
 	external: [
-		'@discord-player/extractor',
 		'bgutils-js',
 		'bufferutil',
 		'discord-player',
+		'discord-player-spotify',
 		'discord-player-youtubei',
 		'discord.js',
 		'sodium-native',

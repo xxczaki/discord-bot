@@ -1,12 +1,12 @@
 import { createReadStream, createWriteStream, existsSync } from 'node:fs';
 import { Readable } from 'node:stream';
-import { SpotifyExtractor } from '@discord-player/extractor';
 import {
 	InterceptedStream,
 	Player,
 	onBeforeCreateStream,
 	onStreamExtracted,
 } from 'discord-player';
+import { SpotifyExtractor } from 'discord-player-spotify';
 import { YoutubeiExtractor } from 'discord-player-youtubei';
 import type { Client } from 'discord.js';
 import { RedisQueryCache } from './RedisQueryCache';

@@ -12,11 +12,11 @@
 	},
 	"packageManager": "pnpm@10.10.0",
 	"dependencies": {
-		"@discord-player/extractor": "^7.1.0",
 		"@sentry/node": "^9.15.0",
 		"bgutils-js": "^3.2.0",
 		"bufferutil": "^4.0.9",
 		"discord-player": "^7.2.0-dev.2",
+		"discord-player-spotify": "^1.1.2",
 		"discord-player-youtubei": "^1.4.5",
 		"discord.js": "^14.19.3",
 		"ioredis": "^5.6.1",
@@ -38,7 +38,7 @@
 		"p-debounce": "^4.0.0",
 		"p-queue": "^8.1.0",
 		"pino-pretty": "^13.0.0",
-		"pretty-bytes": "^6.1.1",
+		"pretty-bytes": "^7.0.0",
 		"typescript": "^5.8.3"
 	},
 	"pnpm": {
