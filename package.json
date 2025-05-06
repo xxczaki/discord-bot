@@ -31,7 +31,7 @@
 		"@sentry/esbuild-plugin": "^3.4.0",
 		"@types/node": "^22.15.3",
 		"date-fns": "^4.1.0",
-		"esbuild": "^0.25.3",
+		"esbuild": "^0.25.4",
 		"esbuild-plugin-pino": "^2.2.2",
 		"fuse.js": "^7.1.0",
 		"memoize": "^10.1.0",
