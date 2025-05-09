@@ -1,4 +1,4 @@
-import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import {
 	COMMAND_CATEGORIES,
 	type CategorizedCommand,
@@ -17,7 +17,7 @@ const helpMessageContent = `
 `.trim();
 
 export default async function helpCommandHandler(
-	interaction: ChatInputCommandInteraction<CacheType>,
+	interaction: ChatInputCommandInteraction,
 ) {
 	await interaction.reply({
 		content: helpMessageContent,

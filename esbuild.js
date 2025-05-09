@@ -1,9 +1,13 @@
+import { glob } from 'node:fs/promises';
 import { sentryEsbuildPlugin } from '@sentry/esbuild-plugin';
 import * as esbuild from 'esbuild';
 import esbuildPluginPino from 'esbuild-plugin-pino';
 
+// @ts-expect-error https://github.com/microsoft/TypeScript/issues/50803
+const handlers = await Array.fromAsync(glob('src/handlers/*.ts'));
+
 await esbuild.build({
-	entryPoints: ['src/index.ts'],
+	entryPoints: ['src/index.ts', ...handlers],
 	bundle: true,
 	platform: 'node',
 	format: 'esm',
@@ -22,7 +26,7 @@ await esbuild.build({
 		'@sentry/node',
 		'pino',
 		'ioredis',
-		'ulid'
+		'ulid',
 	],
 	plugins: [
 		esbuildPluginPino({ transports: [] }),

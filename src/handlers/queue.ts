@@ -13,7 +13,6 @@ import {
 	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonStyle,
-	type CacheType,
 	type ChatInputCommandInteraction,
 	EmbedBuilder,
 	type InteractionResponse,
@@ -25,7 +24,7 @@ import getTrackThumbnail from '../utils/getTrackThumbnail';
 import isObject from '../utils/isObject';
 
 export default async function queueCommandHandler(
-	interaction: ChatInputCommandInteraction<CacheType>,
+	interaction: ChatInputCommandInteraction,
 ) {
 	const queue = useQueue();
 

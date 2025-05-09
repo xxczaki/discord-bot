@@ -1,7 +1,7 @@
 import { readdir, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { captureException } from '@sentry/node';
-import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import prettyBytes from 'pretty-bytes';
 import getOpusCacheDirectoryPath from '../utils/getOpusCacheDirectoryPath';
 import logger from '../utils/logger';
@@ -10,7 +10,7 @@ import pluralize from '../utils/pluralize';
 const opusCacheDirectory = getOpusCacheDirectoryPath();
 
 export default async function opusCacheCommandHandler(
-	interaction: ChatInputCommandInteraction<CacheType>,
+	interaction: ChatInputCommandInteraction,
 ) {
 	await interaction.reply('Fetching the details about the cache…');
 

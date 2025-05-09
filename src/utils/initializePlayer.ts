@@ -24,6 +24,11 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 			queryCache: new RedisQueryCache(redis),
 		});
 
+		/*
+			See:
+			- https://github.com/Androz2091/discord-player/discussions/1962
+			- https://github.com/Androz2091/discord-player/discussions/1985
+		*/
 		onBeforeCreateStream(async (track) => {
 			const filePath = getOpusCacheTrackPath(track.url);
 

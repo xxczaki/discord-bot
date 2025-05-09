@@ -1,11 +1,7 @@
-import {
-	type CacheType,
-	type ChatInputCommandInteraction,
-	EmbedBuilder,
-} from 'discord.js';
+import { type ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 
 export default async function avatarCommandHandler(
-	interaction: ChatInputCommandInteraction<CacheType>,
+	interaction: ChatInputCommandInteraction,
 ) {
 	const user = interaction.options.getUser('user', true);
 

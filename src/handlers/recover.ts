@@ -3,7 +3,6 @@ import {
 	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonStyle,
-	type CacheType,
 	type ChatInputCommandInteraction,
 	type ComponentType,
 	type GuildMember,
@@ -16,7 +15,7 @@ import pluralize from '../utils/pluralize';
 const queueRecoveryService = QueueRecoveryService.getInstance();
 
 export default async function recoverCommandHandler(
-	interaction: ChatInputCommandInteraction<CacheType>,
+	interaction: ChatInputCommandInteraction,
 ) {
 	const voiceChannel = (interaction.member as GuildMember).voice.channel;
 

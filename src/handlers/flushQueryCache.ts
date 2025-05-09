@@ -1,5 +1,5 @@
 import { captureException } from '@sentry/node';
-import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import getEnvironmentVariable from '../utils/getEnvironmentVariable';
 import logger from '../utils/logger';
 import pluralize from '../utils/pluralize';
@@ -8,7 +8,7 @@ import redis from '../utils/redis';
 const ownerUserid = getEnvironmentVariable('OWNER_USER_ID');
 
 export default async function flushQueryCacheCommandHandler(
-	interaction: ChatInputCommandInteraction<CacheType>,
+	interaction: ChatInputCommandInteraction,
 ) {
 	const userId = interaction.member?.user.id;
 

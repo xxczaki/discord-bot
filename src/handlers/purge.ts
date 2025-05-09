@@ -1,5 +1,5 @@
 import { useQueue } from 'discord-player';
-import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import { QueueRecoveryService } from '../utils/QueueRecoveryService';
 import deleteOpusCacheEntry from '../utils/deleteOpusCacheEntry';
 import isObject from '../utils/isObject';
@@ -7,7 +7,7 @@ import isObject from '../utils/isObject';
 const queueRecoveryService = QueueRecoveryService.getInstance();
 
 export default async function purgeCommandHandler(
-	interaction: ChatInputCommandInteraction<CacheType>,
+	interaction: ChatInputCommandInteraction,
 ) {
 	const queue = useQueue();
 

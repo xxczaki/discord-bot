@@ -2,7 +2,6 @@ import {
 	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonStyle,
-	type CacheType,
 	type ChatInputCommandInteraction,
 	type GuildMember,
 	StringSelectMenuBuilder,
@@ -13,7 +12,7 @@ import getEnvironmentVariable from '../utils/getEnvironmentVariable';
 import getPlaylists from '../utils/getPlaylists';
 
 export default async function playlistsCommandHandler(
-	interaction: ChatInputCommandInteraction<CacheType>,
+	interaction: ChatInputCommandInteraction,
 ) {
 	const channel = interaction.client.channels.cache.get(
 		getEnvironmentVariable('PLAYLISTS_CHANNEL_ID'),

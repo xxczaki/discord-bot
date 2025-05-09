@@ -6,7 +6,7 @@ import {
 	ButtonStyle,
 	type GuildMember,
 } from 'discord.js';
-import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
 import createTrackEmbed from '../utils/createTrackEmbed';
 import determineSearchEngine from '../utils/determineSearchEngine';
@@ -14,7 +14,7 @@ import getTrackPosition from '../utils/getTrackPosition';
 import logger from '../utils/logger';
 
 export default async function playCommandHandler(
-	interaction: ChatInputCommandInteraction<CacheType>,
+	interaction: ChatInputCommandInteraction,
 ) {
 	const channel = (interaction.member as GuildMember).voice.channel;
 

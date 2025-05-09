@@ -1,9 +1,5 @@
 import { captureException } from '@sentry/node';
-import {
-	type CacheType,
-	type ChatInputCommandInteraction,
-	EmbedBuilder,
-} from 'discord.js';
+import { type ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import { StatsHandler } from '../utils/StatsHandler';
 import logger from '../utils/logger';
 import redis from '../utils/redis';
@@ -11,7 +7,7 @@ import redis from '../utils/redis';
 const statsHandler = StatsHandler.getInstance();
 
 export default async function statsCommandHandler(
-	interaction: ChatInputCommandInteraction<CacheType>,
+	interaction: ChatInputCommandInteraction,
 ) {
 	const statsStream = statsHandler.getStats('play');
 

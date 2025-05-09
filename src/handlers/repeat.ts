@@ -1,8 +1,8 @@
 import { QueueRepeatMode, useQueue } from 'discord-player';
-import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 
 export default async function repeatCommandHandler(
-	interaction: ChatInputCommandInteraction<CacheType>,
+	interaction: ChatInputCommandInteraction,
 ) {
 	const queue = useQueue();
 	const mode = interaction.options.getInteger('repeat_mode', true);

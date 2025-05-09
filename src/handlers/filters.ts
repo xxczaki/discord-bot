@@ -4,7 +4,6 @@ import {
 	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonStyle,
-	type CacheType,
 	type ChatInputCommandInteraction,
 	type SelectMenuComponentOptionData,
 	StringSelectMenuBuilder,
@@ -26,7 +25,7 @@ const FILTERS: OptionData[] = [
 ];
 
 export default async function filtersCommandHandler(
-	interaction: ChatInputCommandInteraction<CacheType>,
+	interaction: ChatInputCommandInteraction,
 ) {
 	const queue = useQueue();
 

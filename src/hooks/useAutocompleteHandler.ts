@@ -1,6 +1,6 @@
 import { captureException } from '@sentry/node';
 import { useMainPlayer, useQueue } from 'discord-player';
-import type { CacheType, Interaction } from 'discord.js';
+import type { Interaction } from 'discord.js';
 import Fuse from 'fuse.js';
 import debounce from 'p-debounce';
 import determineSearchEngine from '../utils/determineSearchEngine';
@@ -8,7 +8,7 @@ import getTrackPosition from '../utils/getTrackPosition';
 import logger from '../utils/logger';
 import truncateString from '../utils/truncateString';
 
-async function useAutocompleteHandler(interaction: Interaction<CacheType>) {
+async function useAutocompleteHandler(interaction: Interaction) {
 	if (!interaction.isAutocomplete() || interaction.responded) {
 		return;
 	}

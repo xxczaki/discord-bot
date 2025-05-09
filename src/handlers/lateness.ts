@@ -4,7 +4,6 @@ import {
 	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonStyle,
-	type CacheType,
 	type ChatInputCommandInteraction,
 	EmbedBuilder,
 } from 'discord.js';
@@ -16,7 +15,7 @@ import redis from '../utils/redis';
 const lateness = LatenessHandler.getInstance();
 
 export default async function latenessCommandHandler(
-	interaction: ChatInputCommandInteraction<CacheType>,
+	interaction: ChatInputCommandInteraction,
 ) {
 	if (await lateness.isLocked) {
 		const arrived = new ButtonBuilder()

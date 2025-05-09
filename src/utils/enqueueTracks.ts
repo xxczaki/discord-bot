@@ -8,7 +8,6 @@ import {
 } from 'discord-player';
 import {
 	type ButtonInteraction,
-	type CacheType,
 	EmbedBuilder,
 	type Message,
 	type VoiceBasedChannel,
@@ -23,9 +22,9 @@ type Props = {
 	progress: number;
 	voiceChannel: VoiceBasedChannel;
 	interaction: {
-		reply: ButtonInteraction<CacheType>['reply'] | Message['edit'];
-		editReply: ButtonInteraction<CacheType>['editReply'] | Message['edit'];
-		user: ButtonInteraction<CacheType>['user'] | Message['author'];
+		reply: ButtonInteraction['reply'] | Message['edit'];
+		editReply: ButtonInteraction['editReply'] | Message['edit'];
+		user: ButtonInteraction['user'] | Message['author'];
 	};
 };
 

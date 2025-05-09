@@ -1,16 +1,12 @@
 import { useMainPlayer } from 'discord-player';
-import {
-	type CacheType,
-	type ChatInputCommandInteraction,
-	EmbedBuilder,
-} from 'discord.js';
+import { type ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import getCommitLink from '../utils/getCommitLink';
 
 const commitHash = process.env.GIT_COMMIT_SHA;
 const wasDeploymentManual = !commitHash;
 
 export default async function debugCommandHandler(
-	interaction: ChatInputCommandInteraction<CacheType>,
+	interaction: ChatInputCommandInteraction,
 ) {
 	const player = useMainPlayer();
 	const clientLatency = interaction.client.ws.ping.toFixed(0);

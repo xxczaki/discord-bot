@@ -4,7 +4,6 @@ import {
 	ButtonBuilder,
 	type ButtonInteraction,
 	ButtonStyle,
-	type CacheType,
 	type ChatInputCommandInteraction,
 } from 'discord.js';
 import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
@@ -13,7 +12,7 @@ const GRID_SIZE = 3;
 const EMPTY_CHARACTER = '‎';
 
 export default async function ticTacToeCommandHandler(
-	interaction: ChatInputCommandInteraction<CacheType>,
+	interaction: ChatInputCommandInteraction,
 ) {
 	const rows = await getRows([], []);
 	const response = await interaction.reply({
@@ -157,7 +156,7 @@ function isGameOverByWin(positions: string[]) {
 }
 
 async function nextMove(
-	interaction: ButtonInteraction<CacheType>,
+	interaction: ButtonInteraction,
 	xPositions: string[],
 	oPositions: string[],
 ) {

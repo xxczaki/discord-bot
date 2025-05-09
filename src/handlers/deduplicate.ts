@@ -1,5 +1,5 @@
 import { type Track, useQueue } from 'discord-player';
-import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import isObject from '../utils/isObject';
 import pluralize from '../utils/pluralize';
 
@@ -8,7 +8,7 @@ const ALGORITHMS = ['bridged', 'source'] as const;
 const pluralizeDuplicates = pluralize('duplicate', 'duplicates');
 
 export default async function deduplicateCommandHandler(
-	interaction: ChatInputCommandInteraction<CacheType>,
+	interaction: ChatInputCommandInteraction,
 ) {
 	const queue = useQueue();
 

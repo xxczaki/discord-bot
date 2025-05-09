@@ -9,7 +9,6 @@ import {
 	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonStyle,
-	type CacheType,
 	EmbedBuilder,
 	type StringSelectMenuInteraction,
 	type VoiceBasedChannel,
@@ -24,7 +23,7 @@ import pluralize from './pluralize';
 const pluralizeEntries = pluralize('entry', 'entries');
 
 export default async function enqueuePlaylists(
-	interaction: StringSelectMenuInteraction<CacheType>,
+	interaction: StringSelectMenuInteraction,
 	voiceChannel: VoiceBasedChannel,
 ) {
 	const playlistIds = interaction.values.map((value) => `id="${value}"`);

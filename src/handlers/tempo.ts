@@ -2,7 +2,6 @@ import type { QueueFilters } from 'discord-player';
 import { useQueue } from 'discord-player';
 import {
 	ActionRowBuilder,
-	type CacheType,
 	type ChatInputCommandInteraction,
 	StringSelectMenuBuilder,
 	StringSelectMenuOptionBuilder,
@@ -10,7 +9,7 @@ import {
 import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
 
 export default async function tempoCommandHandler(
-	interaction: ChatInputCommandInteraction<CacheType>,
+	interaction: ChatInputCommandInteraction,
 ) {
 	const queue = useQueue();
 
