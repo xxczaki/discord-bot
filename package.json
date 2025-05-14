@@ -10,7 +10,7 @@
 		"lint": "biome check --write ./src",
 		"tsc": "tsc --noEmit"
 	},
-	"packageManager": "pnpm@10.10.0",
+	"packageManager": "pnpm@10.11.0",
 	"dependencies": {
 		"@sentry/node": "^9.18.0",
 		"bgutils-js": "^3.2.0",
