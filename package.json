@@ -29,7 +29,7 @@
 		"@biomejs/biome": "1.9.4",
 		"@discordjs/rest": "^2.5.0",
 		"@sentry/esbuild-plugin": "^3.4.0",
-		"@types/node": "^22.15.17",
+		"@types/node": "^22.15.18",
 		"date-fns": "^4.1.0",
 		"esbuild": "^0.25.4",
 		"esbuild-plugin-pino": "^2.2.2",
