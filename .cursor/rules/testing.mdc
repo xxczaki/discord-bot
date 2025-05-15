@@ -1,0 +1,31 @@
+---
+description: Custom conventions used when writing tests
+globs: 
+alwaysApply: false
+---
+# Testing Conventions
+
+## File Structure
+- Test files should be named `*.test.ts` and placed in a `tests` directory on the same level as the file being tested
+	- Example: For `src/utils/StatsHandler.ts`, the test should be at `src/utils/tests/StatsHandler.test.ts`
+- Do not create a separate `__tests__` directory
+
+## Test Organization
+- Only use `describe` blocks when testing multiple distinct features/components in a single test file
+- For single utility tests, use `it` blocks directly without wrapping them in `describe`
+- When referencing code values in test names (variables, properties, etc.), wrap them in backticks
+  - ✅ `it('should save play stats without `requestedById`')`
+  - ❌ `it('should save play stats without requestedById')`
+
+## Mocking
+- When using multiple `vi.mocked()` calls, define them as constants at the top of the test file
+- Example: `const mockedFunction = vi.mocked(originalFunction)`
+- When mocking external dependencies that require types, use type-only imports:
+  ```typescript
+  import type { ExternalType } from 'package';
+  ```
+
+## Test Data
+- Reusable test data (URLs, IDs, example inputs) should be defined as constants at the top of the test file
+	- Example: `const EXAMPLE_PLAYLIST_URL = 'https://open.spotify.com/playlist/...'`
+
