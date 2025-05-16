@@ -46,7 +46,7 @@
 	"pnpm": {
 		"overrides": {
 			"libsodium-wrappers": "-",
-			"youtubei.js": "github:LuanRT/YouTube.js#v13.4.0"
+			"youtubei.js": "github:LuanRT/YouTube.js"
 		},
 		"onlyBuiltDependencies": [
 			"esbuild",
