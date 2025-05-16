@@ -1,4 +1,4 @@
-FROM node:22.15.0-alpine AS base
+FROM node:22.15.1-alpine AS base
 
 RUN apk add --no-cache python3 make g++ && \
 		corepack enable
@@ -20,7 +20,7 @@ RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN,env=SENTRY_AUTH_TOKEN \
 RUN pnpm prune --prod
 
 
-FROM node:22.15.0-alpine
+FROM node:22.15.1-alpine
 
 ENV TZ="Europe/Warsaw"
 
