@@ -6,7 +6,6 @@ settings:
 
 overrides:
   libsodium-wrappers: '-'
-  youtubei.js: github:LuanRT/YouTube.js
 
 importers:
 
