@@ -6,7 +6,7 @@ settings:
 
 overrides:
   libsodium-wrappers: '-'
-  youtubei.js: github:LuanRT/YouTube.js#v13.4.0
+  youtubei.js: github:LuanRT/YouTube.js
 
 importers:
 
@@ -2346,8 +2346,8 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/a10c6a1c23200d0908cacfa65011dd5ce7954dff:
-    resolution: {tarball: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/a10c6a1c23200d0908cacfa65011dd5ce7954dff}
+  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/0f1fd7223c2e5c8e28637e84a1c00c6d88fad50f:
+    resolution: {tarball: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/0f1fd7223c2e5c8e28637e84a1c00c6d88fad50f}
     version: 13.4.0
 
   zlib-sync@0.1.10:
@@ -3433,7 +3433,7 @@ snapshots:
       jsdom: 26.1.0(bufferutil@4.0.9)
       tiny-typed-emitter: 2.1.0
       undici: 7.9.0
-      youtubei.js: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/a10c6a1c23200d0908cacfa65011dd5ce7954dff
+      youtubei.js: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/0f1fd7223c2e5c8e28637e84a1c00c6d88fad50f
     transitivePeerDependencies:
       - bufferutil
       - canvas
@@ -4574,7 +4574,7 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/a10c6a1c23200d0908cacfa65011dd5ce7954dff:
+  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/0f1fd7223c2e5c8e28637e84a1c00c6d88fad50f:
     dependencies:
       '@bufbuild/protobuf': 2.4.0
       jintr: 3.3.1
