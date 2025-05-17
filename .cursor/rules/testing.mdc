@@ -3,8 +3,6 @@ description: Custom conventions used when writing tests
 globs: 
 alwaysApply: false
 ---
-# Testing Conventions
-
 ## File Structure
 - Test files should be named `*.test.ts` and placed in a `tests` directory on the same level as the file being tested
 	- Example: For `src/utils/StatsHandler.ts`, the test should be at `src/utils/tests/StatsHandler.test.ts`
@@ -18,8 +16,10 @@ alwaysApply: false
   - ❌ `it('should save play stats without requestedById')`
 
 ## Mocking
+- Avoid mocking if possible
+- When mocking is necessary, try to provide minimal implementations
 - When using multiple `vi.mocked()` calls, define them as constants at the top of the test file
-- Example: `const mockedFunction = vi.mocked(originalFunction)`
+	- Example: `const mockedFunction = vi.mocked(originalFunction)`
 - When mocking external dependencies that require types, use type-only imports:
   ```typescript
   import type { ExternalType } from 'package';
@@ -28,4 +28,7 @@ alwaysApply: false
 ## Test Data
 - Reusable test data (URLs, IDs, example inputs) should be defined as constants at the top of the test file
 	- Example: `const EXAMPLE_PLAYLIST_URL = 'https://open.spotify.com/playlist/...'`
+
+## Other
+- Don't ask me to review the test without running it first and fixing any issues!
 
