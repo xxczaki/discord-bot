@@ -40,8 +40,8 @@ importers:
         specifier: ^9.7.0
         version: 9.7.0
       sodium-native:
-        specifier: ^5.0.3
-        version: 5.0.3
+        specifier: ^5.0.4
+        version: 5.0.4
       ulid:
         specifier: ^3.0.0
         version: 3.0.0
@@ -1952,8 +1952,8 @@ packages:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
 
-  sodium-native@5.0.3:
-    resolution: {integrity: sha512-8mmRxZtN9Lw2foyBFuRO193OYmyQ9fnXQrWIcUHn3XLmGZEU3QkCFauLA8zokoGM0nfsdo1OuvGOlL7591dYeQ==}
+  sodium-native@5.0.4:
+    resolution: {integrity: sha512-o/LIWIBVx8SIMFUiYuz60bZnFac88We3cEEPALmMTW1W0ewlnAMGE7GvvrcR9eSCpilFqKebVdn7t+WuvXPATQ==}
     engines: {bare: '>=1.16.0'}
 
   sonic-boom@4.2.0:
@@ -4203,7 +4203,7 @@ snapshots:
 
   signal-exit@4.1.0: {}
 
-  sodium-native@5.0.3:
+  sodium-native@5.0.4:
     dependencies:
       require-addon: 1.1.0
       which-runtime: 1.2.1
