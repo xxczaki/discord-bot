@@ -1,8 +1,8 @@
 import { join } from 'node:path';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { RAW_COMMANDS } from '../constants/commands';
-import snakeToCamelCase from '../utils/snakeToCamelCase';
 import logger from '../utils/logger';
+import snakeToCamelCase from '../utils/snakeToCamelCase';
 
 export default async function useCommandHandlers(
 	interaction: ChatInputCommandInteraction,
