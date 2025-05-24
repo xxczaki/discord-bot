@@ -67,8 +67,15 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 			};
 		});
 
-		await initializedPlayer.extractors.register(YoutubeiExtractor, {});
-		await initializedPlayer.extractors.register(SpotifyExtractor, {});
+		await initializedPlayer.extractors.register(YoutubeiExtractor, {
+			streamOptions: {
+				useClient: 'WEB_EMBEDDED',
+			},
+			generateWithPoToken: true,
+		});
+		await initializedPlayer.extractors.register(SpotifyExtractor, {
+			market: 'PL',
+		});
 
 		await initializedPlayer.extractors.loadMulti([
 			YoutubeiExtractor,
