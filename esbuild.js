@@ -3,7 +3,6 @@ import { sentryEsbuildPlugin } from '@sentry/esbuild-plugin';
 import * as esbuild from 'esbuild';
 import esbuildPluginPino from 'esbuild-plugin-pino';
 
-// @ts-expect-error https://github.com/microsoft/TypeScript/issues/50803
 const handlers = await Array.fromAsync(glob('src/handlers/*.ts'));
 
 await esbuild.build({
@@ -30,15 +29,19 @@ await esbuild.build({
 	],
 	plugins: [
 		esbuildPluginPino({ transports: [] }),
-		sentryEsbuildPlugin({
-			authToken: process.env.SENTRY_AUTH_TOKEN,
-			org: 'parsify-tech',
-			project: 'discord-bot',
-			telemetry: false,
-			release: {
-				name: process.env.SENTRY_RELEASE_NAME,
-			},
-		}),
+		...(process.env.SENTRY_RELEASE_NAME
+			? [
+					sentryEsbuildPlugin({
+						authToken: process.env.SENTRY_AUTH_TOKEN,
+						org: 'parsify-tech',
+						project: 'discord-bot',
+						telemetry: false,
+						release: {
+							name: process.env.SENTRY_RELEASE_NAME,
+						},
+					}),
+				]
+			: []),
 	],
 	outdir: 'dist',
 	minify: true,
