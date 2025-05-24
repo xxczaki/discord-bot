@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { RAW_COMMANDS } from '../constants/commands';
-import camelToSnakeCase from '../utils/camelToSnakeCase';
+import snakeToCamelCase from '../utils/snakeToCamelCase';
 import logger from '../utils/logger';
 
 export default async function useCommandHandlers(
@@ -14,7 +14,7 @@ export default async function useCommandHandlers(
 		return;
 	}
 
-	const fileName = camelToSnakeCase(interaction.commandName);
+	const fileName = snakeToCamelCase(interaction.commandName);
 
 	const { default: handler } = await import(
 		join(import.meta.dirname, 'handlers', `${fileName}.js`)
