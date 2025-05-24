@@ -26,8 +26,9 @@ alwaysApply: false
   ```
 
 ## Test Data
-- Reusable test data (URLs, IDs, example inputs) should be defined as constants at the top of the test file
+- Reusable test data (URLs, IDs, example inputs) should be defined as constants at the top of the test file, after imports but before mocks
 	- Example: `const EXAMPLE_PLAYLIST_URL = 'https://open.spotify.com/playlist/...'`
+- Constants should be placed before any mocks or other code
 
 ## Other
 - Don't ask me to review the test without running it first and fixing any issues!

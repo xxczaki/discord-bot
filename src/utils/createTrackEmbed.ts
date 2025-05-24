@@ -33,7 +33,7 @@ function createTrackEmbed(
 			...queue.metadata,
 			queries: Object.fromEntries(
 				Object.entries(existingQueries).filter(
-					([key]) => key !== track.id || key !== '0',
+					([key]) => key !== track.id && key !== '0',
 				),
 			),
 		});
