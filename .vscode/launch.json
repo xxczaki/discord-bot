@@ -1,0 +1,18 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Debug discord-bot",
+			"type": "node",
+			"request": "launch",
+			"program": "${workspaceFolder}/dist/index.js",
+			"envFile": "${workspaceFolder}/.env",
+			"console": "integratedTerminal",
+			"sourceMaps": true,
+			"skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+			"outputCapture": "std",
+			"internalConsoleOptions": "neverOpen",
+			"preLaunchTask": "build",
+		}
+	]
+}

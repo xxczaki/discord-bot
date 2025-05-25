@@ -1,9 +1,9 @@
-import { glob } from 'node:fs/promises';
+import { globSync } from 'node:fs';
 import { sentryEsbuildPlugin } from '@sentry/esbuild-plugin';
 import * as esbuild from 'esbuild';
 import esbuildPluginPino from 'esbuild-plugin-pino';
 
-const handlers = await Array.fromAsync(glob('src/handlers/*.ts'));
+const handlers = globSync('src/handlers/*.ts');
 
 await esbuild.build({
 	entryPoints: ['src/index.ts', ...handlers],
