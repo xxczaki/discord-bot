@@ -45,11 +45,13 @@ function createMockPlayer() {
 function createMockQueue(executeTasks = false) {
 	return {
 		on: vi.fn(),
-		addAll: vi.fn().mockImplementation(async (tasks: (() => Promise<unknown>)[]) => {
-			if (executeTasks) {
-				await Promise.all(tasks.map((task) => task()));
-			}
-		}),
+		addAll: vi
+			.fn()
+			.mockImplementation(async (tasks: (() => Promise<unknown>)[]) => {
+				if (executeTasks) {
+					await Promise.all(tasks.map((task) => task()));
+				}
+			}),
 		onIdle: vi.fn().mockResolvedValue(undefined),
 		pending: 0,
 	} as unknown as Queue;
@@ -144,7 +146,10 @@ it('should use default error handler when `onError` is not provided', async () =
 		embed: mockEmbed,
 	});
 
-	expect(mockedLogger.error).toHaveBeenCalledWith(mockError, 'Queue processing error');
+	expect(mockedLogger.error).toHaveBeenCalledWith(
+		mockError,
+		'Queue processing error',
+	);
 });
 
 it('should update progress when queue completes items', async () => {
