@@ -12,7 +12,7 @@
 			"skipFiles": ["<node_internals>/**", "**/node_modules/**"],
 			"outputCapture": "std",
 			"internalConsoleOptions": "neverOpen",
-			"preLaunchTask": "build",
+			"preLaunchTask": "debug",
 		}
 	]
 }

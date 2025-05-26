@@ -75,9 +75,10 @@ export default async function recoverCommandHandler(
 					progress,
 					voiceChannel,
 					interaction: {
-						editReply: answer.editReply,
-						reply: answer.reply,
+						editReply: answer.editReply.bind(answer),
+						reply: answer.reply.bind(answer),
 						user: answer.user,
+						channel: answer.channel,
 					},
 				});
 			default:

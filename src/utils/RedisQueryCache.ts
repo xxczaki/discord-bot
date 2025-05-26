@@ -14,7 +14,7 @@ import {
 import type { Redis } from 'ioredis';
 
 export class RedisQueryCache implements QueryCacheProvider<Track> {
-	static EXPIRY_TIMEOUT_MS = 1000 * 60 * 15; // 15 minutes
+	static EXPIRY_TIMEOUT_MS = 1000 * 60 * 60 * 24 * 365; // 1 year
 
 	constructor(public redis: Redis) {}
 

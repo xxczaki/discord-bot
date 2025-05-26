@@ -2,20 +2,21 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "build",
+			"label": "debug",
 			"type": "shell",
-			"command": "pnpm",
-			"args": ["build"],
+			"command": "node",
+			"args": ["esbuild.js", "--watch"],
 			"group": "build",
+			"isBackground": true,
 			"presentation": {
 				"echo": true,
-				"reveal": "silent",
+				"reveal": "always",
 				"focus": false,
 				"panel": "shared",
 				"showReuseMessage": true,
 				"clear": false
 			},
 			"problemMatcher": []
-		},
+		}
 	]
 }

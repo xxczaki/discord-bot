@@ -1,7 +1,12 @@
 import { type Server, createServer } from 'node:net';
 import { captureException } from '@sentry/node';
 import { type GuildQueue, type Player, useMainPlayer } from 'discord-player';
-import { type Client, EmbedBuilder } from 'discord.js';
+import {
+	type Client,
+	EmbedBuilder,
+	type InteractionEditReplyOptions,
+	type InteractionReplyOptions,
+} from 'discord.js';
 import { QueueRecoveryService } from '../utils/QueueRecoveryService';
 import deleteOpusCacheEntry from '../utils/deleteOpusCacheEntry';
 import enqueueTracks from '../utils/enqueueTracks';
@@ -128,14 +133,22 @@ function initializePlayerErrorReporter(
 			return message.edit({ embeds: [embed] });
 		}
 
+		const messageEditHandler = (
+			options: InteractionEditReplyOptions | InteractionReplyOptions,
+		) => {
+			const { flags, ...messageOptions } = options;
+			return message.edit(messageOptions);
+		};
+
 		await enqueueTracks({
 			tracks,
 			progress,
 			voiceChannel: queue.channel,
 			interaction: {
-				editReply: message.edit,
-				reply: message.edit,
+				editReply: messageEditHandler,
+				reply: messageEditHandler,
 				user: message.author,
+				channel: message.channel,
 			},
 		});
 

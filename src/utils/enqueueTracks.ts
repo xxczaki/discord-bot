@@ -1,4 +1,3 @@
-import { availableParallelism } from 'node:os';
 import { captureException } from '@sentry/node';
 import {
 	type QueueFilters,
@@ -6,26 +5,18 @@ import {
 	useMainPlayer,
 	useQueue,
 } from 'discord-player';
-import {
-	type ButtonInteraction,
-	EmbedBuilder,
-	type Message,
-	type VoiceBasedChannel,
-} from 'discord.js';
-import Queue from 'p-queue';
+import { EmbedBuilder, type VoiceBasedChannel } from 'discord.js';
+import type { ProcessingInteraction } from '../types/ProcessingInteraction';
 import determineSearchEngine from './determineSearchEngine';
 import logger from './logger';
 import pluralize from './pluralize';
+import processTracksWithQueue from './processTracksWithQueue';
 
 type Props = {
 	tracks: Track[];
 	progress: number;
 	voiceChannel: VoiceBasedChannel;
-	interaction: {
-		reply: ButtonInteraction['reply'] | Message['edit'];
-		editReply: ButtonInteraction['editReply'] | Message['edit'];
-		user: ButtonInteraction['user'] | Message['author'];
-	};
+	interaction: ProcessingInteraction;
 };
 
 const pluralizeTracks = pluralize('track', 'tracks');
@@ -72,46 +63,40 @@ export default async function enqueueTracks({
 		captureException(error);
 	}
 
-	let enqueued = 0;
+	if (toQueue.length === 0) {
+		// Only one track, no need for queue processing
+		const queue = useQueue();
+		if (!queue) {
+			return interaction.editReply({
+				content: 'The queue is empty.',
+				embeds: [],
+			});
+		}
 
-	const tracksQueue = new Queue({ concurrency: availableParallelism() });
-
-	tracksQueue.on('completed', async () => {
-		await interaction.editReply({
+		return interaction.editReply({
 			content: null,
-			components: [],
 			embeds: [
-				embed.setDescription(
-					pluralizeTracks`${tracks.length - tracksQueue.pending}/${tracks.length} ${null} processed and added to the queue so far.`,
-				),
+				embed
+					.setTitle('✅ Done')
+					.setDescription(
+						pluralizeTracks`1 ${null} had been processed and added to the queue.\n0 skipped.`,
+					),
 			],
 		});
+	}
+
+	const { enqueued } = await processTracksWithQueue({
+		items: toQueue.map(({ url }) => url),
+		voiceChannel,
+		interaction,
+		embed,
+		pluralizeFunction: (progress, total) =>
+			pluralizeTracks`${total - (toQueue.length - progress)}/${tracks.length} ${null} processed and added to the queue so far.`,
+		onError: (error, _context) => {
+			logger.error(error, 'Queue recovery error (subsequent tracks)');
+			captureException(error);
+		},
 	});
-
-	await tracksQueue.addAll(
-		toQueue.map(({ url }) => async () => {
-			const promise = player.play(voiceChannel, url, {
-				searchEngine: determineSearchEngine(url),
-				nodeOptions: {
-					metadata: { interaction },
-					defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
-				},
-				requestedBy: interaction.user,
-			});
-
-			try {
-				enqueued++;
-
-				return await promise;
-			} catch (error) {
-				enqueued--;
-				logger.error(error, 'Queue recovery error (subsequent tracks)');
-				captureException(error);
-			}
-		}),
-	);
-
-	await tracksQueue.onIdle();
 
 	const queue = useQueue();
 
@@ -123,25 +108,22 @@ export default async function enqueueTracks({
 	}
 
 	queue.tracks.store = queue?.tracks.data.sort((a, b) => {
-		const correspondingAId = tracks.find(({ url }) => url === a.url) ?? a.id;
-		const correspondingBId = tracks.find(({ url }) => url === b.url) ?? b.id;
+		const indexA = tracks.findIndex(({ url }) => url === a.url);
+		const indexB = tracks.findIndex(({ url }) => url === b.url);
 
-		if (correspondingAId < correspondingBId) {
-			return -1;
-		}
+		// If track not found in original array, put it at the end
+		if (indexA === -1 && indexB === -1) return 0;
+		if (indexA === -1) return 1;
+		if (indexB === -1) return -1;
 
-		if (correspondingAId > correspondingBId) {
-			return 1;
-		}
-
-		return 0;
+		return indexA - indexB;
 	});
 
 	await interaction.editReply({
 		content: null,
 		embeds: [
 			embed.setTitle('✅ Done').setDescription(
-				pluralizeTracks`${enqueued} ${null} had been processed and added to the queue.\n${
+				pluralizeTracks`${enqueued + 1} ${null} had been processed and added to the queue.\n${
 					tracks.length - enqueued - 1 // excludes `queue.currentTrack`
 				} skipped.`,
 			),

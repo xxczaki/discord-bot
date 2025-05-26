@@ -1,10 +1,4 @@
-import { availableParallelism } from 'node:os';
-import {
-	type PlayerNodeInitializationResult,
-	type QueueFilters,
-	useMainPlayer,
-	useQueue,
-} from 'discord-player';
+import { useQueue } from 'discord-player';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -13,12 +7,11 @@ import {
 	type StringSelectMenuInteraction,
 	type VoiceBasedChannel,
 } from 'discord.js';
-import Queue from 'p-queue';
 import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
 import cleanUpPlaylistContent from './cleanUpPlaylistContent';
-import determineSearchEngine from './determineSearchEngine';
 import getEnvironmentVariable from './getEnvironmentVariable';
 import pluralize from './pluralize';
+import processTracksWithQueue from './processTracksWithQueue';
 
 const pluralizeEntries = pluralize('entry', 'entries');
 
@@ -57,63 +50,17 @@ export default async function enqueuePlaylists(
 		.map((message) => cleanUpPlaylistContent(message.content))
 		.join('\n');
 
-	const playlistQueue = new Queue({ concurrency: availableParallelism() });
 	const songsArray = songs.trim().split('\n');
 
-	let enqueued = 0;
-
-	playlistQueue.on(
-		'completed',
-		async (result: PlayerNodeInitializationResult) => {
-			if (enqueued > 0) {
-				const existingQueries = result?.queue.metadata?.queries ?? {};
-
-				result?.queue.setMetadata({
-					...result.queue.metadata,
-					queries: {
-						...existingQueries,
-						[result.track.id]: result.searchResult.query,
-					},
-				});
-			}
-
-			const progress = songsArray.length - playlistQueue.pending;
-
-			await interaction.editReply({
-				content: null,
-				components: [],
-				embeds: [
-					embed.setDescription(
-						pluralizeEntries`${progress}/${songsArray.length} ${null} processed and added to the queue so far.`,
-					),
-				],
-			});
-		},
-	);
-
-	const player = useMainPlayer();
-
-	await playlistQueue.addAll(
-		songsArray.map((song) => async () => {
-			const promise = player.play(voiceChannel, song, {
-				searchEngine: determineSearchEngine(song),
-				nodeOptions: {
-					metadata: { interaction, queries: { '0': song } },
-					defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
-				},
-				requestedBy: interaction.user,
-			});
-
-			try {
-				enqueued++;
-				return await promise;
-			} catch {
-				enqueued--;
-			}
-		}),
-	);
-
-	await playlistQueue.onIdle();
+	const { enqueued } = await processTracksWithQueue({
+		items: songsArray,
+		voiceChannel,
+		interaction,
+		embed,
+		pluralizeFunction: (progress, total) =>
+			pluralizeEntries`${progress}/${total} ${null} processed and added to the queue so far.`,
+		nodeMetadata: { queries: {} },
+	});
 
 	const shuffle = new ButtonBuilder()
 		.setCustomId('shuffle')
