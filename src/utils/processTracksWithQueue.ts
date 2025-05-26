@@ -5,13 +5,13 @@ import Queue from 'p-queue';
 import type { ProcessingInteraction } from '../types/ProcessingInteraction';
 import determineSearchEngine from './determineSearchEngine';
 import logger from './logger';
+import pluralize from './pluralize';
 
 type ProcessTrackOptions = {
 	items: string[];
 	voiceChannel: VoiceBasedChannel;
 	interaction: ProcessingInteraction;
 	embed: EmbedBuilder;
-	pluralizeFunction: (count: number, total: number) => string;
 	nodeMetadata?: Record<string, unknown>;
 	onError?: (error: unknown, context: string) => void;
 };
@@ -21,12 +21,13 @@ export default async function processTracksWithQueue({
 	voiceChannel,
 	interaction,
 	embed,
-	pluralizeFunction,
 	nodeMetadata = {},
 	onError = (error, context) => logger.error(error, context),
 }: ProcessTrackOptions) {
 	const player = useMainPlayer();
 	let enqueued = 0;
+
+	const pluralizeItems = pluralize('item', 'items');
 
 	const tracksQueue = new Queue({ concurrency: availableParallelism() });
 
@@ -35,7 +36,11 @@ export default async function processTracksWithQueue({
 		await interaction.editReply({
 			content: null,
 			components: [],
-			embeds: [embed.setDescription(pluralizeFunction(progress, items.length))],
+			embeds: [
+				embed.setDescription(
+					pluralizeItems`${progress}/${items.length} ${null} processed and added to the queue so far.`,
+				),
+			],
 		});
 	});
 

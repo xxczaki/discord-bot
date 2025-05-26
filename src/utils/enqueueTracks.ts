@@ -90,8 +90,6 @@ export default async function enqueueTracks({
 		voiceChannel,
 		interaction,
 		embed,
-		pluralizeFunction: (progress, total) =>
-			pluralizeTracks`${total - (toQueue.length - progress)}/${tracks.length} ${null} processed and added to the queue so far.`,
 		onError: (error, _context) => {
 			logger.error(error, 'Queue recovery error (subsequent tracks)');
 			captureException(error);

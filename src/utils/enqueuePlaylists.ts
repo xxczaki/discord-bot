@@ -57,8 +57,6 @@ export default async function enqueuePlaylists(
 		voiceChannel,
 		interaction,
 		embed,
-		pluralizeFunction: (progress, total) =>
-			pluralizeEntries`${progress}/${total} ${null} processed and added to the queue so far.`,
 		nodeMetadata: { queries: {} },
 	});
 
