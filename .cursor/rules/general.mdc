@@ -5,6 +5,6 @@ alwaysApply: true
 ---
 # General guidelines
 - Use the appropriate package manage (`pnpm`)
-- Do not write code comments about *what* something does, unless it would be very difficult to understand and cannot be simplified
+- Do not write code comments about *what* something is/does, unless it would be very difficult to understand and cannot be simplified
 - Write code comments on *why* something was done, but only if it appears strange/unnecessary/overly complicated
 - Do not ask me to review files with multiple TypeScript issues, they should be fixed beforehand

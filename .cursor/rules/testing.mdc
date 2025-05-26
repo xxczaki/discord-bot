@@ -24,6 +24,7 @@ alwaysApply: false
   ```typescript
   import type { ExternalType } from 'package';
   ```
+- Do not use dynamic imports as a hacky way to avoid certain Vitest problems
 
 ## Test Data
 - Reusable test data (URLs, IDs, example inputs) should be defined as constants at the top of the test file, after imports but before mocks
@@ -31,5 +32,5 @@ alwaysApply: false
 - Constants should be placed before any mocks or other code
 
 ## Other
-- Don't ask me to review the test without running it first and fixing any issues!
+- Don't ask me to review the test without running it first and fixing any issues, including TypeScript errors!
 
