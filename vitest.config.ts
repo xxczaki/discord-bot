@@ -4,6 +4,20 @@ export default defineConfig({
 	test: {
 		globals: true,
 		environment: 'node',
-		setupFiles: ['./src/utils/tests/setup.ts'],
+		setupFiles: ['./src/setupTests.ts'],
+
+		pool: 'threads',
+		poolOptions: {
+			threads: {
+				singleThread: false,
+				maxThreads: 4,
+				minThreads: 2,
+			},
+		},
+
+		include: ['src/**/*.test.ts'],
+
+		// Reduce isolation overhead for faster execution
+		isolate: false,
 	},
 });

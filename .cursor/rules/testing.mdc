@@ -24,7 +24,8 @@ alwaysApply: false
   ```typescript
   import type { ExternalType } from 'package';
   ```
-- Do not use dynamic imports as a hacky way to avoid certain Vitest problems
+- Do not use dynamic imports as a hacky way to avoid certain Vitest problems – mock primarily via `vi.mock(...)`
+- Consult the `src/setupTests.ts` file and use it to define global mocks
 
 ## Test Data
 - Reusable test data (URLs, IDs, example inputs) should be defined as constants at the top of the test file, after imports but before mocks

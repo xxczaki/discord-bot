@@ -2,9 +2,9 @@ import { useQueue } from 'discord-player';
 import type { GuildQueue } from 'discord-player';
 import {
 	ActionRowBuilder,
-	EmbedBuilder,
 	type ButtonInteraction,
 	type Collection,
+	EmbedBuilder,
 	type Message,
 	type StringSelectMenuInteraction,
 	type TextBasedChannel,

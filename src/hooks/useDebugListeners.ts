@@ -18,8 +18,6 @@ const FATAL_ERROR_MESSAGE_DEBOUNCE = 1000 * 30; // 30 seconds
 
 const botDebugChannelId = getEnvironmentVariable('BOT_DEBUG_CHANNEL_ID');
 
-const queueRecoveryService = QueueRecoveryService.getInstance();
-
 const server = createServer();
 
 server.listen(8000);
@@ -120,6 +118,15 @@ function initializePlayerErrorReporter(
 		if (!queue.channel) {
 			embed.setDescription(
 				'🛑 Unable to recover – the queue has no voice channel associated with it.\n\nTip: try using the `/recover` command.',
+			);
+			return message.edit({ embeds: [embed] });
+		}
+
+		const queueRecoveryService = QueueRecoveryService.getInstance();
+
+		if (!queueRecoveryService) {
+			embed.setDescription(
+				'🛑 Unable to recover – queue recovery service unavailable.',
 			);
 			return message.edit({ embeds: [embed] });
 		}

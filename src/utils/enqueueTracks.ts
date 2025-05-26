@@ -65,7 +65,7 @@ export default async function enqueueTracks({
 
 	if (toQueue.length === 0) {
 		const queue = useQueue();
-		
+
 		if (!queue) {
 			return interaction.editReply({
 				content: 'The queue is empty.',
