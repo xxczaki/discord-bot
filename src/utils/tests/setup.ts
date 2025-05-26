@@ -8,3 +8,7 @@ vi.mock('../logger', () => ({
 		debug: vi.fn(),
 	},
 }));
+
+vi.mock('ulid', () => ({
+	ulid: vi.fn(),
+}));

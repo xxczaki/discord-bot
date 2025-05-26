@@ -13,10 +13,6 @@ vi.mock('../redis', () => ({
 	},
 }));
 
-vi.mock('ulid', () => ({
-	ulid: vi.fn(),
-}));
-
 const mockedRedis = vi.mocked(redis);
 const mockedUlid = vi.mocked(ulid);
 
