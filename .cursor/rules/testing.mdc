@@ -17,6 +17,8 @@ alwaysApply: false
 
 ## Mocking
 - Avoid mocking if possible – we want the tests to be as real as possible
+- Do not mock simple utility functions (like `isObject`, `pluralize`, etc.) – let them run naturally in tests
+- Only mock external dependencies and complex integrations that require specific context (like Discord.js, discord-player)
 - When mocking is necessary, try to provide only the minimal implementations
 - When using multiple `vi.mocked()` calls, define them as constants at the top of the test file
 	- Example: `const mockedFunction = vi.mocked(originalFunction)`
