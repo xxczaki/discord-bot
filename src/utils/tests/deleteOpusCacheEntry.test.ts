@@ -15,10 +15,6 @@ vi.mock('node:fs/promises', () => ({
 	unlink: vi.fn(),
 }));
 
-vi.mock('@sentry/node', () => ({
-	captureException: vi.fn(),
-}));
-
 vi.mock('../getOpusCacheTrackPath', () => ({
 	default: vi.fn(() => EXAMPLE_FILE_PATH),
 }));

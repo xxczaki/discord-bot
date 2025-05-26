@@ -64,8 +64,8 @@ export default async function enqueueTracks({
 	}
 
 	if (toQueue.length === 0) {
-		// Only one track, no need for queue processing
 		const queue = useQueue();
+		
 		if (!queue) {
 			return interaction.editReply({
 				content: 'The queue is empty.',
@@ -79,7 +79,7 @@ export default async function enqueueTracks({
 				embed
 					.setTitle('✅ Done')
 					.setDescription(
-						pluralizeTracks`1 ${null} had been processed and added to the queue.\n0 skipped.`,
+						pluralizeTracks`${1} ${null} had been processed and added to the queue.\n${0} skipped.`,
 					),
 			],
 		});

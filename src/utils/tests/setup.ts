@@ -9,6 +9,10 @@ vi.mock('../logger', () => ({
 	},
 }));
 
+vi.mock('@sentry/node', () => ({
+	captureException: vi.fn(),
+}));
+
 vi.mock('ulid', () => ({
 	ulid: vi.fn(),
 }));

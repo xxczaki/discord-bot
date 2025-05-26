@@ -16,8 +16,8 @@ alwaysApply: false
   - ❌ `it('should save play stats without requestedById')`
 
 ## Mocking
-- Avoid mocking if possible
-- When mocking is necessary, try to provide minimal implementations
+- Avoid mocking if possible – we want the tests to be as real as possible
+- When mocking is necessary, try to provide only the minimal implementations
 - When using multiple `vi.mocked()` calls, define them as constants at the top of the test file
 	- Example: `const mockedFunction = vi.mocked(originalFunction)`
 - When mocking external dependencies that require types, use type-only imports:
