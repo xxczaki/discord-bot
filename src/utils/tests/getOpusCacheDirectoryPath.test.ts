@@ -16,7 +16,7 @@ vi.mock('node:fs', () => ({
 	mkdirSync: vi.fn(),
 }));
 
-const mockedDirname = '/Users/xxczaki/dev/discord-bot/src/utils';
+const mockedDirname = join(process.cwd(), 'src', 'utils');
 vi.stubGlobal('import.meta', { dirname: mockedDirname });
 
 const mockedExistsSync = vi.mocked(existsSync);
