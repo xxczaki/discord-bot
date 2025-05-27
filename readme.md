@@ -1,6 +1,6 @@
 # xxczaki/discord-bot
 
-![Lint](https://github.com/xxczaki/discord-bot/actions/workflows/lint.yml/badge.svg) [![Deploy](https://github.com/xxczaki/discord-bot/actions/workflows/deploy.yml/badge.svg)](https://github.com/xxczaki/discord-bot/actions/workflows/deploy.yml) [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/xxczaki)](https://artifacthub.io/packages/helm/xxczaki/discord-bot)
+![Lint](https://github.com/xxczaki/discord-bot/actions/workflows/lint.yml/badge.svg) ![Test](https://github.com/xxczaki/discord-bot/actions/workflows/test.yml/badge.svg) [![Deploy](https://github.com/xxczaki/discord-bot/actions/workflows/deploy.yml/badge.svg)](https://github.com/xxczaki/discord-bot/actions/workflows/deploy.yml) [![Coverage Status](https://coveralls.io/repos/github/xxczaki/discord-bot/badge.svg?branch=main)](https://coveralls.io/github/xxczaki/discord-bot?branch=main) [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/xxczaki)](https://artifacthub.io/packages/helm/xxczaki/discord-bot)
 
 > 🎵 Music bot for my private Discord server, powered by discord-player
 

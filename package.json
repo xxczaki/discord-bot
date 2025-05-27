@@ -9,7 +9,8 @@
 		"build": "node esbuild.js",
 		"lint": "biome check --write ./src",
 		"tsc": "tsc --noEmit",
-		"test": "vitest run"
+		"test": "vitest run",
+		"test:coverage": "vitest run --coverage"
 	},
 	"packageManager": "pnpm@10.11.0",
 	"dependencies": {

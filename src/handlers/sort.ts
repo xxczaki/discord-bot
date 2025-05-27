@@ -16,11 +16,14 @@ export default async function sortCommandHandler(
 	await interaction.reply('Sorting the queue…');
 
 	queue.tracks.store = queue?.tracks.data.sort((a, b) => {
-		if (a.title < b.title) {
+		const titleA = a.title.toLowerCase();
+		const titleB = b.title.toLowerCase();
+
+		if (titleA < titleB) {
 			return -1;
 		}
 
-		if (a.title > b.title) {
+		if (titleA > titleB) {
 			return 1;
 		}
 
