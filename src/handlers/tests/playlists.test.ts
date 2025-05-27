@@ -13,10 +13,10 @@ import {
 	StringSelectMenuOptionBuilder,
 } from 'discord.js';
 import { beforeEach, expect, it, vi } from 'vitest';
-import playlistsCommandHandler from '../playlists';
+import enqueuePlaylists from '../../utils/enqueuePlaylists';
 import getEnvironmentVariable from '../../utils/getEnvironmentVariable';
 import getPlaylists from '../../utils/getPlaylists';
-import enqueuePlaylists from '../../utils/enqueuePlaylists';
+import playlistsCommandHandler from '../playlists';
 
 const EXAMPLE_PLAYLISTS_CHANNEL_ID = 'channel123';
 const EXAMPLE_PLAYLISTS = [

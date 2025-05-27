@@ -2,9 +2,9 @@ import { useQueue } from 'discord-player';
 import type { Track } from 'discord-player';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { beforeEach, expect, it, vi } from 'vitest';
-import purgeCommandHandler from '../purge';
 import { QueueRecoveryService } from '../../utils/QueueRecoveryService';
 import deleteOpusCacheEntry from '../../utils/deleteOpusCacheEntry';
+import purgeCommandHandler from '../purge';
 
 const EXAMPLE_TRACK_URL = 'https://example.com/track';
 
