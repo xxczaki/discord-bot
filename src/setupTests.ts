@@ -16,6 +16,17 @@ vi.mock('@sentry/node', () => ({
 	captureException: vi.fn(),
 }));
 
+vi.mock('./utils/redis', () => ({
+	default: {
+		scanStream: vi.fn(),
+		del: vi.fn(),
+		get: vi.fn(),
+		set: vi.fn(),
+		exists: vi.fn(),
+		expire: vi.fn(),
+	},
+}));
+
 vi.mock('ulid', () => ({
 	ulid: vi.fn(),
 }));

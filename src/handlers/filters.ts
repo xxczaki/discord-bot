@@ -59,43 +59,48 @@ export default async function filtersCommandHandler(
 		flags: ['Ephemeral'],
 	});
 
-	const answer = await response.awaitMessageComponent({
-		time: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
-	});
-
-	if (answer.isButton()) {
-		return response.delete();
-	}
-
-	if (answer.isStringSelectMenu()) {
-		const toToggle = [
-			...answer.values.filter(
-				(value) => !activeFilters.includes(value as keyof QueueFilters),
-			),
-			...activeFilters.filter((value) => !answer.values.includes(value)),
-		] as Array<keyof QueueFilters>;
-
-		await answer.reply({
-			content: 'Toggling the selected filters…',
-			components: [],
+	try {
+		const answer = await response.awaitMessageComponent({
+			time: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
 		});
 
-		await queue?.filters.ffmpeg.toggle(toToggle);
+		if (answer.isButton()) {
+			return response.delete();
+		}
+
+		if (answer.isStringSelectMenu()) {
+			const toToggle = [
+				...answer.values.filter(
+					(value) => !activeFilters.includes(value as keyof QueueFilters),
+				),
+				...activeFilters.filter((value) => !answer.values.includes(value)),
+			] as Array<keyof QueueFilters>;
+
+			await answer.reply({
+				content: 'Toggling the selected filters…',
+				components: [],
+			});
+
+			await queue?.filters.ffmpeg.toggle(toToggle);
+
+			await response.delete();
+
+			return answer.editReply({
+				content: 'The selected filters were toggled.',
+				components: [],
+			});
+		}
 
 		await response.delete();
 
 		return answer.editReply({
-			content: 'The selected filters were toggled.',
+			content: 'No filters were selected, aborting…',
 			components: [],
 		});
+	} catch (error) {
+		// Handle timeout or other errors by cleaning up the response
+		return response.delete();
 	}
-
-	await response.delete();
-
-	return answer.editReply({
-		content: 'No filters were selected, aborting…',
-		components: [],
-	});
 }
 
 function getFilters(activeFilters: Array<keyof QueueFilters>) {
