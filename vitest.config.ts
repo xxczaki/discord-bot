@@ -16,8 +16,5 @@ export default defineConfig({
 		},
 
 		include: ['src/**/*.test.ts'],
-
-		// Reduce isolation overhead for faster execution
-		isolate: false,
 	},
 });

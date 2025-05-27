@@ -18,9 +18,7 @@ vi.mock('node:os', () => ({
 	availableParallelism: vi.fn(),
 }));
 
-vi.mock('discord-player', () => ({
-	useMainPlayer: vi.fn(),
-}));
+vi.mock('discord-player');
 
 vi.mock('p-queue', () => ({
 	default: vi.fn(),
