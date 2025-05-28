@@ -8,8 +8,8 @@ import {
 } from 'discord.js';
 import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
 
-const GRID_SIZE = 3;
-const EMPTY_CHARACTER = '‎';
+export const GRID_SIZE = 3;
+export const EMPTY_CHARACTER = '‎';
 
 export default async function ticTacToeCommandHandler(
 	interaction: ChatInputCommandInteraction,
@@ -37,7 +37,7 @@ export default async function ticTacToeCommandHandler(
 	}
 }
 
-function getAllPositions() {
+export function getAllPositions() {
 	const result: string[] = [];
 
 	for (let i = 0; i < GRID_SIZE; i++) {
@@ -49,7 +49,7 @@ function getAllPositions() {
 	return result;
 }
 
-function getWinningSequences() {
+export function getWinningSequences() {
 	const sequences: string[][] = [];
 
 	const ascendingDiagonal: string[][] = [];
@@ -85,7 +85,7 @@ function getWinningSequences() {
 const allPositions = getAllPositions();
 const winningSequences = getWinningSequences();
 
-async function getRows(xPositions: string[], oPositions: string[]) {
+export async function getRows(xPositions: string[], oPositions: string[]) {
 	const rows: ActionRowBuilder<ButtonBuilder>[] = [];
 	for (let i = 0; i < GRID_SIZE; i++) {
 		const actionRow = new ActionRowBuilder<ButtonBuilder>();
@@ -109,7 +109,11 @@ async function getRows(xPositions: string[], oPositions: string[]) {
 	return rows;
 }
 
-function getLabel(id: string, xPositions: string[], oPositions: string[]) {
+export function getLabel(
+	id: string,
+	xPositions: string[],
+	oPositions: string[],
+) {
 	if (xPositions.includes(id)) {
 		return '❌';
 	}
@@ -121,14 +125,20 @@ function getLabel(id: string, xPositions: string[], oPositions: string[]) {
 	return EMPTY_CHARACTER;
 }
 
-function getPossiblePositions(xPositions: string[], oPositions: string[]) {
+export function getPossiblePositions(
+	xPositions: string[],
+	oPositions: string[],
+) {
 	return allPositions.filter(
 		(position) =>
 			!xPositions.includes(position) && !oPositions.includes(position),
 	);
 }
 
-async function getOPositions(xPositions: string[], oPositions: string[]) {
+export async function getOPositions(
+	xPositions: string[],
+	oPositions: string[],
+) {
 	const possiblePositions = getPossiblePositions(xPositions, oPositions);
 
 	for (const position of possiblePositions) {
@@ -145,7 +155,7 @@ async function getOPositions(xPositions: string[], oPositions: string[]) {
 	];
 }
 
-function isGameOverByWin(positions: string[]) {
+export function isGameOverByWin(positions: string[]) {
 	if (positions.length < 3) {
 		return false;
 	}
@@ -155,7 +165,7 @@ function isGameOverByWin(positions: string[]) {
 	);
 }
 
-async function nextMove(
+export async function nextMove(
 	interaction: ButtonInteraction,
 	xPositions: string[],
 	oPositions: string[],
@@ -183,14 +193,6 @@ async function nextMove(
 	if (isGameOverByWin(newOPositions)) {
 		await interaction.update({
 			content: 'Game over, I won – you fucking loser.',
-			components: [],
-		});
-		return;
-	}
-
-	if (newOPositions.length === 0) {
-		await interaction.update({
-			content: 'Game over, draw.',
 			components: [],
 		});
 		return;

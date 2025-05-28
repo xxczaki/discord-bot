@@ -16,7 +16,6 @@ alwaysApply: false
   - ❌ `it('should save play stats without requestedById')`
 
 ## Mocking
-- Avoid mocking if possible – we want the tests to be as real as possible
 - Do not mock simple utility functions (like `isObject`, `pluralize`, etc.) – let them run naturally in tests
 - Only mock external dependencies and complex integrations that require specific context (like Discord.js, discord-player)
 - When mocking is necessary, try to provide only the minimal implementations
