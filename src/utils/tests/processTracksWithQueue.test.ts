@@ -169,3 +169,50 @@ it('should update progress when queue completes items', async () => {
 
 	expect(mockQueue.on).toHaveBeenCalledWith('completed', expect.any(Function));
 });
+
+it('should call progress update with correct description when items are completed', async () => {
+	const mockPlayer = createMockPlayer();
+	const mockEmbed = createMockEmbed();
+	const mockInteraction = createMockInteraction();
+	const mockVoiceChannel = {} as VoiceBasedChannel;
+
+	let completedHandler: (() => Promise<void>) | undefined;
+
+	const mockQueue = {
+		on: vi
+			.fn()
+			.mockImplementation((event: string, handler: () => Promise<void>) => {
+				if (event === 'completed') {
+					completedHandler = handler;
+				}
+			}),
+		addAll: vi.fn().mockResolvedValue(undefined),
+		onIdle: vi.fn().mockResolvedValue(undefined),
+		pending: 1,
+	} as unknown as Queue;
+
+	mockedUseMainPlayer.mockReturnValue(mockPlayer);
+	mockedQueue.mockReturnValue(mockQueue);
+
+	await processTracksWithQueue({
+		items: EXAMPLE_TRACKS,
+		voiceChannel: mockVoiceChannel,
+		interaction: mockInteraction,
+		embed: mockEmbed,
+	});
+
+	expect(completedHandler).toBeDefined();
+
+	if (completedHandler) {
+		await completedHandler();
+	}
+
+	expect(mockInteraction.editReply).toHaveBeenCalledWith({
+		content: null,
+		components: [],
+		embeds: [mockEmbed],
+	});
+	expect(mockEmbed.setDescription).toHaveBeenCalledWith(
+		'2/3 items processed and added to the queue so far.',
+	);
+});
