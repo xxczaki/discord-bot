@@ -23,7 +23,10 @@ alwaysApply: false
 ## Mocking
 - **Never** mock simple utility functions (like `isObject`, `pluralize`, etc.) – let them run naturally in tests
 - Only mock external dependencies and complex integrations that require specific context (like Discord.js, discord-player)
-- **Never** use dynamic imports or `require` calls as a hacky way to avoid certain Vitest problems – mock primarily via `vi.mock(...)`
+- **Never** use dynamic imports or `require` calls in tests – always use proper ES module imports at the top of the file
+  - ❌ `new (require('discord.js').ButtonBuilder)()`
+  - ✅ `import { ButtonBuilder } from 'discord.js'; ... new ButtonBuilder()`
+- Mock primarily via `vi.mock(...)` and ensure all required classes/functions are properly imported
 - Consult the `src/setupTests.ts` file and use it to define global mocks
 - **Do not duplicate mocks** that are already defined globally in `src/setupTests.ts` (like logger, redis, Sentry, etc.)
 
