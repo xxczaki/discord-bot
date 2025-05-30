@@ -16,7 +16,7 @@ alwaysApply: false
   - ❌ `it('should save play stats without requestedById')`
 
 ## Mocking
-- Do not mock simple utility functions (like `isObject`, `pluralize`, etc.) – let them run naturally in tests
+- **Never** mock simple utility functions (like `isObject`, `pluralize`, etc.) – let them run naturally in tests
 - Only mock external dependencies and complex integrations that require specific context (like Discord.js, discord-player)
 - When mocking is necessary, try to provide only the minimal implementations
 - When using multiple `vi.mocked()` calls, define them as constants at the top of the test file
@@ -25,7 +25,7 @@ alwaysApply: false
   ```typescript
   import type { ExternalType } from 'package';
   ```
-- Do not use dynamic imports as a hacky way to avoid certain Vitest problems – mock primarily via `vi.mock(...)`
+- **Never** use dynamic imports or `require` calls as a hacky way to avoid certain Vitest problems – mock primarily via `vi.mock(...)`
 - Consult the `src/setupTests.ts` file and use it to define global mocks
 
 ## Test Data

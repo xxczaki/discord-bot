@@ -61,11 +61,11 @@ function initializeUnhandledErrorReporter(
 			getEnvironmentVariable('NODE_ENV') !== 'development' &&
 			Date.now() - previousMessageTimestamp > FATAL_ERROR_MESSAGE_DEBOUNCE
 		) {
+			previousMessageTimestamp = Date.now();
+
 			await channel.send(
 				'☠️ Encountered a fatal error, the bot will restart promptly – consider using `/recover` afterward.',
 			);
-
-			previousMessageTimestamp = Date.now();
 
 			server.close();
 		}

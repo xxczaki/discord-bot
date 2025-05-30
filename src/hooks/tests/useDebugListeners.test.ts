@@ -43,16 +43,22 @@ vi.mock('../../utils/getEnvironmentVariable', () => ({
 	default: vi.fn(),
 }));
 
-vi.mock('../../utils/isObject', () => ({
-	default: vi.fn(),
-}));
-
-vi.mock('node:net', () => ({
-	createServer: vi.fn(() => ({
+vi.mock('node:net', () => {
+	const mockServer = {
 		listen: vi.fn(),
 		close: vi.fn(),
-	})),
-}));
+	};
+
+	const createServerMock = vi.fn(() => mockServer);
+
+	(
+		createServerMock as unknown as { mockServer: typeof mockServer }
+	).mockServer = mockServer;
+
+	return {
+		createServer: createServerMock,
+	};
+});
 
 const mockedCaptureException = vi.mocked(captureException);
 const mockedUseMainPlayer = vi.mocked(useMainPlayer);
@@ -286,6 +292,34 @@ describe('Client Error Handling', () => {
 		expect(mockedCaptureException).toHaveBeenCalledWith(testError);
 		expect(mockChannel.send).not.toHaveBeenCalled();
 		expect(mockServer.close).not.toHaveBeenCalled();
+	});
+
+	it('should send debug message and close server in production mode', async () => {
+		mockedGetEnvironmentVariable.mockImplementation((key: string) => {
+			if (key === 'BOT_DEBUG_CHANNEL_ID') return TEST_DEBUG_CHANNEL_ID;
+			if (key === 'NODE_ENV') return 'production';
+			return 'mock-value';
+		});
+
+		const mockServer = (mockedCreateServer as unknown as { mockServer: Server })
+			.mockServer;
+		const serverCloseSpy = vi.spyOn(mockServer, 'close');
+
+		const testError = new Error('Test unhandled error');
+
+		useDebugListeners(mockClient);
+
+		process.emit('unhandledRejection', testError, Promise.resolve());
+
+		await new Promise((resolve) => setTimeout(resolve, 100));
+
+		expect(mockedLogger.error).toHaveBeenCalledWith(
+			testError,
+			'Uncaught exception/rejection',
+		);
+		expect(mockedCaptureException).toHaveBeenCalledWith(testError);
+		expect(mockChannel.send).toHaveBeenCalled();
+		expect(serverCloseSpy).toHaveBeenCalled();
 	});
 });
 
