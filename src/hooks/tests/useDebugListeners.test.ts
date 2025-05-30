@@ -10,7 +10,6 @@ import { QueueRecoveryService } from '../../utils/QueueRecoveryService';
 import deleteOpusCacheEntry from '../../utils/deleteOpusCacheEntry';
 import enqueueTracks from '../../utils/enqueueTracks';
 import getEnvironmentVariable from '../../utils/getEnvironmentVariable';
-import isObject from '../../utils/isObject';
 import logger from '../../utils/logger';
 import useDebugListeners from '../useDebugListeners';
 
@@ -67,7 +66,6 @@ const mockedLogger = vi.mocked(logger);
 const mockedCreateServer = vi.mocked(createServer);
 const mockedEnqueueTracks = vi.mocked(enqueueTracks);
 const mockedDeleteOpusCacheEntry = vi.mocked(deleteOpusCacheEntry);
-const mockedIsObject = vi.mocked(isObject);
 const mockedQueueRecoveryService = vi.mocked(QueueRecoveryService);
 
 let mockClient: Client<boolean>;
@@ -369,7 +367,6 @@ describe('Queue Recovery', () => {
 		const { mockMessageEdit } = setupMockMessage();
 		const testError = new Error('Test player error');
 
-		mockedIsObject.mockReturnValue(true);
 		mockedEnqueueTracks.mockResolvedValue(undefined);
 
 		useDebugListeners(mockClient);
@@ -452,7 +449,6 @@ describe('Opus Cache Management', () => {
 		setupMockMessage();
 		const testError = new Error('Test player error');
 
-		mockedIsObject.mockReturnValue(true);
 		mockedEnqueueTracks.mockResolvedValue(undefined);
 		mockedDeleteOpusCacheEntry.mockResolvedValue(undefined);
 
@@ -480,7 +476,6 @@ describe('Opus Cache Management', () => {
 		setupMockMessage();
 		const testError = new Error('Test player error');
 
-		mockedIsObject.mockReturnValue(true);
 		mockedEnqueueTracks.mockResolvedValue(undefined);
 
 		useDebugListeners(mockClient);
