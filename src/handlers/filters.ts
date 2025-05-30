@@ -98,7 +98,6 @@ export default async function filtersCommandHandler(
 			components: [],
 		});
 	} catch (error) {
-		// Handle timeout or other errors by cleaning up the response
 		return response.delete();
 	}
 }

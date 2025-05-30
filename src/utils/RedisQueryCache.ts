@@ -64,7 +64,7 @@ export class RedisQueryCache implements QueryCacheProvider<Track> {
 
 			return new SearchResult(player, {
 				query: context.query,
-				extractor: parsed[0]?.extractor || null,
+				extractor: parsed[0]?.extractor,
 				tracks: parsed,
 				requestedBy: context.requestedBy,
 				playlist: null,

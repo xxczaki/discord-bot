@@ -146,6 +146,7 @@ function initializePlayerErrorReporter(
 				options: InteractionEditReplyOptions | InteractionReplyOptions,
 			) => {
 				const { flags, ...messageOptions } = options;
+
 				return message.edit(messageOptions);
 			};
 

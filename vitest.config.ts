@@ -7,13 +7,6 @@ export default defineConfig({
 		setupFiles: ['./src/setupTests.ts'],
 
 		pool: 'threads',
-		poolOptions: {
-			threads: {
-				singleThread: false,
-				maxThreads: 4,
-				minThreads: 2,
-			},
-		},
 
 		include: ['src/**/*.test.ts'],
 		coverage: {

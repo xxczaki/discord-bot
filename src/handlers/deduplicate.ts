@@ -64,10 +64,6 @@ export default async function deduplicateCommandHandler(
 				pluralizeDuplicates`Removed ${removed} ${null}.`,
 			);
 		}
-		default:
-			return interaction.editReply(
-				'Incorrect deduplication algorithm specified, aborting…',
-			);
 	}
 }
 
@@ -87,7 +83,5 @@ function getTrackUrl(track: Track, type: (typeof ALGORITHMS)[number]) {
 
 			return track.url;
 		}
-		default:
-			throw new TypeError('Invalid track URL type');
 	}
 }
