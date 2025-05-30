@@ -4,9 +4,8 @@ globs:
 alwaysApply: true
 ---
 # General guidelines
-- Use pnpm for running Node.js commands, like `pnpm test`
 - Do not write code comments about *what* something is/does, unless it would be very difficult to understand and cannot be simplified
-- Write code comments on *why* something was done, but only if it appears strange/unnecessary/overly complicated
+- Write code comments on *why* something was done, but *only* if it appears strange/unnecessary/overly complicated
 - Do not ask me to review files with multiple TypeScript issues, they should be fixed beforehand
 - Consider using universal utilities from `src/utils/` instead of writing custom logic, including but not limited to:
   - `isObject()` for type-safe object checking

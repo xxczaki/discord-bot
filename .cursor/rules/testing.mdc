@@ -1,12 +1,17 @@
 ---
-description: Custom conventions used when writing tests
+description: Always use when writing new/modifying existing test files
 globs: 
 alwaysApply: false
 ---
+# Requirements
+- **ALWAYS run tests before finishing** any test-related work (writing new tests, modifying existing tests, refactoring test code)
+- Use `pnpm test:coverage <test-file-path>` to run specific test files
+- Fix any failures or TypeScript errors before completing the task
+- Don't ask me to review the test without running it first and fixing any issues, including TypeScript errors!
+
 ## File Structure
 - Test files should be named `*.test.ts` and placed in a `tests` directory on the same level as the file being tested
-	- Example: For `src/utils/StatsHandler.ts`, the test should be at `src/utils/tests/StatsHandler.test.ts`
-- Do not create a separate `__tests__` directory
+- Import statements can be placed anywhere relative to `vi.mock()` calls since `vi.mock()` is hoisted – prefer placing imports at the top for readability
 
 ## Test Organization
 - Only use `describe` blocks when testing multiple distinct features/components in a single test file
@@ -18,21 +23,22 @@ alwaysApply: false
 ## Mocking
 - **Never** mock simple utility functions (like `isObject`, `pluralize`, etc.) – let them run naturally in tests
 - Only mock external dependencies and complex integrations that require specific context (like Discord.js, discord-player)
-- When mocking is necessary, try to provide only the minimal implementations
-- When using multiple `vi.mocked()` calls, define them as constants at the top of the test file
-	- Example: `const mockedFunction = vi.mocked(originalFunction)`
-- When mocking external dependencies that require types, use type-only imports:
-  ```typescript
-  import type { ExternalType } from 'package';
-  ```
 - **Never** use dynamic imports or `require` calls as a hacky way to avoid certain Vitest problems – mock primarily via `vi.mock(...)`
 - Consult the `src/setupTests.ts` file and use it to define global mocks
+- **Do not duplicate mocks** that are already defined globally in `src/setupTests.ts` (like logger, redis, Sentry, etc.)
 
 ## Test Data
 - Reusable test data (URLs, IDs, example inputs) should be defined as constants at the top of the test file, after imports but before mocks
 	- Example: `const EXAMPLE_PLAYLIST_URL = 'https://open.spotify.com/playlist/...'`
 - Constants should be placed before any mocks or other code
 
-## Other
-- Don't ask me to review the test without running it first and fixing any issues, including TypeScript errors!
+## Coverage
+- Aim for meaningful coverage that tests the core functionality, not arbitrary percentage targets
+- Focus on testing:
+  - Main execution paths and business logic
+  - Error handling and edge cases
+  - Public API behavior
+- **Do not force 100% coverage** at the expense of test quality or maintainability
+- Some code may be difficult to test in isolation (like singleton patterns, complex integrations) – focus on what can be reliably tested
+- When coverage is low, consider if additional test cases would provide meaningful value before adding them
 
