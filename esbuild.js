@@ -14,7 +14,6 @@ const buildOptions = {
 	format: 'esm',
 	target: 'node22',
 	external: [
-		'bgutils-js',
 		'bufferutil',
 		'discord-player',
 		'discord-player-spotify',

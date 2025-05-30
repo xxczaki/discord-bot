@@ -1,2 +1,0 @@
-- Use #file:../.cursor/rules/general.mdc as general guidelines
-- Use #file:../.cursor/rules/testing.mdc when writing tests

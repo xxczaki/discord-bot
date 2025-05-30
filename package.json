@@ -15,7 +15,6 @@
 	"packageManager": "pnpm@10.11.0",
 	"dependencies": {
 		"@sentry/node": "^9.24.0",
-		"bgutils-js": "^3.2.0",
 		"bufferutil": "^4.0.9",
 		"discord-player": "^7.2.0-dev.2",
 		"discord-player-spotify": "^1.1.2",
