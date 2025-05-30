@@ -100,66 +100,77 @@ function initializePlayerErrorReporter(
 
 		const message = await debugChannel.send({ embeds: [embed] });
 
-		if (!queue) {
-			embed.setDescription('🛑 Unable to recover – no queue found.');
-			return message.edit({ embeds: [embed] });
+		try {
+			if (!queue) {
+				embed.setDescription('🛑 Unable to recover – no queue found.');
+				return message.edit({ embeds: [embed] });
+			}
+
+			const track = queue.currentTrack;
+
+			if (
+				track &&
+				isObject(track.metadata) &&
+				!('isFromCache' in track.metadata)
+			) {
+				void deleteOpusCacheEntry(track.url);
+			}
+
+			if (!queue.channel) {
+				embed.setDescription(
+					'🛑 Unable to recover – the queue has no voice channel associated with it.\n\nTip: try using the `/recover` command.',
+				);
+				return message.edit({ embeds: [embed] });
+			}
+
+			const queueRecoveryService = QueueRecoveryService.getInstance();
+
+			if (!queueRecoveryService) {
+				embed.setDescription(
+					'🛑 Unable to recover – queue recovery service unavailable.',
+				);
+				return message.edit({ embeds: [embed] });
+			}
+
+			const { tracks, progress } =
+				await queueRecoveryService.getContents(player);
+
+			if (tracks.length === 0) {
+				queue.delete();
+
+				embed.setDescription('🛑 Found nothing to recover.');
+				return message.edit({ embeds: [embed] });
+			}
+
+			const messageEditHandler = (
+				options: InteractionEditReplyOptions | InteractionReplyOptions,
+			) => {
+				const { flags, ...messageOptions } = options;
+				return message.edit(messageOptions);
+			};
+
+			await enqueueTracks({
+				tracks,
+				progress,
+				voiceChannel: queue.channel,
+				interaction: {
+					editReply: messageEditHandler,
+					reply: messageEditHandler,
+					user: message.author,
+					channel: message.channel,
+				},
+			});
+
+			embed.setDescription('✅Recovery successful');
+			await message.edit({ embeds: [embed] });
+		} catch (error) {
+			if (!(error instanceof Error)) {
+				return;
+			}
+
+			embed.setDescription(`❌ Recovery failed: ${error.message}`);
+
+			await message.edit({ embeds: [embed] });
 		}
-
-		const track = queue.currentTrack;
-
-		if (
-			track &&
-			isObject(track.metadata) &&
-			!('isFromCache' in track.metadata)
-		) {
-			void deleteOpusCacheEntry(track.url);
-		}
-
-		if (!queue.channel) {
-			embed.setDescription(
-				'🛑 Unable to recover – the queue has no voice channel associated with it.\n\nTip: try using the `/recover` command.',
-			);
-			return message.edit({ embeds: [embed] });
-		}
-
-		const queueRecoveryService = QueueRecoveryService.getInstance();
-
-		if (!queueRecoveryService) {
-			embed.setDescription(
-				'🛑 Unable to recover – queue recovery service unavailable.',
-			);
-			return message.edit({ embeds: [embed] });
-		}
-
-		const { tracks, progress } = await queueRecoveryService.getContents(player);
-
-		if (tracks.length === 0) {
-			queue.delete();
-
-			embed.setDescription('🛑 Found nothing to recover.');
-			return message.edit({ embeds: [embed] });
-		}
-
-		const messageEditHandler = (
-			options: InteractionEditReplyOptions | InteractionReplyOptions,
-		) => {
-			const { flags, ...messageOptions } = options;
-			return message.edit(messageOptions);
-		};
-
-		await enqueueTracks({
-			tracks,
-			progress,
-			voiceChannel: queue.channel,
-			interaction: {
-				editReply: messageEditHandler,
-				reply: messageEditHandler,
-				user: message.author,
-				channel: message.channel,
-			},
-		});
-
-		embed.setDescription('✅Recovery successful');
-		await message.edit({ embeds: [embed] });
 	};
 }

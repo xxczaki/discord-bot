@@ -256,6 +256,35 @@ describe('Basic Setup', () => {
 
 		processOnSpy.mockRestore();
 	});
+
+	it('should handle player debug messages', () => {
+		useDebugListeners(mockClient);
+		const playerOnCalls = vi.mocked(mockPlayer.on).mock.calls;
+		const debugHandlerCall = playerOnCalls.find((call) => call[0] === 'debug');
+
+		expect(debugHandlerCall).toBeDefined();
+		const debugHandler = debugHandlerCall?.[1] as (message: string) => void;
+		debugHandler('Test debug message');
+
+		expect(mockedLogger.debug).toHaveBeenCalledWith({}, 'Test debug message');
+	});
+
+	it('should handle player events debug messages', () => {
+		useDebugListeners(mockClient);
+		const playerEventsOnCalls = vi.mocked(mockPlayer.events.on).mock.calls;
+		const debugHandlerCall = playerEventsOnCalls.find(
+			(call) => call[0] === 'debug',
+		);
+
+		expect(debugHandlerCall).toBeDefined();
+		const debugHandler = debugHandlerCall?.[1] as (
+			queue: GuildQueue,
+			message: string,
+		) => void;
+		debugHandler(createMockQueue(), 'Test debug message');
+
+		expect(mockedLogger.debug).toHaveBeenCalledWith({}, 'Test debug message');
+	});
 });
 
 describe('Client Error Handling', () => {
@@ -329,8 +358,7 @@ describe('Player Error Handling', () => {
 		const errorHandler = getPlayerErrorHandler();
 		await errorHandler(testError);
 
-		expect(mockedLogger.error).toHaveBeenCalledWith(testError, 'Player error');
-		expect(mockedCaptureException).toHaveBeenCalledWith(testError);
+		expectBasicErrorHandling(testError);
 		expect(mockChannel.send).toHaveBeenCalledWith({ embeds: [mockEmbed] });
 		expect(mockEmbed.setDescription).toHaveBeenCalledWith(
 			'🛑 Unable to recover – no queue found.',
@@ -402,7 +430,7 @@ describe('Queue Recovery', () => {
 			mockQueueRecoveryInstance as unknown as QueueRecoveryService,
 		);
 
-		const mockQueue = createMockQueue({ currentTrack: null });
+		const mockQueue = createMockQueue();
 		const { mockMessageEdit } = setupMockMessage();
 		const testError = new Error('Test player error');
 
@@ -435,6 +463,93 @@ describe('Queue Recovery', () => {
 			'🛑 Unable to recover – queue recovery service unavailable.',
 		);
 		expect(mockMessageEdit).toHaveBeenCalledWith({ embeds: [mockEmbed] });
+	});
+
+	it('should handle enqueueTracks failure', async () => {
+		const mockQueueRecoveryInstance = createMockQueueRecoveryInstance({
+			tracks: [{ url: 'test-track-1' }, { url: 'test-track-2' }],
+			progress: 5000,
+		});
+		mockedQueueRecoveryService.getInstance.mockReturnValue(
+			mockQueueRecoveryInstance as unknown as QueueRecoveryService,
+		);
+
+		const mockQueue = createMockQueue();
+		const { mockMessageEdit } = setupMockMessage();
+		const testError = new Error('Test player error');
+		const enqueueError = new Error('Failed to enqueue tracks');
+
+		mockedEnqueueTracks.mockRejectedValue(enqueueError);
+
+		useDebugListeners(mockClient);
+		const errorHandler = getPlayerEventsErrorHandler();
+		await errorHandler(mockQueue, testError).catch(() => {});
+
+		expectBasicErrorHandling(testError);
+		expect(mockQueueRecoveryInstance.getContents).toHaveBeenCalledWith(
+			mockPlayer,
+		);
+		expect(mockedEnqueueTracks).toHaveBeenCalled();
+		expect(mockEmbed.setDescription).toHaveBeenLastCalledWith(
+			'❌ Recovery failed: Failed to enqueue tracks',
+		);
+		expect(mockMessageEdit).toHaveBeenLastCalledWith({ embeds: [mockEmbed] });
+	});
+
+	it('should handle queue recovery service error', async () => {
+		const mockQueueRecoveryInstance = createMockQueueRecoveryInstance();
+		mockedQueueRecoveryService.getInstance.mockReturnValue(
+			mockQueueRecoveryInstance as unknown as QueueRecoveryService,
+		);
+
+		const mockQueue = createMockQueue();
+		const { mockMessageEdit } = setupMockMessage();
+		const testError = new Error('Test player error');
+
+		mockQueueRecoveryInstance.getContents.mockRejectedValue(
+			new Error('Failed to get queue contents'),
+		);
+
+		useDebugListeners(mockClient);
+		const errorHandler = getPlayerEventsErrorHandler();
+		await errorHandler(mockQueue, testError).catch(() => {});
+
+		expectBasicErrorHandling(testError);
+		expect(mockQueueRecoveryInstance.getContents).toHaveBeenCalledWith(
+			mockPlayer,
+		);
+		expect(mockEmbed.setDescription).toHaveBeenLastCalledWith(
+			'❌ Recovery failed: Failed to get queue contents',
+		);
+		expect(mockMessageEdit).toHaveBeenLastCalledWith({ embeds: [mockEmbed] });
+	});
+
+	it('should handle non-Error objects in catch block', async () => {
+		const mockQueueRecoveryInstance = createMockQueueRecoveryInstance();
+		mockedQueueRecoveryService.getInstance.mockReturnValue(
+			mockQueueRecoveryInstance as unknown as QueueRecoveryService,
+		);
+
+		const mockQueue = createMockQueue();
+		const { mockMessageEdit } = setupMockMessage();
+		const testError = new Error('Test player error');
+
+		mockedEnqueueTracks.mockRejectedValue('string error');
+
+		useDebugListeners(mockClient);
+		const errorHandler = getPlayerEventsErrorHandler();
+		await errorHandler(mockQueue, testError).catch(() => {});
+
+		expectBasicErrorHandling(testError);
+		expect(mockQueueRecoveryInstance.getContents).toHaveBeenCalledWith(
+			mockPlayer,
+		);
+		expect(mockedEnqueueTracks).toHaveBeenCalled();
+
+		expect(mockEmbed.setDescription).not.toHaveBeenCalledWith(
+			expect.stringContaining('❌ Recovery failed'),
+		);
+		expect(mockMessageEdit).not.toHaveBeenCalled();
 	});
 });
 
