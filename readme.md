@@ -17,6 +17,7 @@
 - Recovery mechanism to continue listening after an error
 - Redis-backed playback statistics
 - Tic-tac-toe
+- Friendly `/help` command
 - Integration with Sentry
 - Extensive logging powered by Pino
 - Easy deployment with a [Helm chart](https://github.com/xxczaki/charts/tree/main/charts/discord-bot)
