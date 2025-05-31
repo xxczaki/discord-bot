@@ -4,6 +4,8 @@
 
 > 🎵 Music bot for my private Discord server, powered by discord-player
 
+https://github.com/user-attachments/assets/329dceca-f1fd-472c-a3d0-30bb7f708fd3
+
 ## Features
 
 - Music playback from YouTube
