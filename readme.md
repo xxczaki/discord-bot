@@ -4,7 +4,7 @@
 
 > 🎵 Music bot for my private Discord server, powered by discord-player
 
-https://github.com/user-attachments/assets/329dceca-f1fd-472c-a3d0-30bb7f708fd3
+![Preview of the `/play` command](https://github.com/user-attachments/assets/2279d0ff-a248-489c-b880-1d6bcf0c2f7f)
 
 ## Features
 
