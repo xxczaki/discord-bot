@@ -252,3 +252,29 @@ it('should handle complex multi-filter toggle scenario', async () => {
 		expectedToToggle,
 	);
 });
+
+it('should handle unknown component type gracefully', async () => {
+	const interaction = createMockInteraction();
+	const mockResponse = createMockResponse();
+	const mockQueue = createMockQueue([]);
+
+	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
+	mockedUseQueue.mockReturnValue(mockQueue);
+
+	// Create a component that is neither a button nor a select menu
+	const mockComponent = {
+		isButton: () => false,
+		isStringSelectMenu: () => false,
+		editReply: vi.fn().mockResolvedValue(undefined),
+	};
+
+	mockResponse.awaitMessageComponent.mockResolvedValue(mockComponent);
+
+	await filtersCommandHandler(interaction);
+
+	expect(mockResponse.delete).toHaveBeenCalled();
+	expect(mockComponent.editReply).toHaveBeenCalledWith({
+		content: 'No filters were selected, aborting…',
+		components: [],
+	});
+});

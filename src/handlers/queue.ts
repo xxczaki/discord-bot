@@ -99,12 +99,14 @@ export default async function queueCommandHandler(
 		.setDescription(
 			`0. ${queue.node.isPaused() ? '⏸️' : '▶️'}${queue.repeatMode === QueueRepeatMode.TRACK ? '🔁' : ''}${isCached ? '♻️' : ''} "${currentTrack.title}" by ${currentTrack.author} (*${currentTrack.duration}*)\n${embedDescriptions[0].join('\n')}`,
 		)
-		.setFooter({
-			text: !embedDescriptions.length
-				? ''
-				: `Page 1/${embedDescriptions.length} ${queue.repeatMode === QueueRepeatMode.QUEUE ? '· Repeat enabled 🔁' : ''}`,
-		})
 		.setThumbnail(getTrackThumbnail(currentTrack));
+
+	// Only set footer if there are tracks in the queue
+	if (embedDescriptions[0].length > 0) {
+		queueEmbed.setFooter({
+			text: `Page 1/${embedDescriptions.length} ${queue.repeatMode === QueueRepeatMode.QUEUE ? '· Repeat enabled 🔁' : ''}`,
+		});
+	}
 
 	const previous = new ButtonBuilder()
 		.setCustomId('0')

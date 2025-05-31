@@ -404,3 +404,29 @@ it('should handle previous page navigation correctly', async () => {
 		components: [expect.any(ActionRowBuilder)],
 	});
 });
+
+it('should show empty footer text when no tracks are queued beyond current track', async () => {
+	const interaction = createMockInteraction();
+	const currentTrack = createMockTrack();
+	const mockQueue = createMockQueue({
+		currentTrack,
+	});
+
+	mockQueue.tracks.toArray = vi.fn().mockReturnValue([]);
+
+	const mockResponse = createMockResponse();
+
+	const setFooterSpy = vi.spyOn(EmbedBuilder.prototype, 'setFooter');
+
+	mockedUseQueue.mockReturnValue(mockQueue);
+	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
+	mockResponse.awaitMessageComponent = vi
+		.fn()
+		.mockRejectedValue(new Error('timeout'));
+
+	await queueCommandHandler(interaction);
+
+	expect(setFooterSpy).not.toHaveBeenCalled();
+
+	setFooterSpy.mockRestore();
+});
