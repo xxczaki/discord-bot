@@ -192,6 +192,7 @@ const createMockQueue = (
 	overrides: Partial<{
 		channel: unknown;
 		currentTrack: unknown;
+		metadata: unknown;
 	}> = {},
 ) => {
 	const defaults = {
@@ -376,7 +377,7 @@ describe('Player Error Handling', () => {
 		expectBasicErrorHandling(testError);
 		expect(mockChannel.send).toHaveBeenCalledWith({ embeds: [mockEmbed] });
 		expect(mockEmbed.setDescription).toHaveBeenCalledWith(
-			'🛑 Unable to recover – the queue has no voice channel associated with it.\n\nTip: try using the `/recover` command.',
+			'🛑 Unable to recover – the queue has no voice channel associated with it.\n\nTip: try using the `/recover` command directly.',
 		);
 	});
 });
@@ -391,7 +392,9 @@ describe('Queue Recovery', () => {
 			mockQueueRecoveryInstance as unknown as QueueRecoveryService,
 		);
 
-		const mockQueue = createMockQueue();
+		const mockQueue = createMockQueue({
+			metadata: { interaction: { channel: mockChannel } },
+		});
 		const { mockMessageEdit } = setupMockMessage();
 		const testError = new Error('Test player error');
 
@@ -446,6 +449,36 @@ describe('Queue Recovery', () => {
 		expect(mockedEnqueueTracks).not.toHaveBeenCalled();
 	});
 
+	it('should handle recovery when original channel is not found', async () => {
+		const mockQueueRecoveryInstance = createMockQueueRecoveryInstance({
+			tracks: [{ url: 'test-track-1' }],
+			progress: 5000,
+		});
+		mockedQueueRecoveryService.getInstance.mockReturnValue(
+			mockQueueRecoveryInstance as unknown as QueueRecoveryService,
+		);
+
+		const mockQueue = createMockQueue({
+			metadata: { interaction: {} },
+		});
+		const { mockMessageEdit } = setupMockMessage();
+		const testError = new Error('Test player error');
+
+		useDebugListeners(mockClient);
+		const errorHandler = getPlayerEventsErrorHandler();
+		await errorHandler(mockQueue, testError);
+
+		expectBasicErrorHandling(testError);
+		expect(mockQueueRecoveryInstance.getContents).toHaveBeenCalledWith(
+			mockPlayer,
+		);
+		expect(mockEmbed.setDescription).toHaveBeenCalledWith(
+			'🛑 Unable to recover – original channel not found.\n\nTip: try using the `/recover` command directly.',
+		);
+		expect(mockMessageEdit).toHaveBeenCalledWith({ embeds: [mockEmbed] });
+		expect(mockedEnqueueTracks).not.toHaveBeenCalled();
+	});
+
 	it('should handle queue recovery service unavailable', async () => {
 		mockedQueueRecoveryService.getInstance.mockReturnValue(
 			null as unknown as QueueRecoveryService,
@@ -474,7 +507,9 @@ describe('Queue Recovery', () => {
 			mockQueueRecoveryInstance as unknown as QueueRecoveryService,
 		);
 
-		const mockQueue = createMockQueue();
+		const mockQueue = createMockQueue({
+			metadata: { interaction: { channel: mockChannel } },
+		});
 		const { mockMessageEdit } = setupMockMessage();
 		const testError = new Error('Test player error');
 		const enqueueError = new Error('Failed to enqueue tracks');
@@ -530,7 +565,9 @@ describe('Queue Recovery', () => {
 			mockQueueRecoveryInstance as unknown as QueueRecoveryService,
 		);
 
-		const mockQueue = createMockQueue();
+		const mockQueue = createMockQueue({
+			metadata: { interaction: { channel: mockChannel } },
+		});
 		const { mockMessageEdit } = setupMockMessage();
 		const testError = new Error('Test player error');
 

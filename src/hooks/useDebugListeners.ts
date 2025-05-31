@@ -118,7 +118,7 @@ function initializePlayerErrorReporter(
 
 			if (!queue.channel) {
 				embed.setDescription(
-					'🛑 Unable to recover – the queue has no voice channel associated with it.\n\nTip: try using the `/recover` command.',
+					'🛑 Unable to recover – the queue has no voice channel associated with it.\n\nTip: try using the `/recover` command directly.',
 				);
 				return message.edit({ embeds: [embed] });
 			}
@@ -142,6 +142,15 @@ function initializePlayerErrorReporter(
 				return message.edit({ embeds: [embed] });
 			}
 
+			const originalChannel = queue.metadata?.interaction?.channel;
+
+			if (!originalChannel) {
+				embed.setDescription(
+					'🛑 Unable to recover – original channel not found.\n\nTip: try using the `/recover` command directly.',
+				);
+				return message.edit({ embeds: [embed] });
+			}
+
 			const messageEditHandler = (
 				options: InteractionEditReplyOptions | InteractionReplyOptions,
 			) => {
@@ -158,7 +167,7 @@ function initializePlayerErrorReporter(
 					editReply: messageEditHandler,
 					reply: messageEditHandler,
 					user: message.author,
-					channel: message.channel,
+					channel: originalChannel,
 				},
 			});
 
