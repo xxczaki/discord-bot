@@ -32,6 +32,8 @@ You have two options:
 > [!NOTE]
 > If you go with the second option, you will need a Redis instance configured with the `REDIS_URL` environment variable – take a look at the `.env.example` file for instructions.
 
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/tgifQE?referralCode=4Ee-1n)
+
 ## Development
 
 First, install the Node.js version defined in the `.nvmrc` file and pnpm (ideally through Corepack).
