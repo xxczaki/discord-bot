@@ -1,6 +1,6 @@
 import { type Server, createServer } from 'node:net';
 import { captureException } from '@sentry/node';
-import { type GuildQueue, type Player, useMainPlayer } from 'discord-player';
+import type { GuildQueue, Player } from 'discord-player';
 import {
 	type Client,
 	EmbedBuilder,
@@ -22,7 +22,10 @@ const server = createServer();
 
 server.listen(8000);
 
-export default function useDebugListeners(client: Client<boolean>) {
+export default function useDebugListeners(
+	client: Client<boolean>,
+	player: Player,
+) {
 	const reportUnhandledError = initializeUnhandledErrorReporter(client, server);
 
 	process.on('unhandledRejection', reportUnhandledError);
@@ -33,7 +36,6 @@ export default function useDebugListeners(client: Client<boolean>) {
 		captureException(error);
 	});
 
-	const player = useMainPlayer();
 	const reportPlayerError = initializePlayerErrorReporter(client, player);
 
 	player.on('error', async (error) => reportPlayerError(undefined, error));

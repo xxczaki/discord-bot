@@ -72,20 +72,21 @@ it('should initialize bot components in correct order', async () => {
 	const playerEventHandlersCall =
 		mockedUsePlayerEventHandlers.mock.invocationCallOrder[0];
 
-	expect(debugListenersCall).toBeLessThan(loginCall);
 	expect(readyEventHandlerCall).toBeLessThan(loginCall);
 
 	expect(loginCall).toBeLessThan(playerInitCall);
+	expect(loginCall).toBeLessThan(debugListenersCall);
 	expect(loginCall).toBeLessThan(discordEventHandlersCall);
 	expect(loginCall).toBeLessThan(playerEventHandlersCall);
 
+	expect(playerInitCall).toBeLessThan(debugListenersCall);
 	expect(playerInitCall).toBeLessThan(discordEventHandlersCall);
 	expect(playerInitCall).toBeLessThan(playerEventHandlersCall);
 
 	expect(mockedInitializeCommands).toHaveBeenCalledOnce();
 	expect(mockedCreateDiscordClient).toHaveBeenCalledOnce();
 	expect(mockedGetEnvironmentVariable).toHaveBeenCalledWith('TOKEN');
-	expect(mockedUseDebugListeners).toHaveBeenCalledWith(mockClient);
+	expect(mockedUseDebugListeners).toHaveBeenCalledWith(mockClient, mockPlayer);
 	expect(mockedUseReadyEventHandler).toHaveBeenCalledWith(mockClient);
 	expect(mockClient.login).toHaveBeenCalledWith(mockToken);
 	expect(mockedGetInitializedPlayer).toHaveBeenCalledWith(mockClient);
@@ -113,10 +114,10 @@ it('should handle initialization errors gracefully', async () => {
 
 	await expect(initializeBot()).rejects.toThrow('Login failed');
 
-	expect(mockedUseDebugListeners).toHaveBeenCalledWith(mockClient);
 	expect(mockedUseReadyEventHandler).toHaveBeenCalledWith(mockClient);
 	expect(mockClient.login).toHaveBeenCalledWith(mockToken);
 	expect(mockedGetInitializedPlayer).not.toHaveBeenCalled();
+	expect(mockedUseDebugListeners).not.toHaveBeenCalled();
 	expect(mockedUseDiscordEventHandlers).not.toHaveBeenCalled();
 	expect(mockedUsePlayerEventHandlers).not.toHaveBeenCalled();
 });

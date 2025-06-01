@@ -2,7 +2,6 @@ import type { Server } from 'node:net';
 import { createServer } from 'node:net';
 import { captureException } from '@sentry/node';
 import type { GuildQueue, Player } from 'discord-player';
-import { useMainPlayer } from 'discord-player';
 import type { Client, TextChannel } from 'discord.js';
 import { EmbedBuilder } from 'discord.js';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -15,10 +14,6 @@ import useDebugListeners from '../useDebugListeners';
 
 const TEST_DEBUG_CHANNEL_ID = 'test-debug-channel-id';
 const TEST_SENTRY_ID = 'test-sentry-id';
-
-vi.mock('discord-player', () => ({
-	useMainPlayer: vi.fn(),
-}));
 
 vi.mock('discord.js', () => ({
 	EmbedBuilder: vi.fn(),
@@ -60,7 +55,6 @@ vi.mock('node:net', () => {
 });
 
 const mockedCaptureException = vi.mocked(captureException);
-const mockedUseMainPlayer = vi.mocked(useMainPlayer);
 const mockedGetEnvironmentVariable = vi.mocked(getEnvironmentVariable);
 const mockedLogger = vi.mocked(logger);
 const mockedCreateServer = vi.mocked(createServer);
@@ -128,7 +122,6 @@ beforeEach(() => {
 			on: vi.fn(),
 		},
 	} as unknown as Player;
-	mockedUseMainPlayer.mockReturnValue(mockPlayer);
 });
 
 afterEach(() => {
@@ -220,11 +213,10 @@ const setupMockMessage = () => {
 
 describe('Basic Setup', () => {
 	it('should set up debug listeners and create server', () => {
-		useDebugListeners(mockClient);
+		useDebugListeners(mockClient, mockPlayer);
 
 		expect(mockClient.on).toHaveBeenCalledWith('error', expect.any(Function));
 
-		expect(mockedUseMainPlayer).toHaveBeenCalled();
 		expect(mockPlayer.on).toHaveBeenCalledWith('error', expect.any(Function));
 		expect(mockPlayer.on).toHaveBeenCalledWith('debug', expect.any(Function));
 		expect(mockPlayer.events.on).toHaveBeenCalledWith(
@@ -244,7 +236,7 @@ describe('Basic Setup', () => {
 	it('should register process error handlers', () => {
 		const processOnSpy = vi.spyOn(process, 'on');
 
-		useDebugListeners(mockClient);
+		useDebugListeners(mockClient, mockPlayer);
 
 		expect(processOnSpy).toHaveBeenCalledWith(
 			'unhandledRejection',
@@ -259,7 +251,7 @@ describe('Basic Setup', () => {
 	});
 
 	it('should handle player debug messages', () => {
-		useDebugListeners(mockClient);
+		useDebugListeners(mockClient, mockPlayer);
 		const playerOnCalls = vi.mocked(mockPlayer.on).mock.calls;
 		const debugHandlerCall = playerOnCalls.find((call) => call[0] === 'debug');
 
@@ -271,7 +263,7 @@ describe('Basic Setup', () => {
 	});
 
 	it('should handle player events debug messages', () => {
-		useDebugListeners(mockClient);
+		useDebugListeners(mockClient, mockPlayer);
 		const playerEventsOnCalls = vi.mocked(mockPlayer.events.on).mock.calls;
 		const debugHandlerCall = playerEventsOnCalls.find(
 			(call) => call[0] === 'debug',
@@ -292,7 +284,7 @@ describe('Client Error Handling', () => {
 	it('should handle client errors and log them', () => {
 		const testError = new Error('Test client error');
 
-		useDebugListeners(mockClient);
+		useDebugListeners(mockClient, mockPlayer);
 		const errorHandler = getClientErrorHandler();
 		errorHandler(testError);
 
@@ -309,7 +301,7 @@ describe('Client Error Handling', () => {
 
 		const testError = new Error('Test unhandled error');
 
-		useDebugListeners(mockClient);
+		useDebugListeners(mockClient, mockPlayer);
 
 		process.emit('unhandledRejection', testError, Promise.resolve());
 
@@ -335,7 +327,7 @@ describe('Client Error Handling', () => {
 
 		const testError = new Error('Test unhandled error');
 
-		useDebugListeners(mockClient);
+		useDebugListeners(mockClient, mockPlayer);
 
 		process.emit('unhandledRejection', testError, Promise.resolve());
 
@@ -355,7 +347,7 @@ describe('Player Error Handling', () => {
 	it('should handle player error with no queue', async () => {
 		const testError = new Error('Test player error');
 
-		useDebugListeners(mockClient);
+		useDebugListeners(mockClient, mockPlayer);
 		const errorHandler = getPlayerErrorHandler();
 		await errorHandler(testError);
 
@@ -370,7 +362,7 @@ describe('Player Error Handling', () => {
 		const testError = new Error('Test player error');
 		const mockQueue = createMockQueue({ channel: null, currentTrack: null });
 
-		useDebugListeners(mockClient);
+		useDebugListeners(mockClient, mockPlayer);
 		const errorHandler = getPlayerEventsErrorHandler();
 		await errorHandler(mockQueue, testError);
 
@@ -400,7 +392,7 @@ describe('Queue Recovery', () => {
 
 		mockedEnqueueTracks.mockResolvedValue(undefined);
 
-		useDebugListeners(mockClient);
+		useDebugListeners(mockClient, mockPlayer);
 		const errorHandler = getPlayerEventsErrorHandler();
 		await errorHandler(mockQueue, testError);
 
@@ -437,7 +429,7 @@ describe('Queue Recovery', () => {
 		const { mockMessageEdit } = setupMockMessage();
 		const testError = new Error('Test player error');
 
-		useDebugListeners(mockClient);
+		useDebugListeners(mockClient, mockPlayer);
 		const errorHandler = getPlayerEventsErrorHandler();
 		await errorHandler(mockQueue, testError);
 
@@ -464,7 +456,7 @@ describe('Queue Recovery', () => {
 		const { mockMessageEdit } = setupMockMessage();
 		const testError = new Error('Test player error');
 
-		useDebugListeners(mockClient);
+		useDebugListeners(mockClient, mockPlayer);
 		const errorHandler = getPlayerEventsErrorHandler();
 		await errorHandler(mockQueue, testError);
 
@@ -488,7 +480,7 @@ describe('Queue Recovery', () => {
 		const mockQueue = createMockQueue();
 		const { mockMessageEdit } = setupMockMessage();
 
-		useDebugListeners(mockClient);
+		useDebugListeners(mockClient, mockPlayer);
 		const errorHandler = getPlayerEventsErrorHandler();
 		await errorHandler(mockQueue, testError);
 
@@ -516,7 +508,7 @@ describe('Queue Recovery', () => {
 
 		mockedEnqueueTracks.mockRejectedValue(enqueueError);
 
-		useDebugListeners(mockClient);
+		useDebugListeners(mockClient, mockPlayer);
 		const errorHandler = getPlayerEventsErrorHandler();
 		await errorHandler(mockQueue, testError).catch(() => {});
 
@@ -545,7 +537,7 @@ describe('Queue Recovery', () => {
 			new Error('Failed to get queue contents'),
 		);
 
-		useDebugListeners(mockClient);
+		useDebugListeners(mockClient, mockPlayer);
 		const errorHandler = getPlayerEventsErrorHandler();
 		await errorHandler(mockQueue, testError).catch(() => {});
 
@@ -573,7 +565,7 @@ describe('Queue Recovery', () => {
 
 		mockedEnqueueTracks.mockRejectedValue('string error');
 
-		useDebugListeners(mockClient);
+		useDebugListeners(mockClient, mockPlayer);
 		const errorHandler = getPlayerEventsErrorHandler();
 		await errorHandler(mockQueue, testError).catch(() => {});
 
@@ -604,7 +596,7 @@ describe('Opus Cache Management', () => {
 		mockedEnqueueTracks.mockResolvedValue(undefined);
 		mockedDeleteOpusCacheEntry.mockResolvedValue(undefined);
 
-		useDebugListeners(mockClient);
+		useDebugListeners(mockClient, mockPlayer);
 		const errorHandler = getPlayerEventsErrorHandler();
 		await errorHandler(mockQueue, testError);
 
@@ -630,7 +622,7 @@ describe('Opus Cache Management', () => {
 
 		mockedEnqueueTracks.mockResolvedValue(undefined);
 
-		useDebugListeners(mockClient);
+		useDebugListeners(mockClient, mockPlayer);
 		const errorHandler = getPlayerEventsErrorHandler();
 		await errorHandler(mockQueue, testError);
 
