@@ -12,10 +12,7 @@ import useCommandHandlers from './useCommandHandlers';
 
 const queueRecoveryService = QueueRecoveryService.getInstance();
 
-export default function useDiscordEventHandlers(
-	client: Client,
-	player: Player,
-): void {
+export function useReadyEventHandler(client: Client): void {
 	client.on('ready', async () => {
 		logger.info(`Logged in as ${client.user?.tag}!`);
 
@@ -31,7 +28,12 @@ export default function useDiscordEventHandlers(
 			);
 		}
 	});
+}
 
+export default function useDiscordEventHandlers(
+	client: Client,
+	player: Player,
+): void {
 	client.on('interactionCreate', async (interaction) => {
 		if (!interaction.guild) {
 			throw new TypeError('Guild is not defined!');

@@ -1,6 +1,8 @@
 import type { Client } from 'discord.js';
 import useDebugListeners from '../hooks/useDebugListeners';
-import useDiscordEventHandlers from '../hooks/useDiscordEventHandlers';
+import useDiscordEventHandlers, {
+	useReadyEventHandler,
+} from '../hooks/useDiscordEventHandlers';
 import usePlayerEventHandlers from '../hooks/usePlayerEventHandlers';
 import { createDiscordClient } from './createDiscordClient';
 import getEnvironmentVariable from './getEnvironmentVariable';
@@ -18,13 +20,15 @@ export async function initializeBot(): Promise<BotInitializationResult> {
 	const client = createDiscordClient();
 	const token = getEnvironmentVariable('TOKEN');
 
-	const player = await getInitializedPlayer(client);
-
 	useDebugListeners(client);
-	useDiscordEventHandlers(client, player);
-	usePlayerEventHandlers(client, player);
+	useReadyEventHandler(client);
 
 	await client.login(token);
+
+	const player = await getInitializedPlayer(client);
+
+	useDiscordEventHandlers(client, player);
+	usePlayerEventHandlers(client, player);
 
 	return { client, token };
 }

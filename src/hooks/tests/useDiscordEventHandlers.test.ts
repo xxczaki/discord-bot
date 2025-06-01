@@ -9,7 +9,9 @@ import type {
 } from 'discord.js';
 import { beforeEach, expect, it, vi } from 'vitest';
 import deleteOpusCacheEntry from '../../utils/deleteOpusCacheEntry';
-import useDiscordEventHandlers from '../useDiscordEventHandlers';
+import useDiscordEventHandlers, {
+	useReadyEventHandler,
+} from '../useDiscordEventHandlers';
 
 const MOCK_GUILD_ID = '123456789';
 const MOCK_COMMIT_SHA = 'abc123def456';
@@ -92,13 +94,20 @@ function createMockChannel(isSendable = true): TextChannel {
 	} as unknown as TextChannel;
 }
 
-it('should register event handlers on client', () => {
+it('should register ready event handler on client', () => {
+	const mockClient = createMockClient();
+
+	useReadyEventHandler(mockClient);
+
+	expect(mockClient.on).toHaveBeenCalledWith('ready', expect.any(Function));
+});
+
+it('should register interaction and voice state event handlers on client', () => {
 	const mockClient = createMockClient();
 	const mockPlayer = createMockPlayer();
 
 	useDiscordEventHandlers(mockClient, mockPlayer);
 
-	expect(mockClient.on).toHaveBeenCalledWith('ready', expect.any(Function));
 	expect(mockClient.on).toHaveBeenCalledWith(
 		'interactionCreate',
 		expect.any(Function),
@@ -112,13 +121,12 @@ it('should register event handlers on client', () => {
 it('should send commit message on `ready` when channel exists and commit hash is present', async () => {
 	const mockChannel = createMockChannel();
 	const mockClient = createMockClient();
-	const mockPlayer = createMockPlayer();
 
 	(mockClient.channels.cache.get as ReturnType<typeof vi.fn>).mockReturnValue(
 		mockChannel,
 	);
 
-	useDiscordEventHandlers(mockClient, mockPlayer);
+	useReadyEventHandler(mockClient);
 
 	const mockOnCalls = (mockClient.on as ReturnType<typeof vi.fn>).mock
 		.calls as Array<[string, (...args: unknown[]) => void]>;
@@ -137,7 +145,6 @@ it('should send commit message on `ready` when channel exists and commit hash is
 it('should not send commit message when deployment is manual', async () => {
 	const mockChannel = createMockChannel();
 	const mockClient = createMockClient();
-	const mockPlayer = createMockPlayer();
 
 	// Clear commit hash to simulate manual deployment
 	const originalCommitSha = process.env.GIT_COMMIT_SHA;
@@ -147,7 +154,7 @@ it('should not send commit message when deployment is manual', async () => {
 		mockChannel,
 	);
 
-	useDiscordEventHandlers(mockClient, mockPlayer);
+	useReadyEventHandler(mockClient);
 
 	const mockOnCalls = (mockClient.on as ReturnType<typeof vi.fn>).mock
 		.calls as Array<[string, (...args: unknown[]) => void]>;
