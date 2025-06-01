@@ -31,10 +31,6 @@ vi.mock('discord-player-spotify', () => ({
 	SpotifyExtractor: vi.fn(),
 }));
 
-vi.mock('discord-player-youtubei', () => ({
-	YoutubeiExtractor: vi.fn(),
-}));
-
 vi.mock('node:fs', () => ({
 	createReadStream: vi.fn(),
 	createWriteStream: vi.fn(),

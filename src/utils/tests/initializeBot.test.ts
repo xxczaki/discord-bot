@@ -20,6 +20,10 @@ vi.mock('../../hooks/useDebugListeners');
 vi.mock('../../hooks/useDiscordEventHandlers');
 vi.mock('../../hooks/usePlayerEventHandlers');
 
+vi.mock('discord-player-youtubei', () => ({
+	YoutubeiExtractor: vi.fn(),
+}));
+
 const mockedCreateDiscordClient = vi.mocked(createDiscordClient);
 const mockedGetEnvironmentVariable = vi.mocked(getEnvironmentVariable);
 const mockedInitializeCommands = vi.mocked(initializeCommands);

@@ -44,7 +44,7 @@ const buildOptions = {
 			: []),
 	],
 	outdir: 'dist',
-	minify: false,
+	minify: true,
 	sourcemap: true,
 	define: {
 		'process.env.GIT_COMMIT_SHA': JSON.stringify(
