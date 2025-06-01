@@ -45,10 +45,10 @@ it('should return empty array when no messages have id attribute', async () => {
 	expect(result).toEqual([]);
 });
 
-it('should extract playlists with id and create select menu options', async () => {
+it('should extract playlists with id and triple backticks content', async () => {
 	const messages = [
-		createMockMessage('id="playlist1" Song 1\nSong 2'),
-		createMockMessage('id="playlist2" Song 3'),
+		createMockMessage('id="playlist1"\n```\nSong 1\nSong 2\n```'),
+		createMockMessage('id="playlist2"\n```\nSong 3\n```'),
 		createMockMessage('No id here'),
 	];
 	const channel = createMockChannel(messages);
@@ -71,10 +71,10 @@ it('should extract playlists with id and create select menu options', async () =
 	expect(result[1].data.value).toBe('playlist2');
 });
 
-it('should handle playlists with Spotify URLs', async () => {
+it('should handle playlists with Spotify URLs in triple backticks', async () => {
 	const messages = [
 		createMockMessage(
-			`id="playlist1" ${EXAMPLE_SPOTIFY_PLAYLIST}\n${EXAMPLE_SONG_URL}`,
+			`id="playlist1"\n\`\`\`\n${EXAMPLE_SPOTIFY_PLAYLIST}\n${EXAMPLE_SONG_URL}\n\`\`\``,
 		),
 	];
 	const channel = createMockChannel(messages);
@@ -92,10 +92,10 @@ it('should handle playlists with Spotify URLs', async () => {
 	expect(result[0].data.description).toBe('1 Spotify playlist (+ 1 song)');
 });
 
-it('should handle playlists with only Spotify URLs', async () => {
+it('should handle playlists with only Spotify URLs in triple backticks', async () => {
 	const messages = [
 		createMockMessage(
-			`id="playlist1" ${EXAMPLE_SPOTIFY_PLAYLIST}\nhttps://open.spotify.com/playlist/456`,
+			`id="playlist1"\n\`\`\`\n${EXAMPLE_SPOTIFY_PLAYLIST}\nhttps://open.spotify.com/playlist/456\n\`\`\``,
 		),
 	];
 	const channel = createMockChannel(messages);
@@ -113,7 +113,9 @@ it('should handle playlists with only Spotify URLs', async () => {
 
 it('should handle single Spotify playlist without additional songs', async () => {
 	const messages = [
-		createMockMessage(`id="playlist1" ${EXAMPLE_SPOTIFY_PLAYLIST}`),
+		createMockMessage(
+			`id="playlist1"\n\`\`\`\n${EXAMPLE_SPOTIFY_PLAYLIST}\n\`\`\``,
+		),
 	];
 	const channel = createMockChannel(messages);
 
@@ -128,13 +130,11 @@ it('should handle single Spotify playlist without additional songs', async () =>
 
 it('should limit results to 25 items', async () => {
 	const messages = Array.from({ length: 30 }, (_, i) =>
-		createMockMessage(`id="playlist${i}" Song ${i}`),
+		createMockMessage(`id="playlist${i}"\n\`\`\`\nSong ${i}\n\`\`\``),
 	);
 	const channel = createMockChannel(messages);
 
-	mockedCleanUpPlaylistContent.mockImplementation(
-		(content) => `Song ${content.match(/playlist(\d+)/)?.[1]}`,
-	);
+	mockedCleanUpPlaylistContent.mockImplementation(() => 'Song');
 	mockedIsUrlSpotifyPlaylist.mockReturnValue(false);
 
 	const result = await getPlaylists(channel);
@@ -144,9 +144,9 @@ it('should limit results to 25 items', async () => {
 
 it('should sort playlists by id alphabetically', async () => {
 	const messages = [
-		createMockMessage('id="zebra" Song Z'),
-		createMockMessage('id="alpha" Song A'),
-		createMockMessage('id="beta" Song B'),
+		createMockMessage('id="zebra"\n```\nSong Z\n```'),
+		createMockMessage('id="alpha"\n```\nSong A\n```'),
+		createMockMessage('id="beta"\n```\nSong B\n```'),
 	];
 	const channel = createMockChannel(messages);
 
@@ -176,27 +176,44 @@ it('should fetch messages with correct parameters', async () => {
 	});
 });
 
-it('should handle empty playlist content', async () => {
-	const messages = [createMockMessage('id="empty"')];
+it('should handle playlist without triple backticks as having 0 songs', async () => {
+	const messages = [createMockMessage('id="empty" Song 1\nSong 2')];
 	const channel = createMockChannel(messages);
 
+	// cleanUpPlaylistContent returns empty string for content without triple backticks
 	mockedCleanUpPlaylistContent.mockReturnValue('');
 	mockedIsUrlSpotifyPlaylist.mockReturnValue(false);
 
 	const result = await getPlaylists(channel);
 
 	expect(result).toHaveLength(1);
-	expect(result[0].data.description).toBe('1 song');
+	expect(result[0].data.description).toBe('0 songs');
 });
 
-it('should handle message content with backticks correctly', async () => {
+it('should handle playlist with empty triple backticks as having 0 songs', async () => {
+	const messages = [createMockMessage('id="empty"\n```\n```')];
+	const channel = createMockChannel(messages);
+
+	// cleanUpPlaylistContent returns empty string for empty triple backticks
+	mockedCleanUpPlaylistContent.mockReturnValue('');
+	mockedIsUrlSpotifyPlaylist.mockReturnValue(false);
+
+	const result = await getPlaylists(channel);
+
+	expect(result).toHaveLength(1);
+	expect(result[0].data.description).toBe('0 songs');
+});
+
+it('should handle message content with triple backticks correctly', async () => {
 	const messages = [
-		createMockMessage('id="playlist1" `Song with backticks`\nAnother song'),
+		createMockMessage(
+			'id="playlist1"\n```\nSong with content\nAnother song\n```\nignored content',
+		),
 	];
 	const channel = createMockChannel(messages);
 
 	mockedCleanUpPlaylistContent.mockReturnValue(
-		'Song with backticks\nAnother song',
+		'Song with content\nAnother song',
 	);
 	mockedIsUrlSpotifyPlaylist.mockReturnValue(false);
 
@@ -205,6 +222,46 @@ it('should handle message content with backticks correctly', async () => {
 	expect(result).toHaveLength(1);
 	expect(result[0].data.description).toBe('2 songs');
 	expect(mockedCleanUpPlaylistContent).toHaveBeenCalledWith(
-		'id="playlist1" `Song with backticks`\nAnother song',
+		'id="playlist1"\n```\nSong with content\nAnother song\n```\nignored content',
 	);
+});
+
+it('should ignore playlists without proper format but still process ones with id', async () => {
+	const messages = [
+		createMockMessage('id="valid"\n```\nSong 1\n```'),
+		createMockMessage('id="invalid" Song without backticks'),
+		createMockMessage('No id here\n```\nSong 2\n```'),
+	];
+	const channel = createMockChannel(messages);
+
+	mockedCleanUpPlaylistContent
+		.mockReturnValueOnce('Song 1') // For valid playlist
+		.mockReturnValueOnce(''); // For invalid playlist (no backticks)
+
+	mockedIsUrlSpotifyPlaylist.mockReturnValue(false);
+
+	const result = await getPlaylists(channel);
+
+	expect(result).toHaveLength(2);
+	expect(result[0].data.label).toBe('invalid');
+	expect(result[0].data.description).toBe('0 songs');
+	expect(result[1].data.label).toBe('valid');
+	expect(result[1].data.description).toBe('1 song');
+});
+
+it('should handle playlist where id appears after triple backticks', async () => {
+	const messages = [
+		createMockMessage('\n```\nSong 1\nSong 2\n```\nid="playlist1"'),
+	];
+	const channel = createMockChannel(messages);
+
+	mockedCleanUpPlaylistContent.mockReturnValue('Song 1\nSong 2');
+	mockedIsUrlSpotifyPlaylist.mockReturnValue(false);
+
+	const result = await getPlaylists(channel);
+
+	expect(result).toHaveLength(1);
+	expect(result[0].data.label).toBe('playlist1');
+	expect(result[0].data.description).toBe('2 songs');
+	expect(result[0].data.value).toBe('playlist1');
 });

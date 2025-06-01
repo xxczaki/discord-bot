@@ -6,7 +6,7 @@ export default defineConfig({
 		environment: 'node',
 		setupFiles: ['./src/setupTests.ts'],
 
-		pool: 'threads',
+		pool: 'vmThreads',
 
 		include: ['src/**/*.test.ts'],
 		coverage: {

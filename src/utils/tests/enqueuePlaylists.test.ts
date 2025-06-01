@@ -70,8 +70,12 @@ beforeEach(() => {
 		},
 	};
 
-	const mockMessage1 = { content: 'id="playlist1" Song 1\nSong 2' } as Message;
-	const mockMessage2 = { content: 'id="playlist2" Song 3\nSong 4' } as Message;
+	const mockMessage1 = {
+		content: 'id="playlist1"\n```\nSong 1\nSong 2\n```',
+	} as Message;
+	const mockMessage2 = {
+		content: 'id="playlist2"\n```\nSong 3\nSong 4\n```',
+	} as Message;
 	const mockMessages = createMockCollection([mockMessage1, mockMessage2]);
 
 	mockPlaylistsChannel = {
@@ -297,9 +301,15 @@ it('should handle messages fetch failure gracefully', async () => {
 });
 
 it('should process only messages that match playlist IDs', async () => {
-	const mockMessage1 = { content: 'id="playlist1" Song 1\nSong 2' } as Message;
-	const mockMessage2 = { content: 'id="playlist2" Song 3\nSong 4' } as Message;
-	const mockMessage3 = { content: 'id="playlist3" Song 5\nSong 6' } as Message;
+	const mockMessage1 = {
+		content: 'id="playlist1"\n```\nSong 1\nSong 2\n```',
+	} as Message;
+	const mockMessage2 = {
+		content: 'id="playlist2"\n```\nSong 3\nSong 4\n```',
+	} as Message;
+	const mockMessage3 = {
+		content: 'id="playlist3"\n```\nSong 5\nSong 6\n```',
+	} as Message;
 
 	const mockMessages = createMockCollection([
 		mockMessage1,

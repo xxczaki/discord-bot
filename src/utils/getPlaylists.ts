@@ -21,7 +21,8 @@ async function getPlaylists(channel: TextBasedChannel) {
 				return [];
 			}
 
-			const songs = cleanUpPlaylistContent(message).split('\n');
+			const cleanContent = cleanUpPlaylistContent(message);
+			const songs = cleanContent ? cleanContent.split('\n') : [];
 
 			return { id, description: getPlaylistDescription(songs) };
 		})
