@@ -16,7 +16,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { RedisQueryCache } from '../RedisQueryCache';
 
 const EXAMPLE_QUERY = 'test song';
+const EXAMPLE_SPOTIFY_PLAYLIST = 'https://open.spotify.com/playlist/123';
 const EXAMPLE_CACHE_KEY = 'discord-player:query-cache:test song';
+
+const mockedExternalPlaylistCache = vi.hoisted(() => ({
+	setTrackCount: vi.fn(),
+}));
+
+const mockedIsUrlSpotifyPlaylist = vi.hoisted(() => vi.fn());
 
 vi.mock('discord-player', () => ({
 	serialize: vi.fn(),
@@ -27,6 +34,14 @@ vi.mock('discord-player', () => ({
 	QueryType: {
 		AUTO: 'auto',
 	},
+}));
+
+vi.mock('../ExternalPlaylistCache', () => ({
+	ExternalPlaylistCache: vi.fn(() => mockedExternalPlaylistCache),
+}));
+
+vi.mock('../isUrlSpotifyPlaylist', () => ({
+	default: mockedIsUrlSpotifyPlaylist,
 }));
 
 describe('RedisQueryCache', () => {
@@ -48,6 +63,7 @@ describe('RedisQueryCache', () => {
 		redisQueryCache = new RedisQueryCache(mockRedis);
 
 		vi.mocked(useMainPlayer).mockReturnValue(mockPlayer);
+		vi.mocked(mockedIsUrlSpotifyPlaylist).mockReturnValue(false);
 	});
 
 	it('should store redis client', () => {
@@ -62,6 +78,7 @@ describe('RedisQueryCache', () => {
 			} as unknown as SearchResult;
 
 			vi.mocked(serialize).mockReturnValue({ title: 'Test Song' });
+			vi.mocked(mockedIsUrlSpotifyPlaylist).mockReturnValue(false);
 
 			await redisQueryCache.addData(mockSearchResult);
 
@@ -70,6 +87,29 @@ describe('RedisQueryCache', () => {
 				EXAMPLE_CACHE_KEY,
 				RedisQueryCache.EXPIRY_TIMEOUT_MS,
 				JSON.stringify([{ title: 'Test Song' }]),
+			);
+			expect(mockedExternalPlaylistCache.setTrackCount).not.toHaveBeenCalled();
+		});
+
+		it('should also cache external playlist track count permanently', async () => {
+			const mockSearchResult = {
+				query: EXAMPLE_SPOTIFY_PLAYLIST,
+				tracks: [{ title: 'Track 1' }, { title: 'Track 2' }],
+			} as unknown as SearchResult;
+
+			vi.mocked(serialize).mockReturnValue({ title: 'Track' });
+			vi.mocked(mockedIsUrlSpotifyPlaylist).mockReturnValue(true);
+
+			await redisQueryCache.addData(mockSearchResult);
+
+			expect(mockRedis.setex).toHaveBeenCalledWith(
+				'discord-player:query-cache:https://open.spotify.com/playlist/123',
+				RedisQueryCache.EXPIRY_TIMEOUT_MS,
+				JSON.stringify([{ title: 'Track' }, { title: 'Track' }]),
+			);
+			expect(mockedExternalPlaylistCache.setTrackCount).toHaveBeenCalledWith(
+				EXAMPLE_SPOTIFY_PLAYLIST,
+				2,
 			);
 		});
 
@@ -89,6 +129,9 @@ describe('RedisQueryCache', () => {
 
 				expect(vi.mocked(serialize)).not.toHaveBeenCalled();
 				expect(mockRedis.setex).not.toHaveBeenCalled();
+				expect(
+					mockedExternalPlaylistCache.setTrackCount,
+				).not.toHaveBeenCalled();
 			},
 		);
 	});

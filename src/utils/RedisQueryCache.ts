@@ -12,11 +12,17 @@ import {
 	type Track,
 } from 'discord-player';
 import type { Redis } from 'ioredis';
+import { ExternalPlaylistCache } from './ExternalPlaylistCache';
+import isUrlSpotifyPlaylist from './isUrlSpotifyPlaylist';
 
 export class RedisQueryCache implements QueryCacheProvider<Track> {
 	static EXPIRY_TIMEOUT_MS = 1000 * 60 * 60 * 24; // 1 day
 
-	constructor(public redis: Redis) {}
+	#externalPlaylistCache: ExternalPlaylistCache;
+
+	constructor(public redis: Redis) {
+		this.#externalPlaylistCache = new ExternalPlaylistCache(redis);
+	}
 
 	#createKey(id: string) {
 		return `discord-player:query-cache:${id}` as const;
@@ -34,6 +40,13 @@ export class RedisQueryCache implements QueryCacheProvider<Track> {
 		);
 
 		await this.redis.setex(key, RedisQueryCache.EXPIRY_TIMEOUT_MS, serialized);
+
+		if (isUrlSpotifyPlaylist(data.query)) {
+			await this.#externalPlaylistCache.setTrackCount(
+				data.query,
+				data.tracks.length,
+			);
+		}
 	}
 
 	async getData(): Promise<DiscordPlayerQueryResultCache<Track<unknown>>[]> {

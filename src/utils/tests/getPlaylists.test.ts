@@ -12,6 +12,12 @@ const mockedRedis = vi.hoisted(() => ({
 	get: vi.fn(),
 }));
 
+const mockedExternalPlaylistCache = vi.hoisted(() => ({
+	getTrackCount: vi.fn(),
+	setTrackCount: vi.fn(),
+	formatCacheDate: vi.fn(),
+}));
+
 vi.mock('../cleanUpPlaylistContent', () => ({
 	default: mockedCleanUpPlaylistContent,
 }));
@@ -22,6 +28,10 @@ vi.mock('../isUrlSpotifyPlaylist', () => ({
 
 vi.mock('../redis', () => ({
 	default: mockedRedis,
+}));
+
+vi.mock('../ExternalPlaylistCache', () => ({
+	ExternalPlaylistCache: vi.fn(() => mockedExternalPlaylistCache),
 }));
 
 function createMockMessage(content: string): Message {
@@ -42,7 +52,9 @@ function createMockChannel(messages: Message[]): TextBasedChannel {
 
 beforeEach(() => {
 	vi.clearAllMocks();
-	mockedRedis.get.mockResolvedValue(null); // Default to no cache data
+	mockedRedis.get.mockResolvedValue(null);
+	mockedExternalPlaylistCache.getTrackCount.mockResolvedValue(null);
+	mockedExternalPlaylistCache.formatCacheDate.mockReturnValue('Jun 1, 2025');
 });
 
 it('should return empty array when no messages have id attribute', async () => {
@@ -280,7 +292,7 @@ it('should handle playlist where id appears after triple backticks', async () =>
 	expect(result[0].data.value).toBe('playlist1');
 });
 
-it('should show actual song count when Spotify playlist is cached', async () => {
+it('should show actual song count with timestamp when Spotify playlist is cached', async () => {
 	const messages = [
 		createMockMessage(
 			`id="playlist1"\n\`\`\`\n${EXAMPLE_SPOTIFY_PLAYLIST}\n${EXAMPLE_SONG_URL}\n\`\`\``,
@@ -295,18 +307,21 @@ it('should show actual song count when Spotify playlist is cached', async () => 
 		.mockReturnValueOnce(true)
 		.mockReturnValueOnce(false);
 
-	mockedRedis.get.mockResolvedValue(JSON.stringify(new Array(5).fill({})));
+	mockedExternalPlaylistCache.getTrackCount.mockResolvedValue({
+		trackCount: 5,
+		cachedAt: '2025-06-01T12:00:00.000Z',
+	});
 
 	const result = await getPlaylists(channel);
 
 	expect(result).toHaveLength(1);
-	expect(result[0].data.description).toBe('6 songs');
-	expect(mockedRedis.get).toHaveBeenCalledWith(
-		`discord-player:query-cache:${EXAMPLE_SPOTIFY_PLAYLIST}`,
+	expect(result[0].data.description).toBe('6 songs (as of Jun 1, 2025)');
+	expect(mockedExternalPlaylistCache.getTrackCount).toHaveBeenCalledWith(
+		EXAMPLE_SPOTIFY_PLAYLIST,
 	);
 });
 
-it('should show cached song count for multiple Spotify playlists', async () => {
+it('should show cached song count with timestamp for multiple Spotify playlists', async () => {
 	const secondSpotifyPlaylist = 'https://open.spotify.com/playlist/456';
 	const messages = [
 		createMockMessage(
@@ -320,17 +335,25 @@ it('should show cached song count for multiple Spotify playlists', async () => {
 	);
 	mockedIsUrlSpotifyPlaylist.mockReturnValue(true);
 
-	mockedRedis.get
-		.mockResolvedValueOnce(JSON.stringify(new Array(3).fill({})))
-		.mockResolvedValueOnce(JSON.stringify(new Array(7).fill({})));
+	mockedExternalPlaylistCache.getTrackCount
+		.mockResolvedValueOnce({
+			trackCount: 3,
+			cachedAt: '2025-06-01T12:00:00.000Z',
+		})
+		.mockResolvedValueOnce({
+			trackCount: 7,
+			cachedAt: '2025-05-15T10:00:00.000Z',
+		});
+
+	mockedExternalPlaylistCache.formatCacheDate.mockReturnValue('May 15, 2025');
 
 	const result = await getPlaylists(channel);
 
 	expect(result).toHaveLength(1);
-	expect(result[0].data.description).toBe('10 songs');
+	expect(result[0].data.description).toBe('10 songs (as of May 15, 2025)');
 });
 
-it('should handle mix of cached and uncached Spotify playlists', async () => {
+it('should handle mix of cached and uncached Spotify playlists with timestamp', async () => {
 	const secondSpotifyPlaylist = 'https://open.spotify.com/playlist/456';
 	const messages = [
 		createMockMessage(
@@ -344,15 +367,18 @@ it('should handle mix of cached and uncached Spotify playlists', async () => {
 	);
 	mockedIsUrlSpotifyPlaylist.mockReturnValue(true);
 
-	mockedRedis.get
-		.mockResolvedValueOnce(JSON.stringify(new Array(4).fill({})))
+	mockedExternalPlaylistCache.getTrackCount
+		.mockResolvedValueOnce({
+			trackCount: 4,
+			cachedAt: '2025-06-01T12:00:00.000Z',
+		})
 		.mockResolvedValueOnce(null);
 
 	const result = await getPlaylists(channel);
 
 	expect(result).toHaveLength(1);
 	expect(result[0].data.description).toBe(
-		'4 songs (+ 1 unresolved external playlist)',
+		'4 songs (as of Jun 1, 2025) (+ 1 unresolved external playlist)',
 	);
 });
 
@@ -371,7 +397,7 @@ it('should fall back to playlist count when no cache data available', async () =
 		.mockReturnValueOnce(true)
 		.mockReturnValueOnce(false);
 
-	mockedRedis.get.mockResolvedValue(null);
+	mockedExternalPlaylistCache.getTrackCount.mockResolvedValue(null);
 
 	const result = await getPlaylists(channel);
 
