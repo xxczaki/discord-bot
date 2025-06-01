@@ -27,6 +27,10 @@ vi.mock('discord-player', () => ({
 	},
 }));
 
+vi.mock('discord-player-youtubei', () => ({
+	YoutubeiExtractor: vi.fn(),
+}));
+
 vi.mock('discord-player-spotify', () => ({
 	SpotifyExtractor: vi.fn(),
 }));
