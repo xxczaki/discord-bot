@@ -72,6 +72,25 @@ describe('RedisQueryCache', () => {
 				JSON.stringify([{ title: 'Test Song' }]),
 			);
 		});
+
+		it.each([
+			['empty array', []],
+			['null', null],
+			['undefined', undefined],
+		])(
+			'should not cache when `tracks` is %s',
+			async (_description, tracksValue) => {
+				const mockSearchResult = {
+					query: EXAMPLE_QUERY,
+					tracks: tracksValue,
+				} as unknown as SearchResult;
+
+				await redisQueryCache.addData(mockSearchResult);
+
+				expect(vi.mocked(serialize)).not.toHaveBeenCalled();
+				expect(mockRedis.setex).not.toHaveBeenCalled();
+			},
+		);
 	});
 
 	describe('getData', () => {

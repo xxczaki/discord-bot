@@ -23,6 +23,11 @@ export class RedisQueryCache implements QueryCacheProvider<Track> {
 	}
 
 	async addData(data: SearchResult): Promise<void> {
+		// Don't cache empty results to prevent caching failed playlist resolutions
+		if (!data.tracks || data.tracks.length === 0) {
+			return;
+		}
+
 		const key = this.#createKey(data.query);
 		const serialized = JSON.stringify(
 			data.tracks.map((track) => serialize(track)),
