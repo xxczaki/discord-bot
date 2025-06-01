@@ -18,13 +18,13 @@ export async function initializeBot(): Promise<BotInitializationResult> {
 	const client = createDiscordClient();
 	const token = getEnvironmentVariable('TOKEN');
 
-	await client.login(token);
-
 	const player = await getInitializedPlayer(client);
 
 	useDebugListeners(client);
 	useDiscordEventHandlers(client, player);
 	usePlayerEventHandlers(client, player);
+
+	await client.login(token);
 
 	return { client, token };
 }

@@ -4,7 +4,6 @@ import * as esbuild from 'esbuild';
 import esbuildPluginPino from 'esbuild-plugin-pino';
 
 const handlers = globSync('src/handlers/*.ts');
-const isWatchMode = process.argv.includes('--watch');
 
 /** @type {import('esbuild').BuildOptions} */
 const buildOptions = {
@@ -45,7 +44,7 @@ const buildOptions = {
 			: []),
 	],
 	outdir: 'dist',
-	minify: !isWatchMode,
+	minify: false,
 	sourcemap: true,
 	define: {
 		'process.env.GIT_COMMIT_SHA': JSON.stringify(
@@ -54,14 +53,4 @@ const buildOptions = {
 	},
 };
 
-async function build() {
-	if (isWatchMode) {
-		const context = await esbuild.context(buildOptions);
-
-		await context.watch();
-	} else {
-		await esbuild.build(buildOptions);
-	}
-}
-
-build().catch(console.error);
+await esbuild.build(buildOptions);

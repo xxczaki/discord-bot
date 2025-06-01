@@ -2,12 +2,11 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "debug",
+			"label": "build",
 			"type": "shell",
 			"command": "node",
-			"args": ["esbuild.js", "--watch"],
+			"args": ["esbuild.js"],
 			"group": "build",
-			"isBackground": true,
 			"presentation": {
 				"echo": true,
 				"reveal": "always",

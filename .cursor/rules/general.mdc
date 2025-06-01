@@ -4,6 +4,7 @@ globs:
 alwaysApply: true
 ---
 # General guidelines
+- **ALWAYS** use `pnpm` for running Node.js tasks (like `pnpm install <package>`, `pnpm test`, etc.)
 - Do not write code comments about *what* something is/does, unless it would be very difficult to understand and cannot be simplified
 - Write code comments on *why* something was done, but *only* if it appears strange/unnecessary/overly complicated
 - Do not ask me to review files with multiple TypeScript issues, they should be fixed beforehand
