@@ -8,7 +8,7 @@ import logger from '../utils/logger';
 import pluralize from '../utils/pluralize';
 
 const opusCacheDirectory = getOpusCacheDirectoryPath();
-const BATCH_SIZE = 10;
+const BATCH_SIZE = 100;
 
 export default async function opusCacheCommandHandler(
 	interaction: ChatInputCommandInteraction,
