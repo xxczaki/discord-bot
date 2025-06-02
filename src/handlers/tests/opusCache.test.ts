@@ -1,5 +1,6 @@
 import type { Stats } from 'node:fs';
-import { readdir, stat } from 'node:fs/promises';
+import type { Dir, Dirent } from 'node:fs';
+import { opendir, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { captureException } from '@sentry/node';
 import type { ChatInputCommandInteraction } from 'discord.js';
@@ -12,7 +13,7 @@ const EXAMPLE_FILE_NAMES = ['track1.opus', 'track2.opus', 'track3.opus'];
 const EXAMPLE_FILE_SIZES = [1024, 2048, 4096];
 
 vi.mock('node:fs/promises', () => ({
-	readdir: vi.fn(),
+	opendir: vi.fn(),
 	stat: vi.fn(),
 }));
 
@@ -28,7 +29,7 @@ vi.mock('pretty-bytes', () => ({
 	default: vi.fn(),
 }));
 
-const mockedReaddir = vi.mocked(readdir);
+const mockedOpendir = vi.mocked(opendir);
 const mockedStat = vi.mocked(stat);
 const mockedJoin = vi.mocked(join);
 const mockedPrettyBytes = vi.mocked(prettyBytes);
@@ -46,6 +47,27 @@ function createMockStats(size: number): Stats {
 	return { size } as Stats;
 }
 
+function createMockDirEntry(name: string, isFile = true): Dirent {
+	return {
+		name,
+		isFile: vi.fn().mockReturnValue(isFile),
+	} as unknown as Dirent;
+}
+
+function createMockDir(entries: { name: string; isFile?: boolean }[]): Dir {
+	const mockEntries = entries.map((entry) =>
+		createMockDirEntry(entry.name, entry.isFile ?? true),
+	);
+
+	return {
+		[Symbol.asyncIterator]: async function* () {
+			for (const entry of mockEntries) {
+				yield entry;
+			}
+		},
+	} as unknown as Dir;
+}
+
 beforeEach(async () => {
 	vi.clearAllMocks();
 	mockedJoin.mockImplementation((dir, file) => `${dir}/${file}`);
@@ -59,9 +81,9 @@ it('should fetch cache details and display correct summary', async () => {
 	const interaction = createMockInteraction();
 	const totalSize = EXAMPLE_FILE_SIZES.reduce((acc, size) => acc + size, 0);
 
-	(
-		mockedReaddir as unknown as MockedFunction<() => Promise<string[]>>
-	).mockResolvedValue(EXAMPLE_FILE_NAMES);
+	const mockDir = createMockDir(EXAMPLE_FILE_NAMES.map((name) => ({ name })));
+	(mockedOpendir as MockedFunction<typeof opendir>).mockResolvedValue(mockDir);
+
 	mockedStat
 		.mockResolvedValueOnce(createMockStats(EXAMPLE_FILE_SIZES[0]))
 		.mockResolvedValueOnce(createMockStats(EXAMPLE_FILE_SIZES[1]))
@@ -69,11 +91,9 @@ it('should fetch cache details and display correct summary', async () => {
 
 	await opusCacheCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith(
-		'Fetching the details about the cache…',
-	);
+	expect(interaction.reply).toHaveBeenCalledWith('Scanning cache directory…');
 
-	expect(mockedReaddir).toHaveBeenCalledWith(MOCK_CACHE_DIRECTORY);
+	expect(mockedOpendir).toHaveBeenCalledWith(MOCK_CACHE_DIRECTORY);
 	expect(mockedJoin).toHaveBeenCalledTimes(EXAMPLE_FILE_NAMES.length);
 
 	for (const fileName of EXAMPLE_FILE_NAMES) {
@@ -95,9 +115,8 @@ it('should handle single file correctly', async () => {
 	const singleFile = ['single-track.opus'];
 	const singleSize = 512;
 
-	(
-		mockedReaddir as unknown as MockedFunction<() => Promise<string[]>>
-	).mockResolvedValue(singleFile);
+	const mockDir = createMockDir(singleFile.map((name) => ({ name })));
+	(mockedOpendir as MockedFunction<typeof opendir>).mockResolvedValue(mockDir);
 	mockedStat.mockResolvedValue(createMockStats(singleSize));
 
 	await opusCacheCommandHandler(interaction);
@@ -113,31 +132,26 @@ it('should handle empty cache directory', async () => {
 	const { default: opusCacheCommandHandler } = await import('../opusCache');
 	const interaction = createMockInteraction();
 
-	(
-		mockedReaddir as unknown as MockedFunction<() => Promise<string[]>>
-	).mockResolvedValue([]);
+	const mockDir = createMockDir([]);
+	(mockedOpendir as MockedFunction<typeof opendir>).mockResolvedValue(mockDir);
 
 	await opusCacheCommandHandler(interaction);
 
 	expect(interaction.editReply).toHaveBeenCalledWith(
-		expect.stringContaining(
-			'Currently storing 0 cached [Opus](<https://opus-codec.org/>) files (total: 0 B).',
-		),
+		'Currently storing 0 cached [Opus](<https://opus-codec.org/>) files (total: 0 B).',
 	);
 });
 
-it('should handle readdir error and reply with error message', async () => {
+it('should handle opendir error and reply with error message', async () => {
 	const { default: opusCacheCommandHandler } = await import('../opusCache');
 	const interaction = createMockInteraction();
 	const error = new Error('Permission denied');
 
-	mockedReaddir.mockRejectedValue(error);
+	mockedOpendir.mockRejectedValue(error);
 
 	await opusCacheCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith(
-		'Fetching the details about the cache…',
-	);
+	expect(interaction.reply).toHaveBeenCalledWith('Scanning cache directory…');
 
 	expect(mockedLogger.error).toHaveBeenCalledWith(error);
 	expect(mockedCaptureException).toHaveBeenCalledWith(error);
@@ -147,22 +161,21 @@ it('should handle readdir error and reply with error message', async () => {
 	);
 });
 
-it('should handle stat error and reply with error message', async () => {
+it('should handle stat error and continue processing', async () => {
 	const { default: opusCacheCommandHandler } = await import('../opusCache');
 	const interaction = createMockInteraction();
 	const error = new Error('File not found');
 
-	(
-		mockedReaddir as unknown as MockedFunction<() => Promise<string[]>>
-	).mockResolvedValue(EXAMPLE_FILE_NAMES);
+	const mockDir = createMockDir(EXAMPLE_FILE_NAMES.map((name) => ({ name })));
+	(mockedOpendir as MockedFunction<typeof opendir>).mockResolvedValue(mockDir);
 	mockedStat.mockRejectedValue(error);
 
 	await opusCacheCommandHandler(interaction);
 
-	expect(mockedLogger.error).toHaveBeenCalledWith(error);
-	expect(mockedCaptureException).toHaveBeenCalledWith(error);
-
-	expect(interaction.editReply).toHaveBeenCalledWith(
-		'❌ Something went wrong when trying to read the cache directory.',
+	expect(mockedLogger.error).toHaveBeenCalledWith(
+		'Error processing batch of 3 files:',
+		error,
 	);
+
+	expect(interaction.editReply).toHaveBeenCalled();
 });

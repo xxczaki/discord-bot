@@ -1,5 +1,6 @@
 import type {
 	Player,
+	Playlist,
 	QueryCacheResolverContext,
 	SearchResult,
 } from 'discord-player';
@@ -85,16 +86,46 @@ describe('RedisQueryCache', () => {
 			expect(vi.mocked(serialize)).toHaveBeenCalledWith({ title: 'Test Song' });
 			expect(mockRedis.setex).toHaveBeenCalledWith(
 				EXAMPLE_CACHE_KEY,
-				RedisQueryCache.EXPIRY_TIMEOUT_MS,
+				RedisQueryCache.EXPIRY_TIMEOUT_SECONDS,
 				JSON.stringify([{ title: 'Test Song' }]),
 			);
 			expect(mockedExternalPlaylistCache.setTrackCount).not.toHaveBeenCalled();
 		});
 
-		it('should also cache external playlist track count permanently', async () => {
+		it('should cache playlist data and external playlist track count for Spotify playlists', async () => {
+			const mockPlaylist = {
+				tracks: [{ title: 'Track 1' }, { title: 'Track 2' }],
+				title: 'Test Playlist',
+			} as unknown as Playlist;
+
+			const mockSearchResult = {
+				query: EXAMPLE_SPOTIFY_PLAYLIST,
+				playlist: mockPlaylist,
+				tracks: [],
+			} as unknown as SearchResult;
+
+			vi.mocked(serialize).mockReturnValue({ title: 'Serialized Playlist' });
+			vi.mocked(mockedIsUrlSpotifyPlaylist).mockReturnValue(true);
+
+			await redisQueryCache.addData(mockSearchResult);
+
+			expect(vi.mocked(serialize)).toHaveBeenCalledWith(mockPlaylist);
+			expect(mockRedis.setex).toHaveBeenCalledWith(
+				'discord-player:query-cache:https://open.spotify.com/playlist/123',
+				RedisQueryCache.EXPIRY_TIMEOUT_SECONDS,
+				JSON.stringify({ title: 'Serialized Playlist' }),
+			);
+			expect(mockedExternalPlaylistCache.setTrackCount).toHaveBeenCalledWith(
+				EXAMPLE_SPOTIFY_PLAYLIST,
+				2,
+			);
+		});
+
+		it('should not cache external playlist track count when no playlist is provided', async () => {
 			const mockSearchResult = {
 				query: EXAMPLE_SPOTIFY_PLAYLIST,
 				tracks: [{ title: 'Track 1' }, { title: 'Track 2' }],
+				playlist: null,
 			} as unknown as SearchResult;
 
 			vi.mocked(serialize).mockReturnValue({ title: 'Track' });
@@ -104,13 +135,24 @@ describe('RedisQueryCache', () => {
 
 			expect(mockRedis.setex).toHaveBeenCalledWith(
 				'discord-player:query-cache:https://open.spotify.com/playlist/123',
-				RedisQueryCache.EXPIRY_TIMEOUT_MS,
+				RedisQueryCache.EXPIRY_TIMEOUT_SECONDS,
 				JSON.stringify([{ title: 'Track' }, { title: 'Track' }]),
 			);
-			expect(mockedExternalPlaylistCache.setTrackCount).toHaveBeenCalledWith(
-				EXAMPLE_SPOTIFY_PLAYLIST,
-				2,
-			);
+			expect(mockedExternalPlaylistCache.setTrackCount).not.toHaveBeenCalled();
+		});
+
+		it('should not cache when both tracks and playlist are empty/null', async () => {
+			const mockSearchResult = {
+				query: EXAMPLE_QUERY,
+				tracks: [],
+				playlist: null,
+			} as unknown as SearchResult;
+
+			await redisQueryCache.addData(mockSearchResult);
+
+			expect(vi.mocked(serialize)).not.toHaveBeenCalled();
+			expect(mockRedis.setex).not.toHaveBeenCalled();
+			expect(mockedExternalPlaylistCache.setTrackCount).not.toHaveBeenCalled();
 		});
 
 		it.each([
@@ -192,6 +234,35 @@ describe('RedisQueryCache', () => {
 			requestedBy: undefined,
 			queryType: QueryType.AUTO,
 		};
+
+		it('should resolve cached playlist data', async () => {
+			const mockPlaylist = {
+				title: 'Test Playlist',
+				tracks: [{ title: 'Track 1', extractor: 'spotify' }],
+			};
+			const serializedPlaylist = { title: 'Test Playlist', tracks: [] };
+
+			vi.mocked(mockRedis.get).mockResolvedValue(
+				JSON.stringify(serializedPlaylist),
+			);
+			vi.mocked(deserialize).mockReturnValue(mockPlaylist as never);
+
+			await redisQueryCache.resolve(mockContext);
+
+			expect(mockRedis.get).toHaveBeenCalledWith(EXAMPLE_CACHE_KEY);
+			expect(vi.mocked(deserialize)).toHaveBeenCalledWith(
+				mockPlayer,
+				serializedPlaylist,
+			);
+			expect(vi.mocked(MockedSearchResult)).toHaveBeenCalledWith(mockPlayer, {
+				query: EXAMPLE_QUERY,
+				extractor: 'spotify',
+				tracks: [{ title: 'Track 1', extractor: 'spotify' }],
+				requestedBy: undefined,
+				playlist: mockPlaylist,
+				queryType: QueryType.AUTO,
+			});
+		});
 
 		it('should resolve cached track data', async () => {
 			const mockTrack = { title: 'Test Song', extractor: 'youtube' };
