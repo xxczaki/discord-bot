@@ -44,11 +44,15 @@ export default function useDiscordEventHandlers(
 		};
 
 		await player.context.provide(context, async () => {
-			await useAutocompleteHandler(interaction);
+			if (interaction.isAutocomplete()) {
+				await useAutocompleteHandler(interaction);
+				return;
+			}
 
-			if (!interaction.isChatInputCommand()) return;
-
-			await useCommandHandlers(interaction);
+			if (interaction.isChatInputCommand()) {
+				await useCommandHandlers(interaction);
+				return;
+			}
 		});
 	});
 

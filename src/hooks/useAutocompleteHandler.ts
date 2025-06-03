@@ -9,7 +9,11 @@ import logger from '../utils/logger';
 import truncateString from '../utils/truncateString';
 
 async function useAutocompleteHandler(interaction: Interaction) {
-	if (!interaction.isAutocomplete() || interaction.responded) {
+	if (!interaction.isAutocomplete()) {
+		return;
+	}
+
+	if (interaction.responded) {
 		return;
 	}
 
@@ -45,7 +49,10 @@ async function useAutocompleteHandler(interaction: Interaction) {
 			logger.error(error, 'Search autocomplete fail');
 			captureException(error);
 
-			return interaction.respond([]);
+			// Only respond if we haven't already responded
+			if (!interaction.responded) {
+				return interaction.respond([]);
+			}
 		}
 	}
 

@@ -9,25 +9,42 @@ vi.mock('node:path', () => ({
 	join: mockJoin,
 }));
 
-const mockedLogger = vi.mocked(logger);
+vi.mock('../../utils/getEnvironmentVariable', () => ({
+	default: vi.fn((key: string) => {
+		if (key === 'OWNER_USER_ID') {
+			return 'mock-owner-id';
+		}
+		throw new TypeError(`Environment variable ${key} is not defined`);
+	}),
+}));
 
-beforeEach(() => {
-	vi.clearAllMocks();
-	mockJoin.mockImplementation((...args) => args.join('/'));
-});
+const mockedLogger = vi.mocked(logger);
 
 function createMockInteraction(
 	commandName: string,
 ): ChatInputCommandInteraction {
 	return {
 		commandName,
-	} as ChatInputCommandInteraction;
+		member: {
+			user: {
+				id: 'mock-owner-id',
+			},
+		},
+		reply: vi.fn().mockResolvedValue({}),
+		replied: false,
+		deferred: false,
+	} as unknown as ChatInputCommandInteraction;
 }
+
+beforeEach(() => {
+	vi.clearAllMocks();
+	mockJoin.mockImplementation((...args) => args.join('/'));
+});
 
 it('should validate command against `RAW_COMMANDS` before proceeding', async () => {
 	const validInteraction = createMockInteraction('play');
 
-	await expect(useCommandHandlers(validInteraction)).rejects.toThrow();
+	await useCommandHandlers(validInteraction);
 
 	expect(mockedLogger.warn).not.toHaveBeenCalledWith('Unknown command, "play"');
 
@@ -48,7 +65,7 @@ it.each([
 	async ({ input, expected }) => {
 		const interaction = createMockInteraction(input);
 
-		await expect(useCommandHandlers(interaction)).rejects.toThrow();
+		await useCommandHandlers(interaction);
 
 		expect(mockJoin).toHaveBeenCalledWith(
 			expect.any(String),

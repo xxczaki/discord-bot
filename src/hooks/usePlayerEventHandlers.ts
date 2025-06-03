@@ -5,7 +5,6 @@ import {
 	ButtonBuilder,
 	ButtonStyle,
 	type Client,
-	PresenceUpdateStatus,
 } from 'discord.js';
 import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
 import { QueueRecoveryService } from '../utils/QueueRecoveryService';
@@ -13,7 +12,7 @@ import { StatsHandler } from '../utils/StatsHandler';
 import createTrackEmbed from '../utils/createTrackEmbed';
 import deleteOpusCacheEntry from '../utils/deleteOpusCacheEntry';
 import isObject from '../utils/isObject';
-import resetPresence from '../utils/resetPresence';
+import { resetPresence, setPresence } from '../utils/presenceManager';
 
 const statsHandler = StatsHandler.getInstance();
 const queueRecoveryService = QueueRecoveryService.getInstance();
@@ -37,15 +36,11 @@ export default function usePlayerEventHandlers(
 			components: [row],
 		});
 
-		client.user?.setPresence({
-			activities: [
-				{
-					name: `"${track.title}" by ${track.author}`,
-					type: ActivityType.Listening,
-					url: track.url,
-				},
-			],
-			status: PresenceUpdateStatus.Online,
+		setPresence(client, {
+			name: `"${track.title}" by ${track.author}`,
+			type: ActivityType.Listening,
+			url: track.url,
+			status: 'online',
 		});
 
 		void queueRecoveryService.saveQueue(queue);

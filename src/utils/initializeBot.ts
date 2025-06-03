@@ -15,7 +15,7 @@ export interface BotInitializationResult {
 }
 
 export async function initializeBot(): Promise<BotInitializationResult> {
-	void initializeCommands();
+	await initializeCommands();
 
 	const client = createDiscordClient();
 	const token = getEnvironmentVariable('TOKEN');

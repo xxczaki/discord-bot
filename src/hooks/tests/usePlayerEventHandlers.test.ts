@@ -5,7 +5,6 @@ import {
 	type Client,
 	type Interaction,
 	type MessageComponentInteraction,
-	PresenceUpdateStatus,
 	type TextChannel,
 } from 'discord.js';
 import { beforeEach, expect, it, vi } from 'vitest';
@@ -14,7 +13,7 @@ import { QueueRecoveryService } from '../../utils/QueueRecoveryService';
 import { StatsHandler } from '../../utils/StatsHandler';
 import createTrackEmbed from '../../utils/createTrackEmbed';
 import deleteOpusCacheEntry from '../../utils/deleteOpusCacheEntry';
-import resetPresence from '../../utils/resetPresence';
+import { resetPresence, setPresence } from '../../utils/presenceManager';
 import usePlayerEventHandlers from '../usePlayerEventHandlers';
 
 const MOCK_TRACK_TITLE = 'Test Song';
@@ -47,8 +46,9 @@ vi.mock('../../utils/deleteOpusCacheEntry', () => ({
 	default: vi.fn(),
 }));
 
-vi.mock('../../utils/resetPresence', () => ({
-	default: vi.fn(),
+vi.mock('../../utils/presenceManager', () => ({
+	resetPresence: vi.fn(),
+	setPresence: vi.fn(),
 }));
 
 const mockedQueueRecoveryService = vi.mocked(
@@ -58,6 +58,7 @@ const mockedStatsHandler = vi.mocked(StatsHandler.getInstance());
 const mockedCreateTrackEmbed = vi.mocked(createTrackEmbed);
 const mockedDeleteOpusCacheEntry = vi.mocked(deleteOpusCacheEntry);
 const mockedResetPresence = vi.mocked(resetPresence);
+const mockedSetPresence = vi.mocked(setPresence);
 
 beforeEach(() => {
 	vi.clearAllMocks();
@@ -204,15 +205,11 @@ it('should set client presence when track starts playing', async () => {
 
 	await playerStartHandler(mockQueue, mockTrack);
 
-	expect(mockClient.user?.setPresence).toHaveBeenCalledWith({
-		activities: [
-			{
-				name: `"${MOCK_TRACK_TITLE}" by ${MOCK_TRACK_AUTHOR}`,
-				type: ActivityType.Listening,
-				url: MOCK_TRACK_URL,
-			},
-		],
-		status: PresenceUpdateStatus.Online,
+	expect(mockedSetPresence).toHaveBeenCalledWith(mockClient, {
+		name: `"${MOCK_TRACK_TITLE}" by ${MOCK_TRACK_AUTHOR}`,
+		type: ActivityType.Listening,
+		url: MOCK_TRACK_URL,
+		status: 'online',
 	});
 });
 

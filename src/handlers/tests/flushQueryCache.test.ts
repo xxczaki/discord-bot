@@ -7,8 +7,6 @@ import logger from '../../utils/logger';
 import redis from '../../utils/redis';
 import flushQueryCacheCommandHandler from '../flushQueryCache';
 
-const OWNER_USER_ID = 'mock-owner-id';
-const DIFFERENT_USER_ID = 'user456';
 const EXAMPLE_CACHE_KEYS = [
 	'discord-player:query-cache:track1',
 	'discord-player:query-cache:track2',
@@ -17,38 +15,38 @@ const EXAMPLE_CACHE_KEYS = [
 
 vi.mock('../../utils/getEnvironmentVariable', () => ({
 	default: vi.fn((key: string) => {
+		if (key === 'REDIS_URL') {
+			return 'redis://localhost:6379';
+		}
 		if (key === 'OWNER_USER_ID') {
 			return 'mock-owner-id';
 		}
-
 		throw new TypeError(`Environment variable ${key} is not defined`);
 	}),
 }));
 
-const mockedCaptureException = vi.mocked(captureException);
 const mockedRedis = vi.mocked(redis);
 const mockedLogger = vi.mocked(logger);
+const mockedCaptureException = vi.mocked(captureException);
+
+vi.mock('../../utils/redis');
+vi.mock('../../utils/logger');
+vi.mock('@sentry/node');
+
+function createMockInteraction(): ChatInputCommandInteraction {
+	return {
+		reply: vi.fn().mockResolvedValue({}),
+		editReply: vi.fn().mockResolvedValue({}),
+	} as unknown as ChatInputCommandInteraction;
+}
 
 interface MockStream extends EventEmitter {
 	pause: () => void;
 	resume: () => void;
 }
 
-function createMockInteraction(userId: string): ChatInputCommandInteraction {
-	return {
-		member: {
-			user: {
-				id: userId,
-			},
-		},
-		reply: vi.fn().mockResolvedValue({}),
-		editReply: vi.fn().mockResolvedValue({}),
-	} as unknown as ChatInputCommandInteraction;
-}
-
 function createMockStream(): MockStream {
 	const stream = new EventEmitter() as MockStream;
-
 	stream.pause = vi.fn();
 	stream.resume = vi.fn();
 
@@ -64,19 +62,8 @@ afterEach(() => {
 	vi.restoreAllMocks();
 });
 
-it('should reject non-owner users with ephemeral message', async () => {
-	const interaction = createMockInteraction(DIFFERENT_USER_ID);
-
-	await flushQueryCacheCommandHandler(interaction);
-
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: `Only <@!${OWNER_USER_ID}> is allowed to run this command.`,
-		flags: ['Ephemeral'],
-	});
-});
-
-it('should allow owner to flush cache and display success message', async () => {
-	const interaction = createMockInteraction(OWNER_USER_ID);
+it('should allow flushing cache and display success message', async () => {
+	const interaction = createMockInteraction();
 	const mockStream = createMockStream();
 	mockedRedis.scanStream.mockReturnValue(mockStream as unknown as ScanStream);
 
@@ -107,7 +94,7 @@ it('should allow owner to flush cache and display success message', async () => 
 });
 
 it('should handle single `key` in success message when only one key is deleted', async () => {
-	const interaction = createMockInteraction(OWNER_USER_ID);
+	const interaction = createMockInteraction();
 	const mockStream = createMockStream();
 	mockedRedis.scanStream.mockReturnValue(mockStream as unknown as ScanStream);
 
@@ -129,7 +116,7 @@ it('should handle single `key` in success message when only one key is deleted',
 });
 
 it('should handle empty cache gracefully', async () => {
-	const interaction = createMockInteraction(OWNER_USER_ID);
+	const interaction = createMockInteraction();
 	const mockStream = createMockStream();
 	mockedRedis.scanStream.mockReturnValue(mockStream as unknown as ScanStream);
 
@@ -152,7 +139,7 @@ it('should handle empty cache gracefully', async () => {
 });
 
 it('should pause and resume stream during key deletion', async () => {
-	const interaction = createMockInteraction(OWNER_USER_ID);
+	const interaction = createMockInteraction();
 	const mockStream = createMockStream();
 	mockedRedis.scanStream.mockReturnValue(mockStream as unknown as ScanStream);
 
@@ -174,7 +161,7 @@ it('should pause and resume stream during key deletion', async () => {
 });
 
 it('should handle redis deletion errors gracefully', async () => {
-	const interaction = createMockInteraction(OWNER_USER_ID);
+	const interaction = createMockInteraction();
 	const mockStream = createMockStream();
 	const deleteError = new Error('Redis connection failed');
 
@@ -202,7 +189,7 @@ it('should handle redis deletion errors gracefully', async () => {
 });
 
 it('should handle multiple data chunks from stream', async () => {
-	const interaction = createMockInteraction(OWNER_USER_ID);
+	const interaction = createMockInteraction();
 	const mockStream = createMockStream();
 	mockedRedis.scanStream.mockReturnValue(mockStream as unknown as ScanStream);
 
@@ -229,7 +216,7 @@ it('should handle multiple data chunks from stream', async () => {
 });
 
 it('should handle undefined keys array in data event', async () => {
-	const interaction = createMockInteraction(OWNER_USER_ID);
+	const interaction = createMockInteraction();
 	const mockStream = createMockStream();
 	mockedRedis.scanStream.mockReturnValue(mockStream as unknown as ScanStream);
 

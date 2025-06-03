@@ -5,6 +5,7 @@ export const COMMAND_CATEGORIES = [
 	'Utilities',
 	'Fun',
 	'Other',
+	'Owner-only',
 ] as const;
 
 export type CategorizedCommand = ChatInputApplicationCommandData & {
@@ -186,7 +187,7 @@ export const RAW_COMMANDS: CategorizedCommand[] = [
 	{
 		name: 'flush_query_cache',
 		description: 'Flushes the internal query cache.',
-		category: 'Other',
+		category: 'Owner-only',
 	},
 	{
 		name: 'avatar',
@@ -223,9 +224,13 @@ export const RAW_COMMANDS: CategorizedCommand[] = [
 	},
 	{
 		name: 'maintenance',
-		description:
-			'Activates maintenance mode by scaling down the bot deployment.',
-		category: 'Other',
+		description: "Activates maintenance mode by deleting the bot's deployment.",
+		category: 'Owner-only',
+	},
+	{
+		name: 'lockdown',
+		description: 'Toggles lockdown mode for certain commands.',
+		category: 'Owner-only',
 	},
 ];
 
