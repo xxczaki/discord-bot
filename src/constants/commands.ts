@@ -221,6 +221,12 @@ export const RAW_COMMANDS: CategorizedCommand[] = [
 		description: 'Shows the available commands and their purpose.',
 		category: 'Other',
 	},
+	{
+		name: 'maintenance',
+		description:
+			'Activates maintenance mode by scaling down the bot deployment.',
+		category: 'Other',
+	},
 ];
 
 export default RAW_COMMANDS.map(({ category, ...rest }) => rest);
