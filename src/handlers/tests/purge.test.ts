@@ -53,6 +53,7 @@ function createMockQueue(
 		currentTrack: null,
 		isEmpty: vi.fn().mockReturnValue(false),
 		delete: vi.fn(),
+		size: 0,
 		...overrides,
 	} as unknown as NonNullable<ReturnType<typeof useQueue>>;
 }
@@ -64,7 +65,7 @@ it('should handle null queue', async () => {
 	await purgeCommandHandler(interaction);
 
 	expect(mockedDeleteOpusCacheEntry).not.toHaveBeenCalled();
-	expect(mockedQueueRecoveryService.saveQueue).toHaveBeenCalledWith(null);
+	expect(mockedQueueRecoveryService.saveQueue).not.toHaveBeenCalled();
 	expect(interaction.reply).toHaveBeenCalledWith(
 		'Queue purged.\n\nUse `/recover` to listen to the same queue again.',
 	);
@@ -128,8 +129,7 @@ it('should not delete opus cache entry when there is no current track', async ()
 
 it('should save queue when it is not empty', async () => {
 	const interaction = createMockInteraction();
-	const mockQueue = createMockQueue();
-	mockQueue.isEmpty = vi.fn().mockReturnValue(false);
+	const mockQueue = createMockQueue({ size: 1 }); // Queue has content
 	mockedUseQueue.mockReturnValue(mockQueue);
 
 	await purgeCommandHandler(interaction);
@@ -139,8 +139,7 @@ it('should save queue when it is not empty', async () => {
 
 it('should not save queue when it is empty', async () => {
 	const interaction = createMockInteraction();
-	const mockQueue = createMockQueue();
-	mockQueue.isEmpty = vi.fn().mockReturnValue(true);
+	const mockQueue = createMockQueue({ size: 0 }); // Truly empty queue
 	mockedUseQueue.mockReturnValue(mockQueue);
 
 	await purgeCommandHandler(interaction);
@@ -173,13 +172,33 @@ it('should reply with purge confirmation message', async () => {
 it('should handle full purge workflow with track deletion and queue saving', async () => {
 	const interaction = createMockInteraction();
 	const track = createMockTrack({ metadata: { customMetadata: 'value' } });
-	const mockQueue = createMockQueue({ currentTrack: track });
-	mockQueue.isEmpty = vi.fn().mockReturnValue(false);
+	const mockQueue = createMockQueue({ currentTrack: track, size: 1 }); // Queue has content
 	mockedUseQueue.mockReturnValue(mockQueue);
 
 	await purgeCommandHandler(interaction);
 
 	expect(mockedDeleteOpusCacheEntry).toHaveBeenCalledWith(EXAMPLE_TRACK_URL);
+	expect(mockedQueueRecoveryService.saveQueue).toHaveBeenCalledWith(mockQueue);
+	expect(mockQueue.delete).toHaveBeenCalledOnce();
+	expect(interaction.reply).toHaveBeenCalledWith(
+		'Queue purged.\n\nUse `/recover` to listen to the same queue again.',
+	);
+});
+
+it('should save queue when only currentTrack exists (single playing song scenario)', async () => {
+	const interaction = createMockInteraction();
+	const track = createMockTrack();
+	const mockQueue = createMockQueue({
+		currentTrack: track,
+		size: 1,
+	});
+
+	mockQueue.isEmpty = vi.fn().mockReturnValue(true);
+
+	mockedUseQueue.mockReturnValue(mockQueue);
+
+	await purgeCommandHandler(interaction);
+
 	expect(mockedQueueRecoveryService.saveQueue).toHaveBeenCalledWith(mockQueue);
 	expect(mockQueue.delete).toHaveBeenCalledOnce();
 	expect(interaction.reply).toHaveBeenCalledWith(

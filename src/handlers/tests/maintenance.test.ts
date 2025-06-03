@@ -86,7 +86,8 @@ it('should handle Kubernetes API errors gracefully', async () => {
 	);
 	expect(mockedCaptureException).toHaveBeenCalledWith(apiError);
 	expect(interaction.editReply).toHaveBeenCalledWith(
-		`❌ Failed to activate maintenance mode: ${apiError.message}
+		`❌ Failed to activate maintenance mode:
+\`\`\`${apiError.message}\`\`\`
 
 Please check the logs or try again later.`,
 	);
@@ -101,7 +102,8 @@ it('should handle non-Error exceptions', async () => {
 	await maintenanceCommandHandler(interaction);
 
 	expect(interaction.editReply).toHaveBeenCalledWith(
-		`❌ Failed to activate maintenance mode: Unknown error occurred
+		`❌ Failed to activate maintenance mode:
+\`\`\`Unknown error occurred\`\`\`
 
 Please check the logs or try again later.`,
 	);

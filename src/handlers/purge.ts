@@ -17,7 +17,7 @@ export default async function purgeCommandHandler(
 		await deleteOpusCacheEntry(track.url);
 	}
 
-	if (!queue?.isEmpty()) {
+	if (queue && queue.size > 0) {
 		await queueRecoveryService.saveQueue(queue);
 	}
 

@@ -12,10 +12,12 @@
 	- On-disk Opus file cache for subsequent streams
 - Cached search powered by Spotify or YouTube
 - Based entirely on slash commands
-- Playlists stored on a dedicated channel
+- Playlists stored in a dedicated channel
 - Spotify-like volume normalization
 - Recovery mechanism to continue listening after an error
 - Redis-backed playback statistics
+- Maintenance mode that uses Kubernetes' API
+- Lockdown mode for restricting command access temporarily
 - Tic-tac-toe
 - Friendly `/help` command
 - Integration with Sentry

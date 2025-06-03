@@ -35,7 +35,8 @@ export default async function maintenanceCommandHandler(
 			error instanceof Error ? error.message : 'Unknown error occurred';
 
 		await interaction.editReply(
-			`❌ Failed to activate maintenance mode: ${errorMessage}
+			`❌ Failed to activate maintenance mode:
+\`\`\`${errorMessage}\`\`\`
 
 Please check the logs or try again later.`,
 		);
