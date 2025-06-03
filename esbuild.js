@@ -13,6 +13,7 @@ const buildOptions = {
 	format: 'esm',
 	target: 'node22',
 	external: [
+		'@kubernetes/client-node',
 		'bufferutil',
 		'discord-player',
 		'discord-player-spotify',
