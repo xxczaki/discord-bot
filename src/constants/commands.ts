@@ -15,12 +15,12 @@ export type CategorizedCommand = ChatInputApplicationCommandData & {
 export const RAW_COMMANDS: CategorizedCommand[] = [
 	{
 		name: 'play',
-		description: 'Plays some music.',
+		description: 'Search for music on Spotify or YouTube and play it',
 		options: [
 			{
 				name: 'query',
 				description:
-					'Spotify search query (prefix with "youtube:" to search YouTube instead)',
+					'Spotify search query (prefix with "youtube:" to browse YouTube instead)',
 				type: 3,
 				required: true,
 				autocomplete: true,
@@ -30,22 +30,22 @@ export const RAW_COMMANDS: CategorizedCommand[] = [
 	},
 	{
 		name: 'pause',
-		description: 'Pauses the queue.',
+		description: 'Pause the queue',
 		category: 'Music',
 	},
 	{
 		name: 'resume',
-		description: 'Resumes the queue.',
+		description: 'Resume the queue',
 		category: 'Music',
 	},
 	{
 		name: 'skip',
-		description: 'Skips the current track.',
+		description: 'Skip the current track',
 		category: 'Music',
 	},
 	{
 		name: 'remove',
-		description: 'Removes track from the queue.',
+		description: 'Remove selected track from the queue',
 		options: [
 			{
 				name: 'query',
@@ -59,7 +59,7 @@ export const RAW_COMMANDS: CategorizedCommand[] = [
 	},
 	{
 		name: 'move',
-		description: 'Moves track in the queue to a different position.',
+		description: 'Move track in the queue to a different position',
 		options: [
 			{
 				name: 'query',
@@ -79,17 +79,17 @@ export const RAW_COMMANDS: CategorizedCommand[] = [
 	},
 	{
 		name: 'queue',
-		description: "Checks what's currently playing and what will play next.",
+		description: "Check what's currently playing and what will play next",
 		category: 'Music',
 	},
 	{
 		name: 'shuffle',
-		description: 'Shuffles the queue.',
+		description: 'Shuffle the queue',
 		category: 'Music',
 	},
 	{
 		name: 'repeat',
-		description: 'Controls the repeat mode.',
+		description: 'Control the repeat mode',
 		options: [
 			{
 				name: 'repeat_mode',
@@ -107,13 +107,14 @@ export const RAW_COMMANDS: CategorizedCommand[] = [
 	},
 	{
 		name: 'volume',
-		description: 'Sets the volume of the player.',
+		description: 'Set the volume of the player',
 		options: [
 			{
 				name: 'value',
 				description: 'Desired volume, base is 100',
 				type: 4,
-				minValue: 0,
+				minValue: 10,
+				maxValue: 1000,
 				required: true,
 			},
 		],
@@ -121,23 +122,23 @@ export const RAW_COMMANDS: CategorizedCommand[] = [
 	},
 	{
 		name: 'purge',
-		description: 'Purges the queue.',
+		description: 'Purge the queue',
 		category: 'Music',
 	},
 	{
 		name: 'debug',
-		description: 'Shows debug information.',
+		description: 'Display debug information',
 		category: 'Other',
 	},
 	{
 		name: 'playlists',
 		description:
-			'Allows enqueuening multiple songs in one go, using the playlists from a dedicated channel.',
+			'Enqueue multiple songs in one go, using the playlists from a dedicated channel',
 		category: 'Music',
 	},
 	{
 		name: 'deduplicate',
-		description: 'Removes duplicates from the queue.',
+		description: 'Remove duplicates from the queue',
 		options: [
 			{
 				name: 'algorithm',
@@ -154,27 +155,27 @@ export const RAW_COMMANDS: CategorizedCommand[] = [
 	},
 	{
 		name: 'sort',
-		description: 'Sorts queue in an alphabetical order.',
+		description: 'Sort queue in an alphabetical order',
 		category: 'Music',
 	},
 	{
 		name: 'stats',
-		description: 'Shows certain statistics regarding bot usage.',
+		description: 'Show certain statistics regarding the bot usage',
 		category: 'Music',
 	},
 	{
 		name: 'filters',
-		description: 'Allows toggling the audio filters.',
+		description: 'Toggle the audio filters',
 		category: 'Music',
 	},
 	{
 		name: 'tempo',
-		description: 'Allows changing the playback speed of the player.',
+		description: 'Change playback speed of the player',
 		category: 'Music',
 	},
 	{
 		name: 'lateness',
-		description: 'Measures lateness.',
+		description: "Measure someone's lateness",
 		options: [
 			{
 				name: 'expected_hour',
@@ -186,12 +187,12 @@ export const RAW_COMMANDS: CategorizedCommand[] = [
 	},
 	{
 		name: 'flush_query_cache',
-		description: 'Flushes the internal query cache.',
+		description: 'Flush the internal query cache',
 		category: 'Owner-only',
 	},
 	{
 		name: 'avatar',
-		description: "Fetches and displays user's avatar.",
+		description: "Fetch and display user's avatar",
 		options: [
 			{
 				name: 'user',
@@ -204,32 +205,32 @@ export const RAW_COMMANDS: CategorizedCommand[] = [
 	},
 	{
 		name: 'tic_tac_toe',
-		description: 'Allows you to play Tic-tac-toe with the bot itself.',
+		description: 'Play Tic-tac-toe with the bot itself',
 		category: 'Fun',
 	},
 	{
 		name: 'recover',
-		description: 'Attempts to recover a queue – useful in case of an error.',
+		description: 'Recover a recently played queue',
 		category: 'Music',
 	},
 	{
 		name: 'opus_cache',
-		description: 'Fetches information about the Opus file cache.',
+		description: 'Fetch information about the Opus file cache',
 		category: 'Other',
 	},
 	{
 		name: 'help',
-		description: 'Shows the available commands and their purpose.',
+		description: 'Shos the available commands and their purpose',
 		category: 'Other',
 	},
 	{
 		name: 'maintenance',
-		description: "Activates maintenance mode by deleting the bot's deployment.",
+		description: "Activate maintenance mode by deleting the bot's deployment",
 		category: 'Owner-only',
 	},
 	{
 		name: 'lockdown',
-		description: 'Toggles lockdown mode for certain commands.',
+		description: 'Toggle lockdown mode for certain commands',
 		category: 'Owner-only',
 	},
 ];
