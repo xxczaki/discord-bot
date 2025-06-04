@@ -40,8 +40,8 @@ importers:
         specifier: ^9.7.0
         version: 9.7.0
       sodium-native:
-        specifier: ^5.0.4
-        version: 5.0.4
+        specifier: ^5.0.5
+        version: 5.0.5
       ulid:
         specifier: ^3.0.0
         version: 3.0.0
@@ -2200,8 +2200,8 @@ packages:
     resolution: {integrity: sha512-D3YaD0aRxR3mEcqnidIs7ReYJFVzWdd6fXJYUM8ixcQcJRGTka/b3saV0KflYhyVJXKhb947GndU35SxYNResQ==}
     engines: {node: '>= 10.0.0', npm: '>= 3.0.0'}
 
-  sodium-native@5.0.4:
-    resolution: {integrity: sha512-o/LIWIBVx8SIMFUiYuz60bZnFac88We3cEEPALmMTW1W0ewlnAMGE7GvvrcR9eSCpilFqKebVdn7t+WuvXPATQ==}
+  sodium-native@5.0.5:
+    resolution: {integrity: sha512-p81pdNMq8pX3aDntdbCuI8a1nEzexU5m51TDUt/rRso+q+Alq//zy9h7jDuoQXyWTjTP8ktzzZQn/HT7e/S0oA==}
     engines: {bare: '>=1.16.0'}
 
   sonic-boom@4.2.0:
@@ -4758,7 +4758,7 @@ snapshots:
       ip-address: 9.0.5
       smart-buffer: 4.2.0
 
-  sodium-native@5.0.4:
+  sodium-native@5.0.5:
     dependencies:
       require-addon: 1.1.0
       which-runtime: 1.2.1
