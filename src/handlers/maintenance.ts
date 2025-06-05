@@ -13,7 +13,7 @@ export default async function maintenanceCommandHandler(
 
 	try {
 		const kc = new k8s.KubeConfig();
-		
+
 		kc.loadFromCluster();
 
 		const k8sAppsV1Api = kc.makeApiClient(k8s.AppsV1Api);

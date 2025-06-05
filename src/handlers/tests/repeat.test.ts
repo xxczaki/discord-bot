@@ -92,5 +92,8 @@ it('should handle when queue is null', async () => {
 
 	await repeatCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith('Repeat mode disabled.');
+	expect(interaction.reply).toHaveBeenCalledWith({
+		content: 'No music is currently playing.',
+		flags: ['Ephemeral'],
+	});
 });

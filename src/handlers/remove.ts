@@ -1,10 +1,13 @@
-import { useQueue } from 'discord-player';
 import type { ChatInputCommandInteraction } from 'discord.js';
+import useQueueWithValidation from '../utils/useQueueWithValidation';
 
 export default async function removeCommandHandler(
 	interaction: ChatInputCommandInteraction,
 ) {
-	const queue = useQueue();
+	const queue = useQueueWithValidation(interaction);
+
+	if (!queue) return;
+
 	const query = interaction.options.getString('query', true);
 	const trackNumber = Number.parseInt(query, 10) - 2;
 
@@ -16,18 +19,18 @@ export default async function removeCommandHandler(
 	}
 
 	try {
-		const trackToRemove = queue?.tracks.at(trackNumber);
+		const trackToRemove = queue.tracks.at(trackNumber);
 
 		if (!trackToRemove) {
 			throw 'fallthrough to catch block';
 		}
 
 		if (trackNumber < 0) {
-			queue?.node.skip();
+			queue.node.skip();
 
 			await interaction.reply('Skipping the current track.');
 		} else {
-			queue?.removeTrack(trackNumber);
+			queue.removeTrack(trackNumber);
 
 			await interaction.reply(`Track "${trackToRemove.title}" removed.`);
 		}

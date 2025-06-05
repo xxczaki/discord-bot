@@ -1,22 +1,32 @@
 import type { QueueFilters } from 'discord-player';
-import { useQueue } from 'discord-player';
+import { useMainPlayer, useQueue } from 'discord-player';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { beforeEach, expect, it, vi } from 'vitest';
 import tempoCommandHandler from '../tempo';
 
 vi.mock('discord-player', () => ({
 	useQueue: vi.fn(),
+	useMainPlayer: vi.fn(),
 }));
 
 const mockedUseQueue = vi.mocked(useQueue);
+const mockedUseMainPlayer = vi.mocked(useMainPlayer);
 
 beforeEach(() => {
 	vi.clearAllMocks();
+
+	mockedUseMainPlayer.mockReturnValue({
+		events: {
+			on: vi.fn(),
+			off: vi.fn(),
+		},
+	} as unknown as ReturnType<typeof useMainPlayer>);
 });
 
 function createMockInteraction() {
 	return {
 		reply: vi.fn(),
+		editReply: vi.fn(),
 	} as unknown as ChatInputCommandInteraction;
 }
 
@@ -158,7 +168,6 @@ it('should handle non-string-select-menu component', async () => {
 		content: 'Nothing was selected; the playback speed remains as is.',
 		components: [],
 	});
-	expect(mockResponse.delete).toHaveBeenCalled();
 });
 
 it('should handle timeout gracefully', async () => {
@@ -172,8 +181,6 @@ it('should handle timeout gracefully', async () => {
 	mockResponse.awaitMessageComponent.mockRejectedValue(new Error('timeout'));
 
 	await tempoCommandHandler(interaction);
-
-	expect(mockResponse.delete).toHaveBeenCalled();
 });
 
 it('should work when no queue is available', async () => {
@@ -181,19 +188,14 @@ it('should work when no queue is available', async () => {
 	const mockResponse = createMockResponse();
 
 	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
+	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(null);
-
-	const mockComponent = createMockComponent(['_tempo125']);
-	mockResponse.awaitMessageComponent.mockResolvedValue(mockComponent);
 
 	await tempoCommandHandler(interaction);
 
-	expect(mockComponent.reply).toHaveBeenCalledWith(
-		'Modifying the playback speed…',
-	);
-	expect(mockComponent.editReply).toHaveBeenCalledWith({
-		content: 'The playback speed was modified.',
-		components: [],
+	expect(interaction.reply).toHaveBeenCalledWith({
+		content: 'No music is currently playing.',
+		flags: ['Ephemeral'],
 	});
 });
 
@@ -243,6 +245,4 @@ it('should handle error during component await', async () => {
 	);
 
 	await tempoCommandHandler(interaction);
-
-	expect(mockResponse.delete).toHaveBeenCalled();
 });

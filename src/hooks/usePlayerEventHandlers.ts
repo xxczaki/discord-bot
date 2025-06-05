@@ -6,9 +6,9 @@ import {
 	ButtonStyle,
 	type Client,
 } from 'discord.js';
-import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
 import { QueueRecoveryService } from '../utils/QueueRecoveryService';
 import { StatsHandler } from '../utils/StatsHandler';
+import createSmartInteractionHandler from '../utils/createSmartInteractionHandler';
 import createTrackEmbed from '../utils/createTrackEmbed';
 import deleteOpusCacheEntry from '../utils/deleteOpusCacheEntry';
 import isObject from '../utils/isObject';
@@ -45,10 +45,18 @@ export default function usePlayerEventHandlers(
 
 		void queueRecoveryService.saveQueue(queue);
 
+		const smartHandler = createSmartInteractionHandler({
+			response,
+			queue,
+			track,
+		});
+
 		try {
 			const answer = await response.awaitMessageComponent({
-				time: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
+				time: smartHandler.timeout,
 			});
+
+			await smartHandler.cleanup();
 
 			if (answer.customId === 'skip') {
 				queue?.node.skip();
@@ -62,10 +70,6 @@ export default function usePlayerEventHandlers(
 
 			throw 'fallthrough to catch block';
 		} catch {
-			await response.edit({
-				components: [],
-			});
-
 			void statsHandler.saveStat('play', {
 				title: track.title,
 				author: track.author,

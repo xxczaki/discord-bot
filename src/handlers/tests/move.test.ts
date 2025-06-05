@@ -152,7 +152,7 @@ it('should handle when queue is null', async () => {
 	await moveCommandHandler(interaction);
 
 	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'Could not move the track, are the specified positions correct?',
+		content: 'No music is currently playing.',
 		flags: ['Ephemeral'],
 	});
 });

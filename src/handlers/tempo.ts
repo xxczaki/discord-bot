@@ -1,19 +1,21 @@
 import type { QueueFilters } from 'discord-player';
-import { useQueue } from 'discord-player';
 import {
 	ActionRowBuilder,
 	type ChatInputCommandInteraction,
 	StringSelectMenuBuilder,
 	StringSelectMenuOptionBuilder,
 } from 'discord.js';
-import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
+import createQueueAwareComponentHandler from '../utils/createQueueAwareComponentHandler';
+import useQueueWithValidation from '../utils/useQueueWithValidation';
 
 export default async function tempoCommandHandler(
 	interaction: ChatInputCommandInteraction,
 ) {
-	const queue = useQueue();
+	const queue = useQueueWithValidation(interaction);
 
-	const activeTempo = queue?.filters.ffmpeg.filters.find((name) =>
+	if (!queue) return;
+
+	const activeTempo = queue.filters.ffmpeg.filters.find((name) =>
 		name?.startsWith('_tempo'),
 	) as string | undefined;
 
@@ -59,22 +61,27 @@ export default async function tempoCommandHandler(
 		components: [row],
 	});
 
+	const handler = createQueueAwareComponentHandler({
+		response,
+		queue,
+	});
+
 	try {
 		const answer = await response.awaitMessageComponent({
-			time: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
+			time: handler.timeout,
 		});
 
 		if (answer.isStringSelectMenu()) {
 			await answer.reply('Modifying the playback speed…');
 
 			if (!activeTempo) {
-				await queue?.filters.ffmpeg.toggle(
+				await queue.filters.ffmpeg.toggle(
 					answer.values[0] as keyof QueueFilters,
 				);
 			} else if (answer.values[0] === 'normal') {
-				await queue?.filters.ffmpeg.toggle(activeTempo as keyof QueueFilters);
+				await queue.filters.ffmpeg.toggle(activeTempo as keyof QueueFilters);
 			} else {
-				await queue?.filters.ffmpeg.toggle([
+				await queue.filters.ffmpeg.toggle([
 					activeTempo,
 					answer.values[0],
 				] as Array<keyof QueueFilters>);
@@ -92,6 +99,6 @@ export default async function tempoCommandHandler(
 		});
 	} catch {
 	} finally {
-		await response.delete();
+		await handler.cleanup();
 	}
 }

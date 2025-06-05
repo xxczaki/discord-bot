@@ -60,5 +60,8 @@ it('should handle when queue is null', async () => {
 
 	await pauseCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith('Track paused.');
+	expect(interaction.reply).toHaveBeenCalledWith({
+		content: 'No music is currently playing.',
+		flags: ['Ephemeral'],
+	});
 });

@@ -1,10 +1,12 @@
-import { useQueue } from 'discord-player';
 import type { ChatInputCommandInteraction } from 'discord.js';
+import useQueueWithValidation from '../utils/useQueueWithValidation';
 
 export default async function moveCommandHandler(
 	interaction: ChatInputCommandInteraction,
 ) {
-	const queue = useQueue();
+	const queue = useQueueWithValidation(interaction);
+
+	if (!queue) return;
 
 	const query = interaction.options.getString('query', true);
 	const from = Number.parseInt(query, 10) - 2;
@@ -26,20 +28,20 @@ export default async function moveCommandHandler(
 	}
 
 	try {
-		const trackToMove = queue?.tracks.at(from);
+		const trackToMove = queue.tracks.at(from);
 
 		if (!trackToMove) {
 			throw 'fallthrough to catch block';
 		}
 
 		if (to < 0) {
-			queue?.moveTrack(trackToMove, 0);
-			queue?.node.skip();
+			queue.moveTrack(trackToMove, 0);
+			queue.node.skip();
 
 			return await interaction.reply('Skipping the current track.');
 		}
 
-		queue?.moveTrack(from, to);
+		queue.moveTrack(from, to);
 
 		await interaction.reply(
 			`Moved "${trackToMove.title}" to position \`${to + 2}\`.`,

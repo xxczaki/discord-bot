@@ -81,9 +81,11 @@ it('should include comprehensive command content and descriptions', async () => 
 
 	const content = getContentFromReply(mockInteraction);
 
-	expect(content).toContain('Plays some music.');
-	expect(content).toContain('Pauses the queue.');
-	expect(content).toContain('Resumes the queue.');
+	expect(content).toContain(
+		'Search for music on Spotify or YouTube and play it',
+	);
+	expect(content).toContain('Pause the queue');
+	expect(content).toContain('Resume the queue');
 
 	expect(content).toContain('`/play <query>`');
 	expect(content).toContain('`/help`');

@@ -1,7 +1,7 @@
 import { vi } from 'vitest';
 
 // Increase EventEmitter max listeners to avoid warnings during parallel testing
-process.setMaxListeners(20);
+process.setMaxListeners(25);
 
 vi.mock('./utils/logger', () => ({
 	default: {

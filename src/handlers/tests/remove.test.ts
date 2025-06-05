@@ -148,7 +148,7 @@ it('should handle error when queue is null', async () => {
 	await removeCommandHandler(interaction);
 
 	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'Could not remove the track, is the specified id correct?',
+		content: 'No music is currently playing.',
 		flags: ['Ephemeral'],
 	});
 });

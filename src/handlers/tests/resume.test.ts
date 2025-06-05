@@ -44,5 +44,8 @@ it('should handle when queue is null', async () => {
 
 	await resumeCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith('Track resumed.');
+	expect(interaction.reply).toHaveBeenCalledWith({
+		content: 'No music is currently playing.',
+		flags: ['Ephemeral'],
+	});
 });

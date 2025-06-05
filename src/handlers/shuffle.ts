@@ -1,12 +1,14 @@
-import { useQueue } from 'discord-player';
 import type { ChatInputCommandInteraction } from 'discord.js';
+import useQueueWithValidation from '../utils/useQueueWithValidation';
 
 export default async function shuffleCommandHandler(
 	interaction: ChatInputCommandInteraction,
 ) {
-	const queue = useQueue();
+	const queue = useQueueWithValidation(interaction);
 
-	queue?.tracks.shuffle();
+	if (!queue) return;
+
+	queue.tracks.shuffle();
 
 	await interaction.reply('Queue shuffled.');
 }

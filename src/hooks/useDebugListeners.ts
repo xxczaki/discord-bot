@@ -81,13 +81,33 @@ function initializePlayerErrorReporter(
 	return async (queue: GuildQueue | undefined, error: Error) => {
 		logger.error(error, 'Player error');
 
-		const sentryId = captureException(error);
-
 		const debugChannel = client.channels.cache.get(botDebugChannelId);
 
 		if (!debugChannel?.isSendable()) {
 			return;
 		}
+
+		// YouTube resolution issue
+		if (
+			error.name === 'NoResultError' ||
+			('code' in error && error.code === 'ERR_NO_RESULT')
+		) {
+			const currentTrack = queue?.currentTrack;
+			const trackInfo = currentTrack
+				? `**${currentTrack.title}** by ${currentTrack.author}`
+				: 'Unknown track';
+
+			const embed = new EmbedBuilder()
+				.setTitle('Track unavailable')
+				.setDescription(
+					`❌ Could not play ${trackInfo}\n\nThis track appears to be unplayable (possibly region-locked, removed, or restricted). The queue will continue with the next track.`,
+				)
+				.setColor('Orange');
+
+			return debugChannel.send({ embeds: [embed] });
+		}
+
+		const sentryId = captureException(error);
 
 		const embed = new EmbedBuilder()
 			.setTitle('Player error')

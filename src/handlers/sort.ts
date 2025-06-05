@@ -1,21 +1,16 @@
-import { useQueue } from 'discord-player';
 import type { ChatInputCommandInteraction } from 'discord.js';
+import useQueueWithValidation from '../utils/useQueueWithValidation';
 
 export default async function sortCommandHandler(
 	interaction: ChatInputCommandInteraction,
 ) {
-	const queue = useQueue();
+	const queue = useQueueWithValidation(interaction, 'The queue is empty.');
 
-	if (!queue) {
-		return interaction.reply({
-			content: 'The queue is empty.',
-			flags: ['Ephemeral'],
-		});
-	}
+	if (!queue) return;
 
 	await interaction.reply('Sorting the queue…');
 
-	queue.tracks.store = queue?.tracks.data.sort((a, b) => {
+	queue.tracks.store = queue.tracks.data.sort((a, b) => {
 		const titleA = a.title.toLowerCase();
 		const titleB = b.title.toLowerCase();
 

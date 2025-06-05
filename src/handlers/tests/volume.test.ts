@@ -52,7 +52,8 @@ it('should handle when queue is null', async () => {
 
 	await volumeCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith(
-		`Volume changed to \`${EXAMPLE_VOLUME}\`.`,
-	);
+	expect(interaction.reply).toHaveBeenCalledWith({
+		content: 'No music is currently playing.',
+		flags: ['Ephemeral'],
+	});
 });

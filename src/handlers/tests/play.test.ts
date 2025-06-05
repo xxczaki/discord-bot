@@ -1,6 +1,10 @@
 import { captureException } from '@sentry/node';
-import { useMainPlayer, useQueue } from 'discord-player';
-import type { GuildQueue, Track } from 'discord-player';
+import {
+	type GuildQueue,
+	type Track,
+	useMainPlayer,
+	useQueue,
+} from 'discord-player';
 import {
 	ActionRowBuilder,
 	type ChatInputCommandInteraction,
@@ -12,6 +16,7 @@ import {
 } from 'discord.js';
 import { beforeEach, expect, it, vi } from 'vitest';
 import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../../constants/miscellaneous';
+import createSmartInteractionHandler from '../../utils/createSmartInteractionHandler';
 import createTrackEmbed from '../../utils/createTrackEmbed';
 import determineSearchEngine from '../../utils/determineSearchEngine';
 import getTrackPosition from '../../utils/getTrackPosition';
@@ -41,18 +46,30 @@ vi.mock('../../utils/getTrackPosition', () => ({
 	default: vi.fn(),
 }));
 
+vi.mock('../../utils/createSmartInteractionHandler', () => ({
+	default: vi.fn(),
+}));
+
 const mockedCaptureException = vi.mocked(captureException);
 const mockedUseMainPlayer = vi.mocked(useMainPlayer);
 const mockedUseQueue = vi.mocked(useQueue);
 const mockedCreateTrackEmbed = vi.mocked(createTrackEmbed);
 const mockedDetermineSearchEngine = vi.mocked(determineSearchEngine);
 const mockedGetTrackPosition = vi.mocked(getTrackPosition);
+const mockedCreateSmartInteractionHandler = vi.mocked(
+	createSmartInteractionHandler,
+);
 const mockedLogger = vi.mocked(logger);
 
 beforeEach(() => {
 	vi.clearAllMocks();
 	mockedDetermineSearchEngine.mockReturnValue('spotifySearch');
 	mockedGetTrackPosition.mockReturnValue(1);
+
+	mockedCreateSmartInteractionHandler.mockReturnValue({
+		cleanup: vi.fn(),
+		timeout: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
+	});
 });
 
 function createMockVoiceChannel(): VoiceBasedChannel {
@@ -204,10 +221,15 @@ it('should handle "play now" button interaction', async () => {
 	const mockEmbed = createMockEmbed();
 	const mockResponse = createMockResponse();
 	const mockComponent = createMockComponentInteraction('play-now');
+	const mockCleanup = vi.fn();
 
 	mockedUseMainPlayer.mockReturnValue(mockPlayer);
 	mockedUseQueue.mockReturnValue(mockQueue);
 	mockedCreateTrackEmbed.mockReturnValue(mockEmbed);
+	mockedCreateSmartInteractionHandler.mockReturnValue({
+		cleanup: mockCleanup,
+		timeout: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
+	});
 	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockResponse.awaitMessageComponent = vi.fn().mockResolvedValue(mockComponent);
 
@@ -219,6 +241,7 @@ it('should handle "play now" button interaction', async () => {
 		content: 'Playing this track now.',
 		components: [],
 	});
+	expect(mockCleanup).toHaveBeenCalled();
 });
 
 it('should handle "move first" button interaction', async () => {
@@ -228,10 +251,15 @@ it('should handle "move first" button interaction', async () => {
 	const mockEmbed = createMockEmbed();
 	const mockResponse = createMockResponse();
 	const mockComponent = createMockComponentInteraction('move-first');
+	const mockCleanup = vi.fn();
 
 	mockedUseMainPlayer.mockReturnValue(mockPlayer);
 	mockedUseQueue.mockReturnValue(mockQueue);
 	mockedCreateTrackEmbed.mockReturnValue(mockEmbed);
+	mockedCreateSmartInteractionHandler.mockReturnValue({
+		cleanup: mockCleanup,
+		timeout: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
+	});
 	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockResponse.awaitMessageComponent = vi.fn().mockResolvedValue(mockComponent);
 
@@ -243,6 +271,7 @@ it('should handle "move first" button interaction', async () => {
 		content: 'Moved to the beginning of the queue.',
 		components: [],
 	});
+	expect(mockCleanup).toHaveBeenCalled();
 });
 
 it('should handle "remove" button interaction', async () => {
@@ -252,10 +281,15 @@ it('should handle "remove" button interaction', async () => {
 	const mockEmbed = createMockEmbed();
 	const mockResponse = createMockResponse();
 	const mockComponent = createMockComponentInteraction('remove');
+	const mockCleanup = vi.fn();
 
 	mockedUseMainPlayer.mockReturnValue(mockPlayer);
 	mockedUseQueue.mockReturnValue(mockQueue);
 	mockedCreateTrackEmbed.mockReturnValue(mockEmbed);
+	mockedCreateSmartInteractionHandler.mockReturnValue({
+		cleanup: mockCleanup,
+		timeout: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
+	});
 	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockResponse.awaitMessageComponent = vi.fn().mockResolvedValue(mockComponent);
 
@@ -267,6 +301,7 @@ it('should handle "remove" button interaction', async () => {
 		embeds: [],
 		components: [],
 	});
+	expect(mockCleanup).toHaveBeenCalled();
 });
 
 it('should handle unknown button interaction', async () => {
@@ -276,10 +311,15 @@ it('should handle unknown button interaction', async () => {
 	const mockEmbed = createMockEmbed();
 	const mockResponse = createMockResponse();
 	const mockComponent = createMockComponentInteraction('unknown');
+	const mockCleanup = vi.fn();
 
 	mockedUseMainPlayer.mockReturnValue(mockPlayer);
 	mockedUseQueue.mockReturnValue(mockQueue);
 	mockedCreateTrackEmbed.mockReturnValue(mockEmbed);
+	mockedCreateSmartInteractionHandler.mockReturnValue({
+		cleanup: mockCleanup,
+		timeout: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
+	});
 	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockResponse.awaitMessageComponent = vi.fn().mockResolvedValue(mockComponent);
 
@@ -288,6 +328,7 @@ it('should handle unknown button interaction', async () => {
 	expect(mockComponent.update).toHaveBeenCalledWith({
 		components: [],
 	});
+	expect(mockCleanup).toHaveBeenCalled();
 });
 
 it('should handle component interaction timeout', async () => {
@@ -307,8 +348,10 @@ it('should handle component interaction timeout', async () => {
 
 	await playCommandHandler(interaction);
 
-	expect(interaction.editReply).toHaveBeenLastCalledWith({
-		components: [],
+	expect(mockedCreateSmartInteractionHandler).toHaveBeenCalledWith({
+		response: mockResponse,
+		queue: mockQueue,
+		track: expect.any(Object),
 	});
 });
 
@@ -425,10 +468,15 @@ it('should use correct `awaitMessageComponent` timeout', async () => {
 	const mockQueue = createMockQueue([createMockTrack()]);
 	const mockEmbed = createMockEmbed();
 	const mockResponse = createMockResponse();
+	const customTimeout = 120000; // 2 minutes
 
 	mockedUseMainPlayer.mockReturnValue(mockPlayer);
 	mockedUseQueue.mockReturnValue(mockQueue);
 	mockedCreateTrackEmbed.mockReturnValue(mockEmbed);
+	mockedCreateSmartInteractionHandler.mockReturnValue({
+		cleanup: vi.fn(),
+		timeout: customTimeout,
+	});
 	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockResponse.awaitMessageComponent = vi
 		.fn()
@@ -437,6 +485,6 @@ it('should use correct `awaitMessageComponent` timeout', async () => {
 	await playCommandHandler(interaction);
 
 	expect(mockResponse.awaitMessageComponent).toHaveBeenCalledWith({
-		time: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
+		time: customTimeout,
 	});
 });

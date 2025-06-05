@@ -1,7 +1,8 @@
-import { type Track, useQueue } from 'discord-player';
+import type { Track } from 'discord-player';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import isObject from '../utils/isObject';
 import pluralize from '../utils/pluralize';
+import useQueueWithValidation from '../utils/useQueueWithValidation';
 
 const ALGORITHMS = ['bridged', 'source'] as const;
 
@@ -10,14 +11,9 @@ const pluralizeDuplicates = pluralize('duplicate', 'duplicates');
 export default async function deduplicateCommandHandler(
 	interaction: ChatInputCommandInteraction,
 ) {
-	const queue = useQueue();
+	const queue = useQueueWithValidation(interaction, 'The queue is empty.');
 
-	if (!queue) {
-		return interaction.reply({
-			content: 'The queue is empty.',
-			flags: ['Ephemeral'],
-		});
-	}
+	if (!queue) return;
 
 	const algorithm = interaction.options.getString('algorithm', true);
 

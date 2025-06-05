@@ -11,6 +11,7 @@ import { beforeEach, expect, it, vi } from 'vitest';
 import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../../constants/miscellaneous';
 import { QueueRecoveryService } from '../../utils/QueueRecoveryService';
 import { StatsHandler } from '../../utils/StatsHandler';
+import createSmartInteractionHandler from '../../utils/createSmartInteractionHandler';
 import createTrackEmbed from '../../utils/createTrackEmbed';
 import deleteOpusCacheEntry from '../../utils/deleteOpusCacheEntry';
 import { resetPresence, setPresence } from '../../utils/presenceManager';
@@ -51,10 +52,17 @@ vi.mock('../../utils/presenceManager', () => ({
 	setPresence: vi.fn(),
 }));
 
+vi.mock('../../utils/createSmartInteractionHandler', () => ({
+	default: vi.fn(),
+}));
+
 const mockedQueueRecoveryService = vi.mocked(
 	QueueRecoveryService.getInstance(),
 );
 const mockedStatsHandler = vi.mocked(StatsHandler.getInstance());
+const mockedCreateSmartInteractionHandler = vi.mocked(
+	createSmartInteractionHandler,
+);
 const mockedCreateTrackEmbed = vi.mocked(createTrackEmbed);
 const mockedDeleteOpusCacheEntry = vi.mocked(deleteOpusCacheEntry);
 const mockedResetPresence = vi.mocked(resetPresence);
@@ -62,6 +70,11 @@ const mockedSetPresence = vi.mocked(setPresence);
 
 beforeEach(() => {
 	vi.clearAllMocks();
+
+	mockedCreateSmartInteractionHandler.mockReturnValue({
+		cleanup: vi.fn(),
+		timeout: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
+	});
 });
 
 function createMockClient(): Client {
@@ -102,7 +115,17 @@ function createMockQueue(): GuildQueue {
 		},
 		node: {
 			skip: vi.fn(),
+			getTimestamp: vi.fn().mockReturnValue(null),
 		},
+		tracks: {
+			find: vi.fn().mockReturnValue(null),
+			data: [],
+		},
+		currentTrack: null,
+		guild: {
+			id: 'mock-guild-id',
+		},
+		size: 0,
 	} as unknown as GuildQueue;
 }
 
@@ -296,8 +319,10 @@ it('should remove components when skip button times out', async () => {
 
 	await playerStartHandler(mockQueue, mockTrack);
 
-	expect(mockResponse.edit).toHaveBeenCalledWith({
-		components: [],
+	expect(mockedCreateSmartInteractionHandler).toHaveBeenCalledWith({
+		response: mockResponse,
+		queue: mockQueue,
+		track: mockTrack,
 	});
 });
 
@@ -491,9 +516,6 @@ it('should handle unknown button interaction by falling through to catch block',
 
 	await playerStartHandler(mockQueue, mockTrack);
 
-	expect(mockResponse.edit).toHaveBeenCalledWith({
-		components: [],
-	});
 	expect(mockedStatsHandler.saveStat).toHaveBeenCalledWith('play', {
 		title: MOCK_TRACK_TITLE,
 		author: MOCK_TRACK_AUTHOR,

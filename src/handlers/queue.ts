@@ -3,12 +3,7 @@ import {
 	differenceInCalendarDays,
 	formatDistance,
 } from 'date-fns';
-import {
-	type GuildQueue,
-	QueueRepeatMode,
-	type Track,
-	useQueue,
-} from 'discord-player';
+import { type GuildQueue, QueueRepeatMode, type Track } from 'discord-player';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -18,18 +13,24 @@ import {
 	type InteractionResponse,
 	type Message,
 } from 'discord.js';
-import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
+import createQueueAwareComponentHandler from '../utils/createQueueAwareComponentHandler';
 import getTrackPosition from '../utils/getTrackPosition';
 import getTrackThumbnail from '../utils/getTrackThumbnail';
 import isObject from '../utils/isObject';
+import useQueueWithValidation from '../utils/useQueueWithValidation';
 
 export default async function queueCommandHandler(
 	interaction: ChatInputCommandInteraction,
 ) {
-	const queue = useQueue();
+	const queue = useQueueWithValidation(
+		interaction,
+		'The queue is empty and nothing is being played.',
+	);
 
-	const tracks = queue?.tracks.toArray() ?? [];
-	const currentTrack = queue?.currentTrack;
+	if (!queue) return;
+
+	const tracks = queue.tracks.toArray();
+	const currentTrack = queue.currentTrack;
 
 	if (!currentTrack) {
 		return interaction.reply('The queue is empty and nothing is being played.');
@@ -130,6 +131,11 @@ export default async function queueCommandHandler(
 		content: null,
 	});
 
+	const handler = createQueueAwareComponentHandler({
+		response,
+		queue,
+	});
+
 	await componentResponseListener(response, {
 		currentTrack,
 		isCached,
@@ -138,6 +144,7 @@ export default async function queueCommandHandler(
 		embedDescriptions,
 		previous,
 		next,
+		handler,
 	});
 }
 
@@ -149,6 +156,7 @@ type ListenerProps = {
 	embedDescriptions: string[][];
 	previous: ButtonBuilder;
 	next: ButtonBuilder;
+	handler: ReturnType<typeof createQueueAwareComponentHandler>;
 };
 
 async function componentResponseListener(
@@ -163,11 +171,12 @@ async function componentResponseListener(
 		embedDescriptions,
 		previous,
 		next,
+		handler,
 	} = properties;
 
 	try {
 		const answer = await response.awaitMessageComponent({
-			time: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
+			time: handler.timeout,
 		});
 		const pageNumber = Number.parseInt(answer.customId, 10);
 
@@ -201,8 +210,6 @@ async function componentResponseListener(
 
 		await componentResponseListener(nextResponse, properties);
 	} catch {
-		await response.edit({
-			components: [],
-		});
+		await handler.cleanup();
 	}
 }

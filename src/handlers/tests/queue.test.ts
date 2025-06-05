@@ -1,4 +1,9 @@
-import { QueueRepeatMode, type Track, useQueue } from 'discord-player';
+import {
+	QueueRepeatMode,
+	type Track,
+	useMainPlayer,
+	useQueue,
+} from 'discord-player';
 import {
 	ActionRowBuilder,
 	type ChatInputCommandInteraction,
@@ -19,6 +24,7 @@ const EXAMPLE_ESTIMATED_DURATION = 600000; // 10 minutes
 
 vi.mock('discord-player', () => ({
 	useQueue: vi.fn(),
+	useMainPlayer: vi.fn(),
 	QueueRepeatMode: {
 		TRACK: 1,
 		QUEUE: 2,
@@ -37,6 +43,7 @@ vi.mock('../../utils/getTrackThumbnail', () => ({
 }));
 
 const mockedUseQueue = vi.mocked(useQueue);
+const mockedUseMainPlayer = vi.mocked(useMainPlayer);
 
 beforeEach(() => {
 	vi.clearAllMocks();
@@ -45,6 +52,14 @@ beforeEach(() => {
 
 	mockedGetTrackPosition.mockReturnValue(1);
 	mockedGetTrackThumbnail.mockReturnValue('https://example.com/thumbnail.jpg');
+
+	// Mock the main player with basic event handling
+	mockedUseMainPlayer.mockReturnValue({
+		events: {
+			on: vi.fn(),
+			off: vi.fn(),
+		},
+	} as unknown as ReturnType<typeof useMainPlayer>);
 });
 
 afterEach(() => {
@@ -130,9 +145,10 @@ it('should reply early when no current track', async () => {
 
 	await queueCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith(
-		'The queue is empty and nothing is being played.',
-	);
+	expect(interaction.reply).toHaveBeenCalledWith({
+		content: 'The queue is empty and nothing is being played.',
+		flags: ['Ephemeral'],
+	});
 	expect(interaction.editReply).not.toHaveBeenCalled();
 });
 

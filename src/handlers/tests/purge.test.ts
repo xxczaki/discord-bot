@@ -66,9 +66,10 @@ it('should handle null queue', async () => {
 
 	expect(mockedDeleteOpusCacheEntry).not.toHaveBeenCalled();
 	expect(mockedQueueRecoveryService.saveQueue).not.toHaveBeenCalled();
-	expect(interaction.reply).toHaveBeenCalledWith(
-		'Queue purged.\n\nUse `/recover` to listen to the same queue again.',
-	);
+	expect(interaction.reply).toHaveBeenCalledWith({
+		content: 'No music is currently playing.',
+		flags: ['Ephemeral'],
+	});
 });
 
 it('should delete opus cache entry when track has non-cache metadata', async () => {

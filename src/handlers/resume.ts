@@ -1,12 +1,14 @@
-import { useQueue } from 'discord-player';
 import type { ChatInputCommandInteraction } from 'discord.js';
+import useQueueWithValidation from '../utils/useQueueWithValidation';
 
 export default async function resumeCommandHandler(
 	interaction: ChatInputCommandInteraction,
 ) {
-	const queue = useQueue();
+	const queue = useQueueWithValidation(interaction);
 
-	queue?.node.setPaused(false);
+	if (!queue) return;
+
+	queue.node.setPaused(false);
 
 	await interaction.reply('Track resumed.');
 }

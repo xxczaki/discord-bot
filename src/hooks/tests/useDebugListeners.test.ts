@@ -344,6 +344,73 @@ describe('Client Error Handling', () => {
 });
 
 describe('Player Error Handling', () => {
+	it('should handle NoResultError without Sentry reporting or recovery', async () => {
+		const testError = new Error('Test NoResult error');
+		testError.name = 'NoResultError';
+		const mockQueue = createMockQueue({
+			currentTrack: {
+				title: 'Test Song',
+				author: 'Test Artist',
+				url: 'test-url',
+			},
+		});
+
+		useDebugListeners(mockClient, mockPlayer);
+		const errorHandler = getPlayerEventsErrorHandler();
+		await errorHandler(mockQueue, testError);
+
+		expect(mockedLogger.error).toHaveBeenCalledWith(testError, 'Player error');
+		expect(mockedCaptureException).not.toHaveBeenCalled();
+		expect(mockChannel.send).toHaveBeenCalledWith({ embeds: [mockEmbed] });
+		expect(mockEmbed.setTitle).toHaveBeenCalledWith('Track unavailable');
+		expect(mockEmbed.setDescription).toHaveBeenCalledWith(
+			'❌ Could not play **Test Song** by Test Artist\n\nThis track appears to be unplayable (possibly region-locked, removed, or restricted). The queue will continue with the next track.',
+		);
+		expect(mockEmbed.setColor).toHaveBeenCalledWith('Orange');
+	});
+
+	it('should handle NoResultError with ERR_NO_RESULT code', async () => {
+		const testError = new Error('Test error with code') as Error & {
+			code: string;
+		};
+		testError.code = 'ERR_NO_RESULT';
+		const mockQueue = createMockQueue({
+			currentTrack: {
+				title: 'Another Song',
+				author: 'Another Artist',
+				url: 'another-url',
+			},
+		});
+
+		useDebugListeners(mockClient, mockPlayer);
+		const errorHandler = getPlayerEventsErrorHandler();
+		await errorHandler(mockQueue, testError);
+
+		expect(mockedLogger.error).toHaveBeenCalledWith(testError, 'Player error');
+		expect(mockedCaptureException).not.toHaveBeenCalled();
+		expect(mockChannel.send).toHaveBeenCalledWith({ embeds: [mockEmbed] });
+		expect(mockEmbed.setDescription).toHaveBeenCalledWith(
+			'❌ Could not play **Another Song** by Another Artist\n\nThis track appears to be unplayable (possibly region-locked, removed, or restricted). The queue will continue with the next track.',
+		);
+	});
+
+	it('should handle NoResultError with unknown track', async () => {
+		const testError = new Error('Test NoResult error');
+		testError.name = 'NoResultError';
+		const mockQueue = createMockQueue({ currentTrack: null });
+
+		useDebugListeners(mockClient, mockPlayer);
+		const errorHandler = getPlayerEventsErrorHandler();
+		await errorHandler(mockQueue, testError);
+
+		expect(mockedLogger.error).toHaveBeenCalledWith(testError, 'Player error');
+		expect(mockedCaptureException).not.toHaveBeenCalled();
+		expect(mockChannel.send).toHaveBeenCalledWith({ embeds: [mockEmbed] });
+		expect(mockEmbed.setDescription).toHaveBeenCalledWith(
+			'❌ Could not play Unknown track\n\nThis track appears to be unplayable (possibly region-locked, removed, or restricted). The queue will continue with the next track.',
+		);
+	});
+
 	it('should handle player error with no queue', async () => {
 		const testError = new Error('Test player error');
 

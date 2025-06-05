@@ -7,7 +7,7 @@ import {
 	type GuildMember,
 } from 'discord.js';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
+import createSmartInteractionHandler from '../utils/createSmartInteractionHandler';
 import createTrackEmbed from '../utils/createTrackEmbed';
 import determineSearchEngine from '../utils/determineSearchEngine';
 import getTrackPosition from '../utils/getTrackPosition';
@@ -87,10 +87,18 @@ export default async function playCommandHandler(
 			content: null,
 		});
 
+		const smartHandler = createSmartInteractionHandler({
+			response,
+			queue,
+			track,
+		});
+
 		try {
 			const answer = await response.awaitMessageComponent({
-				time: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
+				time: smartHandler.timeout,
 			});
+
+			await smartHandler.cleanup();
 
 			switch (answer.customId) {
 				case 'play-now':
@@ -124,11 +132,7 @@ export default async function playCommandHandler(
 						components: [],
 					});
 			}
-		} catch {
-			await interaction.editReply({
-				components: [],
-			});
-		}
+		} catch {}
 	} catch (error) {
 		if (error instanceof Error && error.name.includes('No results found')) {
 			return interaction.editReply('No results found for the given query.');

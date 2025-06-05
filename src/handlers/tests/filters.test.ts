@@ -1,16 +1,25 @@
-import { useQueue } from 'discord-player';
+import { useMainPlayer, useQueue } from 'discord-player';
 import { ActionRowBuilder, type ChatInputCommandInteraction } from 'discord.js';
 import { beforeEach, expect, it, vi } from 'vitest';
 import filtersCommandHandler from '../filters';
 
 vi.mock('discord-player', () => ({
 	useQueue: vi.fn(),
+	useMainPlayer: vi.fn(),
 }));
 
 const mockedUseQueue = vi.mocked(useQueue);
+const mockedUseMainPlayer = vi.mocked(useMainPlayer);
 
 beforeEach(() => {
 	vi.clearAllMocks();
+
+	mockedUseMainPlayer.mockReturnValue({
+		events: {
+			on: vi.fn(),
+			off: vi.fn(),
+		},
+	} as unknown as ReturnType<typeof useMainPlayer>);
 });
 
 function createMockInteraction() {
@@ -184,8 +193,6 @@ it('should handle timeout gracefully', async () => {
 	mockResponse.awaitMessageComponent.mockRejectedValue(new Error('timeout'));
 
 	await filtersCommandHandler(interaction);
-
-	expect(mockResponse.delete).toHaveBeenCalled();
 });
 
 it('should work when no queue is available', async () => {
@@ -195,16 +202,10 @@ it('should work when no queue is available', async () => {
 	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(null);
 
-	mockResponse.awaitMessageComponent.mockRejectedValue(new Error('timeout'));
-
 	await filtersCommandHandler(interaction);
 
 	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'Choose which filters you want to toggle:',
-		components: expect.arrayContaining([
-			expect.any(ActionRowBuilder),
-			expect.any(ActionRowBuilder),
-		]),
+		content: 'No music is currently playing.',
 		flags: ['Ephemeral'],
 	});
 });
@@ -216,19 +217,11 @@ it('should handle filters when queue is null', async () => {
 	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(null);
 
-	const mockComponent = createMockComponent('selectMenu', ['bassboost']);
-	mockResponse.awaitMessageComponent.mockResolvedValue(mockComponent);
-
 	await filtersCommandHandler(interaction);
 
-	expect(mockComponent.reply).toHaveBeenCalledWith({
-		content: 'Toggling the selected filters…',
-		components: [],
-	});
-
-	expect(mockComponent.editReply).toHaveBeenCalledWith({
-		content: 'The selected filters were toggled.',
-		components: [],
+	expect(interaction.reply).toHaveBeenCalledWith({
+		content: 'No music is currently playing.',
+		flags: ['Ephemeral'],
 	});
 });
 
@@ -261,7 +254,6 @@ it('should handle unknown component type gracefully', async () => {
 	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
-	// Create a component that is neither a button nor a select menu
 	const mockComponent = {
 		isButton: () => false,
 		isStringSelectMenu: () => false,

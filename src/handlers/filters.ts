@@ -1,5 +1,4 @@
 import type { QueueFilters } from 'discord-player';
-import { useQueue } from 'discord-player';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -9,7 +8,8 @@ import {
 	StringSelectMenuBuilder,
 	StringSelectMenuOptionBuilder,
 } from 'discord.js';
-import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
+import createQueueAwareComponentHandler from '../utils/createQueueAwareComponentHandler';
+import useQueueWithValidation from '../utils/useQueueWithValidation';
 
 type OptionData = SelectMenuComponentOptionData & { value: keyof QueueFilters };
 
@@ -27,12 +27,13 @@ const FILTERS: OptionData[] = [
 export default async function filtersCommandHandler(
 	interaction: ChatInputCommandInteraction,
 ) {
-	const queue = useQueue();
+	const queue = useQueueWithValidation(interaction);
 
-	const activeFilters =
-		queue?.filters.ffmpeg.filters.filter(
-			(name) => !name.startsWith('_'), // exclude the custom filters
-		) ?? [];
+	if (!queue) return;
+
+	const activeFilters = queue.filters.ffmpeg.filters.filter(
+		(name) => !name.startsWith('_'), // exclude the custom filters
+	);
 
 	const filters = getFilters(activeFilters);
 
@@ -59,9 +60,14 @@ export default async function filtersCommandHandler(
 		flags: ['Ephemeral'],
 	});
 
+	const handler = createQueueAwareComponentHandler({
+		response,
+		queue,
+	});
+
 	try {
 		const answer = await response.awaitMessageComponent({
-			time: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
+			time: handler.timeout,
 		});
 
 		if (answer.isButton()) {
@@ -81,7 +87,7 @@ export default async function filtersCommandHandler(
 				components: [],
 			});
 
-			await queue?.filters.ffmpeg.toggle(toToggle);
+			await queue.filters.ffmpeg.toggle(toToggle);
 
 			await response.delete();
 
@@ -98,7 +104,7 @@ export default async function filtersCommandHandler(
 			components: [],
 		});
 	} catch (error) {
-		return response.delete();
+		await handler.cleanup();
 	}
 }
 
