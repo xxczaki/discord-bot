@@ -43,8 +43,8 @@ importers:
         specifier: ^5.0.6
         version: 5.0.6
       ulid:
-        specifier: ^3.0.0
-        version: 3.0.0
+        specifier: ^3.0.1
+        version: 3.0.1
       zlib-sync:
         specifier: ^0.1.10
         version: 0.1.10
@@ -2411,8 +2411,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  ulid@3.0.0:
-    resolution: {integrity: sha512-yvZYdXInnJve6LdlPIuYmURdS2NP41ZoF4QW7SXwbUKYt53+0eDAySO+rGSvM2O/ciuB/G+8N7GQrZ1mCJpuqw==}
+  ulid@3.0.1:
+    resolution: {integrity: sha512-dPJyqPzx8preQhqq24bBG1YNkvigm87K8kVEHCD+ruZg24t6IFEFv00xMWfxcC4djmFtiTLdFuADn4+DOz6R7Q==}
     hasBin: true
 
   undici-types@6.21.0:
@@ -2620,8 +2620,8 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/09718a717f49633f4382133050647fe4ff6ca007:
-    resolution: {tarball: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/09718a717f49633f4382133050647fe4ff6ca007}
+  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/60137e6a0e34e59a8aedbe7d74da45d8d454d5b9:
+    resolution: {tarball: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/60137e6a0e34e59a8aedbe7d74da45d8d454d5b9}
     version: 13.4.0
 
   zlib-sync@0.1.10:
@@ -3811,7 +3811,7 @@ snapshots:
       jsdom: 26.1.0(bufferutil@4.0.9)
       tiny-typed-emitter: 2.1.0
       undici: 7.9.0
-      youtubei.js: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/09718a717f49633f4382133050647fe4ff6ca007
+      youtubei.js: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/60137e6a0e34e59a8aedbe7d74da45d8d454d5b9
     transitivePeerDependencies:
       - bufferutil
       - canvas
@@ -4981,7 +4981,7 @@ snapshots:
 
   typescript@5.8.3: {}
 
-  ulid@3.0.0: {}
+  ulid@3.0.1: {}
 
   undici-types@6.21.0: {}
 
@@ -5165,7 +5165,7 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/09718a717f49633f4382133050647fe4ff6ca007:
+  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/60137e6a0e34e59a8aedbe7d74da45d8d454d5b9:
     dependencies:
       '@bufbuild/protobuf': 2.4.0
       jintr: 3.3.1

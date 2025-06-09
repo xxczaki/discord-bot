@@ -24,7 +24,7 @@
 		"ioredis": "^5.6.1",
 		"pino": "^9.7.0",
 		"sodium-native": "^5.0.6",
-		"ulid": "^3.0.0",
+		"ulid": "^3.0.1",
 		"zlib-sync": "^0.1.10"
 	},
 	"devDependencies": {
