@@ -160,7 +160,7 @@ describe('LatenessHandler', () => {
 			expect(result).toBe(mockStream);
 			expect(mockedRedis.scanStream).toHaveBeenCalledWith({
 				match: 'discord-player:lateness:*',
-				count: 10,
+				count: 500,
 			});
 		});
 	});

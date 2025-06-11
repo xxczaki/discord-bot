@@ -59,7 +59,7 @@ export class LatenessHandler {
 	getStats() {
 		return redis.scanStream({
 			match: 'discord-player:lateness:*',
-			count: 10,
+			count: 500,
 		});
 	}
 }

@@ -156,7 +156,11 @@ export default async function latenessCommandHandler(
 						text: 'Not showing and counting records spanning more than 2 days.',
 					});
 
-				await interaction.editReply({ embeds: [embed], content: null });
+				try {
+					await interaction.editReply({ embeds: [embed], content: null });
+				} catch (error) {
+					logger.warn(error, 'Failed to edit lateness reply');
+				}
 				statsStream.resume();
 			});
 
