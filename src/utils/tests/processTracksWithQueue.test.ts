@@ -195,19 +195,14 @@ it('should use batch processing for large track lists', async () => {
 		embed: createMockEmbed(),
 	});
 
-	expect(mockPlayer.search).toHaveBeenCalled();
-	expect(mockGuildQueue.addTrack).toHaveBeenCalled();
+	expect(mockPlayer.play).toHaveBeenCalled();
 	expect(result).toEqual({ enqueued: 15 });
 });
 
-it('should handle failed search results for large batches', async () => {
+it('should handle failed play attempts for large batches', async () => {
 	const largeTrackList = Array.from({ length: 15 }, (_, i) => `track-${i}`);
 	const mockPlayer = {
-		play: vi.fn().mockResolvedValue({ track: { title: 'Test Track' } }),
-		search: vi.fn().mockResolvedValue({
-			hasTracks: () => false,
-			tracks: [],
-		}),
+		play: vi.fn().mockRejectedValue(new Error('Play failed')),
 	} as Partial<Player>;
 	const mockGuildQueue = createMockGuildQueue();
 	const mockQueueInstance = {
@@ -233,5 +228,4 @@ it('should handle failed search results for large batches', async () => {
 	});
 
 	expect(result).toEqual({ enqueued: 0 });
-	expect(mockGuildQueue.addTrack).not.toHaveBeenCalled();
 });

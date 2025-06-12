@@ -1,5 +1,5 @@
 import { availableParallelism } from 'node:os';
-import { type QueueFilters, useMainPlayer, useQueue } from 'discord-player';
+import { type QueueFilters, useMainPlayer } from 'discord-player';
 import type { EmbedBuilder, VoiceBasedChannel } from 'discord.js';
 import Queue from 'p-queue';
 import type { ProcessingInteraction } from '../types/ProcessingInteraction';
@@ -29,7 +29,7 @@ export default async function processTracksWithQueue({
 	onError = (error, context) => logger.error(error, context),
 }: ProcessTrackOptions) {
 	const player = useMainPlayer();
-	const queue = useQueue();
+
 	let enqueued = 0;
 	let processed = 0;
 	let lastUpdateTime = 0;
@@ -94,29 +94,31 @@ export default async function processTracksWithQueue({
 		);
 	} else {
 		const searchAndAddBatch = async (batch: string[]) => {
-			let batchEnqueued = 0;
+			const results = await Promise.allSettled(
+				batch.map(async (item) => {
+					try {
+						const result = await player.play(voiceChannel, item, {
+							searchEngine: determineSearchEngine(item),
+							nodeOptions: {
+								metadata: { interaction, ...nodeMetadata },
+								defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
+							},
+							requestedBy: interaction.user,
+						});
 
-			for (const item of batch) {
-				try {
-					const searchResult = await player.search(item, {
-						searchEngine: determineSearchEngine(item),
-						fallbackSearchEngine: 'youtubeSearch',
-						requestedBy: interaction.user,
-					});
-
-					if (searchResult.hasTracks() && queue) {
-						const track = searchResult.tracks[0];
-
-						queue.addTrack(track);
-						batchEnqueued++;
+						processed++;
+						return result;
+					} catch (error) {
+						processed++;
+						onError(error, `Batch processing error for item: ${item}`);
+						return null;
 					}
-				} catch (error) {
-					onError(error, `Batch processing error for item: ${item}`);
-				}
+				}),
+			);
 
-				processed++;
-			}
-
+			const batchEnqueued = results.filter(
+				(result) => result.status === 'fulfilled' && result.value,
+			).length;
 			enqueued += batchEnqueued;
 
 			await updateProgress();
