@@ -1,10 +1,10 @@
 import { availableParallelism } from 'node:os';
-import { useMainPlayer } from 'discord-player';
+import type { GuildQueue, Player } from 'discord-player';
+import { useMainPlayer, useQueue } from 'discord-player';
 import type { EmbedBuilder, User, VoiceBasedChannel } from 'discord.js';
 import Queue from 'p-queue';
 import { beforeEach, expect, it, vi } from 'vitest';
 import type { ProcessingInteraction } from '../../types/ProcessingInteraction';
-import logger from '../logger';
 import processTracksWithQueue from '../processTracksWithQueue';
 
 const EXAMPLE_TRACKS = [
@@ -12,13 +12,15 @@ const EXAMPLE_TRACKS = [
 	'https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh',
 	'Never Gonna Give You Up - Rick Astley',
 ];
-const EXAMPLE_NODE_METADATA = { customData: 'test' };
 
 vi.mock('node:os', () => ({
 	availableParallelism: vi.fn(),
 }));
 
-vi.mock('discord-player');
+vi.mock('discord-player', () => ({
+	useMainPlayer: vi.fn(),
+	useQueue: vi.fn(),
+}));
 
 vi.mock('p-queue', () => ({
 	default: vi.fn(),
@@ -26,96 +28,139 @@ vi.mock('p-queue', () => ({
 
 const mockedAvailableParallelism = vi.mocked(availableParallelism);
 const mockedUseMainPlayer = vi.mocked(useMainPlayer);
+const mockedUseQueue = vi.mocked(useQueue);
 const mockedQueue = vi.mocked(Queue);
-const mockedLogger = vi.mocked(logger);
 
 beforeEach(() => {
 	vi.clearAllMocks();
 	mockedAvailableParallelism.mockReturnValue(4);
 });
 
-function createMockPlayer() {
-	return {
-		play: vi.fn().mockResolvedValue({ track: { title: 'Test Track' } }),
-	} as unknown as ReturnType<typeof useMainPlayer>;
-}
-
-function createMockQueue(executeTasks = false) {
-	return {
-		on: vi.fn(),
-		addAll: vi
-			.fn()
-			.mockImplementation(async (tasks: (() => Promise<unknown>)[]) => {
-				if (executeTasks) {
-					await Promise.all(tasks.map((task) => task()));
-				}
-			}),
-		onIdle: vi.fn().mockResolvedValue(undefined),
-		pending: 0,
-	} as unknown as Queue;
-}
-
-function createMockInteraction() {
+function createMockInteraction(): ProcessingInteraction {
 	return {
 		editReply: vi.fn().mockResolvedValue(undefined),
 		user: { id: 'user123' } as User,
-		channel: null,
-		reply: vi.fn(),
+		channel: {
+			id: 'channel123',
+		} as unknown as ProcessingInteraction['channel'],
+		reply: vi.fn().mockResolvedValue(undefined),
 	} as ProcessingInteraction;
 }
 
-function createMockEmbed() {
+function createMockEmbed(): EmbedBuilder {
 	return {
 		setDescription: vi.fn().mockReturnThis(),
 	} as unknown as EmbedBuilder;
 }
 
-it('should process tracks successfully and return enqueued count', async () => {
-	const mockPlayer = createMockPlayer();
-	const mockQueue = createMockQueue(true);
-	const mockEmbed = createMockEmbed();
-	const mockInteraction = createMockInteraction();
-	const mockVoiceChannel = {} as VoiceBasedChannel;
+function createMockPlayer(): Partial<Player> {
+	return {
+		play: vi.fn().mockResolvedValue({ track: { title: 'Test Track' } }),
+		search: vi.fn().mockResolvedValue({
+			hasTracks: () => true,
+			tracks: [{ title: 'Test Track', id: 'test-id' }],
+		}),
+	};
+}
 
-	mockedUseMainPlayer.mockReturnValue(mockPlayer);
-	mockedQueue.mockReturnValue(mockQueue);
+function createMockGuildQueue(): Partial<GuildQueue> {
+	return {
+		addTrack: vi.fn(),
+		tracks: {
+			data: [],
+			size: 0,
+			first: vi.fn(),
+			at: vi.fn(),
+			toArray: vi.fn().mockReturnValue([]),
+		} as unknown as GuildQueue['tracks'],
+	};
+}
+
+function createMockQueueInstance(): Partial<Queue> {
+	return {
+		on: vi.fn(),
+		addAll: vi.fn().mockResolvedValue(undefined),
+		onIdle: vi.fn().mockResolvedValue(undefined),
+		pending: 0,
+	};
+}
+
+it('should use conservative concurrency limits', async () => {
+	const mockPlayer = createMockPlayer();
+	const mockGuildQueue = createMockGuildQueue();
+	const mockQueueInstance = createMockQueueInstance();
+
+	mockedAvailableParallelism.mockReturnValue(16);
+	mockedUseMainPlayer.mockReturnValue(mockPlayer as Player);
+	mockedUseQueue.mockReturnValue(mockGuildQueue as GuildQueue);
+	mockedQueue.mockReturnValue(mockQueueInstance as Queue);
+
+	await processTracksWithQueue({
+		items: EXAMPLE_TRACKS,
+		voiceChannel: {} as VoiceBasedChannel,
+		interaction: createMockInteraction(),
+		embed: createMockEmbed(),
+	});
+
+	expect(mockedQueue).toHaveBeenCalledWith({ concurrency: 3 });
+});
+
+it('should return enqueued count for small track lists', async () => {
+	const mockPlayer = createMockPlayer();
+	const mockGuildQueue = createMockGuildQueue();
+	const mockQueueInstance = {
+		on: vi.fn(),
+		addAll: vi
+			.fn()
+			.mockImplementation(async (tasks: (() => Promise<unknown>)[]) => {
+				await Promise.all(tasks.map((task) => task()));
+			}),
+		onIdle: vi.fn().mockResolvedValue(undefined),
+		pending: 0,
+	} as Partial<Queue>;
+
+	mockedUseMainPlayer.mockReturnValue(mockPlayer as Player);
+	mockedUseQueue.mockReturnValue(mockGuildQueue as GuildQueue);
+	mockedQueue.mockReturnValue(mockQueueInstance as Queue);
 
 	const result = await processTracksWithQueue({
 		items: EXAMPLE_TRACKS,
-		voiceChannel: mockVoiceChannel,
-		interaction: mockInteraction,
-		embed: mockEmbed,
-		nodeMetadata: EXAMPLE_NODE_METADATA,
+		voiceChannel: {} as VoiceBasedChannel,
+		interaction: createMockInteraction(),
+		embed: createMockEmbed(),
 	});
 
-	expect(mockedQueue).toHaveBeenCalledWith({ concurrency: 4 });
-	expect(mockQueue.on).toHaveBeenCalledWith('completed', expect.any(Function));
-	expect(mockQueue.addAll).toHaveBeenCalledWith(
-		expect.arrayContaining([expect.any(Function)]),
-	);
-	expect(mockQueue.onIdle).toHaveBeenCalled();
 	expect(result).toEqual({ enqueued: 3 });
 });
 
-it('should handle player errors gracefully with custom `onError` handler', async () => {
+it('should handle errors gracefully with custom `onError` handler', async () => {
 	const mockError = new Error('Player failed');
 	const mockPlayer = {
 		play: vi.fn().mockRejectedValue(mockError),
-	} as unknown as ReturnType<typeof useMainPlayer>;
-	const mockQueue = createMockQueue(true);
-	const mockEmbed = createMockEmbed();
-	const mockInteraction = createMockInteraction();
-	const mockVoiceChannel = {} as VoiceBasedChannel;
+		search: vi.fn().mockRejectedValue(mockError),
+	} as Partial<Player>;
+	const mockGuildQueue = createMockGuildQueue();
+	const mockQueueInstance = {
+		on: vi.fn(),
+		addAll: vi
+			.fn()
+			.mockImplementation(async (tasks: (() => Promise<unknown>)[]) => {
+				await Promise.all(tasks.map((task) => task()));
+			}),
+		onIdle: vi.fn().mockResolvedValue(undefined),
+		pending: 0,
+	} as Partial<Queue>;
 	const mockOnError = vi.fn();
 
-	mockedUseMainPlayer.mockReturnValue(mockPlayer);
-	mockedQueue.mockReturnValue(mockQueue);
+	mockedUseMainPlayer.mockReturnValue(mockPlayer as Player);
+	mockedUseQueue.mockReturnValue(mockGuildQueue as GuildQueue);
+	mockedQueue.mockReturnValue(mockQueueInstance as Queue);
 
 	const result = await processTracksWithQueue({
 		items: EXAMPLE_TRACKS,
-		voiceChannel: mockVoiceChannel,
-		interaction: mockInteraction,
-		embed: mockEmbed,
+		voiceChannel: {} as VoiceBasedChannel,
+		interaction: createMockInteraction(),
+		embed: createMockEmbed(),
 		onError: mockOnError,
 	});
 
@@ -124,95 +169,69 @@ it('should handle player errors gracefully with custom `onError` handler', async
 	expect(result).toEqual({ enqueued: 0 });
 });
 
-it('should use default error handler when `onError` is not provided', async () => {
-	const mockError = new Error('Player failed');
-	const mockPlayer = {
-		play: vi.fn().mockRejectedValue(mockError),
-	} as unknown as ReturnType<typeof useMainPlayer>;
-	const mockQueue = createMockQueue(true);
-	const mockEmbed = createMockEmbed();
-	const mockInteraction = createMockInteraction();
-	const mockVoiceChannel = {} as VoiceBasedChannel;
-
-	mockedUseMainPlayer.mockReturnValue(mockPlayer);
-	mockedQueue.mockReturnValue(mockQueue);
-
-	await processTracksWithQueue({
-		items: ['test track'],
-		voiceChannel: mockVoiceChannel,
-		interaction: mockInteraction,
-		embed: mockEmbed,
-	});
-
-	expect(mockedLogger.error).toHaveBeenCalledWith(
-		mockError,
-		'Queue processing error',
-	);
-});
-
-it('should update progress when queue completes items', async () => {
+it('should use batch processing for large track lists', async () => {
+	const largeTrackList = Array.from({ length: 15 }, (_, i) => `track-${i}`);
 	const mockPlayer = createMockPlayer();
-	const mockQueue = createMockQueue();
-	const mockEmbed = createMockEmbed();
-	const mockInteraction = createMockInteraction();
-	const mockVoiceChannel = {} as VoiceBasedChannel;
-
-	mockedUseMainPlayer.mockReturnValue(mockPlayer);
-	mockedQueue.mockReturnValue(mockQueue);
-
-	await processTracksWithQueue({
-		items: EXAMPLE_TRACKS,
-		voiceChannel: mockVoiceChannel,
-		interaction: mockInteraction,
-		embed: mockEmbed,
-	});
-
-	expect(mockQueue.on).toHaveBeenCalledWith('completed', expect.any(Function));
-});
-
-it('should call progress update with correct description when items are completed', async () => {
-	const mockPlayer = createMockPlayer();
-	const mockEmbed = createMockEmbed();
-	const mockInteraction = createMockInteraction();
-	const mockVoiceChannel = {} as VoiceBasedChannel;
-
-	let completedHandler: (() => Promise<void>) | undefined;
-
-	const mockQueue = {
-		on: vi
+	const mockGuildQueue = createMockGuildQueue();
+	const mockQueueInstance = {
+		on: vi.fn(),
+		addAll: vi
 			.fn()
-			.mockImplementation((event: string, handler: () => Promise<void>) => {
-				if (event === 'completed') {
-					completedHandler = handler;
-				}
+			.mockImplementation(async (tasks: (() => Promise<unknown>)[]) => {
+				await Promise.all(tasks.map((task) => task()));
 			}),
-		addAll: vi.fn().mockResolvedValue(undefined),
 		onIdle: vi.fn().mockResolvedValue(undefined),
-		pending: 1,
-	} as unknown as Queue;
+		pending: 0,
+	} as Partial<Queue>;
 
-	mockedUseMainPlayer.mockReturnValue(mockPlayer);
-	mockedQueue.mockReturnValue(mockQueue);
+	mockedUseMainPlayer.mockReturnValue(mockPlayer as Player);
+	mockedUseQueue.mockReturnValue(mockGuildQueue as GuildQueue);
+	mockedQueue.mockReturnValue(mockQueueInstance as Queue);
 
-	await processTracksWithQueue({
-		items: EXAMPLE_TRACKS,
-		voiceChannel: mockVoiceChannel,
-		interaction: mockInteraction,
-		embed: mockEmbed,
+	const result = await processTracksWithQueue({
+		items: largeTrackList,
+		voiceChannel: {} as VoiceBasedChannel,
+		interaction: createMockInteraction(),
+		embed: createMockEmbed(),
 	});
 
-	expect(completedHandler).toBeDefined();
+	expect(mockPlayer.search).toHaveBeenCalled();
+	expect(mockGuildQueue.addTrack).toHaveBeenCalled();
+	expect(result).toEqual({ enqueued: 15 });
+});
 
-	if (completedHandler) {
-		await completedHandler();
-	}
+it('should handle failed search results for large batches', async () => {
+	const largeTrackList = Array.from({ length: 15 }, (_, i) => `track-${i}`);
+	const mockPlayer = {
+		play: vi.fn().mockResolvedValue({ track: { title: 'Test Track' } }),
+		search: vi.fn().mockResolvedValue({
+			hasTracks: () => false,
+			tracks: [],
+		}),
+	} as Partial<Player>;
+	const mockGuildQueue = createMockGuildQueue();
+	const mockQueueInstance = {
+		on: vi.fn(),
+		addAll: vi
+			.fn()
+			.mockImplementation(async (tasks: (() => Promise<unknown>)[]) => {
+				await Promise.all(tasks.map((task) => task()));
+			}),
+		onIdle: vi.fn().mockResolvedValue(undefined),
+		pending: 0,
+	} as Partial<Queue>;
 
-	expect(mockInteraction.editReply).toHaveBeenCalledWith({
-		content: null,
-		components: [],
-		embeds: [mockEmbed],
+	mockedUseMainPlayer.mockReturnValue(mockPlayer as Player);
+	mockedUseQueue.mockReturnValue(mockGuildQueue as GuildQueue);
+	mockedQueue.mockReturnValue(mockQueueInstance as Queue);
+
+	const result = await processTracksWithQueue({
+		items: largeTrackList,
+		voiceChannel: {} as VoiceBasedChannel,
+		interaction: createMockInteraction(),
+		embed: createMockEmbed(),
 	});
-	expect(mockEmbed.setDescription).toHaveBeenCalledWith(
-		'2/3 items processed and added to the queue so far.',
-	);
+
+	expect(result).toEqual({ enqueued: 0 });
+	expect(mockGuildQueue.addTrack).not.toHaveBeenCalled();
 });

@@ -20,7 +20,6 @@ const EXAMPLE_PLAYLIST_IDS = ['playlist1', 'playlist2'];
 const EXAMPLE_PLAYLISTS_CHANNEL_ID = 'channel123';
 const EXAMPLE_ENQUEUED_COUNT = 2;
 
-// Helper to create a mock Collection with filter method
 function createMockCollection(
 	messages: Message[],
 ): Collection<string, Message> {
@@ -142,7 +141,6 @@ it('should fetch playlists channel using environment variable', async () => {
 });
 
 it('should reply with processing embed initially', async () => {
-	// We need to track the calls to see the order and what was called
 	let replyCallArgs: unknown;
 	(mockInteraction.reply as ReturnType<typeof vi.fn>).mockImplementationOnce(
 		(args) => {
@@ -154,9 +152,6 @@ it('should reply with processing embed initially', async () => {
 	await enqueuePlaylists(mockInteraction, mockVoiceChannel);
 
 	expect(mockInteraction.reply).toHaveBeenCalled();
-
-	// The initial reply should have been called with processing status
-	// Since the embed gets mutated later, we need to check the structure
 	expect(replyCallArgs).toEqual({
 		components: [],
 		embeds: [expect.any(EmbedBuilder)],

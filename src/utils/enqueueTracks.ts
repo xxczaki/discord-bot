@@ -105,17 +105,20 @@ export default async function enqueueTracks({
 		});
 	}
 
-	queue.tracks.store = queue?.tracks.data.sort((a, b) => {
-		const indexA = tracks.findIndex(({ url }) => url === a.url);
-		const indexB = tracks.findIndex(({ url }) => url === b.url);
+	if (queue?.tracks) {
+		queue.tracks.store =
+			queue?.tracks?.data?.sort((a, b) => {
+				const indexA = tracks.findIndex(({ url }) => url === a.url);
+				const indexB = tracks.findIndex(({ url }) => url === b.url);
 
-		// If track not found in original array, put it at the end
-		if (indexA === -1 && indexB === -1) return 0;
-		if (indexA === -1) return 1;
-		if (indexB === -1) return -1;
+				// If track not found in original array, put it at the end
+				if (indexA === -1 && indexB === -1) return 0;
+				if (indexA === -1) return 1;
+				if (indexB === -1) return -1;
 
-		return indexA - indexB;
-	});
+				return indexA - indexB;
+			}) || [];
+	}
 
 	await interaction.editReply({
 		content: null,

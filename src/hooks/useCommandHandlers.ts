@@ -16,6 +16,7 @@ export default async function useCommandHandlers(
 	}
 
 	const lockdown = LockdownManager.getInstance();
+
 	if (!lockdown.hasCommandPermission(interaction)) {
 		return lockdown.sendPermissionDeniedMessage(interaction);
 	}
