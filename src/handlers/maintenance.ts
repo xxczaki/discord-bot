@@ -32,14 +32,8 @@ export default async function maintenanceCommandHandler(
 		logger.error(error, 'Failed to delete deployment for maintenance');
 		captureException(error);
 
-		const errorMessage =
-			error instanceof Error ? error.message : 'Unknown error occurred';
-
 		await interaction.editReply(
-			`❌ Failed to activate maintenance mode:
-\`\`\`${errorMessage}\`\`\`
-
-Please check the logs or try again later.`,
+			'❌ Failed to activate maintenance mode. Please check the logs or try again later.',
 		);
 	}
 }
