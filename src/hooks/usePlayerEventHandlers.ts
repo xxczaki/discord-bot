@@ -22,7 +22,7 @@ export default function usePlayerEventHandlers(
 	player: Player,
 ): void {
 	player.events.on('playerStart', async (queue, track) => {
-		const embed = createTrackEmbed(queue, track, 'Playing it now.');
+		const embed = await createTrackEmbed(queue, track, 'Playing it now.');
 
 		const skip = new ButtonBuilder()
 			.setCustomId('skip')
