@@ -1,10 +1,13 @@
+import { stat } from 'node:fs/promises';
 import { type GuildQueue, type Track, serialize } from 'discord-player';
 import { EmbedBuilder } from 'discord.js';
 import memoize from 'memoize';
+import prettyBytes from 'pretty-bytes';
 import isObject from '../utils/isObject';
+import getOpusCacheTrackPath from './getOpusCacheTrackPath';
 import getTrackThumbnail from './getTrackThumbnail';
 
-function createTrackEmbed(
+async function createTrackEmbed(
 	queue: GuildQueue,
 	track: Track,
 	description: string,
@@ -44,8 +47,17 @@ function createTrackEmbed(
 	}
 
 	if (track.metadata.isFromCache) {
+		let footerText = '♻️ Streaming from an offline cache';
+
+		try {
+			const filePath = getOpusCacheTrackPath(track.url);
+			const stats = await stat(filePath);
+
+			footerText += ` (${prettyBytes(stats.size)})`;
+		} catch {}
+
 		embed.setFooter({
-			text: '♻️ Streaming from an offline cache',
+			text: footerText,
 		});
 	}
 

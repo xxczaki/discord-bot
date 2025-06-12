@@ -16,3 +16,12 @@ alwaysApply: true
   - `getEnvironmentVariable()` for accessing environment variables with type safety
   - `snakeToCamelCase()` for string case conversion
   - Other utilities available in the utils directory
+
+## Constants
+- Reusable constants (URLs, IDs, configuration values, timeouts) should be defined as CONSTANT_CASE constants at the top of the file, after imports
+	- Example: `const CACHE_WRITE_BUFFER_MS = 5000;`
+- Constants should be placed before any other code or initialization
+- **Always include units in constant names** to make the value type clear:
+	- Time: `_MS` (milliseconds), `_SEC` (seconds), `_MIN` (minutes)
+	- Size: `_BYTES`, `_KB`, `_MB`, `_GB`
+	- Examples: `MAX_FILE_SIZE_BYTES`, `REQUEST_TIMEOUT_MS`

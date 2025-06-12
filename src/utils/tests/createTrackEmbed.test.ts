@@ -1,3 +1,5 @@
+import type { Stats } from 'node:fs';
+import { stat } from 'node:fs/promises';
 import type { GuildQueue, Track } from 'discord-player';
 import { EmbedBuilder } from 'discord.js';
 import { beforeEach, expect, it, vi } from 'vitest';
@@ -12,6 +14,7 @@ const EXAMPLE_DESCRIPTION = 'Now playing';
 const EXAMPLE_QUERY = 'test song artist';
 const EXAMPLE_URL_QUERY = 'https://spotify.com/track/123';
 const EXAMPLE_BRIDGE_URL = 'https://youtube.com/watch?v=123';
+const EXAMPLE_FILE_SIZE_BYTES = 2534656; // ~2.53 MB
 
 vi.mock('discord-player', () => ({
 	serialize: vi.fn(() => 'serialized-track'),
@@ -19,6 +22,10 @@ vi.mock('discord-player', () => ({
 
 vi.mock('../getTrackThumbnail', () => ({
 	default: vi.fn(() => 'https://example.com/thumbnail.jpg'),
+}));
+
+vi.mock('node:fs/promises', () => ({
+	stat: vi.fn(),
 }));
 
 vi.mock('memoize', () => ({
@@ -48,11 +55,11 @@ beforeEach(() => {
 	vi.clearAllMocks();
 });
 
-it('should create basic embed with required fields', () => {
+it('should create basic embed with required fields', async () => {
 	const track = createMockTrack();
 	const queue = createMockQueue();
 
-	const result = createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
+	const result = await createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
 
 	expect(result).toBeInstanceOf(EmbedBuilder);
 	expect(result.data.title).toBe(EXAMPLE_TRACK_TITLE);
@@ -64,7 +71,7 @@ it('should create basic embed with required fields', () => {
 	]);
 });
 
-it('should add query field when query is not a URL', () => {
+it('should add query field when query is not a URL', async () => {
 	const track = createMockTrack();
 	const queue = createMockQueue({
 		metadata: {
@@ -74,7 +81,7 @@ it('should add query field when query is not a URL', () => {
 		},
 	});
 
-	const result = createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
+	const result = await createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
 
 	expect(result.data.fields).toContainEqual({
 		name: 'Query',
@@ -82,7 +89,7 @@ it('should add query field when query is not a URL', () => {
 	});
 });
 
-it('should not add query field when query is a URL', () => {
+it('should not add query field when query is a URL', async () => {
 	const track = createMockTrack();
 	const queue = createMockQueue({
 		metadata: {
@@ -92,7 +99,7 @@ it('should not add query field when query is a URL', () => {
 		},
 	});
 
-	const result = createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
+	const result = await createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
 
 	const queryField = result.data.fields?.find(
 		(field) => field.name === 'Query',
@@ -100,7 +107,7 @@ it('should not add query field when query is a URL', () => {
 	expect(queryField).toBeUndefined();
 });
 
-it('should use fallback query when track-specific query is not found', () => {
+it('should use fallback query when track-specific query is not found', async () => {
 	const track = createMockTrack();
 	const queue = createMockQueue({
 		metadata: {
@@ -110,7 +117,7 @@ it('should use fallback query when track-specific query is not found', () => {
 		},
 	});
 
-	const result = createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
+	const result = await createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
 
 	expect(result.data.fields).toContainEqual({
 		name: 'Query',
@@ -118,7 +125,7 @@ it('should use fallback query when track-specific query is not found', () => {
 	});
 });
 
-it('should clean up queries after use', () => {
+it('should clean up queries after use', async () => {
 	const track = createMockTrack();
 	const mockSetMetadata = vi.fn();
 	const queue = createMockQueue({
@@ -132,7 +139,7 @@ it('should clean up queries after use', () => {
 		setMetadata: mockSetMetadata,
 	});
 
-	createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
+	await createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
 
 	expect(mockSetMetadata).toHaveBeenCalledWith({
 		queries: {
@@ -141,7 +148,7 @@ it('should clean up queries after use', () => {
 	});
 });
 
-it('should not clean up queries when metadata.queries is undefined', () => {
+it('should not clean up queries when metadata.queries is undefined', async () => {
 	const track = createMockTrack();
 	const mockSetMetadata = vi.fn();
 	const queue = createMockQueue({
@@ -149,22 +156,27 @@ it('should not clean up queries when metadata.queries is undefined', () => {
 		setMetadata: mockSetMetadata,
 	});
 
-	createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
+	await createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
 
 	expect(mockSetMetadata).not.toHaveBeenCalled();
 });
 
-it('should return embed when track metadata is not an object', () => {
+it('should return embed when track metadata is not an object', async () => {
 	const track = createMockTrack({ metadata: null });
 	const queue = createMockQueue();
 
-	const result = createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
+	const result = await createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
 
 	expect(result).toBeInstanceOf(EmbedBuilder);
 	expect(result.data.footer).toBeUndefined();
 });
 
-it('should add cache footer when track `isFromCache`', () => {
+it('should add cache footer when track `isFromCache`', async () => {
+	vi.mocked(stat).mockResolvedValue({
+		size: EXAMPLE_FILE_SIZE_BYTES,
+		mtime: new Date(),
+	} as Stats);
+
 	const track = createMockTrack({
 		metadata: {
 			isFromCache: true,
@@ -172,14 +184,31 @@ it('should add cache footer when track `isFromCache`', () => {
 	});
 	const queue = createMockQueue();
 
-	const result = createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
+	const result = await createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
+
+	expect(result.data.footer).toEqual({
+		text: '♻️ Streaming from an offline cache (2.53 MB)',
+	});
+});
+
+it('should add cache footer without file size when stat fails', async () => {
+	vi.mocked(stat).mockRejectedValue(new Error('File not found'));
+
+	const track = createMockTrack({
+		metadata: {
+			isFromCache: true,
+		},
+	});
+	const queue = createMockQueue();
+
+	const result = await createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
 
 	expect(result.data.footer).toEqual({
 		text: '♻️ Streaming from an offline cache',
 	});
 });
 
-it('should add bridged URL field when bridge metadata exists', () => {
+it('should add bridged URL field when bridge metadata exists', async () => {
 	const track = createMockTrack({
 		metadata: {
 			bridge: {
@@ -189,7 +218,7 @@ it('should add bridged URL field when bridge metadata exists', () => {
 	});
 	const queue = createMockQueue();
 
-	const result = createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
+	const result = await createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
 
 	expect(result.data.fields).toContainEqual({
 		name: 'Bridged URL',
@@ -198,7 +227,7 @@ it('should add bridged URL field when bridge metadata exists', () => {
 	});
 });
 
-it('should not add bridged URL field when bridge metadata is not an object', () => {
+it('should not add bridged URL field when bridge metadata is not an object', async () => {
 	const track = createMockTrack({
 		metadata: {
 			bridge: null,
@@ -206,7 +235,7 @@ it('should not add bridged URL field when bridge metadata is not an object', () 
 	});
 	const queue = createMockQueue();
 
-	const result = createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
+	const result = await createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
 
 	const bridgeField = result.data.fields?.find(
 		(field) => field.name === 'Bridged URL',
@@ -214,7 +243,7 @@ it('should not add bridged URL field when bridge metadata is not an object', () 
 	expect(bridgeField).toBeUndefined();
 });
 
-it('should not add bridged URL field when bridge URL is missing', () => {
+it('should not add bridged URL field when bridge URL is missing', async () => {
 	const track = createMockTrack({
 		metadata: {
 			bridge: {},
@@ -222,7 +251,7 @@ it('should not add bridged URL field when bridge URL is missing', () => {
 	});
 	const queue = createMockQueue();
 
-	const result = createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
+	const result = await createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
 
 	const bridgeField = result.data.fields?.find(
 		(field) => field.name === 'Bridged URL',
@@ -230,7 +259,9 @@ it('should not add bridged URL field when bridge URL is missing', () => {
 	expect(bridgeField).toBeUndefined();
 });
 
-it('should handle both cache footer and bridged URL together', () => {
+it('should handle both cache footer and bridged URL together', async () => {
+	vi.mocked(stat).mockResolvedValue({ size: EXAMPLE_FILE_SIZE_BYTES } as Stats);
+
 	const track = createMockTrack({
 		metadata: {
 			isFromCache: true,
@@ -241,10 +272,10 @@ it('should handle both cache footer and bridged URL together', () => {
 	});
 	const queue = createMockQueue();
 
-	const result = createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
+	const result = await createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
 
 	expect(result.data.footer).toEqual({
-		text: '♻️ Streaming from an offline cache',
+		text: '♻️ Streaming from an offline cache (2.53 MB)',
 	});
 	expect(result.data.fields).toContainEqual({
 		name: 'Bridged URL',

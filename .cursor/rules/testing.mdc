@@ -30,11 +30,6 @@ alwaysApply: false
 - Consult the `src/setupTests.ts` file and use it to define global mocks
 - **Do not duplicate mocks** that are already defined globally in `src/setupTests.ts` (like logger, redis, Sentry, etc.)
 
-## Test Data
-- Reusable test data (URLs, IDs, example inputs) should be defined as constants at the top of the test file, after imports but before mocks
-	- Example: `const EXAMPLE_PLAYLIST_URL = 'https://open.spotify.com/playlist/...'`
-- Constants should be placed before any mocks or other code
-
 ## Coverage
 - Aim for meaningful coverage that tests the core functionality, not arbitrary percentage targets
 - Focus on testing:

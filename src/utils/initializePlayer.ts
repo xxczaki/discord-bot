@@ -1,4 +1,5 @@
-import { createReadStream, createWriteStream, existsSync } from 'node:fs';
+import { createReadStream, createWriteStream } from 'node:fs';
+import { stat } from 'node:fs/promises';
 import { Readable } from 'node:stream';
 import {
 	InterceptedStream,
@@ -13,6 +14,8 @@ import { RedisQueryCache } from './RedisQueryCache';
 import defineCustomFilters from './defineCustomFilters';
 import getOpusCacheTrackPath from './getOpusCacheTrackPath';
 import redis from './redis';
+
+const CACHE_WRITE_BUFFER_MS = 5000;
 
 let initializedPlayer: Player;
 
@@ -32,16 +35,25 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 		onBeforeCreateStream(async (track) => {
 			const filePath = getOpusCacheTrackPath(track.url);
 
-			if (existsSync(filePath)) {
+			try {
+				const stats = await stat(filePath);
+
+				const now = Date.now();
+				const fileAge = now - stats.mtime.getTime();
+
+				if (fileAge < CACHE_WRITE_BUFFER_MS) {
+					return null;
+				}
+
 				track.setMetadata({
 					...(track.metadata ?? {}),
 					isFromCache: true,
 				});
 
 				return createReadStream(filePath);
+			} catch {
+				return null;
 			}
-
-			return null;
 		});
 
 		onStreamExtracted(async (stream, track) => {

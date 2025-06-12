@@ -176,7 +176,7 @@ it('should process track and display embed with buttons', async () => {
 
 	mockedUseMainPlayer.mockReturnValue(mockPlayer);
 	mockedUseQueue.mockReturnValue(mockQueue);
-	mockedCreateTrackEmbed.mockReturnValue(mockEmbed);
+	mockedCreateTrackEmbed.mockResolvedValue(mockEmbed);
 	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockResponse.awaitMessageComponent = vi
 		.fn()
@@ -225,7 +225,7 @@ it('should handle "play now" button interaction', async () => {
 
 	mockedUseMainPlayer.mockReturnValue(mockPlayer);
 	mockedUseQueue.mockReturnValue(mockQueue);
-	mockedCreateTrackEmbed.mockReturnValue(mockEmbed);
+	mockedCreateTrackEmbed.mockResolvedValue(mockEmbed);
 	mockedCreateSmartInteractionHandler.mockReturnValue({
 		cleanup: mockCleanup,
 		timeout: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
@@ -255,7 +255,7 @@ it('should handle "move first" button interaction', async () => {
 
 	mockedUseMainPlayer.mockReturnValue(mockPlayer);
 	mockedUseQueue.mockReturnValue(mockQueue);
-	mockedCreateTrackEmbed.mockReturnValue(mockEmbed);
+	mockedCreateTrackEmbed.mockResolvedValue(mockEmbed);
 	mockedCreateSmartInteractionHandler.mockReturnValue({
 		cleanup: mockCleanup,
 		timeout: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
@@ -285,7 +285,7 @@ it('should handle "remove" button interaction', async () => {
 
 	mockedUseMainPlayer.mockReturnValue(mockPlayer);
 	mockedUseQueue.mockReturnValue(mockQueue);
-	mockedCreateTrackEmbed.mockReturnValue(mockEmbed);
+	mockedCreateTrackEmbed.mockResolvedValue(mockEmbed);
 	mockedCreateSmartInteractionHandler.mockReturnValue({
 		cleanup: mockCleanup,
 		timeout: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
@@ -315,7 +315,7 @@ it('should handle unknown button interaction', async () => {
 
 	mockedUseMainPlayer.mockReturnValue(mockPlayer);
 	mockedUseQueue.mockReturnValue(mockQueue);
-	mockedCreateTrackEmbed.mockReturnValue(mockEmbed);
+	mockedCreateTrackEmbed.mockResolvedValue(mockEmbed);
 	mockedCreateSmartInteractionHandler.mockReturnValue({
 		cleanup: mockCleanup,
 		timeout: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
@@ -340,7 +340,7 @@ it('should handle component interaction timeout', async () => {
 
 	mockedUseMainPlayer.mockReturnValue(mockPlayer);
 	mockedUseQueue.mockReturnValue(mockQueue);
-	mockedCreateTrackEmbed.mockReturnValue(mockEmbed);
+	mockedCreateTrackEmbed.mockResolvedValue(mockEmbed);
 	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockResponse.awaitMessageComponent = vi
 		.fn()
@@ -407,7 +407,7 @@ it('should create proper button states based on track position and queue status'
 
 	mockedUseMainPlayer.mockReturnValue(mockPlayer);
 	mockedUseQueue.mockReturnValue(mockQueue);
-	mockedCreateTrackEmbed.mockReturnValue(mockEmbed);
+	mockedCreateTrackEmbed.mockResolvedValue(mockEmbed);
 	mockedGetTrackPosition.mockReturnValue(0); // Track is at position 1
 
 	vi.mocked(mockQueue.tracks.some).mockReturnValue(true);
@@ -447,7 +447,7 @@ it('should disable "Play next" button when track is at position 1', async () => 
 
 	mockedUseMainPlayer.mockReturnValue(mockPlayer);
 	mockedUseQueue.mockReturnValue(mockQueue);
-	mockedCreateTrackEmbed.mockReturnValue(mockEmbed);
+	mockedCreateTrackEmbed.mockResolvedValue(mockEmbed);
 	mockedGetTrackPosition.mockReturnValue(0);
 	vi.mocked(mockQueue.tracks.some).mockReturnValue(true);
 	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
@@ -472,7 +472,7 @@ it('should use correct `awaitMessageComponent` timeout', async () => {
 
 	mockedUseMainPlayer.mockReturnValue(mockPlayer);
 	mockedUseQueue.mockReturnValue(mockQueue);
-	mockedCreateTrackEmbed.mockReturnValue(mockEmbed);
+	mockedCreateTrackEmbed.mockResolvedValue(mockEmbed);
 	mockedCreateSmartInteractionHandler.mockReturnValue({
 		cleanup: vi.fn(),
 		timeout: customTimeout,
