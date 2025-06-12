@@ -61,11 +61,11 @@ it('should successfully delete deployment', async () => {
 		namespace: 'discord-bot',
 	});
 	expect(interaction.editReply).toHaveBeenCalledWith(
-		'✅ Maintenance mode activated! Deployment deleted.',
+		'✅ Maintenance mode activated! Bot will shut down in a few seconds...',
 	);
 	expect(mockedLogger.info).toHaveBeenCalledWith(
 		{},
-		'Bot deployment deleted for maintenance',
+		'Maintenance mode activated, deleting deployment...',
 	);
 });
 

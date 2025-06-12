@@ -18,16 +18,16 @@ export default async function maintenanceCommandHandler(
 
 		const k8sAppsV1Api = kc.makeApiClient(k8s.AppsV1Api);
 
+		await interaction.editReply(
+			'✅ Maintenance mode activated! Bot will shut down in a few seconds...',
+		);
+
+		logger.info({}, 'Maintenance mode activated, deleting deployment...');
+
 		await k8sAppsV1Api.deleteNamespacedDeployment({
 			name: DEPLOYMENT_NAME,
 			namespace: DEPLOYMENT_NAMESPACE,
 		});
-
-		await interaction.editReply(
-			'✅ Maintenance mode activated! Deployment deleted.',
-		);
-
-		logger.info({}, 'Bot deployment deleted for maintenance');
 	} catch (error) {
 		logger.error(error, 'Failed to delete deployment for maintenance');
 		captureException(error);
