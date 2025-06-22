@@ -1,8 +1,8 @@
-import { Player } from 'discord-player';
 import { Client } from 'discord.js';
+import { Player } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
-import { RedisQueryCache } from '../RedisQueryCache';
 import getInitializedPlayer from '../initializePlayer';
+import { RedisQueryCache } from '../RedisQueryCache';
 
 vi.mock('discord.js', () => ({
 	Client: vi.fn(() => ({ intents: [] })),

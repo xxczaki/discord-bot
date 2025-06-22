@@ -1,8 +1,8 @@
 import { captureException } from '@sentry/node';
 import { type ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
-import { StatsHandler } from '../utils/StatsHandler';
 import logger from '../utils/logger';
 import redis from '../utils/redis';
+import { StatsHandler } from '../utils/StatsHandler';
 
 const statsHandler = StatsHandler.getInstance();
 

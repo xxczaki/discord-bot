@@ -1,4 +1,3 @@
-import type { GuildQueue, Player, Track } from 'discord-player';
 import {
 	ActivityType,
 	ButtonStyle,
@@ -7,14 +6,15 @@ import {
 	type MessageComponentInteraction,
 	type TextChannel,
 } from 'discord.js';
+import type { GuildQueue, Player, Track } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
 import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../../constants/miscellaneous';
-import { QueueRecoveryService } from '../../utils/QueueRecoveryService';
-import { StatsHandler } from '../../utils/StatsHandler';
 import createSmartInteractionHandler from '../../utils/createSmartInteractionHandler';
 import createTrackEmbed from '../../utils/createTrackEmbed';
 import deleteOpusCacheEntry from '../../utils/deleteOpusCacheEntry';
 import { resetPresence, setPresence } from '../../utils/presenceManager';
+import { QueueRecoveryService } from '../../utils/QueueRecoveryService';
+import { StatsHandler } from '../../utils/StatsHandler';
 import usePlayerEventHandlers from '../usePlayerEventHandlers';
 
 const MOCK_TRACK_TITLE = 'Test Song';

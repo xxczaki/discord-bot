@@ -1,4 +1,3 @@
-import { useMainPlayer, useQueue } from 'discord-player';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -7,10 +6,11 @@ import {
 	type ComponentType,
 	type GuildMember,
 } from 'discord.js';
+import { useMainPlayer, useQueue } from 'discord-player';
 import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
-import { QueueRecoveryService } from '../utils/QueueRecoveryService';
 import enqueueTracks from '../utils/enqueueTracks';
 import pluralize from '../utils/pluralize';
+import { QueueRecoveryService } from '../utils/QueueRecoveryService';
 
 const queueRecoveryService = QueueRecoveryService.getInstance();
 

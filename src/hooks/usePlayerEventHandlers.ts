@@ -1,4 +1,3 @@
-import type { Player } from 'discord-player';
 import {
 	ActionRowBuilder,
 	ActivityType,
@@ -6,13 +5,14 @@ import {
 	ButtonStyle,
 	type Client,
 } from 'discord.js';
-import { QueueRecoveryService } from '../utils/QueueRecoveryService';
-import { StatsHandler } from '../utils/StatsHandler';
+import type { Player } from 'discord-player';
 import createSmartInteractionHandler from '../utils/createSmartInteractionHandler';
 import createTrackEmbed from '../utils/createTrackEmbed';
 import deleteOpusCacheEntry from '../utils/deleteOpusCacheEntry';
 import isObject from '../utils/isObject';
 import { resetPresence, setPresence } from '../utils/presenceManager';
+import { QueueRecoveryService } from '../utils/QueueRecoveryService';
+import { StatsHandler } from '../utils/StatsHandler';
 
 const statsHandler = StatsHandler.getInstance();
 const queueRecoveryService = QueueRecoveryService.getInstance();

@@ -1,5 +1,5 @@
-import { useQueue } from 'discord-player';
 import type { ChatInputCommandInteraction } from 'discord.js';
+import { useQueue } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
 import resumeCommandHandler from '../resume';
 

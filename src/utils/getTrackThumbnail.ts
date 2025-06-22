@@ -1,4 +1,4 @@
-import { type Track, serialize } from 'discord-player';
+import { serialize, type Track } from 'discord-player';
 import memoize from 'memoize';
 import isObject from './isObject';
 

@@ -1,5 +1,5 @@
-import { useMainPlayer } from 'discord-player';
 import { type ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
+import { useMainPlayer } from 'discord-player';
 import getCommitLink from '../utils/getCommitLink';
 
 const commitHash = process.env.GIT_COMMIT_SHA;

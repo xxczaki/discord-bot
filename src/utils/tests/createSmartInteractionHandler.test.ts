@@ -1,6 +1,6 @@
+import type { InteractionResponse, Message } from 'discord.js';
 import type { GuildQueue, Track } from 'discord-player';
 import { useMainPlayer } from 'discord-player';
-import type { InteractionResponse, Message } from 'discord.js';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import createSmartInteractionHandler from '../createSmartInteractionHandler';
 

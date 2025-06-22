@@ -1,11 +1,5 @@
 import { captureException } from '@sentry/node';
 import {
-	type GuildQueue,
-	type Track,
-	useMainPlayer,
-	useQueue,
-} from 'discord-player';
-import {
 	ActionRowBuilder,
 	type ChatInputCommandInteraction,
 	EmbedBuilder,
@@ -14,6 +8,12 @@ import {
 	type MessageComponentInteraction,
 	type VoiceBasedChannel,
 } from 'discord.js';
+import {
+	type GuildQueue,
+	type Track,
+	useMainPlayer,
+	useQueue,
+} from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
 import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../../constants/miscellaneous';
 import createSmartInteractionHandler from '../../utils/createSmartInteractionHandler';

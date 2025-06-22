@@ -4,15 +4,15 @@ import type {
 } from 'discord.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ticTacToeCommandHandler, {
-	getAllPositions,
-	getWinningSequences,
-	getLabel,
-	getPossiblePositions,
-	isGameOverByWin,
-	getOPositions,
-	getRows,
-	nextMove,
 	EMPTY_CHARACTER,
+	getAllPositions,
+	getLabel,
+	getOPositions,
+	getPossiblePositions,
+	getRows,
+	getWinningSequences,
+	isGameOverByWin,
+	nextMove,
 } from '../ticTacToe';
 
 const WINNING_HORIZONTAL_TOP = ['0-0', '0-1', '0-2'];

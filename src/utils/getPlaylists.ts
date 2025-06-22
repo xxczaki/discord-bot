@@ -2,8 +2,8 @@ import {
 	StringSelectMenuOptionBuilder,
 	type TextBasedChannel,
 } from 'discord.js';
-import { ExternalPlaylistCache } from './ExternalPlaylistCache';
 import cleanUpPlaylistContent from './cleanUpPlaylistContent';
+import { ExternalPlaylistCache } from './ExternalPlaylistCache';
 import isUrlSpotifyPlaylist from './isUrlSpotifyPlaylist';
 import pluralize from './pluralize';
 import redis from './redis';

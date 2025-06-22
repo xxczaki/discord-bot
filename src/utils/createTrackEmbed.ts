@@ -1,6 +1,6 @@
 import { stat } from 'node:fs/promises';
-import { type GuildQueue, type Track, serialize } from 'discord-player';
 import { EmbedBuilder } from 'discord.js';
+import { type GuildQueue, serialize, type Track } from 'discord-player';
 import memoize from 'memoize';
 import prettyBytes from 'pretty-bytes';
 import isObject from '../utils/isObject';

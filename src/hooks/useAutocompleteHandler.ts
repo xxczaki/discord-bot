@@ -1,6 +1,6 @@
 import { captureException } from '@sentry/node';
-import { useMainPlayer, useQueue } from 'discord-player';
 import type { Interaction } from 'discord.js';
+import { useMainPlayer, useQueue } from 'discord-player';
 import Fuse from 'fuse.js';
 import debounce from 'p-debounce';
 import determineSearchEngine from '../utils/determineSearchEngine';

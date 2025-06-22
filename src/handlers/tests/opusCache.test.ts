@@ -1,11 +1,10 @@
-import type { Stats } from 'node:fs';
-import type { Dir, Dirent } from 'node:fs';
+import type { Dir, Dirent, Stats } from 'node:fs';
 import { opendir, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { captureException } from '@sentry/node';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import prettyBytes from 'pretty-bytes';
-import { type MockedFunction, beforeEach, expect, it, vi } from 'vitest';
+import { beforeEach, expect, it, type MockedFunction, vi } from 'vitest';
 import logger from '../../utils/logger';
 
 const MOCK_CACHE_DIRECTORY = '/mock/opus-cache';

@@ -1,7 +1,7 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
 import {
-	COMMAND_CATEGORIES,
 	type CategorizedCommand,
+	COMMAND_CATEGORIES,
 	RAW_COMMANDS,
 } from '../constants/commands';
 

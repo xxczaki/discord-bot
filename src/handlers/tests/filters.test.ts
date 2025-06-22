@@ -1,5 +1,5 @@
-import { useMainPlayer, useQueue } from 'discord-player';
 import { ActionRowBuilder, type ChatInputCommandInteraction } from 'discord.js';
+import { useMainPlayer, useQueue } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
 import filtersCommandHandler from '../filters';
 

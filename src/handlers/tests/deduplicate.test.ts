@@ -1,6 +1,6 @@
-import { useQueue } from 'discord-player';
-import type { Track } from 'discord-player';
 import type { ChatInputCommandInteraction } from 'discord.js';
+import type { Track } from 'discord-player';
+import { useQueue } from 'discord-player';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import deduplicateCommandHandler from '../deduplicate';
 

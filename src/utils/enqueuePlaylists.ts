@@ -1,4 +1,3 @@
-import { useQueue } from 'discord-player';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -7,6 +6,7 @@ import {
 	type StringSelectMenuInteraction,
 	type VoiceBasedChannel,
 } from 'discord.js';
+import { useQueue } from 'discord-player';
 import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
 import cleanUpPlaylistContent from './cleanUpPlaylistContent';
 import getEnvironmentVariable from './getEnvironmentVariable';

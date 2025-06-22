@@ -1,5 +1,5 @@
-import { type GuildQueue, type Track, useMainPlayer } from 'discord-player';
 import type { InteractionResponse, Message } from 'discord.js';
+import { type GuildQueue, type Track, useMainPlayer } from 'discord-player';
 import calculateSmartTimeout from './calculateSmartTimeout';
 import getTrackPosition from './getTrackPosition';
 

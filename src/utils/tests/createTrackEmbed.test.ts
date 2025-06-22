@@ -1,7 +1,7 @@
 import type { Stats } from 'node:fs';
 import { stat } from 'node:fs/promises';
-import type { GuildQueue, Track } from 'discord-player';
 import { EmbedBuilder } from 'discord.js';
+import type { GuildQueue, Track } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
 import createTrackEmbed from '../createTrackEmbed';
 

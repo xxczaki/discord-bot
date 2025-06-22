@@ -1,7 +1,7 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
-import { QueueRecoveryService } from '../utils/QueueRecoveryService';
 import deleteOpusCacheEntry from '../utils/deleteOpusCacheEntry';
 import isObject from '../utils/isObject';
+import { QueueRecoveryService } from '../utils/QueueRecoveryService';
 import useQueueWithValidation from '../utils/useQueueWithValidation';
 
 const queueRecoveryService = QueueRecoveryService.getInstance();

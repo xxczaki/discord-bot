@@ -1,5 +1,5 @@
-import type { GuildQueue } from 'discord-player';
 import type { ChatInputCommandInteraction } from 'discord.js';
+import type { GuildQueue } from 'discord-player';
 import { expect, it, vi } from 'vitest';
 import useQueueWithValidation from '../useQueueWithValidation';
 

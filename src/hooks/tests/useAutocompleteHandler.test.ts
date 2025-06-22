@@ -1,6 +1,6 @@
 import { captureException } from '@sentry/node';
-import { useMainPlayer, useQueue } from 'discord-player';
 import type { AutocompleteInteraction } from 'discord.js';
+import { useMainPlayer, useQueue } from 'discord-player';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import determineSearchEngine from '../../utils/determineSearchEngine';
 import getTrackPosition from '../../utils/getTrackPosition';

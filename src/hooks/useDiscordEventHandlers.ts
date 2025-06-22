@@ -1,12 +1,12 @@
-import { useQueue } from 'discord-player';
-import type { Player } from 'discord-player';
 import type { Client } from 'discord.js';
-import { QueueRecoveryService } from '../utils/QueueRecoveryService';
+import type { Player } from 'discord-player';
+import { useQueue } from 'discord-player';
 import deleteOpusCacheEntry from '../utils/deleteOpusCacheEntry';
 import getCommitLink from '../utils/getCommitLink';
 import getEnvironmentVariable from '../utils/getEnvironmentVariable';
 import isObject from '../utils/isObject';
 import logger from '../utils/logger';
+import { QueueRecoveryService } from '../utils/QueueRecoveryService';
 import useAutocompleteHandler from './useAutocompleteHandler';
 import useCommandHandlers from './useCommandHandlers';
 

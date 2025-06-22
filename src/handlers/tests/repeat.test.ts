@@ -1,5 +1,5 @@
-import { QueueRepeatMode, useQueue } from 'discord-player';
 import type { ChatInputCommandInteraction } from 'discord.js';
+import { QueueRepeatMode, useQueue } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
 import repeatCommandHandler from '../repeat';
 

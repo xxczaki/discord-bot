@@ -1,15 +1,15 @@
 import type { Server } from 'node:net';
 import { createServer } from 'node:net';
 import { captureException } from '@sentry/node';
-import type { GuildQueue, Player } from 'discord-player';
 import type { Client, TextChannel } from 'discord.js';
 import { EmbedBuilder } from 'discord.js';
+import type { GuildQueue, Player } from 'discord-player';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { QueueRecoveryService } from '../../utils/QueueRecoveryService';
 import deleteOpusCacheEntry from '../../utils/deleteOpusCacheEntry';
 import enqueueTracks from '../../utils/enqueueTracks';
 import getEnvironmentVariable from '../../utils/getEnvironmentVariable';
 import logger from '../../utils/logger';
+import { QueueRecoveryService } from '../../utils/QueueRecoveryService';
 import useDebugListeners from '../useDebugListeners';
 
 const TEST_DEBUG_CHANNEL_ID = 'test-debug-channel-id';

@@ -1,6 +1,6 @@
 import { availableParallelism } from 'node:os';
-import { type QueueFilters, useMainPlayer } from 'discord-player';
 import type { EmbedBuilder, VoiceBasedChannel } from 'discord.js';
+import { type QueueFilters, useMainPlayer } from 'discord-player';
 import Queue from 'p-queue';
 import type { ProcessingInteraction } from '../types/ProcessingInteraction';
 import determineSearchEngine from './determineSearchEngine';

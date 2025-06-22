@@ -1,5 +1,5 @@
-import { QueueRepeatMode } from 'discord-player';
 import type { ChatInputCommandInteraction } from 'discord.js';
+import { QueueRepeatMode } from 'discord-player';
 import useQueueWithValidation from '../utils/useQueueWithValidation';
 
 export default async function repeatCommandHandler(

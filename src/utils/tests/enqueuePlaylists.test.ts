@@ -1,5 +1,3 @@
-import { useQueue } from 'discord-player';
-import type { GuildQueue } from 'discord-player';
 import {
 	ActionRowBuilder,
 	type ButtonInteraction,
@@ -10,6 +8,8 @@ import {
 	type TextBasedChannel,
 	type VoiceBasedChannel,
 } from 'discord.js';
+import type { GuildQueue } from 'discord-player';
+import { useQueue } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
 import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../../constants/miscellaneous';
 import enqueuePlaylists from '../enqueuePlaylists';

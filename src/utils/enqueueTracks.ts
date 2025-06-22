@@ -1,11 +1,11 @@
 import { captureException } from '@sentry/node';
+import { EmbedBuilder, type VoiceBasedChannel } from 'discord.js';
 import {
 	type QueueFilters,
 	type Track,
 	useMainPlayer,
 	useQueue,
 } from 'discord-player';
-import { EmbedBuilder, type VoiceBasedChannel } from 'discord.js';
 import type { ProcessingInteraction } from '../types/ProcessingInteraction';
 import determineSearchEngine from './determineSearchEngine';
 import logger from './logger';

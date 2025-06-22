@@ -6,9 +6,9 @@ import type {
 } from 'discord-player';
 import {
 	DiscordPlayerQueryResultCache,
+	deserialize,
 	SearchResult as MockedSearchResult,
 	QueryType,
-	deserialize,
 	serialize,
 	useMainPlayer,
 } from 'discord-player';

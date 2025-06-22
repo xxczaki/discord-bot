@@ -1,4 +1,3 @@
-import type { QueueFilters } from 'discord-player';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -8,6 +7,7 @@ import {
 	StringSelectMenuBuilder,
 	StringSelectMenuOptionBuilder,
 } from 'discord.js';
+import type { QueueFilters } from 'discord-player';
 import createQueueAwareComponentHandler from '../utils/createQueueAwareComponentHandler';
 import useQueueWithValidation from '../utils/useQueueWithValidation';
 
@@ -103,7 +103,7 @@ export default async function filtersCommandHandler(
 			content: 'No filters were selected, aborting…',
 			components: [],
 		});
-	} catch (error) {
+	} catch {
 		await handler.cleanup();
 	}
 }

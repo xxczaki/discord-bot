@@ -1,8 +1,8 @@
 import { captureException } from '@sentry/node';
+import type { VoiceBasedChannel } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import type { GuildQueue, Player, Track } from 'discord-player';
 import { useMainPlayer, useQueue } from 'discord-player';
-import { EmbedBuilder } from 'discord.js';
-import type { VoiceBasedChannel } from 'discord.js';
 import { beforeEach, expect, it, vi } from 'vitest';
 import type { ProcessingInteraction } from '../../types/ProcessingInteraction';
 import enqueueTracks from '../enqueueTracks';

@@ -1,7 +1,7 @@
 import { availableParallelism } from 'node:os';
+import type { EmbedBuilder, User, VoiceBasedChannel } from 'discord.js';
 import type { GuildQueue, Player } from 'discord-player';
 import { useMainPlayer, useQueue } from 'discord-player';
-import type { EmbedBuilder, User, VoiceBasedChannel } from 'discord.js';
 import Queue from 'p-queue';
 import { beforeEach, expect, it, vi } from 'vitest';
 import type { ProcessingInteraction } from '../../types/ProcessingInteraction';

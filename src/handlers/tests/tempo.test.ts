@@ -1,6 +1,6 @@
+import type { ChatInputCommandInteraction } from 'discord.js';
 import type { QueueFilters } from 'discord-player';
 import { useMainPlayer, useQueue } from 'discord-player';
-import type { ChatInputCommandInteraction } from 'discord.js';
 import { beforeEach, expect, it, vi } from 'vitest';
 import tempoCommandHandler from '../tempo';
 

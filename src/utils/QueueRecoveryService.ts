@@ -1,10 +1,10 @@
 import {
+	deserialize,
 	type GuildQueue,
 	type Player,
 	type SerializedTrack,
-	type Track,
-	deserialize,
 	serialize,
+	type Track,
 } from 'discord-player';
 import redis from './redis';
 
@@ -81,7 +81,7 @@ export class QueueRecoveryService {
 				) as Track[],
 				progress,
 			};
-		} catch (error) {
+		} catch {
 			return DEFAULT_CONTENTS;
 		}
 	}

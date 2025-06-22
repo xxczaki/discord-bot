@@ -1,12 +1,12 @@
 import { captureException } from '@sentry/node';
-import { type QueueFilters, useMainPlayer, useQueue } from 'discord-player';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonStyle,
 	type GuildMember,
 } from 'discord.js';
-import type { ChatInputCommandInteraction } from 'discord.js';
+import { type QueueFilters, useMainPlayer, useQueue } from 'discord-player';
 import createSmartInteractionHandler from '../utils/createSmartInteractionHandler';
 import createTrackEmbed from '../utils/createTrackEmbed';
 import determineSearchEngine from '../utils/determineSearchEngine';

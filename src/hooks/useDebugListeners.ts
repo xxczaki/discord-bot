@@ -1,18 +1,18 @@
-import { type Server, createServer } from 'node:net';
+import { createServer, type Server } from 'node:net';
 import { captureException } from '@sentry/node';
-import type { GuildQueue, Player } from 'discord-player';
 import {
 	type Client,
 	EmbedBuilder,
 	type InteractionEditReplyOptions,
 	type InteractionReplyOptions,
 } from 'discord.js';
-import { QueueRecoveryService } from '../utils/QueueRecoveryService';
+import type { GuildQueue, Player } from 'discord-player';
 import deleteOpusCacheEntry from '../utils/deleteOpusCacheEntry';
 import enqueueTracks from '../utils/enqueueTracks';
 import getEnvironmentVariable from '../utils/getEnvironmentVariable';
 import isObject from '../utils/isObject';
 import logger from '../utils/logger';
+import { QueueRecoveryService } from '../utils/QueueRecoveryService';
 
 const FATAL_ERROR_MESSAGE_DEBOUNCE = 1000 * 30; // 30 seconds
 
@@ -176,7 +176,7 @@ function initializePlayerErrorReporter(
 			const messageEditHandler = (
 				options: InteractionEditReplyOptions | InteractionReplyOptions,
 			) => {
-				const { flags, ...messageOptions } = options;
+				const { flags: _flags, ...messageOptions } = options;
 
 				return message.edit(messageOptions);
 			};

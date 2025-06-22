@@ -1,5 +1,3 @@
-import { useQueue } from 'discord-player';
-import type { Player, Track } from 'discord-player';
 import type {
 	Client,
 	Guild,
@@ -7,6 +5,8 @@ import type {
 	TextChannel,
 	VoiceState,
 } from 'discord.js';
+import type { Player, Track } from 'discord-player';
+import { useQueue } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
 import deleteOpusCacheEntry from '../../utils/deleteOpusCacheEntry';
 import useDiscordEventHandlers, {

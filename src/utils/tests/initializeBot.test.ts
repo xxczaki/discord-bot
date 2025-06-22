@@ -1,5 +1,5 @@
-import type { Player } from 'discord-player';
 import type { Client } from 'discord.js';
+import type { Player } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
 import useDebugListeners from '../../hooks/useDebugListeners';
 import useDiscordEventHandlers, {

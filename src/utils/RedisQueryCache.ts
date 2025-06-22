@@ -1,17 +1,15 @@
 import {
-	type Playlist,
-	type SerializedPlaylist,
-	type SerializedTrack,
-	deserialize,
-	serialize,
-	useMainPlayer,
-} from 'discord-player';
-import {
 	DiscordPlayerQueryResultCache,
+	deserialize,
+	type Playlist,
 	type QueryCacheProvider,
 	type QueryCacheResolverContext,
 	SearchResult,
+	type SerializedPlaylist,
+	type SerializedTrack,
+	serialize,
 	type Track,
+	useMainPlayer,
 } from 'discord-player';
 import type { Redis } from 'ioredis';
 import { ExternalPlaylistCache } from './ExternalPlaylistCache';

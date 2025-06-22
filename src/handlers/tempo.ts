@@ -1,10 +1,10 @@
-import type { QueueFilters } from 'discord-player';
 import {
 	ActionRowBuilder,
 	type ChatInputCommandInteraction,
 	StringSelectMenuBuilder,
 	StringSelectMenuOptionBuilder,
 } from 'discord.js';
+import type { QueueFilters } from 'discord-player';
 import createQueueAwareComponentHandler from '../utils/createQueueAwareComponentHandler';
 import useQueueWithValidation from '../utils/useQueueWithValidation';
 

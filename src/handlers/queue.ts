@@ -3,7 +3,6 @@ import {
 	differenceInCalendarDays,
 	formatDistance,
 } from 'date-fns';
-import { type GuildQueue, QueueRepeatMode, type Track } from 'discord-player';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -13,6 +12,7 @@ import {
 	type InteractionResponse,
 	type Message,
 } from 'discord.js';
+import { type GuildQueue, QueueRepeatMode, type Track } from 'discord-player';
 import createQueueAwareComponentHandler from '../utils/createQueueAwareComponentHandler';
 import getTrackPosition from '../utils/getTrackPosition';
 import getTrackThumbnail from '../utils/getTrackThumbnail';

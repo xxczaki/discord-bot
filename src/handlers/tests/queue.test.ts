@@ -1,10 +1,4 @@
 import {
-	QueueRepeatMode,
-	type Track,
-	useMainPlayer,
-	useQueue,
-} from 'discord-player';
-import {
 	ActionRowBuilder,
 	type ChatInputCommandInteraction,
 	EmbedBuilder,
@@ -12,6 +6,12 @@ import {
 	type Message,
 	type MessageComponentInteraction,
 } from 'discord.js';
+import {
+	QueueRepeatMode,
+	type Track,
+	useMainPlayer,
+	useQueue,
+} from 'discord-player';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import queueCommandHandler from '../queue';
 

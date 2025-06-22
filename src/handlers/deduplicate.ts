@@ -1,5 +1,5 @@
-import type { Track } from 'discord-player';
 import type { ChatInputCommandInteraction } from 'discord.js';
+import type { Track } from 'discord-player';
 import isObject from '../utils/isObject';
 import pluralize from '../utils/pluralize';
 import useQueueWithValidation from '../utils/useQueueWithValidation';

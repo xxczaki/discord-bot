@@ -1,8 +1,8 @@
 import type { ScanStream } from 'ioredis';
 import { ulid } from 'ulid';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { StatsHandler } from '../StatsHandler';
 import redis from '../redis';
+import { StatsHandler } from '../StatsHandler';
 
 const TEST_ULID = ulid();
 

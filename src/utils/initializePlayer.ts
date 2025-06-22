@@ -1,18 +1,18 @@
 import { createReadStream, createWriteStream } from 'node:fs';
 import { stat } from 'node:fs/promises';
 import { Readable } from 'node:stream';
+import type { Client } from 'discord.js';
 import {
 	InterceptedStream,
-	Player,
 	onBeforeCreateStream,
 	onStreamExtracted,
+	Player,
 } from 'discord-player';
 import { SpotifyExtractor } from 'discord-player-spotify';
 import { YoutubeiExtractor } from 'discord-player-youtubei';
-import type { Client } from 'discord.js';
-import { RedisQueryCache } from './RedisQueryCache';
 import defineCustomFilters from './defineCustomFilters';
 import getOpusCacheTrackPath from './getOpusCacheTrackPath';
+import { RedisQueryCache } from './RedisQueryCache';
 import redis from './redis';
 
 const CACHE_WRITE_BUFFER_MS = 5000;
