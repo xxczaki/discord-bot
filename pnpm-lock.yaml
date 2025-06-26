@@ -28,8 +28,8 @@ importers:
         specifier: ^1.1.4
         version: 1.1.4
       discord-player-youtubei:
-        specifier: ^1.4.6
-        version: 1.4.6(bufferutil@4.0.9)
+        specifier: ^1.5.0
+        version: 1.5.0(bufferutil@4.0.9)
       discord.js:
         specifier: ^14.21.0
         version: 14.21.0(bufferutil@4.0.9)
@@ -1263,8 +1263,8 @@ packages:
   discord-player-spotify@1.1.4:
     resolution: {integrity: sha512-HCKps/HmYo61re/b0SlEof4AZ97HTooOI7nxQZEwx0lsdbnmjW+T/G5GWpcdoHslpBpG1ABHIJc5IefLbtremA==}
 
-  discord-player-youtubei@1.4.6:
-    resolution: {integrity: sha512-LM8nSrJkIGYUj6oQsce6vi/rxxkp6AaJgy3m5uE4foSRotPmfkPRNo/tidoddTezlyaI/Qnz9qgCQNmbA43AYA==}
+  discord-player-youtubei@1.5.0:
+    resolution: {integrity: sha512-TYwYQ5cUpOxAffqa+AkM4XVEWFqe9DAFoNl91sHrA+LrvWgPNU5W9sA9P3UQGNqsFnu0Cf93dsQvXL73n+uX0w==}
     hasBin: true
 
   discord-player@7.2.0-dev.2:
@@ -3818,7 +3818,7 @@ snapshots:
       node-html-parser: 7.0.1
       otpauth: 9.4.0
 
-  discord-player-youtubei@1.4.6(bufferutil@4.0.9):
+  discord-player-youtubei@1.5.0(bufferutil@4.0.9):
     dependencies:
       bgutils-js: 3.2.0
       jsdom: 26.1.0(bufferutil@4.0.9)
