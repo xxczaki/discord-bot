@@ -12,6 +12,7 @@ import { SpotifyExtractor } from 'discord-player-spotify';
 import { YoutubeiExtractor } from 'discord-player-youtubei';
 import defineCustomFilters from './defineCustomFilters';
 import getOpusCacheTrackPath from './getOpusCacheTrackPath';
+import logger from './logger';
 import { RedisQueryCache } from './RedisQueryCache';
 import redis from './redis';
 
@@ -67,16 +68,32 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 
 			const filePath = getOpusCacheTrackPath(track.url);
 
-			interceptor.interceptors.add(createWriteStream(filePath));
+			try {
+				const writeStream = createWriteStream(filePath);
 
-			if (isReadable) {
-				return readable.pipe(interceptor);
+				writeStream.on('error', (error) => {
+					logger.error('Opus cache write stream error', error);
+				});
+
+				interceptor.interceptors.add(writeStream);
+
+				if (isReadable) {
+					return readable.pipe(interceptor);
+				}
+
+				return {
+					stream: readable.pipe(interceptor),
+					$fmt: stream.$fmt,
+				};
+			} catch (error) {
+				logger.error('Failed to create opus cache write stream', error);
+
+				if (isReadable) {
+					return readable;
+				}
+
+				return stream;
 			}
-
-			return {
-				stream: readable.pipe(interceptor),
-				$fmt: stream.$fmt,
-			};
 		});
 
 		await initializedPlayer.extractors.register(YoutubeiExtractor, {

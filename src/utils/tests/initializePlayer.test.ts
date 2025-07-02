@@ -1,5 +1,9 @@
 import { Client } from 'discord.js';
-import { Player } from 'discord-player';
+import {
+	onBeforeCreateStream,
+	onStreamExtracted,
+	Player,
+} from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
 import getInitializedPlayer from '../initializePlayer';
 import { RedisQueryCache } from '../RedisQueryCache';
@@ -67,6 +71,8 @@ it('should create a new player instance with Redis query cache', async () => {
 		queryCache: expect.any(RedisQueryCache),
 	});
 	expect(player).toBeDefined();
+	expect(onBeforeCreateStream).toHaveBeenCalledWith(expect.any(Function));
+	expect(onStreamExtracted).toHaveBeenCalledWith(expect.any(Function));
 });
 
 it('should return existing player instance if already initialized', async () => {
