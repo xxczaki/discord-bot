@@ -44,6 +44,10 @@ vi.mock('../../utils/getEnvironmentVariable', () => ({
 	default: vi.fn().mockReturnValue('mocked-channel-id'),
 }));
 
+vi.mock('../../utils/getDeploymentVersion', () => ({
+	default: vi.fn().mockResolvedValue('0.14.0'),
+}));
+
 const mockedUseQueue = vi.mocked(useQueue);
 const mockedDeleteOpusCacheEntry = vi.mocked(deleteOpusCacheEntry);
 
@@ -134,11 +138,11 @@ it('should send commit message on `ready` when channel exists and commit hash is
 	const readyHandler = readyCall?.[1];
 
 	if (readyHandler) {
-		readyHandler();
+		await readyHandler();
 	}
 
 	expect(mockChannel.send).toHaveBeenCalledWith(
-		expect.stringContaining('🎶 Ready to play, running commit'),
+		expect.stringContaining('🎶 Ready to play, running version'),
 	);
 });
 

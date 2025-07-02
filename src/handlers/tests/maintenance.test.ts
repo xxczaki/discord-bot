@@ -1,6 +1,7 @@
 import { captureException } from '@sentry/node';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { beforeEach, expect, it, vi } from 'vitest';
+import { DEPLOYMENT_NAME, DEPLOYMENT_NAMESPACE } from '../../utils/k8sClient';
 import logger from '../../utils/logger';
 import maintenanceCommandHandler from '../maintenance';
 
@@ -26,10 +27,14 @@ const mocks = vi.hoisted(() => {
 	};
 });
 
-vi.mock('@kubernetes/client-node', () => ({
-	KubeConfig: mocks.KubeConfig,
-	AppsV1Api: mocks.AppsV1Api,
-}));
+vi.mock('../../utils/k8sClient', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('../../utils/k8sClient')>();
+
+	return {
+		...actual,
+		default: vi.fn(() => mocks.mockApi),
+	};
+});
 
 const mockedCaptureException = vi.mocked(captureException);
 const mockedLogger = vi.mocked(logger);
@@ -55,10 +60,9 @@ it('should successfully delete deployment', async () => {
 	expect(interaction.reply).toHaveBeenCalledWith(
 		'🔧 Activating maintenance mode...',
 	);
-	expect(mocks.mockKubeConfig.loadFromCluster).toHaveBeenCalled();
 	expect(mocks.mockApi.deleteNamespacedDeployment).toHaveBeenCalledWith({
-		name: 'discord-bot',
-		namespace: 'discord-bot',
+		name: DEPLOYMENT_NAME,
+		namespace: DEPLOYMENT_NAMESPACE,
 	});
 	expect(interaction.editReply).toHaveBeenCalledWith(
 		'✅ Maintenance mode activated! Bot will shut down in a few seconds...',

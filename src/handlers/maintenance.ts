@@ -1,10 +1,10 @@
-import * as k8s from '@kubernetes/client-node';
 import { captureException } from '@sentry/node';
 import type { ChatInputCommandInteraction } from 'discord.js';
+import createK8sClient, {
+	DEPLOYMENT_NAME,
+	DEPLOYMENT_NAMESPACE,
+} from '../utils/k8sClient';
 import logger from '../utils/logger';
-
-const DEPLOYMENT_NAME = 'discord-bot';
-const DEPLOYMENT_NAMESPACE = 'discord-bot';
 
 export default async function maintenanceCommandHandler(
 	interaction: ChatInputCommandInteraction,
@@ -12,11 +12,7 @@ export default async function maintenanceCommandHandler(
 	await interaction.reply('🔧 Activating maintenance mode...');
 
 	try {
-		const kc = new k8s.KubeConfig();
-
-		kc.loadFromCluster();
-
-		const k8sAppsV1Api = kc.makeApiClient(k8s.AppsV1Api);
+		const k8sAppsV1Api = createK8sClient();
 
 		await interaction.editReply(
 			'✅ Maintenance mode activated! Bot will shut down in a few seconds...',

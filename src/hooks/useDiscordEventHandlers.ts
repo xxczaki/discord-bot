@@ -3,6 +3,7 @@ import type { Player } from 'discord-player';
 import { useQueue } from 'discord-player';
 import deleteOpusCacheEntry from '../utils/deleteOpusCacheEntry';
 import getCommitLink from '../utils/getCommitLink';
+import getDeploymentVersion from '../utils/getDeploymentVersion';
 import getEnvironmentVariable from '../utils/getEnvironmentVariable';
 import isObject from '../utils/isObject';
 import logger from '../utils/logger';
@@ -21,11 +22,14 @@ export function useReadyEventHandler(client: Client): void {
 		);
 		const commitHash = process.env.GIT_COMMIT_SHA;
 		const wasDeploymentManual = !commitHash;
+		const deploymentVersion = await getDeploymentVersion();
 
 		if (channel?.isSendable() && !wasDeploymentManual) {
-			await channel.send(
-				`🎶 Ready to play, running commit ${getCommitLink(commitHash)}.`,
-			);
+			const versionInfo = deploymentVersion
+				? `version ${deploymentVersion}`
+				: `commit ${getCommitLink(commitHash)}`;
+
+			await channel.send(`🎶 Ready to play, running ${versionInfo}.`);
 		}
 	});
 }
