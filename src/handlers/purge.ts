@@ -16,11 +16,11 @@ export default async function purgeCommandHandler(
 	const track = queue.currentTrack;
 
 	if (track && isObject(track.metadata) && !('isFromCache' in track.metadata)) {
-		await deleteOpusCacheEntry(track.url);
+		void deleteOpusCacheEntry(track.url);
 	}
 
 	if (queue.size > 0) {
-		await queueRecoveryService.saveQueue(queue);
+		void queueRecoveryService.saveQueue(queue);
 	}
 
 	queue.delete();

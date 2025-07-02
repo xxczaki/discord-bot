@@ -71,6 +71,6 @@ export default function useDiscordEventHandlers(
 			return;
 		}
 
-		await deleteOpusCacheEntry(track.url);
+		void deleteOpusCacheEntry(track.url);
 	});
 }
