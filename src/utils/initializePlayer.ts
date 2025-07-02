@@ -11,14 +11,18 @@ import {
 import { SpotifyExtractor } from 'discord-player-spotify';
 import { YoutubeiExtractor } from 'discord-player-youtubei';
 import defineCustomFilters from './defineCustomFilters';
+import deleteOpusCacheEntry from './deleteOpusCacheEntry';
 import getOpusCacheTrackPath from './getOpusCacheTrackPath';
 import logger from './logger';
 import { RedisQueryCache } from './RedisQueryCache';
 import redis from './redis';
 
 const CACHE_WRITE_BUFFER_MS = 5000;
+const MIN_CACHE_FILE_SIZE_BYTES = 1024; // 1KB
 
 let initializedPlayer: Player;
+
+const activeWrites = new Set<string>();
 
 defineCustomFilters();
 
@@ -36,6 +40,10 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 		onBeforeCreateStream(async (track) => {
 			const filePath = getOpusCacheTrackPath(track.url);
 
+			if (activeWrites.has(filePath)) {
+				return null;
+			}
+
 			try {
 				const stats = await stat(filePath);
 
@@ -43,6 +51,17 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 				const fileAge = now - stats.mtime.getTime();
 
 				if (fileAge < CACHE_WRITE_BUFFER_MS) {
+					return null;
+				}
+
+				if (stats.size < MIN_CACHE_FILE_SIZE_BYTES) {
+					logger.warn('Deleting undersized cache file', {
+						filePath,
+						size: stats.size,
+					});
+
+					void deleteOpusCacheEntry(track.url);
+
 					return null;
 				}
 
@@ -69,10 +88,32 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 			const filePath = getOpusCacheTrackPath(track.url);
 
 			try {
+				activeWrites.add(filePath);
+
 				const writeStream = createWriteStream(filePath);
 
-				writeStream.on('error', (error) => {
+				const cleanup = async () => {
+					activeWrites.delete(filePath);
+					void deleteOpusCacheEntry(track.url);
+				};
+
+				writeStream.on('error', async (error) => {
 					logger.error('Opus cache write stream error', error);
+					await cleanup();
+				});
+
+				writeStream.on('close', () => {
+					activeWrites.delete(filePath);
+				});
+
+				readable.on('error', async () => {
+					await cleanup();
+				});
+
+				readable.on('close', () => {
+					if (activeWrites.has(filePath)) {
+						void cleanup();
+					}
 				});
 
 				interceptor.interceptors.add(writeStream);
@@ -86,6 +127,8 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 					$fmt: stream.$fmt,
 				};
 			} catch (error) {
+				activeWrites.delete(filePath);
+
 				logger.error('Failed to create opus cache write stream', error);
 
 				if (isReadable) {
