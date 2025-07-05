@@ -6,8 +6,9 @@ import type { ChatInputCommandInteraction } from 'discord.js';
 import prettyBytes from 'pretty-bytes';
 import { beforeEach, expect, it, type MockedFunction, vi } from 'vitest';
 import logger from '../../utils/logger';
+import opusCacheCommandHandler from '../opusCache';
 
-const MOCK_CACHE_DIRECTORY = '/mock/opus-cache';
+const MOCK_CACHE_DIRECTORY = vi.hoisted(() => '/mock/opus-cache');
 const EXAMPLE_FILE_NAMES = ['track1.opus', 'track2.opus', 'track3.opus'];
 const EXAMPLE_FILE_SIZES = [1024, 2048, 4096];
 
@@ -71,12 +72,9 @@ beforeEach(async () => {
 	vi.clearAllMocks();
 	mockedJoin.mockImplementation((dir, file) => `${dir}/${file}`);
 	mockedPrettyBytes.mockImplementation((bytes) => `${bytes} B`);
-
-	vi.resetModules();
 });
 
 it('should fetch cache details and display correct summary', async () => {
-	const { default: opusCacheCommandHandler } = await import('../opusCache');
 	const interaction = createMockInteraction();
 	const totalSize = EXAMPLE_FILE_SIZES.reduce((acc, size) => acc + size, 0);
 
@@ -109,7 +107,6 @@ it('should fetch cache details and display correct summary', async () => {
 });
 
 it('should handle single file correctly', async () => {
-	const { default: opusCacheCommandHandler } = await import('../opusCache');
 	const interaction = createMockInteraction();
 	const singleFile = ['single-track.opus'];
 	const singleSize = 512;
@@ -128,7 +125,6 @@ it('should handle single file correctly', async () => {
 });
 
 it('should handle empty cache directory', async () => {
-	const { default: opusCacheCommandHandler } = await import('../opusCache');
 	const interaction = createMockInteraction();
 
 	const mockDir = createMockDir([]);
@@ -142,7 +138,6 @@ it('should handle empty cache directory', async () => {
 });
 
 it('should handle opendir error and reply with error message', async () => {
-	const { default: opusCacheCommandHandler } = await import('../opusCache');
 	const interaction = createMockInteraction();
 	const error = new Error('Permission denied');
 
@@ -161,7 +156,6 @@ it('should handle opendir error and reply with error message', async () => {
 });
 
 it('should handle stat error and continue processing', async () => {
-	const { default: opusCacheCommandHandler } = await import('../opusCache');
 	const interaction = createMockInteraction();
 	const error = new Error('File not found');
 
@@ -177,4 +171,56 @@ it('should handle stat error and continue processing', async () => {
 	);
 
 	expect(interaction.editReply).toHaveBeenCalled();
+});
+
+it('should skip non-file entries', async () => {
+	const interaction = createMockInteraction();
+
+	const mockDir = createMockDir([
+		{ name: 'track1.opus', isFile: true },
+		{ name: 'subdirectory', isFile: false },
+		{ name: 'track2.opus', isFile: true },
+	]);
+	(mockedOpendir as MockedFunction<typeof opendir>).mockResolvedValue(mockDir);
+
+	mockedStat
+		.mockResolvedValueOnce(createMockStats(1024))
+		.mockResolvedValueOnce(createMockStats(2048));
+
+	await opusCacheCommandHandler(interaction);
+
+	expect(mockedStat).toHaveBeenCalledTimes(2); // Only files, not directories
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		expect.stringContaining('Currently storing 2 cached'),
+	);
+});
+
+it('should handle large number of files with batching', async () => {
+	const interaction = createMockInteraction();
+
+	// Create 150 files to trigger batching (BATCH_SIZE = 100)
+	const manyFiles = Array.from({ length: 150 }, (_, i) => ({
+		name: `track${i}.opus`,
+		isFile: true,
+	}));
+
+	const mockDir = createMockDir(manyFiles);
+	(mockedOpendir as MockedFunction<typeof opendir>).mockResolvedValue(mockDir);
+
+	// Mock stat to return 1024 bytes for each file
+	for (let i = 0; i < 150; i++) {
+		mockedStat.mockResolvedValueOnce(createMockStats(1024));
+	}
+
+	await opusCacheCommandHandler(interaction);
+
+	expect(mockedStat).toHaveBeenCalledTimes(150);
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		expect.stringContaining('Currently storing 150 cached'),
+	);
+
+	// Should have been called at least twice due to batching progress updates
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		expect.stringMatching(/Analyzing cache….*files processed/),
+	);
 });

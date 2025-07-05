@@ -9,6 +9,8 @@ import type { Player, Track } from 'discord-player';
 import { useQueue } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
 import deleteOpusCacheEntry from '../../utils/deleteOpusCacheEntry';
+import getCommitLink from '../../utils/getCommitLink';
+import getDeploymentVersion from '../../utils/getDeploymentVersion';
 import useDiscordEventHandlers, {
 	useReadyEventHandler,
 } from '../useDiscordEventHandlers';
@@ -45,15 +47,26 @@ vi.mock('../../utils/getEnvironmentVariable', () => ({
 }));
 
 vi.mock('../../utils/getDeploymentVersion', () => ({
-	default: vi.fn().mockResolvedValue('0.14.0'),
+	default: vi.fn(),
+}));
+
+vi.mock('../../utils/getCommitLink', () => ({
+	default: vi.fn(),
 }));
 
 const mockedUseQueue = vi.mocked(useQueue);
 const mockedDeleteOpusCacheEntry = vi.mocked(deleteOpusCacheEntry);
+const mockedGetDeploymentVersion = vi.mocked(getDeploymentVersion);
+const mockedGetCommitLink = vi.mocked(getCommitLink);
 
 beforeEach(() => {
 	vi.clearAllMocks();
 	process.env.GIT_COMMIT_SHA = MOCK_COMMIT_SHA;
+
+	mockedGetDeploymentVersion.mockResolvedValue('0.14.0');
+	mockedGetCommitLink.mockReturnValue(
+		'[`abc123def456`](https://github.com/xxczaki/discord-bot/commit/abc123def456)',
+	);
 });
 
 function createMockClient(): Client {
@@ -133,7 +146,7 @@ it('should send commit message on `ready` when channel exists and commit hash is
 	useReadyEventHandler(mockClient);
 
 	const mockOnCalls = (mockClient.on as ReturnType<typeof vi.fn>).mock
-		.calls as Array<[string, (...args: unknown[]) => void]>;
+		.calls as Array<[string, (...args: unknown[]) => void | Promise<void>]>;
 	const readyCall = mockOnCalls.find((call) => call[0] === 'ready');
 	const readyHandler = readyCall?.[1];
 
@@ -142,7 +155,7 @@ it('should send commit message on `ready` when channel exists and commit hash is
 	}
 
 	expect(mockChannel.send).toHaveBeenCalledWith(
-		expect.stringContaining('🎶 Ready to play, running version'),
+		expect.stringContaining('🎶 Ready to play, running'),
 	);
 });
 
@@ -161,7 +174,7 @@ it('should not send commit message when deployment is manual', async () => {
 	useReadyEventHandler(mockClient);
 
 	const mockOnCalls = (mockClient.on as ReturnType<typeof vi.fn>).mock
-		.calls as Array<[string, (...args: unknown[]) => void]>;
+		.calls as Array<[string, (...args: unknown[]) => void | Promise<void>]>;
 	const readyCall = mockOnCalls.find((call) => call[0] === 'ready');
 	const readyHandler = readyCall?.[1];
 
@@ -184,7 +197,7 @@ it('should handle `interactionCreate` when guild exists', async () => {
 	useDiscordEventHandlers(mockClient, mockPlayer);
 
 	const mockOnCalls = (mockClient.on as ReturnType<typeof vi.fn>).mock
-		.calls as Array<[string, (...args: unknown[]) => void]>;
+		.calls as Array<[string, (...args: unknown[]) => void | Promise<void>]>;
 	const interactionCall = mockOnCalls.find(
 		(call) => call[0] === 'interactionCreate',
 	);
@@ -208,7 +221,7 @@ it('should throw error when `guild` is not defined in interaction', async () => 
 	useDiscordEventHandlers(mockClient, mockPlayer);
 
 	const mockOnCalls = (mockClient.on as ReturnType<typeof vi.fn>).mock
-		.calls as Array<[string, (...args: unknown[]) => void]>;
+		.calls as Array<[string, (...args: unknown[]) => void | Promise<void>]>;
 	const interactionCall = mockOnCalls.find(
 		(call) => call[0] === 'interactionCreate',
 	);
@@ -234,7 +247,7 @@ it('should handle `voiceStateUpdate` and save queue', async () => {
 	useDiscordEventHandlers(mockClient, mockPlayer);
 
 	const mockOnCalls = (mockClient.on as ReturnType<typeof vi.fn>).mock
-		.calls as Array<[string, (...args: unknown[]) => void]>;
+		.calls as Array<[string, (...args: unknown[]) => void | Promise<void>]>;
 	const voiceStateCall = mockOnCalls.find(
 		(call) => call[0] === 'voiceStateUpdate',
 	);
@@ -264,7 +277,7 @@ it('should delete opus cache when track is not from cache', async () => {
 	useDiscordEventHandlers(mockClient, mockPlayer);
 
 	const mockOnCalls = (mockClient.on as ReturnType<typeof vi.fn>).mock
-		.calls as Array<[string, (...args: unknown[]) => void]>;
+		.calls as Array<[string, (...args: unknown[]) => void | Promise<void>]>;
 	const voiceStateCall = mockOnCalls.find(
 		(call) => call[0] === 'voiceStateUpdate',
 	);
@@ -275,4 +288,128 @@ it('should delete opus cache when track is not from cache', async () => {
 	}
 
 	expect(mockedDeleteOpusCacheEntry).toHaveBeenCalledWith(mockTrack.url);
+});
+
+it('should not delete opus cache when track is from cache', async () => {
+	const mockClient = createMockClient();
+	const mockPlayer = createMockPlayer();
+	const mockVoiceState = createMockVoiceState();
+
+	const mockTrack = {
+		url: 'https://example.com/track.mp3',
+		metadata: { isFromCache: true },
+	} as Track;
+
+	const mockQueue = {
+		currentTrack: mockTrack,
+	};
+
+	mockedUseQueue.mockReturnValue(mockQueue as ReturnType<typeof useQueue>);
+
+	useDiscordEventHandlers(mockClient, mockPlayer);
+
+	const mockOnCalls = (mockClient.on as ReturnType<typeof vi.fn>).mock
+		.calls as Array<[string, (...args: unknown[]) => void | Promise<void>]>;
+	const voiceStateCall = mockOnCalls.find(
+		(call) => call[0] === 'voiceStateUpdate',
+	);
+	const voiceStateHandler = voiceStateCall?.[1];
+
+	if (voiceStateHandler) {
+		voiceStateHandler(mockVoiceState);
+	}
+
+	expect(mockedDeleteOpusCacheEntry).not.toHaveBeenCalled();
+});
+
+it('should send commit link when deployment version is not available', async () => {
+	const mockChannel = createMockChannel();
+	const mockClient = createMockClient();
+
+	(mockClient.channels.cache.get as ReturnType<typeof vi.fn>).mockReturnValue(
+		mockChannel,
+	);
+
+	mockedGetDeploymentVersion.mockResolvedValue(undefined);
+	mockedGetCommitLink.mockReturnValue(
+		'[`abc123def456`](https://github.com/xxczaki/discord-bot/commit/abc123def456)',
+	);
+
+	useReadyEventHandler(mockClient);
+
+	const mockOnCalls = (mockClient.on as ReturnType<typeof vi.fn>).mock
+		.calls as Array<[string, (...args: unknown[]) => void | Promise<void>]>;
+	const readyCall = mockOnCalls.find((call) => call[0] === 'ready');
+	const readyHandler = readyCall?.[1];
+
+	if (readyHandler) {
+		await readyHandler();
+	}
+
+	expect(mockChannel.send).toHaveBeenCalledWith(
+		expect.stringContaining('🎶 Ready to play, running commit'),
+	);
+});
+
+it('should handle autocomplete interactions', async () => {
+	const mockClient = createMockClient();
+	const mockPlayer = createMockPlayer();
+	const mockInteraction = {
+		guild: { id: MOCK_GUILD_ID } as Guild,
+		isAutocomplete: vi.fn().mockReturnValue(true),
+		isChatInputCommand: vi.fn().mockReturnValue(false),
+	} as unknown as Interaction;
+
+	(mockPlayer.context.provide as ReturnType<typeof vi.fn>).mockImplementation(
+		async (_, callback) => {
+			await callback();
+		},
+	);
+
+	useDiscordEventHandlers(mockClient, mockPlayer);
+
+	const mockOnCalls = (mockClient.on as ReturnType<typeof vi.fn>).mock
+		.calls as Array<[string, (...args: unknown[]) => void | Promise<void>]>;
+	const interactionCall = mockOnCalls.find(
+		(call) => call[0] === 'interactionCreate',
+	);
+	const interactionHandler = interactionCall?.[1];
+
+	if (interactionHandler) {
+		interactionHandler(mockInteraction);
+	}
+
+	expect(mockInteraction.isAutocomplete).toHaveBeenCalled();
+});
+
+it('should handle chat input command interactions', async () => {
+	const mockClient = createMockClient();
+	const mockPlayer = createMockPlayer();
+
+	const mockInteraction = {
+		guild: { id: MOCK_GUILD_ID } as Guild,
+		isAutocomplete: vi.fn().mockReturnValue(false),
+		isChatInputCommand: vi.fn().mockReturnValue(true),
+	} as unknown as Interaction;
+
+	(mockPlayer.context.provide as ReturnType<typeof vi.fn>).mockImplementation(
+		async (_, callback) => {
+			await callback();
+		},
+	);
+
+	useDiscordEventHandlers(mockClient, mockPlayer);
+
+	const mockOnCalls = (mockClient.on as ReturnType<typeof vi.fn>).mock
+		.calls as Array<[string, (...args: unknown[]) => void | Promise<void>]>;
+	const interactionCall = mockOnCalls.find(
+		(call) => call[0] === 'interactionCreate',
+	);
+	const interactionHandler = interactionCall?.[1];
+
+	if (interactionHandler) {
+		interactionHandler(mockInteraction);
+	}
+
+	expect(mockInteraction.isChatInputCommand).toHaveBeenCalled();
 });
