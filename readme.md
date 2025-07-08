@@ -81,7 +81,7 @@ No timeline for an alpha/beta release is planned.
 
 ## Legal
 
-⚠️ **Important:** Please read the [Legal Disclaimer](./legal.md) before using this software. This software downloads content from YouTube which may violate their Terms of Service.
+Please read the [Legal Disclaimer](./legal.md) before using this software.
 
 ## AI disclosure
 
