@@ -1,5 +1,3 @@
-import memoize from 'memoize';
-
 function cleanUpPlaylistContent(content: string) {
 	const backtickMatch = /```\n?(.*?)\n?```/s.exec(content);
 
@@ -10,4 +8,4 @@ function cleanUpPlaylistContent(content: string) {
 	return backtickMatch[1].trim();
 }
 
-export default memoize(cleanUpPlaylistContent);
+export default cleanUpPlaylistContent;

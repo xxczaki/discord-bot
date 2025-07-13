@@ -1,7 +1,6 @@
 import { stat } from 'node:fs/promises';
 import { EmbedBuilder } from 'discord.js';
-import { serialize, type Track } from 'discord-player';
-import memoize from 'memoize';
+import type { Track } from 'discord-player';
 import prettyBytes from 'pretty-bytes';
 import isObject from '../utils/isObject';
 import getOpusCacheTrackPath from './getOpusCacheTrackPath';
@@ -57,4 +56,4 @@ async function createTrackEmbed(track: Track, description: string) {
 	return embed;
 }
 
-export default memoize(createTrackEmbed);
+export default createTrackEmbed;

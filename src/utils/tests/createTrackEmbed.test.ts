@@ -28,10 +28,6 @@ vi.mock('node:fs/promises', () => ({
 	stat: vi.fn(),
 }));
 
-vi.mock('memoize', () => ({
-	default: vi.fn((fn) => fn),
-}));
-
 const createMockTrack = (overrides: Partial<Track> = {}): Track =>
 	({
 		id: EXAMPLE_TRACK_ID,
