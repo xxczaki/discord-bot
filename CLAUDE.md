@@ -98,7 +98,9 @@ This is a Discord music bot built with TypeScript using the discord-player libra
 - Only mock external dependencies and complex integrations (Discord.js, discord-player)
 - Use proper ES module imports, never dynamic imports/require in tests
 - Use `vi.mock()` for mocking, check `src/setupTests.ts` for existing global mocks
-- Don't duplicate mocks already defined globally
+- **Don't duplicate mocks already defined globally** - redis, logger, and Sentry are already mocked in `setupTests.ts`
+- **Don't create complex mocks for simple functions** - if a utility needs environment variables, either let it run naturally or use a simple mock
+- Check global mocks in `setupTests.ts` before adding new vi.mock() calls to individual test files
 
 #### Coverage Approach
 

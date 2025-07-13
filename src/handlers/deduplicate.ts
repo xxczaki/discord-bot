@@ -26,31 +26,31 @@ export default async function deduplicateCommandHandler(
 
 	await interaction.reply('Searching for duplicates…');
 
-	let fullQueue = [queue.currentTrack ?? [], ...queue.tracks.store].flat();
+	const fullQueue = [queue.currentTrack ?? [], ...queue.tracks.store].flat();
 
 	switch (algorithm) {
 		case 'bridged':
 		case 'source': {
-			let removed = 0;
+			const seenUrls = new Set<string>();
+			const tracksToRemove: Track[] = [];
 
 			for (const [index, track] of fullQueue.entries()) {
-				if (
-					fullQueue.filter(
-						(nextTrack) =>
-							getTrackUrl(nextTrack, algorithm) ===
-							getTrackUrl(track, algorithm),
-					).length > 1
-				) {
-					if (index === 0) {
-						continue;
+				const trackUrl = getTrackUrl(track, algorithm);
+
+				if (seenUrls.has(trackUrl)) {
+					if (index !== 0) {
+						tracksToRemove.push(track);
 					}
-
-					queue.removeTrack(track);
-					removed++;
-
-					fullQueue = [queue.currentTrack ?? [], ...queue.tracks.store].flat();
+				} else {
+					seenUrls.add(trackUrl);
 				}
 			}
+
+			for (const track of tracksToRemove) {
+				queue.removeTrack(track);
+			}
+
+			const removed = tracksToRemove.length;
 
 			if (removed === 0) {
 				return interaction.editReply('No duplicates were found.');

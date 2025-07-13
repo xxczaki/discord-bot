@@ -70,6 +70,12 @@ function createMockStream(): MockStream {
 
 beforeEach(() => {
 	vi.clearAllMocks();
+
+	const mockPipeline = {
+		get: vi.fn().mockReturnThis(),
+		exec: vi.fn().mockResolvedValue([]),
+	} as unknown as ReturnType<typeof redis.pipeline>;
+	mockedRedis.pipeline.mockReturnValue(mockPipeline);
 });
 
 it('should reply with loading message and process stats successfully', async () => {
@@ -80,10 +86,15 @@ it('should reply with loading message and process stats successfully', async () 
 		mockStream as unknown as ScanStream,
 	);
 
-	mockedRedis.get
-		.mockResolvedValueOnce(JSON.stringify(EXAMPLE_TRACK_STATS[0]))
-		.mockResolvedValueOnce(JSON.stringify(EXAMPLE_TRACK_STATS[1]))
-		.mockResolvedValueOnce(JSON.stringify(EXAMPLE_TRACK_STATS[2]));
+	const mockPipeline = {
+		get: vi.fn().mockReturnThis(),
+		exec: vi.fn().mockResolvedValue([
+			[null, JSON.stringify(EXAMPLE_TRACK_STATS[0])],
+			[null, JSON.stringify(EXAMPLE_TRACK_STATS[1])],
+			[null, JSON.stringify(EXAMPLE_TRACK_STATS[2])],
+		]),
+	} as unknown as ReturnType<typeof redis.pipeline>;
+	mockedRedis.pipeline.mockReturnValue(mockPipeline);
 
 	const promise = statsCommandHandler(interaction);
 
@@ -100,10 +111,12 @@ it('should reply with loading message and process stats successfully', async () 
 	expect(interaction.reply).toHaveBeenCalledWith('Loading latest stats…');
 	expect(mockStatsHandlerInstance.getStats).toHaveBeenCalledWith('play');
 
-	expect(mockedRedis.get).toHaveBeenCalledTimes(3);
-	expect(mockedRedis.get).toHaveBeenCalledWith(EXAMPLE_REDIS_KEYS[0]);
-	expect(mockedRedis.get).toHaveBeenCalledWith(EXAMPLE_REDIS_KEYS[1]);
-	expect(mockedRedis.get).toHaveBeenCalledWith(EXAMPLE_REDIS_KEYS[2]);
+	expect(mockedRedis.pipeline).toHaveBeenCalledTimes(1);
+	const pipelineInstance = mockedRedis.pipeline();
+	expect(pipelineInstance.get).toHaveBeenCalledTimes(3);
+	expect(pipelineInstance.get).toHaveBeenCalledWith(EXAMPLE_REDIS_KEYS[0]);
+	expect(pipelineInstance.get).toHaveBeenCalledWith(EXAMPLE_REDIS_KEYS[1]);
+	expect(pipelineInstance.get).toHaveBeenCalledWith(EXAMPLE_REDIS_KEYS[2]);
 
 	expect(interaction.editReply).toHaveBeenCalledWith({
 		embeds: [expect.any(EmbedBuilder)],
@@ -124,9 +137,14 @@ it('should handle tracks with multiple plays correctly', async () => {
 		{ title: 'Test Song', author: 'Test Artist', requestedById: '456' },
 	];
 
-	mockedRedis.get
-		.mockResolvedValueOnce(JSON.stringify(duplicateTrackStats[0]))
-		.mockResolvedValueOnce(JSON.stringify(duplicateTrackStats[1]));
+	const mockPipeline = {
+		get: vi.fn().mockReturnThis(),
+		exec: vi.fn().mockResolvedValue([
+			[null, JSON.stringify(duplicateTrackStats[0])],
+			[null, JSON.stringify(duplicateTrackStats[1])],
+		]),
+	} as unknown as ReturnType<typeof redis.pipeline>;
+	mockedRedis.pipeline.mockReturnValue(mockPipeline);
 
 	const promise = statsCommandHandler(interaction);
 
@@ -162,9 +180,13 @@ it('should skip tracks without `requestedById`', async () => {
 		author: 'System',
 	};
 
-	mockedRedis.get.mockResolvedValueOnce(
-		JSON.stringify(trackWithoutRequesterId),
-	);
+	const mockPipeline = {
+		get: vi.fn().mockReturnThis(),
+		exec: vi
+			.fn()
+			.mockResolvedValue([[null, JSON.stringify(trackWithoutRequesterId)]]),
+	} as unknown as ReturnType<typeof redis.pipeline>;
+	mockedRedis.pipeline.mockReturnValue(mockPipeline);
 
 	const promise = statsCommandHandler(interaction);
 
@@ -196,7 +218,11 @@ it('should handle Redis get returning null values', async () => {
 		mockStream as unknown as ScanStream,
 	);
 
-	mockedRedis.get.mockResolvedValueOnce(null);
+	const mockPipeline = {
+		get: vi.fn().mockReturnThis(),
+		exec: vi.fn().mockResolvedValue([[null, null]]),
+	} as unknown as ReturnType<typeof redis.pipeline>;
+	mockedRedis.pipeline.mockReturnValue(mockPipeline);
 
 	const promise = statsCommandHandler(interaction);
 
@@ -227,7 +253,11 @@ it('should handle JSON parsing errors gracefully', async () => {
 		mockStream as unknown as ScanStream,
 	);
 
-	mockedRedis.get.mockResolvedValueOnce('invalid-json');
+	const mockPipeline = {
+		get: vi.fn().mockReturnThis(),
+		exec: vi.fn().mockResolvedValue([[null, 'invalid-json']]),
+	} as unknown as ReturnType<typeof redis.pipeline>;
+	mockedRedis.pipeline.mockReturnValue(mockPipeline);
 
 	const promise = statsCommandHandler(interaction);
 
@@ -253,7 +283,13 @@ it('should pause and resume stream during data processing', async () => {
 		mockStream as unknown as ScanStream,
 	);
 
-	mockedRedis.get.mockResolvedValueOnce(JSON.stringify(EXAMPLE_TRACK_STATS[0]));
+	const mockPipeline = {
+		get: vi.fn().mockReturnThis(),
+		exec: vi
+			.fn()
+			.mockResolvedValue([[null, JSON.stringify(EXAMPLE_TRACK_STATS[0])]]),
+	} as unknown as ReturnType<typeof redis.pipeline>;
+	mockedRedis.pipeline.mockReturnValue(mockPipeline);
 
 	const promise = statsCommandHandler(interaction);
 
@@ -294,7 +330,7 @@ it('should handle empty data arrays and undefined data', async () => {
 
 	await promise;
 
-	expect(mockedRedis.get).not.toHaveBeenCalled();
+	expect(mockedRedis.pipeline).not.toHaveBeenCalled();
 });
 
 it('should aggregate stats by user correctly', async () => {
@@ -311,10 +347,15 @@ it('should aggregate stats by user correctly', async () => {
 		{ title: 'Song 3', author: 'Artist 3', requestedById: '456' },
 	];
 
-	mockedRedis.get
-		.mockResolvedValueOnce(JSON.stringify(statsWithSameUser[0]))
-		.mockResolvedValueOnce(JSON.stringify(statsWithSameUser[1]))
-		.mockResolvedValueOnce(JSON.stringify(statsWithSameUser[2]));
+	const mockPipeline = {
+		get: vi.fn().mockReturnThis(),
+		exec: vi.fn().mockResolvedValue([
+			[null, JSON.stringify(statsWithSameUser[0])],
+			[null, JSON.stringify(statsWithSameUser[1])],
+			[null, JSON.stringify(statsWithSameUser[2])],
+		]),
+	} as unknown as ReturnType<typeof redis.pipeline>;
+	mockedRedis.pipeline.mockReturnValue(mockPipeline);
 
 	const promise = statsCommandHandler(interaction);
 
@@ -350,7 +391,13 @@ it('should only show tracks played more than once in top list', async () => {
 		{ title: 'Song 1', author: 'Artist 1', requestedById: '123' },
 	];
 
-	mockedRedis.get.mockResolvedValueOnce(JSON.stringify(singlePlayStats[0]));
+	const mockPipeline = {
+		get: vi.fn().mockReturnThis(),
+		exec: vi
+			.fn()
+			.mockResolvedValue([[null, JSON.stringify(singlePlayStats[0])]]),
+	} as unknown as ReturnType<typeof redis.pipeline>;
+	mockedRedis.pipeline.mockReturnValue(mockPipeline);
 
 	const promise = statsCommandHandler(interaction);
 

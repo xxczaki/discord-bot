@@ -20,10 +20,16 @@ export default async function flushQueryCacheCommandHandler(
 		stream.on('data', async (keys = []) => {
 			stream.pause();
 
-			for (const key of keys) {
+			if (keys.length > 0) {
 				try {
-					await redis.del(key);
-					deleted++;
+					const pipeline = redis.pipeline();
+
+					for (const key of keys) {
+						pipeline.del(key);
+					}
+
+					await pipeline.exec();
+					deleted += keys.length;
 				} catch (error) {
 					logger.error(error);
 					captureException(error);

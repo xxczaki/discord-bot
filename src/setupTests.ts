@@ -24,6 +24,7 @@ vi.mock('./utils/redis', () => ({
 		set: vi.fn(),
 		exists: vi.fn(),
 		expire: vi.fn(),
+		pipeline: vi.fn(),
 	},
 }));
 

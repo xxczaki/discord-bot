@@ -20,39 +20,54 @@ export default async function statsCommandHandler(
 		statsStream.on('data', async (keys = []) => {
 			statsStream.pause();
 
-			for (const key of keys) {
+			if (keys.length > 0) {
 				try {
-					const rawKeyValue = await redis.get(key);
+					const pipeline = redis.pipeline();
 
-					if (!rawKeyValue) {
-						continue;
+					for (const key of keys) {
+						pipeline.get(key);
 					}
 
-					const value: {
-						title: string;
-						author: string;
-						requestedById?: string;
-					} = JSON.parse(rawKeyValue);
+					const results = await pipeline.exec();
 
-					if (!value.requestedById) {
-						continue;
+					if (results) {
+						for (const [error, rawKeyValue] of results) {
+							if (error || !rawKeyValue) {
+								continue;
+							}
+
+							try {
+								const value: {
+									title: string;
+									author: string;
+									requestedById?: string;
+								} = JSON.parse(rawKeyValue as string);
+
+								if (!value.requestedById) {
+									continue;
+								}
+
+								const identifier = `"${value.title}" by ${value.author}`;
+
+								if (identifier in playStatsMap) {
+									playStatsMap[identifier] = playStatsMap[identifier] + 1;
+								} else {
+									playStatsMap[identifier] = 1;
+								}
+
+								if (value.requestedById in requestedStatsMap) {
+									requestedStatsMap[value.requestedById] =
+										requestedStatsMap[value.requestedById] + 1;
+									continue;
+								}
+
+								requestedStatsMap[value.requestedById] = 1;
+							} catch (error) {
+								logger.error(error);
+								captureException(error);
+							}
+						}
 					}
-
-					const identifier = `"${value.title}" by ${value.author}`;
-
-					if (identifier in playStatsMap) {
-						playStatsMap[identifier] = playStatsMap[identifier] + 1;
-					} else {
-						playStatsMap[identifier] = 1;
-					}
-
-					if (value.requestedById in requestedStatsMap) {
-						requestedStatsMap[value.requestedById] =
-							requestedStatsMap[value.requestedById] + 1;
-						continue;
-					}
-
-					requestedStatsMap[value.requestedById] = 1;
 				} catch (error) {
 					logger.error(error);
 					captureException(error);

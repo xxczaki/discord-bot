@@ -7,12 +7,6 @@ import logger from '../../utils/logger';
 import redis from '../../utils/redis';
 import flushQueryCacheCommandHandler from '../flushQueryCache';
 
-const EXAMPLE_CACHE_KEYS = [
-	'discord-player:query-cache:track1',
-	'discord-player:query-cache:track2',
-	'discord-player:query-cache:track3',
-];
-
 vi.mock('../../utils/getEnvironmentVariable', () => ({
 	default: vi.fn((key: string) => {
 		if (key === 'REDIS_URL') {
@@ -25,13 +19,15 @@ vi.mock('../../utils/getEnvironmentVariable', () => ({
 	}),
 }));
 
+const EXAMPLE_CACHE_KEYS = [
+	'discord-player:query-cache:track1',
+	'discord-player:query-cache:track2',
+	'discord-player:query-cache:track3',
+];
+
 const mockedRedis = vi.mocked(redis);
 const mockedLogger = vi.mocked(logger);
 const mockedCaptureException = vi.mocked(captureException);
-
-vi.mock('../../utils/redis');
-vi.mock('../../utils/logger');
-vi.mock('@sentry/node');
 
 function createMockInteraction(): ChatInputCommandInteraction {
 	return {
@@ -56,6 +52,12 @@ function createMockStream(): MockStream {
 beforeEach(() => {
 	vi.clearAllMocks();
 	mockedRedis.del.mockResolvedValue(1);
+
+	const mockPipeline = {
+		del: vi.fn().mockReturnThis(),
+		exec: vi.fn().mockResolvedValue([]),
+	} as unknown as ReturnType<typeof redis.pipeline>;
+	mockedRedis.pipeline.mockReturnValue(mockPipeline);
 });
 
 afterEach(() => {
@@ -84,10 +86,12 @@ it('should allow flushing cache and display success message', async () => {
 		match: 'discord-player:query-cache:*',
 		count: 500,
 	});
-	expect(mockedRedis.del).toHaveBeenCalledTimes(3);
-	expect(mockedRedis.del).toHaveBeenCalledWith(EXAMPLE_CACHE_KEYS[0]);
-	expect(mockedRedis.del).toHaveBeenCalledWith(EXAMPLE_CACHE_KEYS[1]);
-	expect(mockedRedis.del).toHaveBeenCalledWith(EXAMPLE_CACHE_KEYS[2]);
+	expect(mockedRedis.pipeline).toHaveBeenCalledTimes(1);
+	const mockPipeline = mockedRedis.pipeline();
+	expect(mockPipeline.del).toHaveBeenCalledTimes(3);
+	expect(mockPipeline.del).toHaveBeenCalledWith(EXAMPLE_CACHE_KEYS[0]);
+	expect(mockPipeline.del).toHaveBeenCalledWith(EXAMPLE_CACHE_KEYS[1]);
+	expect(mockPipeline.del).toHaveBeenCalledWith(EXAMPLE_CACHE_KEYS[2]);
 	expect(interaction.editReply).toHaveBeenCalledWith(
 		'✅ Flushed a total of 3 keys from the query cache.',
 	);
@@ -132,7 +136,7 @@ it('should handle empty cache gracefully', async () => {
 
 	await promise;
 
-	expect(mockedRedis.del).not.toHaveBeenCalled();
+	expect(mockedRedis.pipeline).not.toHaveBeenCalled();
 	expect(interaction.editReply).toHaveBeenCalledWith(
 		'✅ Flushed a total of 0 keys from the query cache.',
 	);
@@ -166,7 +170,11 @@ it('should handle redis deletion errors gracefully', async () => {
 	const deleteError = new Error('Redis connection failed');
 
 	mockedRedis.scanStream.mockReturnValue(mockStream as unknown as ScanStream);
-	mockedRedis.del.mockRejectedValueOnce(deleteError);
+	const mockPipeline = {
+		del: vi.fn().mockReturnThis(),
+		exec: vi.fn().mockRejectedValueOnce(deleteError),
+	} as unknown as ReturnType<typeof redis.pipeline>;
+	mockedRedis.pipeline.mockReturnValue(mockPipeline);
 
 	const promise = flushQueryCacheCommandHandler(interaction);
 
@@ -184,7 +192,7 @@ it('should handle redis deletion errors gracefully', async () => {
 	expect(mockedCaptureException).toHaveBeenCalledWith(deleteError);
 
 	expect(interaction.editReply).toHaveBeenCalledWith(
-		'✅ Flushed a total of 2 keys from the query cache.',
+		'✅ Flushed a total of 0 keys from the query cache.',
 	);
 });
 
@@ -209,7 +217,9 @@ it('should handle multiple data chunks from stream', async () => {
 
 	await promise;
 
-	expect(mockedRedis.del).toHaveBeenCalledTimes(3);
+	expect(mockedRedis.pipeline).toHaveBeenCalledTimes(2);
+	const mockPipeline = mockedRedis.pipeline();
+	expect(mockPipeline.del).toHaveBeenCalledTimes(3);
 	expect(interaction.editReply).toHaveBeenCalledWith(
 		'✅ Flushed a total of 3 keys from the query cache.',
 	);
@@ -232,7 +242,7 @@ it('should handle undefined keys array in data event', async () => {
 
 	await promise;
 
-	expect(mockedRedis.del).not.toHaveBeenCalled();
+	expect(mockedRedis.pipeline).not.toHaveBeenCalled();
 	expect(interaction.editReply).toHaveBeenCalledWith(
 		'✅ Flushed a total of 0 keys from the query cache.',
 	);

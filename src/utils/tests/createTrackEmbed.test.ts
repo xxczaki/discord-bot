@@ -132,6 +132,7 @@ it('should add cache footer without file size when stat fails', async () => {
 	vi.mocked(stat).mockRejectedValue(new Error('File not found'));
 
 	const track = createMockTrack({
+		url: 'https://unique-url-for-stat-fail-test.com/track',
 		metadata: {
 			isFromCache: true,
 		},

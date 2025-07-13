@@ -6,6 +6,9 @@ import isObject from '../utils/isObject';
 import getOpusCacheTrackPath from './getOpusCacheTrackPath';
 import getTrackThumbnail from './getTrackThumbnail';
 
+const fileStatsCache = new Map<string, { size: number; timestamp: number }>();
+const CACHE_DURATION_MS = 30_000;
+
 async function createTrackEmbed(track: Track, description: string) {
 	const embed = new EmbedBuilder()
 		.setTitle(track.title)
@@ -35,9 +38,21 @@ async function createTrackEmbed(track: Track, description: string) {
 
 		try {
 			const filePath = getOpusCacheTrackPath(track.url);
-			const stats = await stat(filePath);
+			const now = Date.now();
 
-			footerText += ` (${prettyBytes(stats.size)})`;
+			let fileSize: number | undefined;
+
+			const cached = fileStatsCache.get(filePath);
+
+			if (cached && now - cached.timestamp < CACHE_DURATION_MS) {
+				fileSize = cached.size;
+			} else {
+				const stats = await stat(filePath);
+				fileSize = stats.size;
+				fileStatsCache.set(filePath, { size: fileSize, timestamp: now });
+			}
+
+			footerText += ` (${prettyBytes(fileSize)})`;
 		} catch {}
 
 		embed.setFooter({
