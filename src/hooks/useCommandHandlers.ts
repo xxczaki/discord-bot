@@ -3,6 +3,7 @@ import type { ChatInputCommandInteraction } from 'discord.js';
 import { RAW_COMMANDS } from '../constants/commands';
 import LockdownManager from '../utils/lockdown';
 import logger from '../utils/logger';
+import reportError from '../utils/reportError';
 import snakeToCamelCase from '../utils/snakeToCamelCase';
 
 export default async function useCommandHandlers(
@@ -30,7 +31,7 @@ export default async function useCommandHandlers(
 
 		await handler(interaction);
 	} catch (error) {
-		logger.error(error, `Failed to handle command "${commandName}"`);
+		reportError(error, `Failed to handle command "${commandName}"`);
 
 		if (!interaction.replied && !interaction.deferred) {
 			try {

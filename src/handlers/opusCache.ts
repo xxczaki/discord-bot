@@ -1,11 +1,11 @@
 import { opendir, stat } from 'node:fs/promises';
 import { join } from 'node:path';
-import { captureException } from '@sentry/node';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import prettyBytes from 'pretty-bytes';
 import getOpusCacheDirectoryPath from '../utils/getOpusCacheDirectoryPath';
 import logger from '../utils/logger';
 import pluralize from '../utils/pluralize';
+import reportError from '../utils/reportError';
 
 const opusCacheDirectory = getOpusCacheDirectoryPath();
 const BATCH_SIZE = 100;
@@ -74,8 +74,7 @@ export default async function opusCacheCommandHandler(
 			)`Currently storing ${processedFiles} cached [Opus](<https://opus-codec.org/>) ${null} (total: ${prettyBytes(totalSize)}).`,
 		);
 	} catch (error) {
-		logger.error(error);
-		captureException(error);
+		reportError(error, 'Failed to scan opus cache directory');
 
 		await interaction.editReply(
 			'❌ Something went wrong when trying to read the cache directory.',

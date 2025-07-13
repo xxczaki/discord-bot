@@ -288,7 +288,10 @@ describe('Client Error Handling', () => {
 		const errorHandler = getClientErrorHandler();
 		errorHandler(testError);
 
-		expect(mockedLogger.error).toHaveBeenCalledWith(testError, 'Client error');
+		expect(mockedLogger.error).toHaveBeenCalledWith(
+			testError,
+			'Discord client error',
+		);
 		expect(mockedCaptureException).toHaveBeenCalledWith(testError);
 	});
 

@@ -1,4 +1,3 @@
-import { captureException } from '@sentry/node';
 import { differenceInMinutes, format } from 'date-fns';
 import {
 	ActionRowBuilder,
@@ -11,6 +10,7 @@ import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellane
 import { LatenessHandler } from '../utils/LatenessHandler';
 import logger from '../utils/logger';
 import redis from '../utils/redis';
+import reportError from '../utils/reportError';
 
 const lateness = LatenessHandler.getInstance();
 
@@ -121,8 +121,7 @@ export default async function latenessCommandHandler(
 
 						stats[expected.getTime()] = identifier;
 					} catch (error) {
-						logger.error(error);
-						captureException(error);
+						reportError(error, 'Failed to parse lateness stats JSON data');
 					}
 				}
 

@@ -188,7 +188,10 @@ it('should handle redis deletion errors gracefully', async () => {
 
 	await promise;
 
-	expect(mockedLogger.error).toHaveBeenCalledWith(deleteError);
+	expect(mockedLogger.error).toHaveBeenCalledWith(
+		deleteError,
+		'Failed to delete query cache keys from Redis',
+	);
 	expect(mockedCaptureException).toHaveBeenCalledWith(deleteError);
 
 	expect(interaction.editReply).toHaveBeenCalledWith(

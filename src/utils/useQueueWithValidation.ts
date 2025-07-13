@@ -1,5 +1,6 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { useQueue } from 'discord-player';
+import reportError from './reportError';
 
 export default function useQueueWithValidation(
 	interaction: ChatInputCommandInteraction,
@@ -10,10 +11,14 @@ export default function useQueueWithValidation(
 	if (!queue) {
 		const message = customMessage ?? 'No music is currently playing.';
 
-		void interaction.reply({
-			content: message,
-			flags: ['Ephemeral'],
-		});
+		interaction
+			.reply({
+				content: message,
+				flags: ['Ephemeral'],
+			})
+			.catch((error) => {
+				reportError(error, 'Failed to send queue validation error message');
+			});
 
 		return null;
 	}

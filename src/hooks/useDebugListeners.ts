@@ -13,6 +13,7 @@ import getEnvironmentVariable from '../utils/getEnvironmentVariable';
 import isObject from '../utils/isObject';
 import logger from '../utils/logger';
 import { QueueRecoveryService } from '../utils/QueueRecoveryService';
+import reportError from '../utils/reportError';
 
 const FATAL_ERROR_MESSAGE_DEBOUNCE = 1000 * 30; // 30 seconds
 
@@ -32,8 +33,7 @@ export default function useDebugListeners(
 	process.on('uncaughtException', reportUnhandledError);
 
 	client.on('error', (error) => {
-		logger.error(error, 'Client error');
-		captureException(error);
+		reportError(error, 'Discord client error');
 	});
 
 	const reportPlayerError = initializePlayerErrorReporter(client, player);
@@ -53,8 +53,7 @@ function initializeUnhandledErrorReporter(
 	let previousMessageTimestamp = 0;
 
 	return async (payload: unknown) => {
-		logger.error(payload, 'Uncaught exception/rejection');
-		captureException(payload);
+		reportError(payload, 'Uncaught exception/rejection');
 
 		const channel = client.channels.cache.get(botDebugChannelId);
 

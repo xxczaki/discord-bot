@@ -1,4 +1,3 @@
-import { captureException } from '@sentry/node';
 import { EmbedBuilder, type VoiceBasedChannel } from 'discord.js';
 import {
 	type QueueFilters,
@@ -8,9 +7,9 @@ import {
 } from 'discord-player';
 import type { ProcessingInteraction } from '../types/ProcessingInteraction';
 import determineSearchEngine from './determineSearchEngine';
-import logger from './logger';
 import pluralize from './pluralize';
 import processTracksWithQueue from './processTracksWithQueue';
+import reportError from './reportError';
 
 type Props = {
 	tracks: Track[];
@@ -59,8 +58,7 @@ export default async function enqueueTracks({
 			],
 		});
 	} catch (error) {
-		logger.error(error, 'Queue recovery error (first track)');
-		captureException(error);
+		reportError(error, 'Queue recovery error (first track)');
 	}
 
 	if (toQueue.length === 0) {
@@ -91,8 +89,7 @@ export default async function enqueueTracks({
 		interaction,
 		embed,
 		onError: (error, _context) => {
-			logger.error(error, 'Queue recovery error (subsequent tracks)');
-			captureException(error);
+			reportError(error, 'Queue recovery error (subsequent tracks)');
 		},
 	});
 

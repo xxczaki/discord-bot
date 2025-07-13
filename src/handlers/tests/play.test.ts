@@ -392,7 +392,10 @@ it('should handle generic errors and log them', async () => {
 
 	await playCommandHandler(interaction);
 
-	expect(mockedLogger.error).toHaveBeenCalledWith(error);
+	expect(mockedLogger.error).toHaveBeenCalledWith(
+		error,
+		'Failed to play track',
+	);
 	expect(mockedCaptureException).toHaveBeenCalledWith(error);
 });
 

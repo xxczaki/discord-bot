@@ -10,7 +10,7 @@ vi.mock('discord-player', () => ({
 }));
 
 const mockInteraction = {
-	reply: vi.fn(),
+	reply: vi.fn().mockResolvedValue(undefined),
 } as unknown as ChatInputCommandInteraction;
 
 it('should return queue when useQueue returns a valid queue', async () => {

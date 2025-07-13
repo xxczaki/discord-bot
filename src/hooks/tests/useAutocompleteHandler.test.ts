@@ -266,7 +266,7 @@ describe('play command autocomplete', () => {
 
 		expect(mockedLogger.error).toHaveBeenCalledWith(
 			mockError,
-			'Search autocomplete fail',
+			'Search autocomplete failed',
 		);
 		expect(mockedCaptureException).toHaveBeenCalledWith(mockError);
 		expect(interaction.respond).toHaveBeenCalledWith([]);

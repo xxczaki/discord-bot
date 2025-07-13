@@ -1,11 +1,10 @@
-import { captureException } from '@sentry/node';
 import type { Interaction } from 'discord.js';
 import { useMainPlayer, useQueue } from 'discord-player';
 import Fuse from 'fuse.js';
 import debounce from 'p-debounce';
 import determineSearchEngine from '../utils/determineSearchEngine';
 import getTrackPosition from '../utils/getTrackPosition';
-import logger from '../utils/logger';
+import reportError from '../utils/reportError';
 import truncateString from '../utils/truncateString';
 
 async function useAutocompleteHandler(interaction: Interaction) {
@@ -46,8 +45,7 @@ async function useAutocompleteHandler(interaction: Interaction) {
 
 			return interaction.respond(results);
 		} catch (error) {
-			logger.error(error, 'Search autocomplete fail');
-			captureException(error);
+			reportError(error, 'Search autocomplete failed');
 
 			// Only respond if we haven't already responded
 			if (!interaction.responded) {

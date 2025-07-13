@@ -88,7 +88,10 @@ it('should log error and capture exception for other filesystem errors', async (
 
 	expect(mockedUnlink).toHaveBeenCalledWith(EXAMPLE_FILE_PATH);
 	expect(mockedLogger.warn).not.toHaveBeenCalled();
-	expect(mockedLogger.error).toHaveBeenCalledWith(permissionError);
+	expect(mockedLogger.error).toHaveBeenCalledWith(
+		permissionError,
+		'Failed to delete Opus cache entry',
+	);
 	expect(mockedCaptureException).toHaveBeenCalledWith(permissionError);
 });
 
@@ -100,6 +103,9 @@ it('should handle non-Error exceptions', async () => {
 
 	expect(mockedUnlink).toHaveBeenCalledWith(EXAMPLE_FILE_PATH);
 	expect(mockedLogger.warn).not.toHaveBeenCalled();
-	expect(mockedLogger.error).toHaveBeenCalledWith(stringError);
+	expect(mockedLogger.error).toHaveBeenCalledWith(
+		stringError,
+		'Failed to delete Opus cache entry',
+	);
 	expect(mockedCaptureException).toHaveBeenCalledWith(stringError);
 });

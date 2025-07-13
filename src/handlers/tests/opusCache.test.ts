@@ -147,7 +147,10 @@ it('should handle opendir error and reply with error message', async () => {
 
 	expect(interaction.reply).toHaveBeenCalledWith('Scanning cache directory…');
 
-	expect(mockedLogger.error).toHaveBeenCalledWith(error);
+	expect(mockedLogger.error).toHaveBeenCalledWith(
+		error,
+		'Failed to scan opus cache directory',
+	);
 	expect(mockedCaptureException).toHaveBeenCalledWith(error);
 
 	expect(interaction.editReply).toHaveBeenCalledWith(

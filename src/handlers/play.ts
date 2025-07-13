@@ -1,4 +1,3 @@
-import { captureException } from '@sentry/node';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import {
 	ActionRowBuilder,
@@ -11,7 +10,7 @@ import createSmartInteractionHandler from '../utils/createSmartInteractionHandle
 import createTrackEmbed from '../utils/createTrackEmbed';
 import determineSearchEngine from '../utils/determineSearchEngine';
 import getTrackPosition from '../utils/getTrackPosition';
-import logger from '../utils/logger';
+import reportError from '../utils/reportError';
 
 export default async function playCommandHandler(
 	interaction: ChatInputCommandInteraction,
@@ -137,7 +136,6 @@ export default async function playCommandHandler(
 			return interaction.editReply('No results found for the given query.');
 		}
 
-		logger.error(error);
-		captureException(error);
+		reportError(error, 'Failed to play track');
 	}
 }

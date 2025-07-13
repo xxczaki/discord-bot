@@ -1,8 +1,7 @@
-import { captureException } from '@sentry/node';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import logger from '../utils/logger';
 import pluralize from '../utils/pluralize';
 import redis from '../utils/redis';
+import reportError from '../utils/reportError';
 
 export default async function flushQueryCacheCommandHandler(
 	interaction: ChatInputCommandInteraction,
@@ -31,8 +30,7 @@ export default async function flushQueryCacheCommandHandler(
 					await pipeline.exec();
 					deleted += keys.length;
 				} catch (error) {
-					logger.error(error);
-					captureException(error);
+					reportError(error, 'Failed to delete query cache keys from Redis');
 				}
 			}
 

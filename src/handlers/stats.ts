@@ -1,7 +1,6 @@
-import { captureException } from '@sentry/node';
 import { type ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
-import logger from '../utils/logger';
 import redis from '../utils/redis';
+import reportError from '../utils/reportError';
 import { StatsHandler } from '../utils/StatsHandler';
 
 const statsHandler = StatsHandler.getInstance();
@@ -63,14 +62,12 @@ export default async function statsCommandHandler(
 
 								requestedStatsMap[value.requestedById] = 1;
 							} catch (error) {
-								logger.error(error);
-								captureException(error);
+								reportError(error, 'Failed to parse stats JSON value');
 							}
 						}
 					}
 				} catch (error) {
-					logger.error(error);
-					captureException(error);
+					reportError(error, 'Failed to process stats data from Redis');
 				}
 			}
 

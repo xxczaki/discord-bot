@@ -1,10 +1,10 @@
-import { captureException } from '@sentry/node';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import createK8sClient, {
 	DEPLOYMENT_NAME,
 	DEPLOYMENT_NAMESPACE,
 } from '../utils/k8sClient';
 import logger from '../utils/logger';
+import reportError from '../utils/reportError';
 
 export default async function maintenanceCommandHandler(
 	interaction: ChatInputCommandInteraction,
@@ -25,8 +25,7 @@ export default async function maintenanceCommandHandler(
 			namespace: DEPLOYMENT_NAMESPACE,
 		});
 	} catch (error) {
-		logger.error(error, 'Failed to delete deployment for maintenance');
-		captureException(error);
+		reportError(error, 'Failed to delete deployment for maintenance');
 
 		await interaction.editReply(
 			'❌ Failed to activate maintenance mode. Please check the logs or try again later.',

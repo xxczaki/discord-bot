@@ -1,7 +1,7 @@
 import { unlink } from 'node:fs/promises';
-import { captureException } from '@sentry/node';
 import getOpusCacheTrackPath from './getOpusCacheTrackPath';
 import logger from './logger';
+import reportError from './reportError';
 
 export default async function deleteOpusCacheEntry(url: string | undefined) {
 	if (!url) {
@@ -18,7 +18,6 @@ export default async function deleteOpusCacheEntry(url: string | undefined) {
 			return;
 		}
 
-		logger.error(error);
-		captureException(error);
+		reportError(error, 'Failed to delete Opus cache entry');
 	}
 }
