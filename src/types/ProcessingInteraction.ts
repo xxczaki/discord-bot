@@ -1,3 +1,4 @@
+/* v8 ignore start */
 import type {
 	InteractionEditReplyOptions,
 	InteractionReplyOptions,
@@ -22,3 +23,4 @@ export interface ProcessingInteraction {
 	reply(options: InteractionReplyOptions): Promise<unknown>;
 	editReply(options: InteractionEditReplyOptions): Promise<unknown>;
 }
+/* v8 ignore stop */

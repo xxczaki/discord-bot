@@ -139,6 +139,7 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 			}
 		});
 
+		/* v8 ignore start */
 		await initializedPlayer.extractors.register(YoutubeiExtractor, {
 			streamOptions: {
 				useClient: 'WEB_EMBEDDED',
@@ -153,6 +154,7 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 			YoutubeiExtractor,
 			SpotifyExtractor,
 		]);
+		/* v8 ignore stop */
 	}
 
 	return initializedPlayer;

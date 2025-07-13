@@ -41,7 +41,9 @@ vi.mock('discord-player-spotify', () => ({
 
 vi.mock('node:fs', () => ({
 	createReadStream: vi.fn(),
-	createWriteStream: vi.fn(),
+	createWriteStream: vi.fn(() => ({
+		on: vi.fn(),
+	})),
 	existsSync: vi.fn(),
 }));
 

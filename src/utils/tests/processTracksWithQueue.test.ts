@@ -270,3 +270,90 @@ it('should store queries in track metadata when provided', async () => {
 		originalQuery: 'test query',
 	});
 });
+
+it('should handle tracks with non-object metadata when storing queries', async () => {
+	const mockSetMetadata = vi.fn();
+	const mockTrack = {
+		id: 'track-123',
+		title: 'Test Track',
+		setMetadata: mockSetMetadata,
+		metadata: 'string-metadata',
+	};
+	const mockPlayer = {
+		play: vi.fn().mockResolvedValue({ track: mockTrack }),
+	} as Partial<Player>;
+	const mockGuildQueue = createMockGuildQueue();
+	const mockQueueInstance = {
+		on: vi.fn(),
+		addAll: vi
+			.fn()
+			.mockImplementation(async (tasks: (() => Promise<unknown>)[]) => {
+				await Promise.all(tasks.map((task) => task()));
+			}),
+		onIdle: vi.fn().mockResolvedValue(undefined),
+		pending: 0,
+	} as Partial<Queue>;
+
+	mockedUseMainPlayer.mockReturnValue(mockPlayer as Player);
+	mockedUseQueue.mockReturnValue(mockGuildQueue as unknown as GuildQueue);
+	mockedQueue.mockReturnValue(mockQueueInstance as Queue);
+
+	await processTracksWithQueue({
+		items: ['test query'],
+		voiceChannel: {} as VoiceBasedChannel,
+		interaction: createMockInteraction(),
+		embed: createMockEmbed(),
+		nodeMetadata: { queries: { '0': 'test query' } },
+	});
+
+	expect(mockSetMetadata).toHaveBeenCalledWith({
+		originalQuery: 'test query',
+	});
+});
+
+it('should handle metadata assignment in large batch processing', async () => {
+	const largeTrackList = Array.from({ length: 15 }, (_, i) => `track-${i}`);
+	const mockSetMetadata = vi.fn();
+	const mockTrack = {
+		id: 'track-123',
+		title: 'Test Track',
+		setMetadata: mockSetMetadata,
+		metadata: { existing: 'data' },
+	};
+	const mockPlayer = {
+		play: vi.fn().mockResolvedValue({ track: mockTrack }),
+	} as Partial<Player>;
+	const mockGuildQueue = createMockGuildQueue();
+	const mockQueueInstance = {
+		on: vi.fn(),
+		addAll: vi
+			.fn()
+			.mockImplementation(async (tasks: (() => Promise<unknown>)[]) => {
+				await Promise.all(tasks.map((task) => task()));
+			}),
+		onIdle: vi.fn().mockResolvedValue(undefined),
+		pending: 0,
+	} as Partial<Queue>;
+
+	mockedUseMainPlayer.mockReturnValue(mockPlayer as Player);
+	mockedUseQueue.mockReturnValue(mockGuildQueue as unknown as GuildQueue);
+	mockedQueue.mockReturnValue(mockQueueInstance as Queue);
+
+	const queries = Object.fromEntries(
+		largeTrackList.map((_, index) => [index.toString(), `query-${index}`]),
+	);
+
+	await processTracksWithQueue({
+		items: largeTrackList,
+		voiceChannel: {} as VoiceBasedChannel,
+		interaction: createMockInteraction(),
+		embed: createMockEmbed(),
+		nodeMetadata: { queries },
+	});
+
+	expect(mockSetMetadata).toHaveBeenCalledTimes(15);
+	expect(mockSetMetadata).toHaveBeenCalledWith({
+		existing: 'data',
+		originalQuery: 'query-0',
+	});
+});
