@@ -202,7 +202,6 @@ it('should process track and display embed with buttons', async () => {
 	);
 
 	expect(mockedCreateTrackEmbed).toHaveBeenCalledWith(
-		mockQueue,
 		expect.any(Object),
 		'Added to queue (position 2).',
 	);

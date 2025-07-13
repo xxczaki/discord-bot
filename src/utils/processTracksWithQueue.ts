@@ -4,6 +4,7 @@ import { type QueueFilters, useMainPlayer } from 'discord-player';
 import Queue from 'p-queue';
 import type { ProcessingInteraction } from '../types/ProcessingInteraction';
 import determineSearchEngine from './determineSearchEngine';
+import isObject from './isObject';
 import logger from './logger';
 import pluralize from './pluralize';
 
@@ -69,7 +70,7 @@ export default async function processTracksWithQueue({
 		tracksQueue.on('completed', () => updateProgress());
 
 		await tracksQueue.addAll(
-			items.map((item) => async () => {
+			items.map((item, index) => async () => {
 				try {
 					const result = await player.play(voiceChannel, item, {
 						searchEngine: determineSearchEngine(item),
@@ -79,6 +80,20 @@ export default async function processTracksWithQueue({
 						},
 						requestedBy: interaction.user,
 					});
+
+					if (result.track && nodeMetadata.queries) {
+						const queries = nodeMetadata.queries as Record<string, string>;
+						const queryForTrack = queries[index.toString()];
+
+						if (queryForTrack) {
+							result.track.setMetadata({
+								...(isObject(result.track.metadata)
+									? result.track.metadata
+									: {}),
+								originalQuery: queryForTrack,
+							});
+						}
+					}
 
 					enqueued++;
 					processed++;
@@ -93,9 +108,12 @@ export default async function processTracksWithQueue({
 			}),
 		);
 	} else {
-		const searchAndAddBatch = async (batch: string[]) => {
+		const searchAndAddBatch = async (
+			batch: string[],
+			batchStartIndex: number,
+		) => {
 			const results = await Promise.allSettled(
-				batch.map(async (item) => {
+				batch.map(async (item, batchIndex) => {
 					try {
 						const result = await player.play(voiceChannel, item, {
 							searchEngine: determineSearchEngine(item),
@@ -105,6 +123,21 @@ export default async function processTracksWithQueue({
 							},
 							requestedBy: interaction.user,
 						});
+
+						if (result.track && nodeMetadata.queries) {
+							const queries = nodeMetadata.queries as Record<string, string>;
+							const itemIndex = batchStartIndex + batchIndex;
+							const queryForTrack = queries[itemIndex.toString()];
+
+							if (queryForTrack) {
+								result.track.setMetadata({
+									...(isObject(result.track.metadata)
+										? result.track.metadata
+										: {}),
+									originalQuery: queryForTrack,
+								});
+							}
+						}
 
 						processed++;
 						return result;
@@ -127,13 +160,17 @@ export default async function processTracksWithQueue({
 		};
 
 		const batches: string[][] = [];
+		const batchIndices: number[] = [];
 
 		for (let i = 0; i < items.length; i += BATCH_SIZE) {
 			batches.push(items.slice(i, i + BATCH_SIZE));
+			batchIndices.push(i);
 		}
 
 		await tracksQueue.addAll(
-			batches.map((batch) => () => searchAndAddBatch(batch)),
+			batches.map(
+				(batch, index) => () => searchAndAddBatch(batch, batchIndices[index]),
+			),
 		);
 	}
 

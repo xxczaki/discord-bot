@@ -92,7 +92,7 @@ it('should use conservative concurrency limits', async () => {
 
 	mockedAvailableParallelism.mockReturnValue(16);
 	mockedUseMainPlayer.mockReturnValue(mockPlayer as Player);
-	mockedUseQueue.mockReturnValue(mockGuildQueue as GuildQueue);
+	mockedUseQueue.mockReturnValue(mockGuildQueue as unknown as GuildQueue);
 	mockedQueue.mockReturnValue(mockQueueInstance as Queue);
 
 	await processTracksWithQueue({
@@ -120,7 +120,7 @@ it('should return enqueued count for small track lists', async () => {
 	} as Partial<Queue>;
 
 	mockedUseMainPlayer.mockReturnValue(mockPlayer as Player);
-	mockedUseQueue.mockReturnValue(mockGuildQueue as GuildQueue);
+	mockedUseQueue.mockReturnValue(mockGuildQueue as unknown as GuildQueue);
 	mockedQueue.mockReturnValue(mockQueueInstance as Queue);
 
 	const result = await processTracksWithQueue({
@@ -153,7 +153,7 @@ it('should handle errors gracefully with custom `onError` handler', async () => 
 	const mockOnError = vi.fn();
 
 	mockedUseMainPlayer.mockReturnValue(mockPlayer as Player);
-	mockedUseQueue.mockReturnValue(mockGuildQueue as GuildQueue);
+	mockedUseQueue.mockReturnValue(mockGuildQueue as unknown as GuildQueue);
 	mockedQueue.mockReturnValue(mockQueueInstance as Queue);
 
 	const result = await processTracksWithQueue({
@@ -185,7 +185,7 @@ it('should use batch processing for large track lists', async () => {
 	} as Partial<Queue>;
 
 	mockedUseMainPlayer.mockReturnValue(mockPlayer as Player);
-	mockedUseQueue.mockReturnValue(mockGuildQueue as GuildQueue);
+	mockedUseQueue.mockReturnValue(mockGuildQueue as unknown as GuildQueue);
 	mockedQueue.mockReturnValue(mockQueueInstance as Queue);
 
 	const result = await processTracksWithQueue({
@@ -217,7 +217,7 @@ it('should handle failed play attempts for large batches', async () => {
 	} as Partial<Queue>;
 
 	mockedUseMainPlayer.mockReturnValue(mockPlayer as Player);
-	mockedUseQueue.mockReturnValue(mockGuildQueue as GuildQueue);
+	mockedUseQueue.mockReturnValue(mockGuildQueue as unknown as GuildQueue);
 	mockedQueue.mockReturnValue(mockQueueInstance as Queue);
 
 	const result = await processTracksWithQueue({
@@ -228,4 +228,45 @@ it('should handle failed play attempts for large batches', async () => {
 	});
 
 	expect(result).toEqual({ enqueued: 0 });
+});
+
+it('should store queries in track metadata when provided', async () => {
+	const mockSetMetadata = vi.fn();
+	const mockTrack = {
+		id: 'track-123',
+		title: 'Test Track',
+		setMetadata: mockSetMetadata,
+		metadata: { existingData: true },
+	};
+	const mockPlayer = {
+		play: vi.fn().mockResolvedValue({ track: mockTrack }),
+	} as Partial<Player>;
+	const mockGuildQueue = createMockGuildQueue();
+	const mockQueueInstance = {
+		on: vi.fn(),
+		addAll: vi
+			.fn()
+			.mockImplementation(async (tasks: (() => Promise<unknown>)[]) => {
+				await Promise.all(tasks.map((task) => task()));
+			}),
+		onIdle: vi.fn().mockResolvedValue(undefined),
+		pending: 0,
+	} as Partial<Queue>;
+
+	mockedUseMainPlayer.mockReturnValue(mockPlayer as Player);
+	mockedUseQueue.mockReturnValue(mockGuildQueue as unknown as GuildQueue);
+	mockedQueue.mockReturnValue(mockQueueInstance as Queue);
+
+	await processTracksWithQueue({
+		items: ['test query'],
+		voiceChannel: {} as VoiceBasedChannel,
+		interaction: createMockInteraction(),
+		embed: createMockEmbed(),
+		nodeMetadata: { queries: { '0': 'test query' } },
+	});
+
+	expect(mockSetMetadata).toHaveBeenCalledWith({
+		existingData: true,
+		originalQuery: 'test query',
+	});
 });

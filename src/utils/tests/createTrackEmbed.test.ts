@@ -1,7 +1,7 @@
 import type { Stats } from 'node:fs';
 import { stat } from 'node:fs/promises';
 import { EmbedBuilder } from 'discord.js';
-import type { GuildQueue, Track } from 'discord-player';
+import type { Track } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
 import createTrackEmbed from '../createTrackEmbed';
 
@@ -44,22 +44,14 @@ const createMockTrack = (overrides: Partial<Track> = {}): Track =>
 		...overrides,
 	}) as Track;
 
-const createMockQueue = (overrides: Partial<GuildQueue> = {}): GuildQueue =>
-	({
-		metadata: {},
-		setMetadata: vi.fn(),
-		...overrides,
-	}) as unknown as GuildQueue;
-
 beforeEach(() => {
 	vi.clearAllMocks();
 });
 
 it('should create basic embed with required fields', async () => {
 	const track = createMockTrack();
-	const queue = createMockQueue();
 
-	const result = await createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
+	const result = await createTrackEmbed(track, EXAMPLE_DESCRIPTION);
 
 	expect(result).toBeInstanceOf(EmbedBuilder);
 	expect(result.data.title).toBe(EXAMPLE_TRACK_TITLE);
@@ -72,16 +64,13 @@ it('should create basic embed with required fields', async () => {
 });
 
 it('should add query field when query is not a URL', async () => {
-	const track = createMockTrack();
-	const queue = createMockQueue({
+	const track = createMockTrack({
 		metadata: {
-			queries: {
-				[EXAMPLE_TRACK_ID]: EXAMPLE_QUERY,
-			},
+			originalQuery: EXAMPLE_QUERY,
 		},
 	});
 
-	const result = await createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
+	const result = await createTrackEmbed(track, EXAMPLE_DESCRIPTION);
 
 	expect(result.data.fields).toContainEqual({
 		name: 'Query',
@@ -89,17 +78,25 @@ it('should add query field when query is not a URL', async () => {
 	});
 });
 
-it('should not add query field when query is a URL', async () => {
-	const track = createMockTrack();
-	const queue = createMockQueue({
+it('should add query field when query is a URL', async () => {
+	const track = createMockTrack({
 		metadata: {
-			queries: {
-				[EXAMPLE_TRACK_ID]: EXAMPLE_URL_QUERY,
-			},
+			originalQuery: EXAMPLE_URL_QUERY,
 		},
 	});
 
-	const result = await createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
+	const result = await createTrackEmbed(track, EXAMPLE_DESCRIPTION);
+
+	expect(result.data.fields).toContainEqual({
+		name: 'Query',
+		value: `\`${EXAMPLE_URL_QUERY}\``,
+	});
+});
+
+it('should not add query field when track has no originalQuery metadata', async () => {
+	const track = createMockTrack();
+
+	const result = await createTrackEmbed(track, EXAMPLE_DESCRIPTION);
 
 	const queryField = result.data.fields?.find(
 		(field) => field.name === 'Query',
@@ -107,65 +104,10 @@ it('should not add query field when query is a URL', async () => {
 	expect(queryField).toBeUndefined();
 });
 
-it('should use fallback query when track-specific query is not found', async () => {
-	const track = createMockTrack();
-	const queue = createMockQueue({
-		metadata: {
-			queries: {
-				'0': EXAMPLE_QUERY,
-			},
-		},
-	});
-
-	const result = await createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
-
-	expect(result.data.fields).toContainEqual({
-		name: 'Query',
-		value: `\`${EXAMPLE_QUERY}\``,
-	});
-});
-
-it('should clean up queries after use', async () => {
-	const track = createMockTrack();
-	const mockSetMetadata = vi.fn();
-	const queue = createMockQueue({
-		metadata: {
-			queries: {
-				[EXAMPLE_TRACK_ID]: EXAMPLE_QUERY,
-				'other-track': 'other query',
-				'0': 'fallback query',
-			},
-		},
-		setMetadata: mockSetMetadata,
-	});
-
-	await createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
-
-	expect(mockSetMetadata).toHaveBeenCalledWith({
-		queries: {
-			'other-track': 'other query',
-		},
-	});
-});
-
-it('should not clean up queries when metadata.queries is undefined', async () => {
-	const track = createMockTrack();
-	const mockSetMetadata = vi.fn();
-	const queue = createMockQueue({
-		metadata: {},
-		setMetadata: mockSetMetadata,
-	});
-
-	await createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
-
-	expect(mockSetMetadata).not.toHaveBeenCalled();
-});
-
 it('should return embed when track metadata is not an object', async () => {
 	const track = createMockTrack({ metadata: null });
-	const queue = createMockQueue();
 
-	const result = await createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
+	const result = await createTrackEmbed(track, EXAMPLE_DESCRIPTION);
 
 	expect(result).toBeInstanceOf(EmbedBuilder);
 	expect(result.data.footer).toBeUndefined();
@@ -182,9 +124,8 @@ it('should add cache footer when track `isFromCache`', async () => {
 			isFromCache: true,
 		},
 	});
-	const queue = createMockQueue();
 
-	const result = await createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
+	const result = await createTrackEmbed(track, EXAMPLE_DESCRIPTION);
 
 	expect(result.data.footer).toEqual({
 		text: '♻️ Streaming from an offline cache (2.53 MB)',
@@ -199,9 +140,8 @@ it('should add cache footer without file size when stat fails', async () => {
 			isFromCache: true,
 		},
 	});
-	const queue = createMockQueue();
 
-	const result = await createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
+	const result = await createTrackEmbed(track, EXAMPLE_DESCRIPTION);
 
 	expect(result.data.footer).toEqual({
 		text: '♻️ Streaming from an offline cache',
@@ -216,9 +156,8 @@ it('should add bridged URL field when bridge metadata exists', async () => {
 			},
 		},
 	});
-	const queue = createMockQueue();
 
-	const result = await createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
+	const result = await createTrackEmbed(track, EXAMPLE_DESCRIPTION);
 
 	expect(result.data.fields).toContainEqual({
 		name: 'Bridged URL',
@@ -233,9 +172,8 @@ it('should not add bridged URL field when bridge metadata is not an object', asy
 			bridge: null,
 		},
 	});
-	const queue = createMockQueue();
 
-	const result = await createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
+	const result = await createTrackEmbed(track, EXAMPLE_DESCRIPTION);
 
 	const bridgeField = result.data.fields?.find(
 		(field) => field.name === 'Bridged URL',
@@ -249,9 +187,8 @@ it('should not add bridged URL field when bridge URL is missing', async () => {
 			bridge: {},
 		},
 	});
-	const queue = createMockQueue();
 
-	const result = await createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
+	const result = await createTrackEmbed(track, EXAMPLE_DESCRIPTION);
 
 	const bridgeField = result.data.fields?.find(
 		(field) => field.name === 'Bridged URL',
@@ -270,9 +207,8 @@ it('should handle both cache footer and bridged URL together', async () => {
 			},
 		},
 	});
-	const queue = createMockQueue();
 
-	const result = await createTrackEmbed(queue, track, EXAMPLE_DESCRIPTION);
+	const result = await createTrackEmbed(track, EXAMPLE_DESCRIPTION);
 
 	expect(result.data.footer).toEqual({
 		text: '♻️ Streaming from an offline cache (2.53 MB)',

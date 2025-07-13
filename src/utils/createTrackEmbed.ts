@@ -1,17 +1,13 @@
 import { stat } from 'node:fs/promises';
 import { EmbedBuilder } from 'discord.js';
-import { type GuildQueue, serialize, type Track } from 'discord-player';
+import { serialize, type Track } from 'discord-player';
 import memoize from 'memoize';
 import prettyBytes from 'pretty-bytes';
 import isObject from '../utils/isObject';
 import getOpusCacheTrackPath from './getOpusCacheTrackPath';
 import getTrackThumbnail from './getTrackThumbnail';
 
-async function createTrackEmbed(
-	queue: GuildQueue,
-	track: Track,
-	description: string,
-) {
+async function createTrackEmbed(track: Track, description: string) {
 	const embed = new EmbedBuilder()
 		.setTitle(track.title)
 		.setDescription(description)
@@ -20,25 +16,14 @@ async function createTrackEmbed(
 		.setAuthor({ name: track.author })
 		.setFields({ name: 'Duration', value: track.duration, inline: true });
 
-	const existingQueries = queue.metadata?.queries;
-	const trackQuery = existingQueries?.[track.id] ?? existingQueries?.[0];
+	const trackQuery = isObject(track.metadata)
+		? track.metadata.originalQuery
+		: undefined;
 
-	if (trackQuery && !URL.canParse(trackQuery)) {
+	if (trackQuery && typeof trackQuery === 'string') {
 		embed.addFields({
 			name: 'Query',
 			value: `\`${trackQuery}\``,
-		});
-	}
-
-	// Cleanup
-	if (existingQueries) {
-		queue.setMetadata({
-			...queue.metadata,
-			queries: Object.fromEntries(
-				Object.entries(existingQueries).filter(
-					([key]) => key !== track.id && key !== '0',
-				),
-			),
 		});
 	}
 
@@ -72,6 +57,4 @@ async function createTrackEmbed(
 	return embed;
 }
 
-export default memoize(createTrackEmbed, {
-	cacheKey: ([_queue, track]) => serialize(track),
-});
+export default memoize(createTrackEmbed);

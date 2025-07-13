@@ -191,7 +191,6 @@ it('should handle `playerStart` event with track embed and skip button', async (
 	await playerStartHandler(mockQueue, mockTrack);
 
 	expect(mockedCreateTrackEmbed).toHaveBeenCalledWith(
-		mockQueue,
 		mockTrack,
 		'Playing it now.',
 	);

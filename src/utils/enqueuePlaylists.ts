@@ -52,12 +52,16 @@ export default async function enqueuePlaylists(
 
 	const songsArray = songs.trim().split('\n');
 
+	const queries = Object.fromEntries(
+		songsArray.map((song, index) => [index.toString(), song]),
+	);
+
 	const { enqueued } = await processTracksWithQueue({
 		items: songsArray,
 		voiceChannel,
 		interaction,
 		embed,
-		nodeMetadata: { queries: {} },
+		nodeMetadata: { queries },
 	});
 
 	const shuffle = new ButtonBuilder()

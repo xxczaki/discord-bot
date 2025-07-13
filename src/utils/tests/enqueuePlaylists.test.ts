@@ -175,7 +175,14 @@ it('should process tracks with correct parameters', async () => {
 		voiceChannel: mockVoiceChannel,
 		interaction: mockInteraction,
 		embed: expect.any(EmbedBuilder),
-		nodeMetadata: { queries: {} },
+		nodeMetadata: {
+			queries: {
+				'0': 'Song 1',
+				'1': 'Song 2',
+				'2': 'Song 3',
+				'3': 'Song 4',
+			},
+		},
 	});
 });
 
@@ -270,7 +277,11 @@ it('should handle empty songs array correctly', async () => {
 		voiceChannel: mockVoiceChannel,
 		interaction: mockInteraction,
 		embed: expect.any(EmbedBuilder),
-		nodeMetadata: { queries: {} },
+		nodeMetadata: {
+			queries: {
+				'0': '',
+			},
+		},
 	});
 });
 
@@ -321,6 +332,13 @@ it('should process only messages that match playlist IDs', async () => {
 		voiceChannel: mockVoiceChannel,
 		interaction: mockInteraction,
 		embed: expect.any(EmbedBuilder),
-		nodeMetadata: { queries: {} },
+		nodeMetadata: {
+			queries: {
+				'0': 'Song 1',
+				'1': 'Song 2',
+				'2': 'Song 3',
+				'3': 'Song 4',
+			},
+		},
 	});
 });

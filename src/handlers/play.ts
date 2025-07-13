@@ -50,7 +50,6 @@ export default async function playCommandHandler(
 		const trackPosition = getTrackPosition(queue, track) + 1;
 
 		const embed = await createTrackEmbed(
-			queue,
 			track,
 			`Added to queue (position ${trackPosition}).`,
 		);
