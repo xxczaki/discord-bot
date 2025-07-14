@@ -1,6 +1,7 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { beforeEach, expect, it, vi } from 'vitest';
 import LockdownManager from '../../utils/lockdown';
+import { setPresence } from '../../utils/presenceManager';
 import lockdownCommandHandler from '../lockdown';
 
 vi.mock('../../utils/getEnvironmentVariable', () => ({
@@ -12,13 +13,23 @@ vi.mock('../../utils/getEnvironmentVariable', () => ({
 	}),
 }));
 
-function createMockInteraction(userId: string): ChatInputCommandInteraction {
+vi.mock('../../utils/presenceManager', () => ({
+	setPresence: vi.fn(),
+}));
+
+function createMockInteraction(
+	userId: string,
+	withClient = false,
+): ChatInputCommandInteraction {
+	const mockClient = withClient ? { id: 'bot-123' } : undefined;
+
 	return {
 		member: {
 			user: {
 				id: userId,
 			},
 		},
+		client: mockClient,
 		reply: vi.fn().mockResolvedValue({}),
 	} as unknown as ChatInputCommandInteraction;
 }
@@ -116,4 +127,12 @@ it('should handle missing user ID', async () => {
 		content: 'Only <@!owner-123> is allowed to run this command.',
 		flags: ['Ephemeral'],
 	});
+});
+
+it('should call setPresence when client is available', async () => {
+	const interaction = createMockInteraction('owner-123', true);
+
+	await lockdownCommandHandler(interaction);
+
+	expect(setPresence).toHaveBeenCalledWith(interaction.client);
 });
