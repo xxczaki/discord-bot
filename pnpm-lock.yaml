@@ -25,8 +25,8 @@ importers:
         specifier: ^7.2.0-dev.2
         version: 7.2.0-dev.2(@discord-player/extractor@7.1.0)(mediaplex@1.0.0)(postcss@8.5.3)(tsx@4.19.4)
       discord-player-spotify:
-        specifier: ^1.1.4
-        version: 1.1.4
+        specifier: ^1.1.7
+        version: 1.1.7
       discord-player-youtubei:
         specifier: ^1.5.0
         version: 1.5.0(bufferutil@4.0.9)
@@ -1278,8 +1278,8 @@ packages:
   discord-api-types@0.38.8:
     resolution: {integrity: sha512-xuRXPD44FcbKHrQK15FS1HFlMRNJtsaZou/SVws18vQ7zHqmlxyDktMkZpyvD6gE2ctGOVYC/jUyoMMAyBWfcw==}
 
-  discord-player-spotify@1.1.4:
-    resolution: {integrity: sha512-HCKps/HmYo61re/b0SlEof4AZ97HTooOI7nxQZEwx0lsdbnmjW+T/G5GWpcdoHslpBpG1ABHIJc5IefLbtremA==}
+  discord-player-spotify@1.1.7:
+    resolution: {integrity: sha512-Hw86G2RRq5BeaA/S3Ukm1RYKIIBmrvAyQ4vQ0zTDGhHDQ8oa0IAeAvi/wkqRxvlc7mBEp+N2eAlrvMXQV5hRYw==}
 
   discord-player-youtubei@1.5.0:
     resolution: {integrity: sha512-TYwYQ5cUpOxAffqa+AkM4XVEWFqe9DAFoNl91sHrA+LrvWgPNU5W9sA9P3UQGNqsFnu0Cf93dsQvXL73n+uX0w==}
@@ -3848,7 +3848,7 @@ snapshots:
 
   discord-api-types@0.38.8: {}
 
-  discord-player-spotify@1.1.4:
+  discord-player-spotify@1.1.7:
     dependencies:
       node-html-parser: 7.0.1
       otpauth: 9.4.0
