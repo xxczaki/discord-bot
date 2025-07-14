@@ -263,7 +263,7 @@ it('should handle `processTracksWithQueue` errors', async () => {
 	}
 });
 
-it('should handle queue not existing after processing', async () => {
+it('should handle queue not existing after processing multiple tracks', async () => {
 	const tracks = [
 		createMockTrack(EXAMPLE_TRACK_URL),
 		createMockTrack(EXAMPLE_TRACK_URL_2),
@@ -273,9 +273,7 @@ it('should handle queue not existing after processing', async () => {
 	const mockVoiceChannel = createMockVoiceChannel();
 
 	mockedUseMainPlayer.mockReturnValue(mockPlayer as Player);
-	mockedUseQueue
-		.mockReturnValueOnce({} as GuildQueue)
-		.mockReturnValueOnce(null);
+	mockedUseQueue.mockReturnValue(null);
 	mockedProcessTracksWithQueue.mockResolvedValue({ enqueued: 1 });
 
 	await enqueueTracks({
@@ -285,12 +283,8 @@ it('should handle queue not existing after processing', async () => {
 		interaction: mockInteraction,
 	});
 
-	const mockEditReply = vi.mocked(mockInteraction.editReply);
-	const lastEditCall =
-		mockEditReply.mock.calls[mockEditReply.mock.calls.length - 1];
-	const embed = lastEditCall?.[0]?.embeds?.[0] as EmbedBuilder;
-
-	expect(embed.data.description).toBe(
-		'2 tracks had been processed and added to the queue.\n0 skipped.',
-	);
+	expect(mockInteraction.editReply).toHaveBeenCalledWith({
+		content: 'The queue is empty.',
+		embeds: [],
+	});
 });

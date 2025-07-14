@@ -109,6 +109,13 @@ This is a Discord music bot built with TypeScript using the discord-player libra
 - Don't force 100% coverage at expense of test quality
 - Some complex integrations may be difficult to test in isolation
 
+#### Singleton Testing
+
+- **Never add testing-specific reset functions** to production code (e.g., `resetForTesting()`)
+- For singletons with complex external dependencies, test only what's testable without internal state manipulation
+- Focus on testing the public API and exported constants rather than internal singleton behavior
+- Use `/* v8 ignore start */` comments around complex initialization code that can't be easily tested
+
 ## Development Guidelines
 
 ### Code Style
