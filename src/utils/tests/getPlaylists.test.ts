@@ -154,8 +154,8 @@ it('should handle single Spotify playlist without additional songs', async () =>
 	expect(result[0].data.description).toBe('1 unresolved external playlist');
 });
 
-it('should limit results to 25 items', async () => {
-	const messages = Array.from({ length: 30 }, (_, i) =>
+it('should limit results to 50 items', async () => {
+	const messages = Array.from({ length: 60 }, (_, i) =>
 		createMockMessage(`id="playlist${i}"\n\`\`\`\nSong ${i}\n\`\`\``),
 	);
 	const channel = createMockChannel(messages);
@@ -165,7 +165,7 @@ it('should limit results to 25 items', async () => {
 
 	const result = await getPlaylists(channel);
 
-	expect(result).toHaveLength(25);
+	expect(result).toHaveLength(50);
 });
 
 it('should sort playlists by id alphabetically', async () => {
