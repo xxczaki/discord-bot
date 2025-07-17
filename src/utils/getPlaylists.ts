@@ -31,7 +31,7 @@ async function getPlaylists(channel: TextBasedChannel) {
 
 				return { id, songs };
 			})
-			.slice(0, 50)
+			.slice(0, 30)
 			.map(async ({ id, songs }) => ({
 				id,
 				description: await getPlaylistDescription(songs),
