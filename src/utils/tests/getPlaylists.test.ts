@@ -66,7 +66,7 @@ it('should return empty array when no messages have id attribute', async () => {
 
 	const result = await getPlaylists(channel);
 
-	expect(result).toEqual([]);
+	expect(result.options).toEqual([]);
 });
 
 it('should extract playlists with id and triple backticks content', async () => {
@@ -85,14 +85,14 @@ it('should extract playlists with id and triple backticks content', async () => 
 
 	const result = await getPlaylists(channel);
 
-	expect(result).toHaveLength(2);
-	expect(result[0]).toBeInstanceOf(StringSelectMenuOptionBuilder);
-	expect(result[0].data.label).toBe('playlist1');
-	expect(result[0].data.description).toBe('2 songs');
-	expect(result[0].data.value).toBe('playlist1');
-	expect(result[1].data.label).toBe('playlist2');
-	expect(result[1].data.description).toBe('1 song');
-	expect(result[1].data.value).toBe('playlist2');
+	expect(result.options).toHaveLength(2);
+	expect(result.options[0]).toBeInstanceOf(StringSelectMenuOptionBuilder);
+	expect(result.options[0].data.label).toBe('playlist1');
+	expect(result.options[0].data.description).toBe('2 songs');
+	expect(result.options[0].data.value).toBe('playlist1');
+	expect(result.options[1].data.label).toBe('playlist2');
+	expect(result.options[1].data.description).toBe('1 song');
+	expect(result.options[1].data.value).toBe('playlist2');
 });
 
 it('should handle playlists with Spotify URLs in triple backticks', async () => {
@@ -112,8 +112,8 @@ it('should handle playlists with Spotify URLs in triple backticks', async () => 
 
 	const result = await getPlaylists(channel);
 
-	expect(result).toHaveLength(1);
-	expect(result[0].data.description).toBe(
+	expect(result.options).toHaveLength(1);
+	expect(result.options[0].data.description).toBe(
 		'1 song (+ 1 unresolved external playlist)',
 	);
 });
@@ -133,8 +133,10 @@ it('should handle playlists with only Spotify URLs in triple backticks', async (
 
 	const result = await getPlaylists(channel);
 
-	expect(result).toHaveLength(1);
-	expect(result[0].data.description).toBe('2 unresolved external playlists');
+	expect(result.options).toHaveLength(1);
+	expect(result.options[0].data.description).toBe(
+		'2 unresolved external playlists',
+	);
 });
 
 it('should handle single Spotify playlist without additional songs', async () => {
@@ -150,8 +152,10 @@ it('should handle single Spotify playlist without additional songs', async () =>
 
 	const result = await getPlaylists(channel);
 
-	expect(result).toHaveLength(1);
-	expect(result[0].data.description).toBe('1 unresolved external playlist');
+	expect(result.options).toHaveLength(1);
+	expect(result.options[0].data.description).toBe(
+		'1 unresolved external playlist',
+	);
 });
 
 it('should limit results to 25 items', async () => {
@@ -165,7 +169,7 @@ it('should limit results to 25 items', async () => {
 
 	const result = await getPlaylists(channel);
 
-	expect(result).toHaveLength(25);
+	expect(result.options).toHaveLength(25);
 });
 
 it('should sort playlists by id alphabetically', async () => {
@@ -185,10 +189,10 @@ it('should sort playlists by id alphabetically', async () => {
 
 	const result = await getPlaylists(channel);
 
-	expect(result).toHaveLength(3);
-	expect(result[0].data.label).toBe('alpha');
-	expect(result[1].data.label).toBe('beta');
-	expect(result[2].data.label).toBe('zebra');
+	expect(result.options).toHaveLength(3);
+	expect(result.options[0].data.label).toBe('alpha');
+	expect(result.options[1].data.label).toBe('beta');
+	expect(result.options[2].data.label).toBe('zebra');
 });
 
 it('should fetch messages with correct parameters', async () => {
@@ -212,8 +216,8 @@ it('should handle playlist without triple backticks as having 0 songs', async ()
 
 	const result = await getPlaylists(channel);
 
-	expect(result).toHaveLength(1);
-	expect(result[0].data.description).toBe('0 songs');
+	expect(result.options).toHaveLength(1);
+	expect(result.options[0].data.description).toBe('0 songs');
 });
 
 it('should handle playlist with empty triple backticks as having 0 songs', async () => {
@@ -226,8 +230,8 @@ it('should handle playlist with empty triple backticks as having 0 songs', async
 
 	const result = await getPlaylists(channel);
 
-	expect(result).toHaveLength(1);
-	expect(result[0].data.description).toBe('0 songs');
+	expect(result.options).toHaveLength(1);
+	expect(result.options[0].data.description).toBe('0 songs');
 });
 
 it('should handle message content with triple backticks correctly', async () => {
@@ -245,8 +249,8 @@ it('should handle message content with triple backticks correctly', async () => 
 
 	const result = await getPlaylists(channel);
 
-	expect(result).toHaveLength(1);
-	expect(result[0].data.description).toBe('2 songs');
+	expect(result.options).toHaveLength(1);
+	expect(result.options[0].data.description).toBe('2 songs');
 	expect(mockedCleanUpPlaylistContent).toHaveBeenCalledWith(
 		'id="playlist1"\n```\nSong with content\nAnother song\n```\nignored content',
 	);
@@ -268,11 +272,11 @@ it('should ignore playlists without proper format but still process ones with id
 
 	const result = await getPlaylists(channel);
 
-	expect(result).toHaveLength(2);
-	expect(result[0].data.label).toBe('invalid');
-	expect(result[0].data.description).toBe('0 songs');
-	expect(result[1].data.label).toBe('valid');
-	expect(result[1].data.description).toBe('1 song');
+	expect(result.options).toHaveLength(2);
+	expect(result.options[0].data.label).toBe('invalid');
+	expect(result.options[0].data.description).toBe('0 songs');
+	expect(result.options[1].data.label).toBe('valid');
+	expect(result.options[1].data.description).toBe('1 song');
 });
 
 it('should handle playlist where id appears after triple backticks', async () => {
@@ -286,10 +290,10 @@ it('should handle playlist where id appears after triple backticks', async () =>
 
 	const result = await getPlaylists(channel);
 
-	expect(result).toHaveLength(1);
-	expect(result[0].data.label).toBe('playlist1');
-	expect(result[0].data.description).toBe('2 songs');
-	expect(result[0].data.value).toBe('playlist1');
+	expect(result.options).toHaveLength(1);
+	expect(result.options[0].data.label).toBe('playlist1');
+	expect(result.options[0].data.description).toBe('2 songs');
+	expect(result.options[0].data.value).toBe('playlist1');
 });
 
 it('should show actual song count with timestamp when Spotify playlist is cached', async () => {
@@ -314,8 +318,10 @@ it('should show actual song count with timestamp when Spotify playlist is cached
 
 	const result = await getPlaylists(channel);
 
-	expect(result).toHaveLength(1);
-	expect(result[0].data.description).toBe('6 songs (as of Jun 1, 2025)');
+	expect(result.options).toHaveLength(1);
+	expect(result.options[0].data.description).toBe(
+		'6 songs (as of Jun 1, 2025)',
+	);
 	expect(mockedExternalPlaylistCache.getTrackCount).toHaveBeenCalledWith(
 		EXAMPLE_SPOTIFY_PLAYLIST,
 	);
@@ -349,8 +355,10 @@ it('should show cached song count with timestamp for multiple Spotify playlists'
 
 	const result = await getPlaylists(channel);
 
-	expect(result).toHaveLength(1);
-	expect(result[0].data.description).toBe('10 songs (as of May 15, 2025)');
+	expect(result.options).toHaveLength(1);
+	expect(result.options[0].data.description).toBe(
+		'10 songs (as of May 15, 2025)',
+	);
 });
 
 it('should handle mix of cached and uncached Spotify playlists with timestamp', async () => {
@@ -376,8 +384,8 @@ it('should handle mix of cached and uncached Spotify playlists with timestamp', 
 
 	const result = await getPlaylists(channel);
 
-	expect(result).toHaveLength(1);
-	expect(result[0].data.description).toBe(
+	expect(result.options).toHaveLength(1);
+	expect(result.options[0].data.description).toBe(
 		'4 songs (as of Jun 1, 2025) (+ 1 unresolved external playlist)',
 	);
 });
@@ -401,8 +409,8 @@ it('should fall back to playlist count when no cache data available', async () =
 
 	const result = await getPlaylists(channel);
 
-	expect(result).toHaveLength(1);
-	expect(result[0].data.description).toBe(
+	expect(result.options).toHaveLength(1);
+	expect(result.options[0].data.description).toBe(
 		'1 song (+ 1 unresolved external playlist)',
 	);
 });
@@ -422,8 +430,10 @@ it('should handle Redis errors gracefully', async () => {
 
 	const result = await getPlaylists(channel);
 
-	expect(result).toHaveLength(1);
-	expect(result[0].data.description).toBe('1 unresolved external playlist');
+	expect(result.options).toHaveLength(1);
+	expect(result.options[0].data.description).toBe(
+		'1 unresolved external playlist',
+	);
 });
 
 it('should handle invalid JSON in cache gracefully', async () => {
@@ -441,6 +451,8 @@ it('should handle invalid JSON in cache gracefully', async () => {
 
 	const result = await getPlaylists(channel);
 
-	expect(result).toHaveLength(1);
-	expect(result[0].data.description).toBe('1 unresolved external playlist');
+	expect(result.options).toHaveLength(1);
+	expect(result.options[0].data.description).toBe(
+		'1 unresolved external playlist',
+	);
 });

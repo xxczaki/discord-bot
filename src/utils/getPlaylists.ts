@@ -12,11 +12,15 @@ const pluralizeSongs = pluralize('song', 'songs');
 const pluralizePlaylist = pluralize('playlist', 'playlists');
 const externalPlaylistCache = new ExternalPlaylistCache(redis);
 
-async function getPlaylists(channel: TextBasedChannel) {
+async function getPlaylists(
+	channel: TextBasedChannel,
+	page = 0,
+	itemsPerPage = 25,
+) {
 	const rawMessages = await channel.messages.fetch({ limit: 50, cache: false });
 	const messages = rawMessages.map((message) => message.content);
 
-	const playlistsWithCache = await Promise.all(
+	const allPlaylistsWithCache = await Promise.all(
 		messages
 			.flatMap((message) => {
 				const match = /id="(?<id>.+)"/.exec(message);
@@ -31,21 +35,44 @@ async function getPlaylists(channel: TextBasedChannel) {
 
 				return { id, songs };
 			})
-			.slice(0, 25)
 			.map(async ({ id, songs }) => ({
 				id,
 				description: await getPlaylistDescription(songs),
 			})),
 	);
 
-	return playlistsWithCache
-		.sort(({ id: a }, { id: b }) => a.charCodeAt(0) - b.charCodeAt(0))
-		.map(({ id, description }) =>
-			new StringSelectMenuOptionBuilder()
-				.setLabel(id)
-				.setDescription(description)
-				.setValue(id),
-		);
+	const sortedPlaylists = allPlaylistsWithCache.sort(({ id: a }, { id: b }) =>
+		a.localeCompare(b, 'en', { sensitivity: 'base' }),
+	);
+
+	const startIndex = page * itemsPerPage;
+	const endIndex = startIndex + itemsPerPage;
+	const pageItems = sortedPlaylists.slice(startIndex, endIndex);
+
+	const options = pageItems.map(({ id, description }) =>
+		new StringSelectMenuOptionBuilder()
+			.setLabel(id)
+			.setDescription(description)
+			.setValue(id),
+	);
+
+	const totalPages = Math.ceil(sortedPlaylists.length / itemsPerPage);
+	const firstItemLabel = pageItems[0]?.id || '';
+	const lastItemLabel = pageItems[pageItems.length - 1]?.id || '';
+
+	const rangeIndicator =
+		pageItems.length > 0
+			? `${firstItemLabel.charAt(0).toUpperCase()}-${lastItemLabel.charAt(0).toUpperCase()}`
+			: '';
+
+	return {
+		options,
+		totalPages,
+		currentPage: page,
+		totalItems: sortedPlaylists.length,
+		rangeIndicator,
+		hasMore: sortedPlaylists.length > itemsPerPage,
+	};
 }
 
 export default getPlaylists;

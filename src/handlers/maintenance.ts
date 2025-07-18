@@ -14,6 +14,13 @@ export default async function maintenanceCommandHandler(
 	try {
 		const k8sAppsV1Api = createK8sClient();
 
+		if (!k8sAppsV1Api) {
+			await interaction.editReply(
+				'❌ Maintenance mode is not available – running outside of cluster environment.',
+			);
+			return;
+		}
+
 		await interaction.editReply(
 			'✅ Maintenance mode activated! Bot will shut down in a few seconds...',
 		);
