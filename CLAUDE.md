@@ -26,12 +26,6 @@ pnpm test
 # Run tests with coverage
 pnpm test:coverage
 
-# Run specific test file
-pnpm test src/path/to/file.test.ts
-
-# Run specific test file with coverage
-pnpm test:coverage src/path/to/file.test.ts
-
 # Full development workflow check
 pnpm lint && pnpm tsc && pnpm test
 ```
@@ -101,6 +95,14 @@ This is a Discord music bot built with TypeScript using the discord-player libra
 - **Don't duplicate mocks already defined globally** - redis, logger, and Sentry are already mocked in `setupTests.ts`
 - **Don't create complex mocks for simple functions** - if a utility needs environment variables, either let it run naturally or use a simple mock
 - Check global mocks in `setupTests.ts` before adding new vi.mock() calls to individual test files
+
+#### Type Safety in Tests
+
+- **NEVER use `as any`** - this defeats the purpose of TypeScript and is completely unacceptable
+- Use proper type assertions with specific types when necessary
+- Create proper mock types that match the expected interface
+- If Discord.js types are complex, create minimal interface mocks that match only the properties you're testing
+- Use type guards and proper typing for test data structures
 
 #### Coverage Approach
 

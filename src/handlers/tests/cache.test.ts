@@ -2,7 +2,9 @@ import { opendir, stat } from 'node:fs/promises';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import redis from '../../utils/redis';
-import cacheCommandHandler from '../cache';
+import cacheCommandHandler, {
+	createActionRowWithRemovedButton,
+} from '../cache';
 
 vi.mock('../../utils/getEnvironmentVariable', () => ({
 	default: vi.fn((key: string) => {
@@ -23,6 +25,21 @@ vi.mock('node:fs/promises', () => ({
 const mockOpendir = vi.mocked(opendir);
 const mockStat = vi.mocked(stat);
 
+interface MockButtonData {
+	custom_id: string;
+	label: string;
+	disabled: boolean;
+	style: number;
+}
+
+interface MockComponent {
+	data: MockButtonData;
+}
+
+interface MockActionRow {
+	components: MockComponent[];
+}
+
 interface MockEditReplyCall {
 	embeds?: {
 		data: {
@@ -31,7 +48,7 @@ interface MockEditReplyCall {
 			fields: { name: string; value: string }[];
 		};
 	}[];
-	components?: { components: { data: { disabled: boolean } }[] }[];
+	components?: MockActionRow[];
 }
 
 function getEditReplyCall(
@@ -339,8 +356,7 @@ describe('cache command handler', () => {
 		const mockButtonInteraction = {
 			user: { id: 'owner-123' },
 			customId: 'unknown_action',
-			deferReply: vi.fn().mockResolvedValue({}),
-			editReply: vi.fn().mockResolvedValue({}),
+			update: vi.fn().mockResolvedValue({}),
 		};
 
 		const mockCollector = {
@@ -368,8 +384,65 @@ describe('cache command handler', () => {
 
 		await collectCallback(mockButtonInteraction);
 
-		expect(mockButtonInteraction.editReply).toHaveBeenCalledWith({
-			content: '❌ Unknown action.',
-		});
+		expect(mockButtonInteraction.update).toHaveBeenCalled();
+	});
+});
+
+describe('createActionRowWithRemovedButton', () => {
+	it('should remove flush_query_cache button and keep flush_external_playlist_cache', () => {
+		const row = createActionRowWithRemovedButton('flush_query_cache');
+
+		expect(row.components).toHaveLength(1);
+
+		const remainingButton = row.components[0].data as MockButtonData;
+
+		expect(remainingButton.custom_id).toBe('flush_external_playlist_cache');
+		expect(remainingButton.label).toBe('Flush playlist cache');
+		expect(remainingButton.disabled).toBe(false);
+	});
+
+	it('should remove flush_external_playlist_cache button and keep flush_query_cache', () => {
+		const row = createActionRowWithRemovedButton(
+			'flush_external_playlist_cache',
+		);
+
+		expect(row.components).toHaveLength(1);
+
+		const remainingButton = row.components[0].data as MockButtonData;
+
+		expect(remainingButton.custom_id).toBe('flush_query_cache');
+		expect(remainingButton.label).toBe('Flush query cache');
+		expect(remainingButton.disabled).toBe(false);
+	});
+
+	it('should keep both buttons when removing unknown button', () => {
+		const row = createActionRowWithRemovedButton('unknown_button');
+
+		expect(row.components).toHaveLength(2);
+
+		const firstButton = row.components[0].data as MockButtonData;
+		const secondButton = row.components[1].data as MockButtonData;
+
+		expect(firstButton.custom_id).toBe('flush_query_cache');
+		expect(secondButton.custom_id).toBe('flush_external_playlist_cache');
+	});
+
+	it('should return empty row when all buttons are removed', () => {
+		const row = createActionRowWithRemovedButton('flush_query_cache');
+		expect(row.components).toHaveLength(1);
+
+		const remainingButtons = [
+			{ customId: 'flush_query_cache', label: 'Flush query cache' },
+			{
+				customId: 'flush_external_playlist_cache',
+				label: 'Flush playlist cache',
+			},
+		].filter(
+			(button) =>
+				button.customId !== 'flush_query_cache' &&
+				button.customId !== 'flush_external_playlist_cache',
+		);
+
+		expect(remainingButtons).toHaveLength(0);
 	});
 });

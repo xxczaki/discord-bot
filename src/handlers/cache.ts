@@ -42,8 +42,13 @@ export default async function cacheCommandHandler(
 	await interaction.reply('Loading cache statistics…');
 
 	try {
-		const stats = await gatherCacheStatsWithLiveUpdates(interaction);
+		const usedButtons = new Set<string>();
 		const actionRow = createActionRow(interaction.user.id === OWNER_ID);
+		const stats = await gatherCacheStatsWithLiveUpdates(
+			interaction,
+			usedButtons,
+			actionRow,
+		);
 
 		await interaction.editReply({
 			embeds: [createCacheStatsEmbed(stats)],
@@ -65,9 +70,18 @@ export default async function cacheCommandHandler(
 				return;
 			}
 
-			await buttonInteraction.deferReply({ ephemeral: true });
-
 			try {
+				usedButtons.add(buttonInteraction.customId);
+				const remainingActionRow = createActionRowWithUsedButtons(usedButtons);
+
+				await buttonInteraction.update({
+					embeds: [createCacheStatsEmbed(stats)],
+					components:
+						remainingActionRow.components.length > 0
+							? [remainingActionRow]
+							: [],
+				});
+
 				switch (buttonInteraction.customId) {
 					case 'flush_query_cache':
 						await flushQueryCache();
@@ -76,24 +90,22 @@ export default async function cacheCommandHandler(
 						await flushExternalPlaylistCache();
 						break;
 					default:
-						await buttonInteraction.editReply({
-							content: '❌ Unknown action.',
-						});
 						return;
 				}
 
-				await buttonInteraction.deleteReply();
-				const newStats = await gatherCacheStatsWithLiveUpdates(interaction);
+				const newStats = await gatherCacheStatsWithLiveUpdates(
+					interaction,
+					usedButtons,
+				);
 				await interaction.editReply({
 					embeds: [createCacheStatsEmbed(newStats)],
-					components: [],
+					components:
+						remainingActionRow.components.length > 0
+							? [remainingActionRow]
+							: [],
 				});
-				collector?.stop();
 			} catch (error) {
 				reportError(error, 'Failed to process cache flush button');
-				await buttonInteraction.editReply({
-					content: '❌ Something went wrong while processing the request.',
-				});
 			}
 		});
 
@@ -115,6 +127,8 @@ export default async function cacheCommandHandler(
 
 async function gatherCacheStatsWithLiveUpdates(
 	interaction: ChatInputCommandInteraction,
+	usedButtons: Set<string>,
+	initialActionRow?: ActionRowBuilder<ButtonBuilder>,
 ): Promise<CacheStats> {
 	const stats: CacheStats = {
 		queryCache: { count: 0, size: 0 },
@@ -125,11 +139,12 @@ async function gatherCacheStatsWithLiveUpdates(
 	const updateDisplay = async () => {
 		try {
 			const embed = createCacheStatsEmbed(stats);
-			const actionRow = createActionRow(interaction.user.id === OWNER_ID);
+			const actionRow =
+				initialActionRow || createActionRowWithUsedButtons(usedButtons);
 
 			await interaction.editReply({
 				embeds: [embed],
-				components: [actionRow],
+				components: actionRow.components.length > 0 ? [actionRow] : [],
 				content: null,
 			});
 		} catch {}
@@ -162,7 +177,7 @@ async function getRedisCacheStatsWithUpdates(
 	try {
 		const stream = redis.scanStream({
 			match: pattern,
-			count: 100,
+			count: 500,
 		});
 
 		let count = 0;
@@ -228,7 +243,7 @@ async function getOpusCacheStatsWithUpdates(
 		let size = 0;
 		let processedFiles = 0;
 
-		const BATCH_SIZE = 50;
+		const BATCH_SIZE = 200;
 
 		for await (const entry of directory) {
 			if (entry.isFile()) {
@@ -240,7 +255,7 @@ async function getOpusCacheStatsWithUpdates(
 
 					if (processedFiles % BATCH_SIZE === 0) {
 						onUpdate({ count, size });
-						await new Promise((resolve) => setTimeout(resolve, 10));
+						await new Promise((resolve) => setTimeout(resolve, 100));
 					}
 				} catch (error) {
 					logger.error(`Failed to stat file ${entry.name}:`, error);
@@ -300,24 +315,65 @@ function createCacheStatsEmbed(stats: CacheStats): EmbedBuilder {
 }
 
 function createActionRow(isOwner: boolean): ActionRowBuilder<ButtonBuilder> {
+	if (!isOwner) {
+		const row = new ActionRowBuilder<ButtonBuilder>();
+		const buttons = [
+			new ButtonBuilder()
+				.setCustomId('flush_query_cache')
+				.setLabel('Flush query cache')
+				.setStyle(ButtonStyle.Danger)
+				.setDisabled(true),
+			new ButtonBuilder()
+				.setCustomId('flush_external_playlist_cache')
+				.setLabel('Flush playlist cache')
+				.setStyle(ButtonStyle.Danger)
+				.setDisabled(true),
+		];
+		row.addComponents(buttons);
+		return row;
+	}
+
+	return createActionRowWithUsedButtons(new Set());
+}
+
+export function createActionRowWithUsedButtons(
+	usedButtons: Set<string>,
+): ActionRowBuilder<ButtonBuilder> {
 	const row = new ActionRowBuilder<ButtonBuilder>();
 
-	const buttons = [
-		new ButtonBuilder()
-			.setCustomId('flush_query_cache')
-			.setLabel('Flush query cache')
-			.setStyle(ButtonStyle.Danger)
-			.setDisabled(!isOwner),
-		new ButtonBuilder()
-			.setCustomId('flush_external_playlist_cache')
-			.setLabel('Flush playlist cache')
-			.setStyle(ButtonStyle.Danger)
-			.setDisabled(!isOwner),
+	const allButtons = [
+		{
+			customId: 'flush_query_cache',
+			label: 'Flush query cache',
+		},
+		{
+			customId: 'flush_external_playlist_cache',
+			label: 'Flush playlist cache',
+		},
 	];
 
-	row.addComponents(buttons);
+	const remainingButtons = allButtons
+		.filter((button) => !usedButtons.has(button.customId))
+		.map((button) =>
+			new ButtonBuilder()
+				.setCustomId(button.customId)
+				.setLabel(button.label)
+				.setStyle(ButtonStyle.Danger)
+				.setDisabled(false),
+		);
+
+	if (remainingButtons.length > 0) {
+		row.addComponents(remainingButtons);
+	}
 
 	return row;
+}
+
+export function createActionRowWithRemovedButton(
+	removedButtonId: string,
+): ActionRowBuilder<ButtonBuilder> {
+	const usedButtons = new Set([removedButtonId]);
+	return createActionRowWithUsedButtons(usedButtons);
 }
 
 async function flushQueryCache(): Promise<void> {
