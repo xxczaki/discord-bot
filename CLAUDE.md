@@ -127,6 +127,7 @@ This is a Discord music bot built with TypeScript using the discord-player libra
 - **Utilities**: Prefer existing utilities from `src/utils/` over custom logic
 - **Logging**: Use `logger` from `src/utils/logger.ts` instead of console methods
 - **Type Safety**: Use `isObject()`, `getEnvironmentVariable()` and other type-safe utilities
+- **Variable Naming**: Use descriptive names, avoid single-letter variables (e.g., use `field` instead of `f`, `item` instead of `i`)
 
 ### Key Utilities Available
 

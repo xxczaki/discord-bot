@@ -5,6 +5,7 @@ import prettyBytes from 'pretty-bytes';
 import isObject from '../utils/isObject';
 import getOpusCacheTrackPath from './getOpusCacheTrackPath';
 import getTrackThumbnail from './getTrackThumbnail';
+import isUrlSpotifyPlaylist from './isUrlSpotifyPlaylist';
 
 const fileStatsCache = new Map<string, { size: number; timestamp: number }>();
 const CACHE_DURATION_MS = 30_000;
@@ -22,7 +23,11 @@ async function createTrackEmbed(track: Track, description: string) {
 		? track.metadata.originalQuery
 		: undefined;
 
-	if (trackQuery && typeof trackQuery === 'string') {
+	if (
+		trackQuery &&
+		typeof trackQuery === 'string' &&
+		!isUrlSpotifyPlaylist(trackQuery)
+	) {
 		embed.addFields({
 			name: 'Query',
 			value: `\`${trackQuery}\``,

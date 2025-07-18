@@ -186,9 +186,9 @@ export const RAW_COMMANDS: CategorizedCommand[] = [
 		category: 'Utilities',
 	},
 	{
-		name: 'flush_query_cache',
-		description: 'Flush the internal query cache',
-		category: 'Owner-only',
+		name: 'cache',
+		description: 'View cache statistics and manage cache types',
+		category: 'Other',
 	},
 	{
 		name: 'avatar',
@@ -212,11 +212,6 @@ export const RAW_COMMANDS: CategorizedCommand[] = [
 		name: 'recover',
 		description: 'Recover a recently played queue',
 		category: 'Music',
-	},
-	{
-		name: 'opus_cache',
-		description: 'Fetch information about the Opus file cache',
-		category: 'Other',
 	},
 	{
 		name: 'help',

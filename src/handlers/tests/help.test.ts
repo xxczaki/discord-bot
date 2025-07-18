@@ -91,7 +91,7 @@ it('should include comprehensive command content and descriptions', async () => 
 	expect(content).toContain('`/help`');
 	expect(content).toContain('`/avatar <user>`');
 	expect(content).toContain('`/tic_tac_toe`');
-	expect(content).toContain('`/opus_cache`');
+	expect(content).toContain('`/cache`');
 
 	expect(content).not.toContain('category:');
 	expect(content).not.toContain('"category"');

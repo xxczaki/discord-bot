@@ -13,6 +13,8 @@ const EXAMPLE_TRACK_URL = 'https://example.com/track';
 const EXAMPLE_DESCRIPTION = 'Now playing';
 const EXAMPLE_QUERY = 'test song artist';
 const EXAMPLE_URL_QUERY = 'https://spotify.com/track/123';
+const EXAMPLE_PLAYLIST_URL =
+	'https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M';
 const EXAMPLE_BRIDGE_URL = 'https://youtube.com/watch?v=123';
 const EXAMPLE_FILE_SIZE_BYTES = 2534656; // ~2.53 MB
 
@@ -91,6 +93,21 @@ it('should add query field when query is a URL', async () => {
 
 it('should not add query field when track has no originalQuery metadata', async () => {
 	const track = createMockTrack();
+
+	const result = await createTrackEmbed(track, EXAMPLE_DESCRIPTION);
+
+	const queryField = result.data.fields?.find(
+		(field) => field.name === 'Query',
+	);
+	expect(queryField).toBeUndefined();
+});
+
+it('should not add query field when originalQuery is a Spotify playlist URL', async () => {
+	const track = createMockTrack({
+		metadata: {
+			originalQuery: EXAMPLE_PLAYLIST_URL,
+		},
+	});
 
 	const result = await createTrackEmbed(track, EXAMPLE_DESCRIPTION);
 

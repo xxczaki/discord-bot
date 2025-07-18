@@ -7,11 +7,7 @@ export default class LockdownManager {
 	#ownerUserId: string | null = null;
 	#isLockdownActive = false;
 	#lockdownAffectedCategories = new Set(['Music']);
-	#ownerOnlyCommands = new Set([
-		'maintenance',
-		'flush_query_cache',
-		'lockdown',
-	]);
+	#ownerOnlyCommands = new Set(['maintenance', 'lockdown']);
 
 	private constructor() {}
 
@@ -36,7 +32,6 @@ export default class LockdownManager {
 		this.#lockdownAffectedCategories.add('Music');
 		this.#ownerOnlyCommands.clear();
 		this.#ownerOnlyCommands.add('maintenance');
-		this.#ownerOnlyCommands.add('flush_query_cache');
 		this.#ownerOnlyCommands.add('lockdown');
 	}
 

@@ -60,7 +60,6 @@ it('should identify commands affected by lockdown', () => {
 it('should identify owner-only commands', () => {
 	const lockdown = LockdownManager.getInstance();
 	expect(lockdown.isOwnerOnlyCommand('maintenance')).toBe(true);
-	expect(lockdown.isOwnerOnlyCommand('flush_query_cache')).toBe(true);
 	expect(lockdown.isOwnerOnlyCommand('lockdown')).toBe(true);
 	expect(lockdown.isOwnerOnlyCommand('play')).toBe(false);
 });
