@@ -145,7 +145,7 @@ async function gatherCacheStatsWithLiveUpdates(
 		if (!force && now - lastUpdateTime < UPDATE_THROTTLE_MS) {
 			return;
 		}
-		
+
 		lastUpdateTime = now;
 
 		try {

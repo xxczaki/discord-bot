@@ -59,3 +59,18 @@ it('should export correct deployment constants', () => {
 	expect(DEPLOYMENT_NAME).toBe('discord-bot');
 	expect(DEPLOYMENT_NAMESPACE).toBe('discord-bot');
 });
+
+it('should return null when loadFromCluster throws error', async () => {
+	mockLoadFromCluster.mockImplementation(() => {
+		throw new Error('Failed to load cluster config');
+	});
+
+	const { default: freshCreateK8sClient } = await import('../k8sClient');
+
+	const client = freshCreateK8sClient();
+
+	expect(mockKubeConfig).toHaveBeenCalledTimes(1);
+	expect(mockLoadFromCluster).toHaveBeenCalledTimes(1);
+	expect(mockMakeApiClient).not.toHaveBeenCalled();
+	expect(client).toBeNull();
+});

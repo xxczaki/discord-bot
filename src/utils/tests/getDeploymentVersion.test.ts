@@ -77,3 +77,13 @@ it('should handle k8s API errors gracefully', async () => {
 
 	expect(result).toBeUndefined();
 });
+
+it('should handle TypeError with Invalid URL message specifically', async () => {
+	const typeError = new TypeError('Invalid URL');
+
+	mocks.mockApi.readNamespacedDeployment.mockRejectedValue(typeError);
+
+	const result = await getDeploymentVersion();
+
+	expect(result).toBeUndefined();
+});

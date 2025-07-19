@@ -386,6 +386,38 @@ describe('cache command handler', () => {
 
 		expect(mockButtonInteraction.update).toHaveBeenCalled();
 	});
+
+	it('should handle individual file stat errors in opus cache', async () => {
+		const mockInteraction = createMockInteraction();
+
+		const mockDirectory = {
+			[Symbol.asyncIterator]: async function* () {
+				yield {
+					name: 'good-file.opus',
+					isFile: () => true,
+				};
+				yield {
+					name: 'bad-file.opus',
+					isFile: () => true,
+				};
+			},
+		};
+
+		mockOpendir.mockResolvedValue(mockDirectory as never);
+		mockStat
+			.mockResolvedValueOnce({ size: 1024 } as never)
+			.mockRejectedValueOnce(new Error('Permission denied'));
+
+		await cacheCommandHandler(mockInteraction);
+
+		const call = getEditReplyCall(mockInteraction);
+		const opusCacheField = call.embeds?.[0]?.data.fields.find(
+			(field) => field.name === 'Opus cache',
+		);
+
+		expect(opusCacheField?.value).toContain('1 file');
+		expect(opusCacheField?.value).toContain('1.02 kB');
+	});
 });
 
 describe('createActionRowWithRemovedButton', () => {
