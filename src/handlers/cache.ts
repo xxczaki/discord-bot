@@ -136,7 +136,18 @@ async function gatherCacheStatsWithLiveUpdates(
 		opusCache: { count: 0, size: 0 },
 	};
 
-	const updateDisplay = async () => {
+	let lastUpdateTime = 0;
+	const UPDATE_THROTTLE_MS = 500;
+
+	const updateDisplay = async (force = false) => {
+		const now = Date.now();
+
+		if (!force && now - lastUpdateTime < UPDATE_THROTTLE_MS) {
+			return;
+		}
+		
+		lastUpdateTime = now;
+
 		try {
 			const embed = createCacheStatsEmbed(stats);
 			const actionRow =
@@ -167,6 +178,8 @@ async function gatherCacheStatsWithLiveUpdates(
 
 	await Promise.all(promises);
 
+	await updateDisplay(true);
+
 	return stats;
 }
 
@@ -177,7 +190,7 @@ async function getRedisCacheStatsWithUpdates(
 	try {
 		const stream = redis.scanStream({
 			match: pattern,
-			count: 500,
+			count: 200,
 		});
 
 		let count = 0;
@@ -201,6 +214,8 @@ async function getRedisCacheStatsWithUpdates(
 						size += batchSize;
 
 						onUpdate({ count, size });
+
+						await new Promise((resolve) => setTimeout(resolve, 25));
 					} catch (error) {
 						logger.error(
 							`Failed to process Redis cache batch for pattern ${pattern}:`,
@@ -213,6 +228,7 @@ async function getRedisCacheStatsWithUpdates(
 			});
 
 			stream.on('end', () => {
+				onUpdate({ count, size });
 				resolve();
 			});
 
@@ -243,7 +259,7 @@ async function getOpusCacheStatsWithUpdates(
 		let size = 0;
 		let processedFiles = 0;
 
-		const BATCH_SIZE = 200;
+		const BATCH_SIZE = 100;
 
 		for await (const entry of directory) {
 			if (entry.isFile()) {
@@ -255,7 +271,7 @@ async function getOpusCacheStatsWithUpdates(
 
 					if (processedFiles % BATCH_SIZE === 0) {
 						onUpdate({ count, size });
-						await new Promise((resolve) => setTimeout(resolve, 100));
+						await new Promise((resolve) => setTimeout(resolve, 50));
 					}
 				} catch (error) {
 					logger.error(`Failed to stat file ${entry.name}:`, error);
