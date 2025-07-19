@@ -215,7 +215,7 @@ export const RAW_COMMANDS: CategorizedCommand[] = [
 	},
 	{
 		name: 'help',
-		description: 'Shos the available commands and their purpose',
+		description: 'Show the available commands and their purpose',
 		category: 'Other',
 	},
 	{
@@ -226,6 +226,11 @@ export const RAW_COMMANDS: CategorizedCommand[] = [
 	{
 		name: 'lockdown',
 		description: 'Toggle lockdown mode for certain commands',
+		category: 'Owner-only',
+	},
+	{
+		name: 'deploy',
+		description: 'Trigger an instant Argo CD deployment sync',
 		category: 'Owner-only',
 	},
 ];
