@@ -56,8 +56,8 @@ importers:
         specifier: ^2.5.1
         version: 2.5.1
       '@sentry/esbuild-plugin':
-        specifier: ^3.6.1
-        version: 3.6.1
+        specifier: ^4.0.0
+        version: 4.0.0
       '@types/node':
         specifier: ^24.1.0
         version: 24.1.0
@@ -818,12 +818,12 @@ packages:
     resolution: {integrity: sha512-xzvBr1Q1c4lCe7i6sRnrofxeO1QTP/LKQ6A6qy0iB4x5yfiSfARMEQEghojzTNALDTcv8En04qYNIco9/K9eZQ==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
 
-  '@sentry/babel-plugin-component-annotate@3.6.1':
-    resolution: {integrity: sha512-zmvUa4RpzDG3LQJFpGCE8lniz8Rk1Wa6ZvvK+yEH+snZeaHHRbSnAQBMR607GOClP+euGHNO2YtaY4UAdNTYbg==}
+  '@sentry/babel-plugin-component-annotate@4.0.0':
+    resolution: {integrity: sha512-1sozj4esnQBhJ2QO4imiLMl1858StkLjUxFF1KxgX/X1uEL/QlW2MYL8CKzbLeACy1SkR9h4V8GXSZvCnci5Dw==}
     engines: {node: '>= 14'}
 
-  '@sentry/bundler-plugin-core@3.6.1':
-    resolution: {integrity: sha512-/ubWjPwgLep84sUPzHfKL2Ns9mK9aQrEX4aBFztru7ygiJidKJTxYGtvjh4dL2M1aZ0WRQYp+7PF6+VKwdZXcQ==}
+  '@sentry/bundler-plugin-core@4.0.0':
+    resolution: {integrity: sha512-dTdbcctT5MJUwdbttZm2zomO+ui1F062ZIkogHeHqlA938Fwd1+9JIJ328+XL4XdcUG2yiFAZBWUPW3bYwoN9A==}
     engines: {node: '>= 14'}
 
   '@sentry/cli-darwin@2.50.0':
@@ -882,8 +882,8 @@ packages:
     resolution: {integrity: sha512-cZkuz6BDna6VXSqvlWnrRsaDx4QBKq1PcfQrqhVz8ljs0M7Gcl+Mtj8dCzUxx12fkYM62hQXG72DEGNlAQpH/Q==}
     engines: {node: '>=18'}
 
-  '@sentry/esbuild-plugin@3.6.1':
-    resolution: {integrity: sha512-1ak3ed3bbGLsBMonSyIshZeHNFDdFjlfI9Fq3sgcHBuOVjeSzFBPuAxNnqeEpR5lEMrx0vXc0448vm5x/IPi/A==}
+  '@sentry/esbuild-plugin@4.0.0':
+    resolution: {integrity: sha512-W+HVruclJHYpvekbSrBcmNahnS/W3pon2gS1Ve5uQjez7CA56OFi9lqCLvlloQpCSYYYeyGmxZEf6C7Z2d6jAw==}
     engines: {node: '>= 14'}
 
   '@sentry/node-core@9.40.0':
@@ -2643,9 +2643,9 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/d9eb00544ec2c0e5ae323f8c74ca14b16d1b3ef2:
-    resolution: {tarball: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/d9eb00544ec2c0e5ae323f8c74ca14b16d1b3ef2}
-    version: 15.0.0
+  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/0181594530c871e92f417c656bc6ee88b4a2a58a:
+    resolution: {tarball: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/0181594530c871e92f417c656bc6ee88b4a2a58a}
+    version: 15.0.1
 
   zlib-sync@0.1.10:
     resolution: {integrity: sha512-t7/pYg5tLBznL1RuhmbAt8rNp5tbhr+TSrJFnMkRtrGIaPJZ6Dc0uR4u3OoQI2d6cGlVI62E3Gy6gwkxyIqr/w==}
@@ -3356,12 +3356,12 @@ snapshots:
 
   '@sapphire/snowflake@3.5.5': {}
 
-  '@sentry/babel-plugin-component-annotate@3.6.1': {}
+  '@sentry/babel-plugin-component-annotate@4.0.0': {}
 
-  '@sentry/bundler-plugin-core@3.6.1':
+  '@sentry/bundler-plugin-core@4.0.0':
     dependencies:
       '@babel/core': 7.27.1
-      '@sentry/babel-plugin-component-annotate': 3.6.1
+      '@sentry/babel-plugin-component-annotate': 4.0.0
       '@sentry/cli': 2.50.0
       dotenv: 16.5.0
       find-up: 5.0.0
@@ -3418,9 +3418,9 @@ snapshots:
 
   '@sentry/core@9.40.0': {}
 
-  '@sentry/esbuild-plugin@3.6.1':
+  '@sentry/esbuild-plugin@4.0.0':
     dependencies:
-      '@sentry/bundler-plugin-core': 3.6.1
+      '@sentry/bundler-plugin-core': 4.0.0
       unplugin: 1.0.1
       uuid: 9.0.1
     transitivePeerDependencies:
@@ -3857,7 +3857,7 @@ snapshots:
       jsdom: 26.1.0(bufferutil@4.0.9)
       tiny-typed-emitter: 2.1.0
       undici: 7.9.0
-      youtubei.js: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/d9eb00544ec2c0e5ae323f8c74ca14b16d1b3ef2
+      youtubei.js: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/0181594530c871e92f417c656bc6ee88b4a2a58a
     transitivePeerDependencies:
       - bufferutil
       - canvas
@@ -5214,7 +5214,7 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/d9eb00544ec2c0e5ae323f8c74ca14b16d1b3ef2:
+  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/0181594530c871e92f417c656bc6ee88b4a2a58a:
     dependencies:
       '@bufbuild/protobuf': 2.4.0
       jintr: 3.3.1
