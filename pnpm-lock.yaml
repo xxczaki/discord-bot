@@ -6,7 +6,6 @@ settings:
 
 overrides:
   libsodium-wrappers: '-'
-  youtubei.js: github:LuanRT/YouTube.js
 
 importers:
 
@@ -456,6 +455,10 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
+
+  '@fastify/busboy@2.1.1':
+    resolution: {integrity: sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==}
+    engines: {node: '>=14'}
 
   '@ioredis/commands@1.2.0':
     resolution: {integrity: sha512-Sx1pU8EM64o2BrqNpEO1CNLtKQwyhuXuqyfH7oGKCk+1a33d2r5saW8zNwm3j6BTExtjrv2BxTgzzkMwts6vGg==}
@@ -2449,6 +2452,10 @@ packages:
   undici-types@7.8.0:
     resolution: {integrity: sha512-9UJ2xGDvQ43tYyVMpuHlsgApydB8ZKfVYTsLDhXkFL/6gfkp+U8xTGdh8pMJv1SpZna0zxG1DwsKZsreLbXBxw==}
 
+  undici@5.29.0:
+    resolution: {integrity: sha512-raqeBD6NQK4SkWhQzeYKd1KmIG6dllBOTt55Rmkt4HtI9mwdWtJljnrXjAFUBLTSN67HWrOIZ3EPF4kjUw80Bg==}
+    engines: {node: '>=14.0'}
+
   undici@6.21.3:
     resolution: {integrity: sha512-gBLkYIlEnSp8pFbT64yFgGE6UIB9tAkhukC23PmMDCe5Nd+cRqKxSjw5y54MK2AZMgZfJWMaNE4nYUHgi1XEOw==}
     engines: {node: '>=18.17'}
@@ -2643,9 +2650,8 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/0181594530c871e92f417c656bc6ee88b4a2a58a:
-    resolution: {tarball: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/0181594530c871e92f417c656bc6ee88b4a2a58a}
-    version: 15.0.1
+  youtubei.js@14.0.0:
+    resolution: {integrity: sha512-KAFttOw+9fwwBUvBc1T7KzMNBLczDOuN/dfote8BA9CABxgx8MPgV+vZWlowdDB6DnHjSUYppv+xvJ4VNBLK9A==}
 
   zlib-sync@0.1.10:
     resolution: {integrity: sha512-t7/pYg5tLBznL1RuhmbAt8rNp5tbhr+TSrJFnMkRtrGIaPJZ6Dc0uR4u3OoQI2d6cGlVI62E3Gy6gwkxyIqr/w==}
@@ -2967,6 +2973,8 @@ snapshots:
 
   '@esbuild/win32-x64@0.25.8':
     optional: true
+
+  '@fastify/busboy@2.1.1': {}
 
   '@ioredis/commands@1.2.0': {}
 
@@ -3857,7 +3865,7 @@ snapshots:
       jsdom: 26.1.0(bufferutil@4.0.9)
       tiny-typed-emitter: 2.1.0
       undici: 7.9.0
-      youtubei.js: https://codeload.github.com/LuanRT/YouTube.js/tar.gz/0181594530c871e92f417c656bc6ee88b4a2a58a
+      youtubei.js: 14.0.0
     transitivePeerDependencies:
       - bufferutil
       - canvas
@@ -5040,6 +5048,10 @@ snapshots:
 
   undici-types@7.8.0: {}
 
+  undici@5.29.0:
+    dependencies:
+      '@fastify/busboy': 2.1.1
+
   undici@6.21.3: {}
 
   undici@7.9.0: {}
@@ -5214,11 +5226,12 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  youtubei.js@https://codeload.github.com/LuanRT/YouTube.js/tar.gz/0181594530c871e92f417c656bc6ee88b4a2a58a:
+  youtubei.js@14.0.0:
     dependencies:
       '@bufbuild/protobuf': 2.4.0
       jintr: 3.3.1
-      undici: 6.21.3
+      tslib: 2.8.1
+      undici: 5.29.0
 
   zlib-sync@0.1.10:
     dependencies:
