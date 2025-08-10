@@ -70,8 +70,8 @@ importers:
         specifier: ^0.25.8
         version: 0.25.8
       esbuild-plugin-pino:
-        specifier: ^2.2.2
-        version: 2.2.2(esbuild@0.25.8)
+        specifier: ^2.3.0
+        version: 2.3.0(esbuild@0.25.8)(pino-pretty@13.1.1)(pino@9.8.0)(thread-stream@3.1.0)
       fuse.js:
         specifier: ^7.1.0
         version: 7.1.0
@@ -1365,10 +1365,18 @@ packages:
     resolution: {integrity: sha512-j6vWzfrGVfyXxge+O0x5sh6cvxAog0a/4Rdd2K36zCMV5eJ+/+tOAngRO8cODMNWbVRdVlmGZQL2YS3yR8bIUA==}
     engines: {node: '>= 0.4'}
 
-  esbuild-plugin-pino@2.2.2:
-    resolution: {integrity: sha512-VABhtEBkjmv60Lz50Z44OH2NR1OA2HpKns86zR6FQQx5ctBl96p7Y28sv0/tBi+Ca5qMg0Y4k/OORgaSIarkhQ==}
+  esbuild-plugin-pino@2.3.0:
+    resolution: {integrity: sha512-9fyvikD6k7qWVtwl777OYI1hY728gDgHMwDb6d6FEU8usawamWRuNdhbOEvFT5jTzKSwGou3oi0uRDes33jCMw==}
     peerDependencies:
-      esbuild: '>=0.25.0 <=0.25.0'
+      esbuild: '>=0.25.0 <=0.25.8'
+      pino: '>=7.0.0'
+      pino-pretty: '*'
+      thread-stream: '*'
+    peerDependenciesMeta:
+      pino-pretty:
+        optional: true
+      thread-stream:
+        optional: true
 
   esbuild@0.25.8:
     resolution: {integrity: sha512-vVC0USHGtMi8+R4Kz8rt6JhEWLxsv9Rnu/lGYbPR8u47B+DCBksq9JarW0zOO7bs37hyOK1l2/oqtbciutL5+Q==}
@@ -3986,9 +3994,13 @@ snapshots:
       has-tostringtag: 1.0.2
       hasown: 2.0.2
 
-  esbuild-plugin-pino@2.2.2(esbuild@0.25.8):
+  esbuild-plugin-pino@2.3.0(esbuild@0.25.8)(pino-pretty@13.1.1)(pino@9.8.0)(thread-stream@3.1.0):
     dependencies:
       esbuild: 0.25.8
+      pino: 9.8.0
+    optionalDependencies:
+      pino-pretty: 13.1.1
+      thread-stream: 3.1.0
 
   esbuild@0.25.8:
     optionalDependencies:
