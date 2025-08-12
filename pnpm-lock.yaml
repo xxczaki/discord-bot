@@ -88,8 +88,8 @@ importers:
         specifier: ^13.1.1
         version: 13.1.1
       pretty-bytes:
-        specifier: ^7.0.0
-        version: 7.0.0
+        specifier: ^7.0.1
+        version: 7.0.1
       typescript:
         specifier: ^5.9.2
         version: 5.9.2
@@ -2090,8 +2090,8 @@ packages:
     resolution: {integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==}
     engines: {node: '>=0.10.0'}
 
-  pretty-bytes@7.0.0:
-    resolution: {integrity: sha512-U5otLYPR3L0SVjHGrkEUx5mf7MxV2ceXeE7VwWPk+hyzC5drNohsOGNPDZqxCqyX1lkbEN4kl1LiI8QFd7r0ZA==}
+  pretty-bytes@7.0.1:
+    resolution: {integrity: sha512-285/jRCYIbMGDciDdrw0KPNC4LKEEwz/bwErcYNxSJOi4CpGUuLpb9gQpg3XJP0XYj9ldSRluXxih4lX2YN8Xw==}
     engines: {node: '>=20'}
 
   process-warning@5.0.0:
@@ -4680,7 +4680,7 @@ snapshots:
     dependencies:
       xtend: 4.0.2
 
-  pretty-bytes@7.0.0: {}
+  pretty-bytes@7.0.1: {}
 
   process-warning@5.0.0: {}
 
