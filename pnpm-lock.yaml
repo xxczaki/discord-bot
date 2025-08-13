@@ -55,8 +55,8 @@ importers:
         specifier: ^2.5.1
         version: 2.5.1
       '@sentry/esbuild-plugin':
-        specifier: ^4.1.0
-        version: 4.1.0
+        specifier: ^4.1.1
+        version: 4.1.1
       '@types/node':
         specifier: ^24.2.1
         version: 24.2.1
@@ -821,12 +821,12 @@ packages:
     resolution: {integrity: sha512-xzvBr1Q1c4lCe7i6sRnrofxeO1QTP/LKQ6A6qy0iB4x5yfiSfARMEQEghojzTNALDTcv8En04qYNIco9/K9eZQ==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
 
-  '@sentry/babel-plugin-component-annotate@4.1.0':
-    resolution: {integrity: sha512-UkcnqC7Bp9ODyoBN7BKcRotd1jz/I2vyruE/qjNfRC7UnP+jIRItUWYaXxQPON1fTw+N+egKdByk0M1y2OPv/Q==}
+  '@sentry/babel-plugin-component-annotate@4.1.1':
+    resolution: {integrity: sha512-HUpqrCK7zDVojTV6KL6BO9ZZiYrEYQqvYQrscyMsq04z+WCupXaH6YEliiNRvreR8DBJgdsG3lBRpebhUGmvfA==}
     engines: {node: '>= 14'}
 
-  '@sentry/bundler-plugin-core@4.1.0':
-    resolution: {integrity: sha512-/5XBtCF6M+9frEXrrvfSWOdOC2q6I1L7oY7qbUVegNkp3kYVGihNZZnJIXGzo9rmwnA0IV7jI3o0pF/HDRqPeA==}
+  '@sentry/bundler-plugin-core@4.1.1':
+    resolution: {integrity: sha512-Hx9RgXaD1HEYmL5aYoWwCKkVvPp4iklwfD9mvmdpQtcwLg6b6oLnPVDQaOry1ak6Pxt8smlrWcKy4IiKASlvig==}
     engines: {node: '>= 14'}
 
   '@sentry/cli-darwin@2.51.1':
@@ -885,8 +885,8 @@ packages:
     resolution: {integrity: sha512-yTpB53fBEWTMzltD/8f/qI2MFTwgd2vSkn7pOZQusSOMtyt0Bsm/77oqXldIt+eMBAImZalzZaxmaN7RyiRKWQ==}
     engines: {node: '>=18'}
 
-  '@sentry/esbuild-plugin@4.1.0':
-    resolution: {integrity: sha512-ZGCASS8Mk6gP6+/T5ZPJ4WzJfRnhzaafzdqNuTL+IfsIUtuN2F4hMAi9hmMHCrVJNdCC3lLNaMrA8OhCLfBgSA==}
+  '@sentry/esbuild-plugin@4.1.1':
+    resolution: {integrity: sha512-LTNNdB6/TYYDikFVSmu9pd2tnzsLTWjxZ3CZxZeIqvNhU6WRjLfkoSRzIiy7C7rB2wlWuywDDFx9tkOkDGDByg==}
     engines: {node: '>= 14'}
 
   '@sentry/node-core@9.45.0':
@@ -3373,12 +3373,12 @@ snapshots:
 
   '@sapphire/snowflake@3.5.5': {}
 
-  '@sentry/babel-plugin-component-annotate@4.1.0': {}
+  '@sentry/babel-plugin-component-annotate@4.1.1': {}
 
-  '@sentry/bundler-plugin-core@4.1.0':
+  '@sentry/bundler-plugin-core@4.1.1':
     dependencies:
       '@babel/core': 7.27.1
-      '@sentry/babel-plugin-component-annotate': 4.1.0
+      '@sentry/babel-plugin-component-annotate': 4.1.1
       '@sentry/cli': 2.51.1
       dotenv: 16.5.0
       find-up: 5.0.0
@@ -3435,9 +3435,9 @@ snapshots:
 
   '@sentry/core@9.45.0': {}
 
-  '@sentry/esbuild-plugin@4.1.0':
+  '@sentry/esbuild-plugin@4.1.1':
     dependencies:
-      '@sentry/bundler-plugin-core': 4.1.0
+      '@sentry/bundler-plugin-core': 4.1.1
       unplugin: 1.0.1
       uuid: 9.0.1
     transitivePeerDependencies:
