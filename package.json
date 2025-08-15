@@ -28,7 +28,7 @@
 		"zlib-sync": "^0.1.10"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.1.4",
+		"@biomejs/biome": "2.2.0",
 		"@discordjs/rest": "^2.5.1",
 		"@sentry/esbuild-plugin": "^4.1.1",
 		"@types/node": "^24.3.0",
