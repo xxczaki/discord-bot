@@ -41,7 +41,7 @@ export default async function enqueuePlaylists(
 	});
 
 	const messages = await playlistsChannel.messages.fetch({
-		limit: 30,
+		limit: 100,
 		cache: false,
 	});
 
@@ -50,7 +50,10 @@ export default async function enqueuePlaylists(
 		.map((message) => cleanUpPlaylistContent(message.content))
 		.join('\n');
 
-	const songsArray = songs.trim().split('\n');
+	const songsArray = songs
+		.trim()
+		.split('\n')
+		.filter((song) => song.trim() !== '');
 
 	const queries = Object.fromEntries(
 		songsArray.map((song, index) => [index.toString(), song]),

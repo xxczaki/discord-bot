@@ -201,7 +201,7 @@ it('should fetch messages with correct parameters', async () => {
 	await getPlaylists(channel);
 
 	expect(channel.messages.fetch).toHaveBeenCalledWith({
-		limit: 50,
+		limit: 100,
 		cache: false,
 	});
 });

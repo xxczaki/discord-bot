@@ -12,6 +12,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import getInitializedPlayer from '../initializePlayer';
 import { RedisQueryCache } from '../RedisQueryCache';
 
+vi.mock('../getOpusCacheDirectoryPath', () => ({
+	default: vi.fn().mockReturnValue('/mock/cache/path'),
+}));
+
 interface MockTrack {
 	url: string;
 	metadata?: Record<string, unknown>;
@@ -160,7 +164,7 @@ describe('onBeforeCreateStream callback', () => {
 		const result = await onBeforeCreateStreamCallback?.(mockTrack);
 
 		expect(mockStat).toHaveBeenCalledWith(
-			'/opus-cache/aHR0cHM6Ly9leGFtcGxlLmNvbS90cmFjaw.opus',
+			'/mock/cache/path/aHR0cHM6Ly9leGFtcGxlLmNvbS90cmFjaw.opus',
 		);
 		expect(mockTrack.setMetadata).toHaveBeenCalledWith({
 			isFromCache: true,
@@ -331,7 +335,7 @@ describe('onStreamExtracted callback', () => {
 		const result = await onStreamExtractedCallback?.(mockReadable, mockTrack);
 
 		expect(createWriteStream).toHaveBeenCalledWith(
-			'/opus-cache/aHR0cHM6Ly9leGFtcGxlLmNvbS90cmFjaw.opus',
+			'/mock/cache/path/aHR0cHM6Ly9leGFtcGxlLmNvbS90cmFjaw.opus',
 		);
 		expect(mockInterceptor.interceptors.add).toHaveBeenCalledWith(
 			mockWriteStream,

@@ -162,7 +162,7 @@ it('should fetch messages with correct parameters', async () => {
 	await enqueuePlaylists(mockInteraction, mockVoiceChannel);
 
 	expect(mockPlaylistsChannel.messages.fetch).toHaveBeenCalledWith({
-		limit: 30,
+		limit: 100,
 		cache: false,
 	});
 });
@@ -273,14 +273,12 @@ it('should handle empty songs array correctly', async () => {
 	await enqueuePlaylists(mockInteraction, mockVoiceChannel);
 
 	expect(mockedProcessTracksWithQueue).toHaveBeenCalledWith({
-		items: [''],
+		items: [],
 		voiceChannel: mockVoiceChannel,
 		interaction: mockInteraction,
 		embed: expect.any(EmbedBuilder),
 		nodeMetadata: {
-			queries: {
-				'0': '',
-			},
+			queries: {},
 		},
 	});
 });

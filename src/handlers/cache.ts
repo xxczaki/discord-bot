@@ -71,6 +71,10 @@ export default async function cacheCommandHandler(
 			}
 
 			try {
+				if (buttonInteraction.deferred || buttonInteraction.replied) {
+					return;
+				}
+
 				usedButtons.add(buttonInteraction.customId);
 				const remainingActionRow = createActionRowWithUsedButtons(usedButtons);
 
@@ -97,13 +101,18 @@ export default async function cacheCommandHandler(
 					interaction,
 					usedButtons,
 				);
-				await interaction.editReply({
-					embeds: [createCacheStatsEmbed(newStats)],
-					components:
-						remainingActionRow.components.length > 0
-							? [remainingActionRow]
-							: [],
-				});
+
+				try {
+					await interaction.editReply({
+						embeds: [createCacheStatsEmbed(newStats)],
+						components:
+							remainingActionRow.components.length > 0
+								? [remainingActionRow]
+								: [],
+					});
+				} catch (editError) {
+					logger.error(editError, 'Failed to edit reply after cache flush');
+				}
 			} catch (error) {
 				reportError(error, 'Failed to process cache flush button');
 			}
@@ -218,8 +227,8 @@ async function getRedisCacheStatsWithUpdates(
 						await new Promise((resolve) => setTimeout(resolve, 25));
 					} catch (error) {
 						logger.error(
-							`Failed to process Redis cache batch for pattern ${pattern}:`,
 							error,
+							`Failed to process Redis cache batch for pattern ${pattern}:`,
 						);
 					}
 				}
@@ -234,16 +243,16 @@ async function getRedisCacheStatsWithUpdates(
 
 			stream.on('error', (error) => {
 				logger.error(
-					`Failed to scan Redis cache for pattern ${pattern}:`,
 					error,
+					`Failed to scan Redis cache for pattern ${pattern}:`,
 				);
 				reject(error);
 			});
 		});
 	} catch (error) {
 		logger.error(
-			`Failed to get Redis cache stats for pattern ${pattern}:`,
 			error,
+			`Failed to get Redis cache stats for pattern ${pattern}:`,
 		);
 		onUpdate({ count: 0, size: 0 });
 	}
@@ -274,14 +283,14 @@ async function getOpusCacheStatsWithUpdates(
 						await new Promise((resolve) => setTimeout(resolve, 50));
 					}
 				} catch (error) {
-					logger.error(`Failed to stat file ${entry.name}:`, error);
+					logger.error(error, `Failed to stat file ${entry.name}:`);
 				}
 			}
 		}
 
 		onUpdate({ count, size });
 	} catch (error) {
-		logger.error('Failed to get Opus cache stats:', error);
+		logger.error(error, 'Failed to get Opus cache stats:');
 		onUpdate({ count: 0, size: 0 });
 	}
 }

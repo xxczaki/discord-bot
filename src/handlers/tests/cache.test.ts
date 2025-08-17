@@ -100,7 +100,9 @@ function createMockStream() {
 		resume: vi.fn(),
 		emit: (event: string, ...args: unknown[]) => {
 			if (listeners[event]) {
-				listeners[event].forEach((callback) => callback(...args));
+				listeners[event].forEach((callback) => {
+					callback(...args);
+				});
 			}
 		},
 	};

@@ -74,6 +74,7 @@ export default async function processTracksWithQueue({
 				try {
 					const result = await player.play(voiceChannel, item, {
 						searchEngine: determineSearchEngine(item),
+						fallbackSearchEngine: 'youtubeSearch',
 						nodeOptions: {
 							metadata: { interaction, ...nodeMetadata },
 							defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
@@ -117,6 +118,7 @@ export default async function processTracksWithQueue({
 					try {
 						const result = await player.play(voiceChannel, item, {
 							searchEngine: determineSearchEngine(item),
+							fallbackSearchEngine: 'youtubeSearch',
 							nodeOptions: {
 								metadata: { interaction, ...nodeMetadata },
 								defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],

@@ -8,16 +8,17 @@ import isUrlSpotifyPlaylist from './isUrlSpotifyPlaylist';
 import pluralize from './pluralize';
 import redis from './redis';
 
+const ITEMS_PER_PAGE = 25;
+
 const pluralizeSongs = pluralize('song', 'songs');
 const pluralizePlaylist = pluralize('playlist', 'playlists');
 const externalPlaylistCache = new ExternalPlaylistCache(redis);
 
-async function getPlaylists(
-	channel: TextBasedChannel,
-	page = 0,
-	itemsPerPage = 25,
-) {
-	const rawMessages = await channel.messages.fetch({ limit: 50, cache: false });
+async function getPlaylists(channel: TextBasedChannel, page = 0) {
+	const rawMessages = await channel.messages.fetch({
+		limit: 100,
+		cache: false,
+	});
 	const messages = rawMessages.map((message) => message.content);
 
 	const allPlaylistsWithCache = await Promise.all(
@@ -45,8 +46,8 @@ async function getPlaylists(
 		a.localeCompare(b, 'en', { sensitivity: 'base' }),
 	);
 
-	const startIndex = page * itemsPerPage;
-	const endIndex = startIndex + itemsPerPage;
+	const startIndex = page * ITEMS_PER_PAGE;
+	const endIndex = startIndex + ITEMS_PER_PAGE;
 	const pageItems = sortedPlaylists.slice(startIndex, endIndex);
 
 	const options = pageItems.map(({ id, description }) =>
@@ -56,7 +57,7 @@ async function getPlaylists(
 			.setValue(id),
 	);
 
-	const totalPages = Math.ceil(sortedPlaylists.length / itemsPerPage);
+	const totalPages = Math.ceil(sortedPlaylists.length / ITEMS_PER_PAGE);
 	const firstItemLabel = pageItems[0]?.id || '';
 	const lastItemLabel = pageItems[pageItems.length - 1]?.id || '';
 
@@ -71,7 +72,7 @@ async function getPlaylists(
 		currentPage: page,
 		totalItems: sortedPlaylists.length,
 		rangeIndicator,
-		hasMore: sortedPlaylists.length > itemsPerPage,
+		hasMore: sortedPlaylists.length > ITEMS_PER_PAGE,
 	};
 }
 

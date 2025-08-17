@@ -1,7 +1,10 @@
 import { globSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { sentryEsbuildPlugin } from '@sentry/esbuild-plugin';
 import * as esbuild from 'esbuild';
-import esbuildPluginPino from 'esbuild-plugin-pino';
+
+const require = createRequire(import.meta.url);
+const esbuildPluginPino = require('esbuild-plugin-pino');
 
 const handlers = globSync('src/handlers/*.ts');
 

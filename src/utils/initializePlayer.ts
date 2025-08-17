@@ -55,10 +55,13 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 				}
 
 				if (stats.size < MIN_CACHE_FILE_SIZE_BYTES) {
-					logger.warn('Deleting undersized cache file', {
-						filePath,
-						size: stats.size,
-					});
+					logger.warn(
+						{
+							filePath,
+							size: stats.size,
+						},
+						'Deleting undersized cache file',
+					);
 
 					void deleteOpusCacheEntry(track.url);
 
@@ -98,7 +101,7 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 				};
 
 				writeStream.on('error', async (error) => {
-					logger.error('Opus cache write stream error', error);
+					logger.error(error, 'Opus cache write stream error');
 					await cleanup();
 				});
 
@@ -129,7 +132,7 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 			} catch (error) {
 				activeWrites.delete(filePath);
 
-				logger.error('Failed to create opus cache write stream', error);
+				logger.error(error, 'Failed to create opus cache write stream');
 
 				if (isReadable) {
 					return readable;
