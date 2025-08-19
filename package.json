@@ -12,7 +12,7 @@
 		"test": "vitest run",
 		"test:coverage": "vitest run --coverage"
 	},
-	"packageManager": "pnpm@10.14.0",
+	"packageManager": "pnpm@10.15.0",
 	"dependencies": {
 		"@kubernetes/client-node": "^1.3.0",
 		"@sentry/node": "^10.5.0",
