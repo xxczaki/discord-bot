@@ -30,8 +30,8 @@ importers:
         specifier: ^1.5.0
         version: 1.5.0(bufferutil@4.0.9)
       discord.js:
-        specifier: ^14.22.0
-        version: 14.22.0(bufferutil@4.0.9)
+        specifier: ^14.22.1
+        version: 14.22.1(bufferutil@4.0.9)
       ioredis:
         specifier: ^5.7.0
         version: 5.7.0
@@ -1304,8 +1304,8 @@ packages:
   discord-voip@7.1.0:
     resolution: {integrity: sha512-6aQgI3QUj0Ee5tqaAV+pgBcOrgnkBh5/1UxAqbKMYQinQNs9LEZA7OoCxlWdiJVpVM2c1AxCdqhfryQMvM10+A==}
 
-  discord.js@14.22.0:
-    resolution: {integrity: sha512-IDSeDdWSEA4DoOyspekbetcFKkEonJO09cxR+kqQQlTWd5CTm/3Z48I4Te+EL8uxn52s718FZ0rI2dLxRkTpwg==}
+  discord.js@14.22.1:
+    resolution: {integrity: sha512-3k+Kisd/v570Jr68A1kNs7qVhNehDwDJAPe4DZ2Syt+/zobf9zEcuYFvsfIaAOgCa0BiHMfOOKQY4eYINl0z7w==}
     engines: {node: '>=18'}
 
   dom-serializer@2.0.0:
@@ -3932,7 +3932,7 @@ snapshots:
       - tsx
       - yaml
 
-  discord.js@14.22.0(bufferutil@4.0.9):
+  discord.js@14.22.1(bufferutil@4.0.9):
     dependencies:
       '@discordjs/builders': 1.11.2
       '@discordjs/collection': 1.5.3
