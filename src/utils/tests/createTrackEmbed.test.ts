@@ -141,7 +141,7 @@ it('should add cache footer when track `isFromCache`', async () => {
 	const result = await createTrackEmbed(track, EXAMPLE_DESCRIPTION);
 
 	expect(result.data.footer).toEqual({
-		text: '♻️ Streaming from an offline cache (2.53 MB)',
+		text: '♻️ Streaming from the offline cache (2.53 MB)',
 	});
 });
 
@@ -158,7 +158,7 @@ it('should add cache footer without file size when stat fails', async () => {
 	const result = await createTrackEmbed(track, EXAMPLE_DESCRIPTION);
 
 	expect(result.data.footer).toEqual({
-		text: '♻️ Streaming from an offline cache',
+		text: '♻️ Streaming from the offline cache',
 	});
 });
 
@@ -225,7 +225,7 @@ it('should handle both cache footer and bridged URL together', async () => {
 	const result = await createTrackEmbed(track, EXAMPLE_DESCRIPTION);
 
 	expect(result.data.footer).toEqual({
-		text: '♻️ Streaming from an offline cache (2.53 MB)',
+		text: '♻️ Streaming from the offline cache (2.53 MB)',
 	});
 	expect(result.data.fields).toContainEqual({
 		name: 'Bridged URL',

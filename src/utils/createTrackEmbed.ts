@@ -39,7 +39,7 @@ async function createTrackEmbed(track: Track, description: string) {
 	}
 
 	if (track.metadata.isFromCache) {
-		let footerText = '♻️ Streaming from an offline cache';
+		let footerText = '♻️ Streaming from the offline cache';
 
 		try {
 			const filePath = getOpusCacheTrackPath(track.url);
