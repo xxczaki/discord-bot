@@ -1,6 +1,7 @@
 import {
 	ActionRowBuilder,
 	type ButtonInteraction,
+	type ChatInputCommandInteraction,
 	type Collection,
 	EmbedBuilder,
 	type Message,
@@ -10,7 +11,7 @@ import {
 } from 'discord.js';
 import type { GuildQueue } from 'discord-player';
 import { useQueue } from 'discord-player';
-import { beforeEach, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../../constants/miscellaneous';
 import enqueuePlaylists from '../enqueuePlaylists';
 import getEnvironmentVariable from '../getEnvironmentVariable';
@@ -338,5 +339,175 @@ it('should process only messages that match playlist IDs', async () => {
 				'3': 'Song 4',
 			},
 		},
+	});
+});
+
+describe('enqueuePlaylists with ChatInputCommandInteraction and playlist IDs', () => {
+	let mockChatInputInteraction: ChatInputCommandInteraction;
+	let mockVoiceChannel: VoiceBasedChannel;
+	let mockPlaylistsChannel: TextBasedChannel;
+	let mockResponse: Message;
+	let mockQueue: { tracks: { shuffle: () => void } } | null;
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+
+		mockQueue = {
+			tracks: {
+				shuffle: vi.fn(),
+			},
+		};
+
+		const mockMessage1 = {
+			content: 'id="playlist1"\n```\nChat Song 1\nChat Song 2\n```',
+		} as Message;
+		const mockMessage2 = {
+			content: 'id="playlist2"\n```\nChat Song 3\nChat Song 4\n```',
+		} as Message;
+		const mockMessages = createMockCollection([mockMessage1, mockMessage2]);
+
+		mockPlaylistsChannel = {
+			isTextBased: () => true,
+			messages: {
+				fetch: vi.fn().mockResolvedValue(mockMessages),
+			},
+		} as unknown as TextBasedChannel;
+
+		mockResponse = {
+			awaitMessageComponent: vi.fn(),
+			edit: vi.fn(),
+			delete: vi.fn(),
+		} as unknown as Message;
+
+		mockChatInputInteraction = {
+			client: {
+				channels: {
+					cache: {
+						get: vi.fn().mockReturnValue(mockPlaylistsChannel),
+					},
+				},
+			},
+			reply: vi.fn(),
+			editReply: vi.fn().mockResolvedValue(mockResponse),
+		} as unknown as ChatInputCommandInteraction;
+
+		mockVoiceChannel = {} as VoiceBasedChannel;
+
+		mockedGetEnvironmentVariable.mockReturnValue(EXAMPLE_PLAYLISTS_CHANNEL_ID);
+		mockedProcessTracksWithQueue.mockResolvedValue({
+			enqueued: EXAMPLE_ENQUEUED_COUNT,
+		});
+		mockedUseQueue.mockReturnValue(mockQueue as unknown as GuildQueue<unknown>);
+	});
+
+	it('should handle ChatInputCommandInteraction with single playlist ID', async () => {
+		await enqueuePlaylists(mockChatInputInteraction, mockVoiceChannel, [
+			'playlist1',
+		]);
+
+		expect(mockedProcessTracksWithQueue).toHaveBeenCalledWith({
+			items: ['Chat Song 1', 'Chat Song 2'],
+			voiceChannel: mockVoiceChannel,
+			interaction: mockChatInputInteraction,
+			embed: expect.any(EmbedBuilder),
+			nodeMetadata: {
+				queries: {
+					'0': 'Chat Song 1',
+					'1': 'Chat Song 2',
+				},
+			},
+		});
+	});
+
+	it('should handle ChatInputCommandInteraction with multiple playlist IDs', async () => {
+		await enqueuePlaylists(mockChatInputInteraction, mockVoiceChannel, [
+			'playlist1',
+			'playlist2',
+		]);
+
+		expect(mockedProcessTracksWithQueue).toHaveBeenCalledWith({
+			items: ['Chat Song 1', 'Chat Song 2', 'Chat Song 3', 'Chat Song 4'],
+			voiceChannel: mockVoiceChannel,
+			interaction: mockChatInputInteraction,
+			embed: expect.any(EmbedBuilder),
+			nodeMetadata: {
+				queries: {
+					'0': 'Chat Song 1',
+					'1': 'Chat Song 2',
+					'2': 'Chat Song 3',
+					'3': 'Chat Song 4',
+				},
+			},
+		});
+	});
+
+	it('should handle ChatInputCommandInteraction with empty playlist IDs array', async () => {
+		await enqueuePlaylists(mockChatInputInteraction, mockVoiceChannel, []);
+
+		expect(mockedProcessTracksWithQueue).toHaveBeenCalledWith({
+			items: [],
+			voiceChannel: mockVoiceChannel,
+			interaction: mockChatInputInteraction,
+			embed: expect.any(EmbedBuilder),
+			nodeMetadata: {
+				queries: {},
+			},
+		});
+	});
+
+	it('should handle ChatInputCommandInteraction when playlists channel is not text-based', async () => {
+		mockPlaylistsChannel = {
+			isTextBased: () => false,
+		} as unknown as TextBasedChannel;
+
+		mockChatInputInteraction.client.channels.cache.get = vi
+			.fn()
+			.mockReturnValue(mockPlaylistsChannel);
+
+		await enqueuePlaylists(mockChatInputInteraction, mockVoiceChannel, [
+			'playlist1',
+		]);
+
+		expect(mockChatInputInteraction.reply).toHaveBeenCalledWith({
+			content: 'Invalid playlists channel type!',
+			components: [],
+		});
+	});
+
+	it('should handle ChatInputCommandInteraction shuffle button interaction', async () => {
+		const mockButtonInteraction = {
+			customId: 'shuffle',
+		} as ButtonInteraction;
+
+		(
+			mockResponse.awaitMessageComponent as ReturnType<typeof vi.fn>
+		).mockResolvedValue(mockButtonInteraction);
+
+		await enqueuePlaylists(mockChatInputInteraction, mockVoiceChannel, [
+			'playlist1',
+		]);
+
+		expect(mockResponse.awaitMessageComponent).toHaveBeenCalledWith({
+			time: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
+		});
+		expect(mockQueue?.tracks.shuffle).toHaveBeenCalled();
+		expect(mockResponse.edit).toHaveBeenCalledWith({ components: [] });
+	});
+
+	it('should handle ChatInputCommandInteraction with non-existent playlist IDs', async () => {
+		await enqueuePlaylists(mockChatInputInteraction, mockVoiceChannel, [
+			'nonexistent1',
+			'nonexistent2',
+		]);
+
+		expect(mockedProcessTracksWithQueue).toHaveBeenCalledWith({
+			items: [],
+			voiceChannel: mockVoiceChannel,
+			interaction: mockChatInputInteraction,
+			embed: expect.any(EmbedBuilder),
+			nodeMetadata: {
+				queries: {},
+			},
+		});
 	});
 });

@@ -78,6 +78,44 @@ async function getPlaylists(channel: TextBasedChannel, page = 0) {
 
 export default getPlaylists;
 
+export async function getAllPlaylists(channel: TextBasedChannel) {
+	const rawMessages = await channel.messages.fetch({
+		limit: 100,
+		cache: false,
+	});
+	const messages = rawMessages.map((message) => message.content);
+
+	const allPlaylistsWithCache = await Promise.all(
+		messages
+			.flatMap((message) => {
+				const match = /id="(?<id>.+)"/.exec(message);
+				const id = match?.groups?.id;
+
+				if (!id) {
+					return [];
+				}
+
+				const cleanContent = cleanUpPlaylistContent(message);
+				const songs = cleanContent ? cleanContent.split('\n') : [];
+
+				return { id, songs };
+			})
+			.map(async ({ id, songs }) => ({
+				id,
+				description: await getPlaylistDescription(songs),
+			})),
+	);
+
+	const sortedPlaylists = allPlaylistsWithCache.sort(({ id: a }, { id: b }) =>
+		a.localeCompare(b, 'en', { sensitivity: 'base' }),
+	);
+
+	return sortedPlaylists.map(({ id, description }) => ({
+		name: `${id} - ${description}`,
+		value: id,
+	}));
+}
+
 async function getPlaylistDescription(songs: string[]) {
 	const spotifyPlaylists = songs.filter(isUrlSpotifyPlaylist);
 

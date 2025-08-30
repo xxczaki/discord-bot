@@ -14,7 +14,7 @@ import useCommandHandlers from './useCommandHandlers';
 const queueRecoveryService = QueueRecoveryService.getInstance();
 
 export function useReadyEventHandler(client: Client): void {
-	client.on('ready', async () => {
+	client.on('clientReady', async () => {
 		logger.info(`Logged in as ${client.user?.tag}!`);
 
 		const channel = client.channels.cache.get(

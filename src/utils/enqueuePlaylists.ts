@@ -2,6 +2,7 @@ import {
 	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonStyle,
+	type ChatInputCommandInteraction,
 	EmbedBuilder,
 	type StringSelectMenuInteraction,
 	type VoiceBasedChannel,
@@ -18,17 +19,33 @@ const pluralizeEntries = pluralize('entry', 'entries');
 export default async function enqueuePlaylists(
 	interaction: StringSelectMenuInteraction,
 	voiceChannel: VoiceBasedChannel,
-) {
-	const playlistIds = interaction.values.map((value) => `id="${value}"`);
+): Promise<void>;
+export default async function enqueuePlaylists(
+	interaction: ChatInputCommandInteraction,
+	voiceChannel: VoiceBasedChannel,
+	playlistIds: string[],
+): Promise<void>;
+export default async function enqueuePlaylists(
+	interaction: StringSelectMenuInteraction | ChatInputCommandInteraction,
+	voiceChannel: VoiceBasedChannel,
+	playlistIdsParam?: string[],
+): Promise<void> {
+	const playlistIds = playlistIdsParam
+		? playlistIdsParam.map((value) => `id="${value}"`)
+		: (interaction as StringSelectMenuInteraction).values.map(
+				(value) => `id="${value}"`,
+			);
+
 	const playlistsChannel = interaction.client.channels.cache.get(
 		getEnvironmentVariable('PLAYLISTS_CHANNEL_ID'),
 	);
 
 	if (!playlistsChannel?.isTextBased()) {
-		return interaction.reply({
+		await interaction.reply({
 			content: 'Invalid playlists channel type!',
 			components: [],
 		});
+		return;
 	}
 
 	const embed = new EmbedBuilder()

@@ -134,6 +134,43 @@ export const RAW_COMMANDS: CategorizedCommand[] = [
 		name: 'playlists',
 		description:
 			'Enqueue multiple songs in one go, using the playlists from a dedicated channel',
+		options: [
+			{
+				name: 'playlist1',
+				description: 'First playlist to enqueue',
+				type: 3,
+				required: true,
+				autocomplete: true,
+			},
+			{
+				name: 'playlist2',
+				description: 'Second playlist to enqueue (optional)',
+				type: 3,
+				required: false,
+				autocomplete: true,
+			},
+			{
+				name: 'playlist3',
+				description: 'Third playlist to enqueue (optional)',
+				type: 3,
+				required: false,
+				autocomplete: true,
+			},
+			{
+				name: 'playlist4',
+				description: 'Fourth playlist to enqueue (optional)',
+				type: 3,
+				required: false,
+				autocomplete: true,
+			},
+			{
+				name: 'playlist5',
+				description: 'Fifth playlist to enqueue (optional)',
+				type: 3,
+				required: false,
+				autocomplete: true,
+			},
+		],
 		category: 'Music',
 	},
 	{

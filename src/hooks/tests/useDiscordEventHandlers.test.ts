@@ -116,7 +116,10 @@ it('should register ready event handler on client', () => {
 
 	useReadyEventHandler(mockClient);
 
-	expect(mockClient.on).toHaveBeenCalledWith('ready', expect.any(Function));
+	expect(mockClient.on).toHaveBeenCalledWith(
+		'clientReady',
+		expect.any(Function),
+	);
 });
 
 it('should register interaction and voice state event handlers on client', () => {
@@ -135,7 +138,7 @@ it('should register interaction and voice state event handlers on client', () =>
 	);
 });
 
-it('should send commit message on `ready` when channel exists and commit hash is present', async () => {
+it('should send commit message on `clientReady` when channel exists and commit hash is present', async () => {
 	const mockChannel = createMockChannel();
 	const mockClient = createMockClient();
 
@@ -147,7 +150,7 @@ it('should send commit message on `ready` when channel exists and commit hash is
 
 	const mockOnCalls = (mockClient.on as ReturnType<typeof vi.fn>).mock
 		.calls as Array<[string, (...args: unknown[]) => void | Promise<void>]>;
-	const readyCall = mockOnCalls.find((call) => call[0] === 'ready');
+	const readyCall = mockOnCalls.find((call) => call[0] === 'clientReady');
 	const readyHandler = readyCall?.[1];
 
 	if (readyHandler) {
@@ -175,7 +178,7 @@ it('should not send commit message when deployment is manual', async () => {
 
 	const mockOnCalls = (mockClient.on as ReturnType<typeof vi.fn>).mock
 		.calls as Array<[string, (...args: unknown[]) => void | Promise<void>]>;
-	const readyCall = mockOnCalls.find((call) => call[0] === 'ready');
+	const readyCall = mockOnCalls.find((call) => call[0] === 'clientReady');
 	const readyHandler = readyCall?.[1];
 
 	if (readyHandler) {
@@ -339,7 +342,7 @@ it('should send commit link when deployment version is not available', async () 
 
 	const mockOnCalls = (mockClient.on as ReturnType<typeof vi.fn>).mock
 		.calls as Array<[string, (...args: unknown[]) => void | Promise<void>]>;
-	const readyCall = mockOnCalls.find((call) => call[0] === 'ready');
+	const readyCall = mockOnCalls.find((call) => call[0] === 'clientReady');
 	const readyHandler = readyCall?.[1];
 
 	if (readyHandler) {

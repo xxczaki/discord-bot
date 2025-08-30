@@ -3,6 +3,8 @@ import { useMainPlayer, useQueue } from 'discord-player';
 import Fuse from 'fuse.js';
 import debounce from 'p-debounce';
 import determineSearchEngine from '../utils/determineSearchEngine';
+import getEnvironmentVariable from '../utils/getEnvironmentVariable';
+import { getAllPlaylists } from '../utils/getPlaylists';
 import getTrackPosition from '../utils/getTrackPosition';
 import reportError from '../utils/reportError';
 import truncateString from '../utils/truncateString';
@@ -89,6 +91,51 @@ async function useAutocompleteHandler(interaction: Interaction) {
 		const results = matches.slice(0, 25).map(({ item }) => item);
 
 		return interaction.respond(results);
+	}
+
+	if (interaction.commandName === 'playlists') {
+		const focusedOption = interaction.options.getFocused(true);
+
+		try {
+			const channel = interaction.client.channels.cache.get(
+				getEnvironmentVariable('PLAYLISTS_CHANNEL_ID'),
+			);
+
+			if (!channel?.isTextBased()) {
+				return interaction.respond([]);
+			}
+
+			const allPlaylists = await getAllPlaylists(channel);
+
+			const selectedPlaylists = [
+				interaction.options.getString('playlist1'),
+				interaction.options.getString('playlist2'),
+				interaction.options.getString('playlist3'),
+				interaction.options.getString('playlist4'),
+				interaction.options.getString('playlist5'),
+			].filter(Boolean);
+
+			const availablePlaylists = allPlaylists.filter(
+				(playlist) => !selectedPlaylists.includes(playlist.value),
+			);
+
+			if (focusedOption.value === '') {
+				return interaction.respond(availablePlaylists.slice(0, 25));
+			}
+
+			const fuse = new Fuse(availablePlaylists, {
+				keys: ['name', 'value'],
+				threshold: 0.3,
+			});
+
+			const searchResults = fuse.search(focusedOption.value);
+			const results = searchResults.slice(0, 25).map(({ item }) => item);
+
+			return interaction.respond(results);
+		} catch (error) {
+			reportError(error, 'Playlist autocomplete failed');
+			return interaction.respond([]);
+		}
 	}
 }
 
