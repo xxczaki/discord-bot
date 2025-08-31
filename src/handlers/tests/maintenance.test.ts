@@ -17,6 +17,9 @@ const mocks = vi.hoisted(() => {
 		makeApiClient: vi.fn(() => mockApi),
 	};
 
+	const mockedCreateK8sClient = vi.fn();
+	mockedCreateK8sClient.mockReturnValue(mockApi);
+
 	return {
 		OWNER_USER_ID,
 		DIFFERENT_USER_ID: 'user456',
@@ -24,17 +27,15 @@ const mocks = vi.hoisted(() => {
 		mockKubeConfig,
 		KubeConfig: vi.fn(() => mockKubeConfig),
 		AppsV1Api: vi.fn(),
+		mockedCreateK8sClient,
 	};
 });
 
-vi.mock('../../utils/k8sClient', async (importOriginal) => {
-	const actual = await importOriginal<typeof import('../../utils/k8sClient')>();
-
-	return {
-		...actual,
-		default: vi.fn(() => mocks.mockApi),
-	};
-});
+vi.mock('../../utils/k8sClient', () => ({
+	default: mocks.mockedCreateK8sClient,
+	DEPLOYMENT_NAME: 'discord-bot',
+	DEPLOYMENT_NAMESPACE: 'default',
+}));
 
 const mockedCaptureException = vi.mocked(captureException);
 const mockedLogger = vi.mocked(logger);
@@ -104,5 +105,20 @@ it('should handle non-Error exceptions', async () => {
 
 	expect(interaction.editReply).toHaveBeenCalledWith(
 		'❌ Failed to activate maintenance mode. Please check the logs or try again later.',
+	);
+});
+
+it('should handle case when k8sClient returns null', async () => {
+	const interaction = createMockInteraction();
+
+	mocks.mockedCreateK8sClient.mockReturnValueOnce(null);
+
+	await maintenanceCommandHandler(interaction);
+
+	expect(interaction.reply).toHaveBeenCalledWith(
+		'🔧 Activating maintenance mode...',
+	);
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'❌ Maintenance mode is not available – running outside of cluster environment.',
 	);
 });

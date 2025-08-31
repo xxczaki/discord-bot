@@ -111,7 +111,7 @@ export async function getAllPlaylists(channel: TextBasedChannel) {
 	);
 
 	return sortedPlaylists.map(({ id, description }) => ({
-		name: `${id} - ${description}`,
+		name: `${id} – ${description}`,
 		value: id,
 	}));
 }

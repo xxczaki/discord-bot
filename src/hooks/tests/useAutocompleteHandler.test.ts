@@ -21,10 +21,15 @@ const mockedUseQueue = vi.mocked(useQueue);
 const mockedDetermineSearchEngine = vi.mocked(determineSearchEngine);
 const mockedGetTrackPosition = vi.mocked(getTrackPosition);
 
+const mockGetEnvironmentVariable = vi.hoisted(() => vi.fn());
+
 vi.mock('@sentry/node');
 vi.mock('discord-player');
 vi.mock('../../utils/determineSearchEngine');
 vi.mock('../../utils/getTrackPosition');
+vi.mock('../../utils/getEnvironmentVariable', () => ({
+	default: mockGetEnvironmentVariable,
+}));
 vi.mock('p-debounce', () => ({
 	default: <T extends (...args: unknown[]) => unknown>(fn: T) => fn, // Return the function immediately without debounce
 }));
@@ -33,6 +38,8 @@ function createMockAutocompleteInteraction(
 	commandName: string,
 	query = '',
 	responded = false,
+	focusedOptionName?: string,
+	playlistOptions: Record<string, string | null> = {},
 ) {
 	const respond = vi.fn();
 
@@ -41,9 +48,28 @@ function createMockAutocompleteInteraction(
 		responded,
 		commandName,
 		options: {
-			getString: vi.fn().mockReturnValue(query),
+			getString: vi.fn((optionName: string) => {
+				if (optionName === 'query') return query;
+				if (focusedOptionName && optionName !== focusedOptionName) {
+					return playlistOptions[optionName] || null;
+				}
+				return query;
+			}),
+			getFocused: vi.fn((returnObject?: boolean) => {
+				if (returnObject) {
+					return { name: focusedOptionName || 'query', value: query };
+				}
+				return query;
+			}),
 		},
 		user: { id: 'user123' },
+		client: {
+			channels: {
+				cache: {
+					get: vi.fn(),
+				},
+			},
+		},
 		respond,
 	} as unknown as AutocompleteInteraction;
 }
@@ -407,6 +433,53 @@ describe('move command autocomplete', () => {
 				value: '1',
 			},
 		]);
+	});
+});
+
+describe('playlists command autocomplete', () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		mockGetEnvironmentVariable.mockReturnValue('test-channel-id');
+	});
+
+	it('should return empty array if channel is not text-based', async () => {
+		const interaction = createMockAutocompleteInteraction(
+			'playlists',
+			'',
+			false,
+			'playlist1',
+		);
+
+		const mockNonTextChannel = {
+			isTextBased: vi.fn().mockReturnValue(false),
+		};
+
+		interaction.client.channels.cache.get = vi
+			.fn()
+			.mockReturnValue(mockNonTextChannel);
+
+		await useAutocompleteHandler(interaction);
+
+		expect(interaction.respond).toHaveBeenCalledWith([]);
+		expect(mockNonTextChannel.isTextBased).toHaveBeenCalled();
+		expect(interaction.client.channels.cache.get).toHaveBeenCalledWith(
+			'test-channel-id',
+		);
+	});
+
+	it('should return empty array when channel is not found', async () => {
+		const interaction = createMockAutocompleteInteraction(
+			'playlists',
+			'',
+			false,
+			'playlist1',
+		);
+
+		interaction.client.channels.cache.get = vi.fn(() => undefined);
+
+		await useAutocompleteHandler(interaction);
+
+		expect(interaction.respond).toHaveBeenCalledWith([]);
 	});
 });
 

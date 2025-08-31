@@ -1,7 +1,7 @@
 import type { Collection, Message, TextBasedChannel } from 'discord.js';
 import { StringSelectMenuOptionBuilder } from 'discord.js';
-import { beforeEach, expect, it, vi } from 'vitest';
-import getPlaylists from '../getPlaylists';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import getPlaylists, { getAllPlaylists } from '../getPlaylists';
 
 const EXAMPLE_SPOTIFY_PLAYLIST = 'https://open.spotify.com/playlist/123';
 const EXAMPLE_SONG_URL = 'https://example.com/song1';
@@ -455,4 +455,146 @@ it('should handle invalid JSON in cache gracefully', async () => {
 	expect(result.options[0].data.description).toBe(
 		'1 unresolved external playlist',
 	);
+});
+
+describe('getAllPlaylists', () => {
+	it('should return all playlists with descriptions', async () => {
+		const messages = [
+			createMockMessage('id="playlist1"\nsong1\nsong2'),
+			createMockMessage('id="playlist2"\nsong3'),
+		];
+		const channel = createMockChannel(messages);
+
+		mockedCleanUpPlaylistContent
+			.mockReturnValueOnce('song1\nsong2')
+			.mockReturnValueOnce('song3');
+
+		mockedIsUrlSpotifyPlaylist.mockReturnValue(false);
+
+		const result = await getAllPlaylists(channel);
+
+		expect(result).toEqual([
+			{ name: 'playlist1 – 2 songs', value: 'playlist1' },
+			{ name: 'playlist2 – 1 song', value: 'playlist2' },
+		]);
+	});
+
+	it('should handle playlists with Spotify URLs', async () => {
+		const messages = [
+			createMockMessage(
+				`id="mixed-playlist"\n${EXAMPLE_SPOTIFY_PLAYLIST}\nsong1`,
+			),
+		];
+		const channel = createMockChannel(messages);
+
+		mockedCleanUpPlaylistContent.mockReturnValue(
+			`${EXAMPLE_SPOTIFY_PLAYLIST}\nsong1`,
+		);
+		mockedIsUrlSpotifyPlaylist.mockImplementation(
+			(url) => url === EXAMPLE_SPOTIFY_PLAYLIST,
+		);
+		mockedExternalPlaylistCache.getTrackCount.mockResolvedValue({
+			trackCount: 15,
+			cachedAt: '2023-01-01T00:00:00Z',
+		});
+		mockedExternalPlaylistCache.formatCacheDate.mockReturnValue('Jan 1, 2023');
+
+		const result = await getAllPlaylists(channel);
+
+		expect(result).toEqual([
+			{
+				name: 'mixed-playlist – 16 songs (as of Jan 1, 2023)',
+				value: 'mixed-playlist',
+			},
+		]);
+	});
+
+	it('should handle unresolved Spotify playlists', async () => {
+		const messages = [
+			createMockMessage(
+				`id="unresolved-playlist"\n${EXAMPLE_SPOTIFY_PLAYLIST}`,
+			),
+		];
+		const channel = createMockChannel(messages);
+
+		mockedCleanUpPlaylistContent.mockReturnValue(EXAMPLE_SPOTIFY_PLAYLIST);
+		mockedIsUrlSpotifyPlaylist.mockReturnValue(true);
+		mockedExternalPlaylistCache.getTrackCount.mockResolvedValue(null);
+
+		const result = await getAllPlaylists(channel);
+
+		expect(result).toEqual([
+			{
+				name: 'unresolved-playlist – 1 unresolved external playlist',
+				value: 'unresolved-playlist',
+			},
+		]);
+	});
+
+	it('should handle mixed resolved and unresolved Spotify playlists', async () => {
+		const messages = [
+			createMockMessage(
+				`id="complex-playlist"\n${EXAMPLE_SPOTIFY_PLAYLIST}\nhttps://open.spotify.com/playlist/456\nsong1`,
+			),
+		];
+		const channel = createMockChannel(messages);
+
+		mockedCleanUpPlaylistContent.mockReturnValue(
+			`${EXAMPLE_SPOTIFY_PLAYLIST}\nhttps://open.spotify.com/playlist/456\nsong1`,
+		);
+		mockedIsUrlSpotifyPlaylist.mockImplementation((url) =>
+			url.includes('spotify.com/playlist'),
+		);
+		mockedExternalPlaylistCache.getTrackCount
+			.mockResolvedValueOnce({
+				trackCount: 10,
+				cachedAt: '2023-01-01T00:00:00Z',
+			})
+			.mockResolvedValueOnce(null);
+		mockedExternalPlaylistCache.formatCacheDate.mockReturnValue('Jan 1, 2023');
+
+		const result = await getAllPlaylists(channel);
+
+		expect(result).toEqual([
+			{
+				name: 'complex-playlist – 11 songs (as of Jan 1, 2023) (+ 1 unresolved external playlist)',
+				value: 'complex-playlist',
+			},
+		]);
+	});
+
+	it('should sort playlists alphabetically', async () => {
+		const messages = [
+			createMockMessage('id="zebra"\nsong1'),
+			createMockMessage('id="alpha"\nsong2'),
+			createMockMessage('id="beta"\nsong3'),
+		];
+		const channel = createMockChannel(messages);
+
+		mockedCleanUpPlaylistContent.mockReturnValue('song1');
+		mockedIsUrlSpotifyPlaylist.mockReturnValue(false);
+
+		const result = await getAllPlaylists(channel);
+
+		expect(result.map((p) => p.value)).toEqual(['alpha', 'beta', 'zebra']);
+	});
+
+	it('should skip messages without valid ID pattern', async () => {
+		const messages = [
+			createMockMessage('invalid message format'),
+			createMockMessage('id="valid-playlist"\nsong1'),
+		];
+		const channel = createMockChannel(messages);
+
+		// First message has no ID pattern so no call to cleanUpPlaylistContent for it
+		// Second message has valid ID so cleanUpPlaylistContent gets called
+		mockedCleanUpPlaylistContent.mockReturnValueOnce('song1');
+		mockedIsUrlSpotifyPlaylist.mockReturnValue(false);
+
+		const result = await getAllPlaylists(channel);
+
+		expect(result).toEqual([
+			{ name: 'valid-playlist – 1 song', value: 'valid-playlist' },
+		]);
+	});
 });
