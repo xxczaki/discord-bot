@@ -61,9 +61,14 @@ export default function usePlayerEventHandlers(
 			if (answer.customId === 'skip') {
 				queue?.node.skip();
 
+				const skippedEmbed = await createTrackEmbed(
+					track,
+					'⏭️ Track was skipped.',
+				);
+
 				return await answer.update({
 					content: 'Track skipped.',
-					embeds: [],
+					embeds: [skippedEmbed],
 					components: [],
 				});
 			}

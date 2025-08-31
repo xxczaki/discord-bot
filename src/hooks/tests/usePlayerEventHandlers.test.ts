@@ -284,9 +284,13 @@ it('should handle skip button interaction and skip track', async () => {
 		time: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
 	});
 	expect(mockQueue.node.skip).toHaveBeenCalled();
+	expect(mockedCreateTrackEmbed).toHaveBeenCalledWith(
+		mockTrack,
+		'⏭️ Track was skipped.',
+	);
 	expect(mockComponentInteraction.update).toHaveBeenCalledWith({
 		content: 'Track skipped.',
-		embeds: [],
+		embeds: [{ title: 'Mock Embed' }],
 		components: [],
 	});
 });
