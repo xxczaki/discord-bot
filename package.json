@@ -30,7 +30,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "2.2.2",
 		"@discordjs/rest": "^2.6.0",
-		"@sentry/esbuild-plugin": "^4.2.0",
+		"@sentry/esbuild-plugin": "^4.3.0",
 		"@types/node": "^24.3.0",
 		"@vitest/coverage-v8": "3.2.4",
 		"date-fns": "^4.1.0",
