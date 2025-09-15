@@ -29,6 +29,5 @@ export default async function playlistsCommandHandler(
 		});
 	}
 
-	// Use the existing enqueuePlaylists function with the new overload
 	await enqueuePlaylists(interaction, voiceChannel, selectedPlaylists);
 }

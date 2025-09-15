@@ -174,6 +174,50 @@ export const RAW_COMMANDS: CategorizedCommand[] = [
 		category: 'Music',
 	},
 	{
+		name: 'head',
+		description: 'Play the first N songs from a playlist',
+		options: [
+			{
+				name: 'playlist',
+				description: 'The playlist to play from',
+				type: 3,
+				required: true,
+				autocomplete: true,
+			},
+			{
+				name: 'count',
+				description: 'Number of songs to play',
+				type: 4,
+				minValue: 1,
+				maxValue: 100,
+				required: true,
+			},
+		],
+		category: 'Music',
+	},
+	{
+		name: 'tail',
+		description: 'Play the last N songs from a playlist',
+		options: [
+			{
+				name: 'playlist',
+				description: 'The playlist to play from',
+				type: 3,
+				required: true,
+				autocomplete: true,
+			},
+			{
+				name: 'count',
+				description: 'Number of songs to play',
+				type: 4,
+				minValue: 1,
+				maxValue: 100,
+				required: true,
+			},
+		],
+		category: 'Music',
+	},
+	{
 		name: 'deduplicate',
 		description: 'Remove duplicates from the queue',
 		options: [
