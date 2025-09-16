@@ -93,7 +93,11 @@ async function useAutocompleteHandler(interaction: Interaction) {
 		return interaction.respond(results);
 	}
 
-	if (interaction.commandName === 'playlists') {
+	if (
+		interaction.commandName === 'playlists' ||
+		interaction.commandName === 'head' ||
+		interaction.commandName === 'tail'
+	) {
 		const focusedOption = interaction.options.getFocused(true);
 
 		try {
@@ -107,17 +111,21 @@ async function useAutocompleteHandler(interaction: Interaction) {
 
 			const allPlaylists = await getAllPlaylists(channel);
 
-			const selectedPlaylists = [
-				interaction.options.getString('playlist1'),
-				interaction.options.getString('playlist2'),
-				interaction.options.getString('playlist3'),
-				interaction.options.getString('playlist4'),
-				interaction.options.getString('playlist5'),
-			].filter(Boolean);
+			// For playlists command, filter out already selected playlists
+			let availablePlaylists = allPlaylists;
+			if (interaction.commandName === 'playlists') {
+				const selectedPlaylists = [
+					interaction.options.getString('playlist1'),
+					interaction.options.getString('playlist2'),
+					interaction.options.getString('playlist3'),
+					interaction.options.getString('playlist4'),
+					interaction.options.getString('playlist5'),
+				].filter(Boolean);
 
-			const availablePlaylists = allPlaylists.filter(
-				(playlist) => !selectedPlaylists.includes(playlist.value),
-			);
+				availablePlaylists = allPlaylists.filter(
+					(playlist) => !selectedPlaylists.includes(playlist.value),
+				);
+			}
 
 			if (focusedOption.value === '') {
 				return interaction.respond(availablePlaylists.slice(0, 25));
