@@ -33,8 +33,8 @@ importers:
         specifier: ^14.22.1
         version: 14.22.1(bufferutil@4.0.9)
       ioredis:
-        specifier: ^5.7.0
-        version: 5.7.0
+        specifier: ^5.8.0
+        version: 5.8.0
       pino:
         specifier: ^9.9.5
         version: 9.9.5
@@ -460,8 +460,8 @@ packages:
     resolution: {integrity: sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==}
     engines: {node: '>=14'}
 
-  '@ioredis/commands@1.3.0':
-    resolution: {integrity: sha512-M/T6Zewn7sDaBQEqIZ8Rb+i9y8qfGmq+5SDFSf9sA2lUZTmdDLVdOiQaeDp+Q4wElZ9HG1GAX5KhDaidp6LQsQ==}
+  '@ioredis/commands@1.4.0':
+    resolution: {integrity: sha512-aFT2yemJJo+TZCmieA7qnYGQooOS7QfNmYrzGtsYd3g9j5iDP8AimYYAesf79ohjbLG12XxC4nG5DyEnC88AsQ==}
 
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -1575,8 +1575,8 @@ packages:
   import-in-the-middle@1.14.2:
     resolution: {integrity: sha512-5tCuY9BV8ujfOpwtAGgsTx9CGUapcFMEEyByLv1B+v2+6DhAcw+Zr0nhQT7uwaZ7DiourxFEscghOR8e1aPLQw==}
 
-  ioredis@5.7.0:
-    resolution: {integrity: sha512-NUcA93i1lukyXU+riqEyPtSEkyFq8tX90uL659J+qpCZ3rEdViB/APC58oAhIh3+bJln2hzdlZbBZsGNrlsR8g==}
+  ioredis@5.8.0:
+    resolution: {integrity: sha512-AUXbKn9gvo9hHKvk6LbZJQSKn/qIfkWXrnsyL9Yrf+oeXmla9Nmf6XEumOddyhM8neynpK5oAV6r9r99KBuwzA==}
     engines: {node: '>=12.22.0'}
 
   ip-address@9.0.5:
@@ -2991,7 +2991,7 @@ snapshots:
 
   '@fastify/busboy@2.1.1': {}
 
-  '@ioredis/commands@1.3.0': {}
+  '@ioredis/commands@1.4.0': {}
 
   '@isaacs/cliui@8.0.2':
     dependencies:
@@ -4231,9 +4231,9 @@ snapshots:
       cjs-module-lexer: 1.4.3
       module-details-from-path: 1.0.4
 
-  ioredis@5.7.0:
+  ioredis@5.8.0:
     dependencies:
-      '@ioredis/commands': 1.3.0
+      '@ioredis/commands': 1.4.0
       cluster-key-slot: 1.1.2
       debug: 4.4.1
       denque: 2.1.0
