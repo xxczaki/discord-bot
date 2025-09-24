@@ -23,7 +23,7 @@
 		"discord.js": "^14.22.1",
 		"ioredis": "^5.8.0",
 		"pino": "^9.9.5",
-		"sodium-native": "^5.0.8",
+		"sodium-native": "^5.0.9",
 		"ulid": "^3.0.1",
 		"zlib-sync": "^0.1.10"
 	},
