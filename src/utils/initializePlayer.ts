@@ -148,6 +148,9 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 				useClient: 'WEB_EMBEDDED',
 			},
 			generateWithPoToken: true,
+			innertubeConfigRaw: {
+				player_id: '0004de42',
+			},
 		});
 		await initializedPlayer.extractors.register(SpotifyExtractor, {
 			market: 'PL',

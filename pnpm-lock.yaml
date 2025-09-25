@@ -36,8 +36,8 @@ importers:
         specifier: ^5.8.0
         version: 5.8.0
       pino:
-        specifier: ^9.9.5
-        version: 9.9.5
+        specifier: ^9.11.0
+        version: 9.11.0
       sodium-native:
         specifier: ^5.0.9
         version: 5.0.9
@@ -71,7 +71,7 @@ importers:
         version: 0.25.10
       esbuild-plugin-pino:
         specifier: 2.3.3
-        version: 2.3.3(esbuild@0.25.10)(pino-pretty@13.1.1)(pino@9.9.5)(thread-stream@3.1.0)
+        version: 2.3.3(esbuild@0.25.10)(pino-pretty@13.1.1)(pino@9.11.0)(thread-stream@3.1.0)
       fuse.js:
         specifier: ^7.1.0
         version: 7.1.0
@@ -79,8 +79,8 @@ importers:
         specifier: ^10.1.0
         version: 10.1.0
       p-debounce:
-        specifier: ^4.0.0
-        version: 4.0.0
+        specifier: ^5.0.0
+        version: 5.0.0
       p-queue:
         specifier: ^8.1.1
         version: 8.1.1
@@ -1966,9 +1966,9 @@ packages:
   otpauth@9.4.0:
     resolution: {integrity: sha512-fHIfzIG5RqCkK9cmV8WU+dPQr9/ebR5QOwGZn2JAr1RQF+lmAuLL2YdtdqvmBjNmgJlYk3KZ4a0XokaEhg1Jsw==}
 
-  p-debounce@4.0.0:
-    resolution: {integrity: sha512-4Ispi9I9qYGO4lueiLDhe4q4iK5ERK8reLsuzH6BPaXn53EGaua8H66PXIFGrW897hwjXp+pVLrm/DLxN0RF0A==}
-    engines: {node: '>=12'}
+  p-debounce@5.0.0:
+    resolution: {integrity: sha512-rnaPSZtETbl75h6lcVFQxJ9LXJhkYhtVNie4Kj/nECazixDxrPYWl8I+DfY69C299HI4Of8NJDfR0ekrlcwAkA==}
+    engines: {node: '>=20'}
 
   p-limit@3.1.0:
     resolution: {integrity: sha512-TYOanM3wGwNGsZN2cVTYPArw454xnXj5qmWF1bEoAc4+cU/ol7GVh7odevjp1FNHduHc3KZMcFduxU5Xc6uJRQ==}
@@ -2050,8 +2050,8 @@ packages:
   pino-std-serializers@7.0.0:
     resolution: {integrity: sha512-e906FRY0+tV27iq4juKzSYPbUj2do2X2JX4EzSca1631EB2QJQUqGbDuERal7LCtOpxl6x3+nvo9NPZcmjkiFA==}
 
-  pino@9.9.5:
-    resolution: {integrity: sha512-d1s98p8/4TfYhsJ09r/Azt30aYELRi6NNnZtEbqFw6BoGsdPVf5lKNK3kUwH8BmJJfpTLNuicjUQjaMbd93dVg==}
+  pino@9.11.0:
+    resolution: {integrity: sha512-+YIodBB9sxcWeR8PrXC2K3gEDyfkUuVEITOcbqrfcj+z5QW4ioIcqZfYFbrLTYLsmAwunbS7nfU/dpBB6PZc1g==}
     hasBin: true
 
   pirates@4.0.7:
@@ -4010,10 +4010,10 @@ snapshots:
       has-tostringtag: 1.0.2
       hasown: 2.0.2
 
-  esbuild-plugin-pino@2.3.3(esbuild@0.25.10)(pino-pretty@13.1.1)(pino@9.9.5)(thread-stream@3.1.0):
+  esbuild-plugin-pino@2.3.3(esbuild@0.25.10)(pino-pretty@13.1.1)(pino@9.11.0)(thread-stream@3.1.0):
     dependencies:
       esbuild: 0.25.10
-      pino: 9.9.5
+      pino: 9.11.0
     optionalDependencies:
       pino-pretty: 13.1.1
       thread-stream: 3.1.0
@@ -4577,7 +4577,7 @@ snapshots:
     dependencies:
       '@noble/hashes': 1.7.1
 
-  p-debounce@4.0.0: {}
+  p-debounce@5.0.0: {}
 
   p-limit@3.1.0:
     dependencies:
@@ -4657,7 +4657,7 @@ snapshots:
 
   pino-std-serializers@7.0.0: {}
 
-  pino@9.9.5:
+  pino@9.11.0:
     dependencies:
       atomic-sleep: 1.0.0
       fast-redact: 3.5.0
