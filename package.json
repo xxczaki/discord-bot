@@ -38,7 +38,7 @@
 		"esbuild-plugin-pino": "2.3.3",
 		"fuse.js": "^7.1.0",
 		"memoize": "^10.1.0",
-		"p-debounce": "^4.0.0",
+		"p-debounce": "^5.0.0",
 		"p-queue": "^8.1.1",
 		"pino-pretty": "^13.1.1",
 		"pretty-bytes": "^7.1.0",
