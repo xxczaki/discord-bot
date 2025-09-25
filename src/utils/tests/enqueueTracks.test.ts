@@ -23,7 +23,6 @@ vi.mock('../processTracksWithQueue', () => ({
 	default: vi.fn().mockResolvedValue({ enqueued: 0 }),
 }));
 
-vi.mock('../logger');
 vi.mock('@sentry/node');
 
 const mockedUseMainPlayer = vi.mocked(useMainPlayer);
