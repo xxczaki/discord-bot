@@ -473,7 +473,7 @@ it('should use correct timeout for message component', async () => {
 	});
 });
 
-it('should display correct description for head operation', async () => {
+it('should display correct description for head operation with plural', async () => {
 	const interaction = createMockInteraction('rock-classics', 3);
 	const voiceChannel = createMockVoiceChannel();
 
@@ -511,7 +511,44 @@ it('should display correct description for head operation', async () => {
 	});
 });
 
-it('should display correct description for tail operation', async () => {
+it('should display correct description for head operation with singular', async () => {
+	const interaction = createMockInteraction('rock-classics', 1);
+	const voiceChannel = createMockVoiceChannel();
+
+	const mockPlaylistsChannel = {
+		isTextBased: vi.fn().mockReturnValue(true),
+		messages: {
+			fetch: vi.fn().mockResolvedValue({
+				find: vi.fn().mockReturnValue(undefined),
+			}),
+		},
+	} as unknown as TextBasedChannel;
+
+	interaction.client.channels.cache.get = vi
+		.fn()
+		.mockReturnValue(mockPlaylistsChannel);
+
+	await enqueuePlaylistSlice(
+		interaction,
+		voiceChannel,
+		'rock-classics',
+		'head',
+		1,
+	);
+
+	expect(interaction.reply).toHaveBeenCalledWith({
+		components: [],
+		embeds: [
+			expect.objectContaining({
+				data: expect.objectContaining({
+					description: 'Fetching first 1 song…',
+				}),
+			}),
+		],
+	});
+});
+
+it('should display correct description for tail operation with plural', async () => {
 	const interaction = createMockInteraction('rock-classics', 3);
 	const voiceChannel = createMockVoiceChannel();
 
@@ -543,6 +580,43 @@ it('should display correct description for tail operation', async () => {
 			expect.objectContaining({
 				data: expect.objectContaining({
 					description: 'Fetching last 3 songs…',
+				}),
+			}),
+		],
+	});
+});
+
+it('should display correct description for tail operation with singular', async () => {
+	const interaction = createMockInteraction('rock-classics', 1);
+	const voiceChannel = createMockVoiceChannel();
+
+	const mockPlaylistsChannel = {
+		isTextBased: vi.fn().mockReturnValue(true),
+		messages: {
+			fetch: vi.fn().mockResolvedValue({
+				find: vi.fn().mockReturnValue(undefined),
+			}),
+		},
+	} as unknown as TextBasedChannel;
+
+	interaction.client.channels.cache.get = vi
+		.fn()
+		.mockReturnValue(mockPlaylistsChannel);
+
+	await enqueuePlaylistSlice(
+		interaction,
+		voiceChannel,
+		'rock-classics',
+		'tail',
+		1,
+	);
+
+	expect(interaction.reply).toHaveBeenCalledWith({
+		components: [],
+		embeds: [
+			expect.objectContaining({
+				data: expect.objectContaining({
+					description: 'Fetching last 1 song…',
 				}),
 			}),
 		],
@@ -595,5 +669,146 @@ it('should filter out empty lines from playlist content', async () => {
 				'2': 'Song 3',
 			},
 		},
+	});
+});
+
+it('should properly pluralize success message for single song', async () => {
+	const interaction = createMockInteraction('single-song-playlist', 1);
+	const voiceChannel = createMockVoiceChannel();
+	const mockQueue = createMockQueue();
+
+	const mockPlaylistsChannel = {
+		isTextBased: vi.fn().mockReturnValue(true),
+		messages: {
+			fetch: vi.fn().mockResolvedValue({
+				find: vi.fn().mockReturnValue({
+					content: 'id="single-song-playlist"\n```\nOnly Song\n```',
+				}),
+			}),
+		},
+	} as unknown as TextBasedChannel;
+
+	interaction.client.channels.cache.get = vi
+		.fn()
+		.mockReturnValue(mockPlaylistsChannel);
+
+	mockCleanUpPlaylistContent.mockReturnValue('Only Song');
+	mockUseQueue.mockReturnValue(mockQueue);
+	mockProcessTracksWithQueue.mockResolvedValue({ enqueued: 1 });
+
+	await enqueuePlaylistSlice(
+		interaction,
+		voiceChannel,
+		'single-song-playlist',
+		'head',
+		1,
+	);
+
+	expect(interaction.editReply).toHaveBeenCalledWith({
+		content: null,
+		embeds: [
+			expect.objectContaining({
+				data: expect.objectContaining({
+					description:
+						'1 entry from 1 song had been processed and added to the queue.\n0 skipped.',
+				}),
+			}),
+		],
+		components: [expect.any(ActionRowBuilder)],
+	});
+});
+
+it('should properly pluralize success message for multiple songs', async () => {
+	const interaction = createMockInteraction('multi-song-playlist', 3);
+	const voiceChannel = createMockVoiceChannel();
+	const mockQueue = createMockQueue();
+
+	const mockPlaylistsChannel = {
+		isTextBased: vi.fn().mockReturnValue(true),
+		messages: {
+			fetch: vi.fn().mockResolvedValue({
+				find: vi.fn().mockReturnValue({
+					content:
+						'id="multi-song-playlist"\n```\nSong 1\nSong 2\nSong 3\nSong 4\nSong 5\n```',
+				}),
+			}),
+		},
+	} as unknown as TextBasedChannel;
+
+	interaction.client.channels.cache.get = vi
+		.fn()
+		.mockReturnValue(mockPlaylistsChannel);
+
+	mockCleanUpPlaylistContent.mockReturnValue(
+		'Song 1\nSong 2\nSong 3\nSong 4\nSong 5',
+	);
+	mockUseQueue.mockReturnValue(mockQueue);
+	mockProcessTracksWithQueue.mockResolvedValue({ enqueued: 3 });
+
+	await enqueuePlaylistSlice(
+		interaction,
+		voiceChannel,
+		'multi-song-playlist',
+		'head',
+		3,
+	);
+
+	expect(interaction.editReply).toHaveBeenCalledWith({
+		content: null,
+		embeds: [
+			expect.objectContaining({
+				data: expect.objectContaining({
+					description:
+						'3 entries from the first 3 of 5 songs had been processed and added to the queue.\n0 skipped.',
+				}),
+			}),
+		],
+		components: [expect.any(ActionRowBuilder)],
+	});
+});
+
+it('should use simplified wording when processing all songs', async () => {
+	const interaction = createMockInteraction('small-playlist', 3);
+	const voiceChannel = createMockVoiceChannel();
+	const mockQueue = createMockQueue();
+
+	const mockPlaylistsChannel = {
+		isTextBased: vi.fn().mockReturnValue(true),
+		messages: {
+			fetch: vi.fn().mockResolvedValue({
+				find: vi.fn().mockReturnValue({
+					content: 'id="small-playlist"\n```\nSong 1\nSong 2\nSong 3\n```',
+				}),
+			}),
+		},
+	} as unknown as TextBasedChannel;
+
+	interaction.client.channels.cache.get = vi
+		.fn()
+		.mockReturnValue(mockPlaylistsChannel);
+
+	mockCleanUpPlaylistContent.mockReturnValue('Song 1\nSong 2\nSong 3');
+	mockUseQueue.mockReturnValue(mockQueue);
+	mockProcessTracksWithQueue.mockResolvedValue({ enqueued: 3 });
+
+	await enqueuePlaylistSlice(
+		interaction,
+		voiceChannel,
+		'small-playlist',
+		'head',
+		3,
+	);
+
+	expect(interaction.editReply).toHaveBeenCalledWith({
+		content: null,
+		embeds: [
+			expect.objectContaining({
+				data: expect.objectContaining({
+					description:
+						'3 entries from 3 songs had been processed and added to the queue.\n0 skipped.',
+				}),
+			}),
+		],
+		components: [expect.any(ActionRowBuilder)],
 	});
 });

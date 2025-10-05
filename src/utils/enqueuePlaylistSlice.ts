@@ -14,6 +14,7 @@ import pluralize from './pluralize';
 import processTracksWithQueue from './processTracksWithQueue';
 
 const pluralizeEntries = pluralize('entry', 'entries');
+const pluralizeSongs = pluralize('song', 'songs');
 
 export default async function enqueuePlaylistSlice(
 	interaction: ChatInputCommandInteraction,
@@ -39,7 +40,7 @@ export default async function enqueuePlaylistSlice(
 	const embed = new EmbedBuilder()
 		.setTitle('⏳ Processing')
 		.setDescription(
-			`Fetching ${sliceType === 'head' ? 'first' : 'last'} ${count} songs…`,
+			pluralizeSongs`Fetching ${sliceType === 'head' ? 'first' : 'last'} ${count} ${null}…`,
 		);
 
 	await interaction.reply({
@@ -108,13 +109,21 @@ export default async function enqueuePlaylistSlice(
 	const actualCount = slicedSongs.length;
 	const totalCount = allSongs.length;
 
+	let fromDescription: string;
+
+	if (actualCount === totalCount) {
+		fromDescription = pluralizeSongs`${actualCount} ${null}`;
+	} else {
+		fromDescription = `the ${sliceDescription} ${actualCount} of ${pluralizeSongs`${totalCount} ${null}`}`;
+	}
+
 	const response = await interaction.editReply({
 		content: null,
 		embeds: [
 			embed
 				.setTitle('✅ Done')
 				.setDescription(
-					pluralizeEntries`${enqueued} ${null} from the ${sliceDescription} ${actualCount} of ${totalCount} songs had been processed and added to the queue.\n${
+					pluralizeEntries`${enqueued} ${null} from ${fromDescription} had been processed and added to the queue.\n${
 						slicedSongs.length - enqueued
 					} skipped.`,
 				),
