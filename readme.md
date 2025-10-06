@@ -16,11 +16,7 @@
 - Spotify-like volume normalization
 - Recovery mechanism to continue listening after an error
 - Redis-backed playback statistics
-- AI-powered queue control with `/prompt` command (optional)
-	- Natural language queue manipulation (e.g., "remove all bob dylan songs", "move all tracks from genesis to the front and play them now")
-	- Powered by OpenAI's gpt-4o-mini with AI SDK v5
-	- Global rate limit of 100 calls per day
-	- Requires `OPENAI_API_KEY` environment variable
+- AI-powered queue control with the `/prompt` command
 - Maintenance mode that uses Kubernetes' API
 - Lockdown mode for restricting command access temporarily
 - Tic-tac-toe
@@ -39,9 +35,6 @@ You have two options:
 > [!NOTE]
 > Required environment variables:
 > - `REDIS_URL` - Redis instance connection string
->
-> Optional environment variables:
-> - `OPENAI_API_KEY` - OpenAI API key for the `/prompt` command (can be obtained from [OpenAI Platform](https://platform.openai.com/api-keys))
 
 [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/tgifQE?referralCode=4Ee-1n)
 
