@@ -1,53 +1,24 @@
 import { openai } from '@ai-sdk/openai';
-import { generateText, tool } from 'ai';
+import {
+	InvalidArgumentError,
+	NoSuchToolError,
+	stepCountIs,
+	streamText,
+} from 'ai';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import type { Track } from 'discord-player';
-import { z } from 'zod';
+import logger from '../utils/logger';
+import {
+	generateErrorMessage,
+	generateSuccessMessage,
+	generateSystemPrompt,
+	getAvailableTools,
+	type ToolContext,
+	type ToolResult,
+} from '../utils/promptTools';
+import { RateLimiter } from '../utils/RateLimiter';
 import useQueueWithValidation from '../utils/useQueueWithValidation';
 
-// Rate limiter: 100 calls per day for the entire bot
-class RateLimiter {
-	private static instance: RateLimiter;
-	private callCount = 0;
-	private lastReset = new Date();
-
-	private constructor() {}
-
-	static getInstance(): RateLimiter {
-		if (!RateLimiter.instance) {
-			RateLimiter.instance = new RateLimiter();
-		}
-		return RateLimiter.instance;
-	}
-
-	canMakeCall(): boolean {
-		this.resetIfNeeded();
-		return this.callCount < 100;
-	}
-
-	incrementCall(): void {
-		this.resetIfNeeded();
-		this.callCount++;
-	}
-
-	getRemainingCalls(): number {
-		this.resetIfNeeded();
-		return Math.max(0, 100 - this.callCount);
-	}
-
-	private resetIfNeeded(): void {
-		const now = new Date();
-		const hoursSinceReset =
-			(now.getTime() - this.lastReset.getTime()) / (1000 * 60 * 60);
-
-		if (hoursSinceReset >= 24) {
-			this.callCount = 0;
-			this.lastReset = now;
-		}
-	}
-}
-
-const rateLimiter = RateLimiter.getInstance();
+const rateLimiter = RateLimiter.getInstance('prompt-command', 100, 24);
 
 export default async function promptCommandHandler(
 	interaction: ChatInputCommandInteraction,
@@ -78,219 +49,103 @@ export default async function promptCommandHandler(
 
 	const prompt = interaction.options.getString('prompt', true);
 
-	await interaction.reply('Processing your request…');
+	await interaction.reply('Analyzing queue…');
 
 	try {
 		const tracks = queue.tracks.toArray();
 		const currentTrack = queue.currentTrack;
 
-		// Prepare queue data for the AI
+		const toolContext: ToolContext = {
+			queue,
+			currentTrackTitle: currentTrack?.title ?? 'None',
+			currentTrackAuthor: currentTrack?.author ?? 'N/A',
+			trackCount: tracks.length,
+		};
+
 		const queueData = tracks.map((track, index) => ({
-			index: index,
+			index,
 			title: track.title,
 			author: track.author,
-			url: track.url,
 			duration: track.duration,
 		}));
 
-		const result = await generateText({
-			model: openai('gpt-5-nano'),
-			system: `You are a bot control assistant that helps manipulate a music queue. You can ONLY perform actions on the queue - you cannot answer general questions or chat with users. If the user asks anything that isn't about controlling the queue, respond with an error.
-
-Current queue has ${tracks.length} tracks. The current playing track is: "${currentTrack?.title ?? 'None'}" by ${currentTrack?.author ?? 'N/A'}.
-
-Available actions:
-- Remove tracks matching criteria (e.g., by artist, title)
-- Move tracks matching criteria to a specific position
-- Skip the current track
-
-Be precise with pattern matching. Use case-insensitive matching for artist/title names.`,
-			prompt: `User request: "${prompt}"\n\nQueue data: ${JSON.stringify(queueData, null, 2)}`,
-			tools: {
-				removeTracksByPattern: tool({
-					description:
-						'Remove all tracks from the queue that match a pattern (artist name, title, or both)',
-					inputSchema: z.object({
-						artistPattern: z
-							.string()
-							.optional()
-							.describe('Artist name pattern to match (case-insensitive)'),
-						titlePattern: z
-							.string()
-							.optional()
-							.describe('Track title pattern to match (case-insensitive)'),
-					}),
-					execute: async ({ artistPattern, titlePattern }) => {
-						const tracksToRemove: Track[] = [];
-						let shouldSkipCurrent = false;
-
-						for (const track of tracks) {
-							const matchesArtist = artistPattern
-								? track.author
-										.toLowerCase()
-										.includes(artistPattern.toLowerCase())
-								: true;
-							const matchesTitle = titlePattern
-								? track.title.toLowerCase().includes(titlePattern.toLowerCase())
-								: true;
-
-							if (matchesArtist && matchesTitle) {
-								tracksToRemove.push(track);
-							}
-						}
-
-						if (currentTrack) {
-							const currentMatchesArtist = artistPattern
-								? currentTrack.author
-										.toLowerCase()
-										.includes(artistPattern.toLowerCase())
-								: true;
-							const currentMatchesTitle = titlePattern
-								? currentTrack.title
-										.toLowerCase()
-										.includes(titlePattern.toLowerCase())
-								: true;
-
-							if (currentMatchesArtist && currentMatchesTitle) {
-								shouldSkipCurrent = true;
-							}
-						}
-
-						for (const track of tracksToRemove) {
-							queue.removeTrack(track);
-						}
-
-						if (shouldSkipCurrent) {
-							queue.node.skip();
-						}
-
-						const totalRemoved =
-							tracksToRemove.length + (shouldSkipCurrent ? 1 : 0);
-
-						return {
-							success: true,
-							removedCount: totalRemoved,
-						};
-					},
-				}),
-				moveTracksByPattern: tool({
-					description:
-						'Move all tracks matching a pattern to a specific position in the queue',
-					inputSchema: z.object({
-						artistPattern: z
-							.string()
-							.optional()
-							.describe('Artist name pattern to match (case-insensitive)'),
-						titlePattern: z
-							.string()
-							.optional()
-							.describe('Track title pattern to match (case-insensitive)'),
-						position: z
-							.number()
-							.describe(
-								'Target position (0 = front of queue, -1 = end of queue)',
-							),
-						skipCurrent: z
-							.boolean()
-							.optional()
-							.describe(
-								'Whether to skip the current track after moving (use this to play the moved tracks immediately)',
-							),
-					}),
-					execute: async ({
-						artistPattern,
-						titlePattern,
-						position,
-						skipCurrent,
-					}) => {
-						const tracksToMove: { track: Track; originalIndex: number }[] = [];
-
-						for (const [index, track] of tracks.entries()) {
-							const matchesArtist = artistPattern
-								? track.author
-										.toLowerCase()
-										.includes(artistPattern.toLowerCase())
-								: true;
-							const matchesTitle = titlePattern
-								? track.title.toLowerCase().includes(titlePattern.toLowerCase())
-								: true;
-
-							if (matchesArtist && matchesTitle) {
-								tracksToMove.push({ track, originalIndex: index });
-							}
-						}
-
-						if (tracksToMove.length === 0) {
-							throw new Error('No tracks found matching the criteria');
-						}
-
-						const targetPos = position === -1 ? tracks.length - 1 : position;
-
-						if (position === 0 || position === -1) {
-							for (let index = tracksToMove.length - 1; index >= 0; index--) {
-								const { track } = tracksToMove[index];
-								queue.moveTrack(track, targetPos);
-							}
-						} else {
-							for (const { track } of tracksToMove) {
-								queue.moveTrack(track, targetPos);
-							}
-						}
-
-						if (skipCurrent) {
-							queue.node.skip();
-						}
-
-						return {
-							success: true,
-							movedCount: tracksToMove.length,
-							skippedCurrent: skipCurrent ?? false,
-						};
-					},
-				}),
-				skipCurrentTrack: tool({
-					description:
-						'Skip the currently playing track to play the next track in queue',
-					inputSchema: z.object({}),
-					execute: async () => {
-						queue.node.skip();
-
-						return {
-							success: true,
-						};
-					},
-				}),
-			},
+		const result = streamText({
+			model: openai('gpt-4o-mini'),
+			system: generateSystemPrompt(toolContext),
+			prompt: `User request: "${prompt}"\n\nQueue data: ${JSON.stringify(queueData)}`,
+			tools: getAvailableTools(toolContext),
+			stopWhen: stepCountIs(5),
+			maxRetries: 2,
+			temperature: 0.1,
 		});
 
 		rateLimiter.incrementCall();
 
-		const toolCalls = result.toolCalls || [];
+		const completedActions: string[] = [];
 
-		if (toolCalls.length === 0) {
-			return interaction.editReply(
-				'No actions were performed. The request might not match any tracks in the queue.',
-			);
+		const formatOutput = () => {
+			return completedActions.join('\n');
+		};
+
+		const pendingTools = new Map<string, string>();
+
+		for await (const part of result.fullStream) {
+			if (part.type === 'tool-call') {
+				pendingTools.set(part.toolCallId, part.toolName);
+			} else if (part.type === 'tool-result') {
+				const output = 'output' in part ? part.output : undefined;
+				const result = output as ToolResult | undefined;
+
+				const toolName = pendingTools.get(part.toolCallId);
+				if (!toolName) continue;
+
+				const isSuccess = result?.success !== false;
+				let completedMessage: string;
+
+				if (!isSuccess) {
+					const errorMsg = generateErrorMessage(toolName, result ?? {});
+					completedMessage = `❌ ${errorMsg}`;
+					logger.error({ toolName, result }, '[Prompt] Tool execution failed');
+				} else {
+					const successMsg = generateSuccessMessage(toolName, result ?? {});
+					completedMessage = `✅ ${successMsg}`;
+				}
+
+				// Add completed message to history (keep pending message too)
+				completedActions.push(completedMessage);
+				pendingTools.delete(part.toolCallId);
+
+				// Update immediately when a tool completes
+				await interaction.editReply(formatOutput());
+			} else if (part.type === 'error') {
+				logger.error(
+					{ error: 'error' in part ? part.error : 'Unknown error' },
+					'[Prompt] Stream error',
+				);
+			}
 		}
 
-		const steps = toolCalls
-			.map((call) => {
-				const input = call.input as Record<string, unknown>;
-				const params = Object.entries(input)
-					.filter(([_, value]) => value !== undefined && value !== null)
-					.map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
-					.join(', ');
-				return `→ ${call.toolName}(${params})`;
-			})
-			.join('\n');
-
-		await interaction.editReply(steps);
+		if (completedActions.length === 0) {
+			return interaction.editReply(
+				'❌ No actions were performed. The request might not match any tracks in the queue.',
+			);
+		}
 	} catch (error) {
-		await interaction.editReply({
-			content:
-				error instanceof Error
-					? error.message
-					: 'An error occurred while processing your request.',
-		});
+		if (NoSuchToolError.isInstance(error)) {
+			await interaction.editReply({
+				content: `Tool not found: ${error.message}`,
+			});
+		} else if (InvalidArgumentError.isInstance(error)) {
+			await interaction.editReply({
+				content: `Invalid arguments: ${error.message}`,
+			});
+		} else {
+			await interaction.editReply({
+				content:
+					error instanceof Error
+						? error.message
+						: 'An error occurred while processing your request.',
+			});
+		}
 	}
 }
