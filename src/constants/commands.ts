@@ -309,6 +309,20 @@ export const RAW_COMMANDS: CategorizedCommand[] = [
 		description: 'Toggle lockdown mode for certain commands',
 		category: 'Owner-only',
 	},
+	{
+		name: 'prompt',
+		description: 'Control the queue with natural language',
+		options: [
+			{
+				name: 'prompt',
+				description:
+					'e.g., "remove all bob dylan songs" or "move genesis tracks to the front and play now"',
+				type: 3,
+				required: true,
+			},
+		],
+		category: 'Music',
+	},
 ];
 
 export default RAW_COMMANDS.map(({ category, ...rest }) => rest);
