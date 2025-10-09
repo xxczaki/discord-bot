@@ -16,7 +16,7 @@
 	"dependencies": {
 		"@ai-sdk/openai": "^2.0.44",
 		"@kubernetes/client-node": "^1.4.0",
-		"@sentry/node": "^10.18.0",
+		"@sentry/node": "^10.19.0",
 		"ai": "^5.0.61",
 		"bufferutil": "^4.0.9",
 		"discord-player": "^7.2.0-dev.2",
