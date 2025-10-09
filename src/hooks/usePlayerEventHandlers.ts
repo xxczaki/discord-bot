@@ -67,7 +67,7 @@ export default function usePlayerEventHandlers(
 				);
 
 				return await answer.update({
-					content: 'Track skipped.',
+					content: null,
 					embeds: [skippedEmbed],
 					components: [],
 				});

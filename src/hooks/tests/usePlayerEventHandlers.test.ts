@@ -289,7 +289,7 @@ it('should handle skip button interaction and skip track', async () => {
 		'⏭️ Track was skipped.',
 	);
 	expect(mockComponentInteraction.update).toHaveBeenCalledWith({
-		content: 'Track skipped.',
+		content: null,
 		embeds: [{ title: 'Mock Embed' }],
 		components: [],
 	});
