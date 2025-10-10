@@ -43,7 +43,7 @@
 		"memoize": "^10.1.0",
 		"p-debounce": "^5.0.0",
 		"p-queue": "^9.0.0",
-		"pino-pretty": "^13.1.1",
+		"pino-pretty": "^13.1.2",
 		"pretty-bytes": "^7.1.0",
 		"typescript": "^5.9.3",
 		"vitest": "^3.2.4"
