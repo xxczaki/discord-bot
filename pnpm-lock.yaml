@@ -21,8 +21,8 @@ importers:
         specifier: ^10.19.0
         version: 10.19.0
       ai:
-        specifier: ^5.0.70
-        version: 5.0.70(zod@4.1.12)
+        specifier: ^5.0.71
+        version: 5.0.71(zod@4.1.12)
       bufferutil:
         specifier: ^4.0.9
         version: 4.0.9
@@ -1078,8 +1078,8 @@ packages:
     resolution: {integrity: sha512-jRR5wdylq8CkOe6hei19GGZnxM6rBGwFl3Bg0YItGDimvjGtAvdZk4Pu6Cl4u4Igsws4a1fd1Vq3ezrhn4KmFw==}
     engines: {node: '>= 14'}
 
-  ai@5.0.70:
-    resolution: {integrity: sha512-srJV++Ml1X8I33gTiiJQpq6GUbAv5ivjSzDzzF9SM4d25zq+/m+zTtHBb794tYKTz2PgbJ3oop9+gU50ZdCLbQ==}
+  ai@5.0.71:
+    resolution: {integrity: sha512-2c9/cXpF7O1K9xOgcoPCMC7Jj5GxVsPHTBhKcV6bqCVKm21P8AiN+rz9zIGopNMDhlEbQxqi8qSgrwCfsW+KMw==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -3759,7 +3759,7 @@ snapshots:
 
   agent-base@7.1.3: {}
 
-  ai@5.0.70(zod@4.1.12):
+  ai@5.0.71(zod@4.1.12):
     dependencies:
       '@ai-sdk/gateway': 1.0.40(zod@4.1.12)
       '@ai-sdk/provider': 2.0.0
