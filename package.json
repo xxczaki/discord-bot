@@ -12,7 +12,7 @@
 		"test": "vitest run",
 		"test:coverage": "vitest run --coverage"
 	},
-	"packageManager": "pnpm@10.18.2",
+	"packageManager": "pnpm@10.18.3",
 	"dependencies": {
 		"@ai-sdk/openai": "^2.0.52",
 		"@kubernetes/client-node": "^1.4.0",
