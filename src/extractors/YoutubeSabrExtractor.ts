@@ -64,7 +64,7 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 		setupYoutubeJsEvaluator();
 
 		this.#innertube = await Innertube.create({
-			cache: new UniversalCache(true),
+			cache: new UniversalCache(true, '/tmp/.cache'),
 		});
 
 		this.protocols = ['ytsearch', 'youtube'];
