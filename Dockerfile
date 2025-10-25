@@ -1,8 +1,7 @@
 FROM node:22.21.0-alpine AS base
 
-RUN apk add --no-cache python3 make g++ && \
+RUN apk add --no-cache build-base python3 make g++ cairo-dev pango-dev && \
 		corepack enable
-
 
 FROM base AS build
 
