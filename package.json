@@ -21,7 +21,6 @@
 		"bufferutil": "^4.0.9",
 		"discord-player": "^7.2.0-dev.2",
 		"discord-player-spotify": "^1.1.7",
-		"discord-player-youtubei": "^1.5.0",
 		"discord.js": "^14.24.0",
 		"ioredis": "^5.8.2",
 		"pino": "^10.1.0",
@@ -40,13 +39,15 @@
 		"esbuild": "^0.25.11",
 		"esbuild-plugin-pino": "2.3.3",
 		"fuse.js": "^7.1.0",
+		"googlevideo": "^4.0.4",
 		"memoize": "^10.2.0",
 		"p-debounce": "^5.0.0",
 		"p-queue": "^9.0.0",
 		"pino-pretty": "^13.1.2",
 		"pretty-bytes": "^7.1.0",
 		"typescript": "^5.9.3",
-		"vitest": "^3.2.4"
+		"vitest": "^3.2.4",
+		"youtubei.js": "^16.0.1"
 	},
 	"pnpm": {
 		"overrides": {

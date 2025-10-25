@@ -20,7 +20,6 @@ const buildOptions = {
 		'bufferutil',
 		'discord-player',
 		'discord-player-spotify',
-		'discord-player-youtubei',
 		'discord.js',
 		'sodium-native',
 		'zlib-sync',

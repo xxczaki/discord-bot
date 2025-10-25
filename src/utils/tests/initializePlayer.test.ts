@@ -70,8 +70,8 @@ vi.mock('discord-player', () => ({
 	},
 }));
 
-vi.mock('discord-player-youtubei', () => ({
-	YoutubeiExtractor: vi.fn(),
+vi.mock('../../extractors/YoutubeSabrExtractor', () => ({
+	YoutubeSabrExtractor: vi.fn(),
 }));
 
 vi.mock('discord-player-spotify', () => ({

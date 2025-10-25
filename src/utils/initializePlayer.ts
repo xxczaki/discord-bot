@@ -9,7 +9,7 @@ import {
 	Player,
 } from 'discord-player';
 import { SpotifyExtractor } from 'discord-player-spotify';
-import { YoutubeiExtractor } from 'discord-player-youtubei';
+import { YoutubeSabrExtractor } from '../extractors/YoutubeSabrExtractor';
 import defineCustomFilters from './defineCustomFilters';
 import deleteOpusCacheEntry from './deleteOpusCacheEntry';
 import getOpusCacheTrackPath from './getOpusCacheTrackPath';
@@ -143,21 +143,13 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 		});
 
 		/* v8 ignore start */
-		await initializedPlayer.extractors.register(YoutubeiExtractor, {
-			streamOptions: {
-				useClient: 'WEB_EMBEDDED',
-			},
-			generateWithPoToken: true,
-			innertubeConfigRaw: {
-				player_id: '0004de42',
-			},
-		});
+		await initializedPlayer.extractors.register(YoutubeSabrExtractor, {});
 		await initializedPlayer.extractors.register(SpotifyExtractor, {
 			market: 'PL',
 		});
 
 		await initializedPlayer.extractors.loadMulti([
-			YoutubeiExtractor,
+			YoutubeSabrExtractor,
 			SpotifyExtractor,
 		]);
 		/* v8 ignore stop */
