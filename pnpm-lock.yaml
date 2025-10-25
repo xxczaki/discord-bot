@@ -88,8 +88,8 @@ importers:
         specifier: ^10.2.0
         version: 10.2.0
       p-debounce:
-        specifier: ^5.0.0
-        version: 5.0.0
+        specifier: ^5.1.0
+        version: 5.1.0
       p-queue:
         specifier: ^9.0.0
         version: 9.0.0
@@ -2022,8 +2022,8 @@ packages:
   otpauth@9.4.0:
     resolution: {integrity: sha512-fHIfzIG5RqCkK9cmV8WU+dPQr9/ebR5QOwGZn2JAr1RQF+lmAuLL2YdtdqvmBjNmgJlYk3KZ4a0XokaEhg1Jsw==}
 
-  p-debounce@5.0.0:
-    resolution: {integrity: sha512-rnaPSZtETbl75h6lcVFQxJ9LXJhkYhtVNie4Kj/nECazixDxrPYWl8I+DfY69C299HI4Of8NJDfR0ekrlcwAkA==}
+  p-debounce@5.1.0:
+    resolution: {integrity: sha512-3DNQmB7HPRMSuZ9P8JQFzEr7156s1S5Lqpi3mSrsZe5AHvl4ONfGrdB5azWqeOpNejQiemgQBkyU+IDKR5nwyg==}
     engines: {node: '>=20'}
 
   p-limit@3.1.0:
@@ -4695,7 +4695,7 @@ snapshots:
     dependencies:
       '@noble/hashes': 1.7.1
 
-  p-debounce@5.0.0: {}
+  p-debounce@5.1.0: {}
 
   p-limit@3.1.0:
     dependencies:
