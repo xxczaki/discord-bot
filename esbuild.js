@@ -29,6 +29,10 @@ const buildOptions = {
 		'pino',
 		'ioredis',
 		'ulid',
+
+		// PO token generation dependencies (use dynamic requires)
+		'jsdom',
+		'bgutils-js',
 	],
 	plugins: [
 		esbuildPluginPino({ transports: [] }),
