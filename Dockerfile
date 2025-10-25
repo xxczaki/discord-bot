@@ -23,7 +23,6 @@ RUN pnpm prune --prod
 FROM node:22.21.0-alpine
 
 ENV TZ="Europe/Warsaw"
-ENV HOME="/tmp"
 
 RUN apk add --no-cache ffmpeg
 
