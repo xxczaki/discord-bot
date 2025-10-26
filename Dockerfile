@@ -6,19 +6,23 @@ RUN apk add --no-cache build-base python3 make g++ cairo-dev pango-dev && \
 FROM base AS build
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY packages/*/package.json ./packages/
+COPY packages/discord-player-googlevideo/package.json ./packages/discord-player-googlevideo/
+
 RUN pnpm fetch && pnpm install --offline
 
-COPY packages ./packages/
+COPY packages/discord-player-googlevideo ./packages/discord-player-googlevideo
+
+RUN cd packages/discord-player-googlevideo && pnpm build
+
 COPY src ./src/
 COPY esbuild.js ./
 
 ARG GIT_COMMIT_SHA
 
 RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN,env=SENTRY_AUTH_TOKEN \
-		SENTRY_RELEASE_NAME=$GIT_COMMIT_SHA pnpm build --recursive
+		SENTRY_RELEASE_NAME=$GIT_COMMIT_SHA pnpm build
 
-RUN pnpm prune --prod
+RUN CI=true pnpm prune --prod
 
 
 FROM node:22.21.0-alpine
