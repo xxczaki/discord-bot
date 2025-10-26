@@ -2,12 +2,6 @@
 
 > A discord-player extractor using YouTube SABR streaming with googlevideo and youtubei.js
 
-## Features
-
-- **Automatic Reconnection**: Handles stream interruptions with intelligent retry logic
-- **PO Token Authentication**: Generates required tokens for authenticated streaming
-- **Search & Direct URLs**: Supports both YouTube search queries and direct video URLs
-
 ## Installation
 
 ```bash

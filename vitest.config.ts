@@ -27,6 +27,7 @@ export default defineConfig({
 				},
 			},
 			{
+				extends: true,
 				test: {
 					name: 'discord-player-googlevideo',
 					root: './packages/discord-player-googlevideo',
