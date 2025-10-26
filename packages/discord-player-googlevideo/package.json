@@ -57,7 +57,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "catalog:",
-		"@changesets/cli": "^2.27.11",
+		"@changesets/cli": "^2.29.7",
 		"@types/jsdom": "catalog:",
 		"@types/node": "catalog:",
 		"@vitest/coverage-v8": "catalog:",

@@ -173,7 +173,7 @@ importers:
         specifier: 'catalog:'
         version: 2.3.0
       '@changesets/cli':
-        specifier: ^2.27.11
+        specifier: ^2.29.7
         version: 2.29.7(@types/node@24.9.1)
       '@types/jsdom':
         specifier: 'catalog:'
