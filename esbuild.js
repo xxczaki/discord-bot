@@ -17,10 +17,12 @@ const buildOptions = {
 	target: 'node22',
 	external: [
 		'@kubernetes/client-node',
+		'bgutils-js',
 		'bufferutil',
 		'discord-player',
 		'discord-player-spotify',
 		'discord.js',
+		'jsdom',
 		'sodium-native',
 		'zlib-sync',
 
@@ -29,10 +31,6 @@ const buildOptions = {
 		'pino',
 		'ioredis',
 		'ulid',
-
-		// PO token generation dependencies (use dynamic requires)
-		'jsdom',
-		'bgutils-js',
 	],
 	plugins: [
 		esbuildPluginPino({ transports: [] }),
