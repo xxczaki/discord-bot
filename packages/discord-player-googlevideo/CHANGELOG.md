@@ -1,5 +1,11 @@
 # discord-player-googlevideo
 
+## 0.1.1
+
+### Patch Changes
+
+- f9ae122: README update, testing setup changes
+
 ## 0.1.0
 
 ### Minor Changes
