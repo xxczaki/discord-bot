@@ -46,7 +46,7 @@
 		"url": "https://github.com/xxczaki/discord-bot/issues"
 	},
 	"peerDependencies": {
-		"discord-player": "^7.0.0"
+		"discord-player": "^7.1.0"
 	},
 	"dependencies": {
 		"bgutils-js": "^3.2.0",
