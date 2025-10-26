@@ -22,7 +22,7 @@
 		"lint": "biome check --write ./src",
 		"tsc": "tsc --noEmit",
 		"test": "vitest run",
-		"prepublishOnly": "pnpm clean && pnpm build && pnpm test"
+		"prepublishOnly": "pnpm clean && pnpm build && pnpm test --silent"
 	},
 	"keywords": [
 		"discord",
