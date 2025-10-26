@@ -5,15 +5,15 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"start": "pnpm build && node --env-file=.env dist/index.js | pino-pretty",
-		"build": "pnpm --filter discord-player-googlevideo build && node esbuild.js",
+		"start": "pnpm recursive --include-workspace-root run build && node --env-file=.env dist/index.js | pino-pretty",
+		"build": "node esbuild.js",
 		"lint": "biome check --write ./src",
 		"tsc": "tsc --noEmit",
-		"test": "pnpm --filter discord-player-googlevideo build && vitest run",
-		"test:coverage": "pnpm --filter discord-player-googlevideo build && vitest run --coverage",
+		"test": "vitest run",
+		"test:coverage": "vitest run --coverage",
 		"changeset": "changeset",
 		"version-packages": "changeset version",
-		"release": "pnpm --filter discord-player-googlevideo build && changeset publish"
+		"release": "pnpm recursive run build && changeset publish"
 	},
 	"packageManager": "pnpm@10.19.0",
 	"dependencies": {
@@ -35,7 +35,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "catalog:",
-		"@changesets/cli": "catalog:",
+		"@changesets/cli": "^2.29.7",
 		"@discordjs/rest": "^2.6.0",
 		"@sentry/esbuild-plugin": "^4.5.0",
 		"@types/node": "catalog:",

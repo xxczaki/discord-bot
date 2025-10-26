@@ -10,17 +10,14 @@ COPY packages/discord-player-googlevideo/package.json ./packages/discord-player-
 
 RUN pnpm fetch && pnpm install --offline
 
-COPY packages/discord-player-googlevideo ./packages/discord-player-googlevideo
-
-RUN cd packages/discord-player-googlevideo && pnpm build
-
 COPY src ./src/
 COPY esbuild.js ./
+COPY packages/discord-player-googlevideo ./packages/discord-player-googlevideo
 
 ARG GIT_COMMIT_SHA
 
 RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN,env=SENTRY_AUTH_TOKEN \
-		SENTRY_RELEASE_NAME=$GIT_COMMIT_SHA pnpm build
+		SENTRY_RELEASE_NAME=$GIT_COMMIT_SHA pnpm recursive --include-workspace-root run build
 
 RUN CI=true pnpm prune --prod
 
