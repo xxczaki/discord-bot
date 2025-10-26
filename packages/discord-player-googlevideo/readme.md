@@ -2,6 +2,8 @@
 
 > A discord-player extractor using YouTube SABR streaming with googlevideo and youtubei.js
 
+[![Release](https://github.com/xxczaki/discord-bot/actions/workflows/release.yml/badge.svg)](https://github.com/xxczaki/discord-bot/actions/workflows/release.yml)
+
 ## Installation
 
 ```bash
