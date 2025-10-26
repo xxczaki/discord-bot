@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
@@ -6,7 +7,6 @@ export default defineConfig({
 		environment: 'node',
 
 		pool: 'vmThreads',
-		vmMemoryLimit: '256MB',
 
 		projects: [
 			{
@@ -14,6 +14,16 @@ export default defineConfig({
 					name: 'discord-bot',
 					setupFiles: ['./src/setupTests.ts'],
 					include: ['src/**/*.test.ts'],
+				},
+				resolve: {
+					alias: {
+						'discord-player-googlevideo': fileURLToPath(
+							new URL(
+								'./packages/discord-player-googlevideo/src/index.ts',
+								import.meta.url,
+							),
+						),
+					},
 				},
 			},
 			{
