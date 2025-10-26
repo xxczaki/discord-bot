@@ -6,11 +6,11 @@
 	"type": "module",
 	"scripts": {
 		"start": "pnpm build && node --env-file=.env dist/index.js | pino-pretty",
-		"build": "node esbuild.js",
+		"build": "pnpm --filter discord-player-googlevideo build && node esbuild.js",
 		"lint": "biome check --write ./src",
 		"tsc": "tsc --noEmit",
-		"test": "vitest run",
-		"test:coverage": "vitest run --coverage"
+		"test": "pnpm --filter discord-player-googlevideo build && vitest run",
+		"test:coverage": "pnpm --filter discord-player-googlevideo build && vitest run --coverage"
 	},
 	"packageManager": "pnpm@10.19.0",
 	"dependencies": {

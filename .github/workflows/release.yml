@@ -31,19 +31,15 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        working-directory: packages/discord-player-googlevideo
+
+      - name: Build package
+        run: pnpm --filter discord-player-googlevideo build
 
       - name: Run linter
-        run: pnpm lint
-        working-directory: packages/discord-player-googlevideo
-
-      - name: Build project
-        run: pnpm build
-        working-directory: packages/discord-player-googlevideo
+        run: pnpm --filter discord-player-googlevideo lint
 
       - name: Run tests
-        run: pnpm test
-        working-directory: packages/discord-player-googlevideo
+        run: pnpm --filter discord-player-googlevideo test
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
