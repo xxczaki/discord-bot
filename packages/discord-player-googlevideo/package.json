@@ -45,6 +45,7 @@
 	"bugs": {
 		"url": "https://github.com/xxczaki/discord-bot/issues"
 	},
+	"homepage": "https://github.com/xxczaki/discord-bot/tree/main/packages/discord-player-googlevideo#readme",
 	"peerDependencies": {
 		"discord-player": "^7.1.0"
 	},
