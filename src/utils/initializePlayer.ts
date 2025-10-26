@@ -8,8 +8,8 @@ import {
 	onStreamExtracted,
 	Player,
 } from 'discord-player';
+import { YoutubeSabrExtractor } from 'discord-player-googlevideo';
 import { SpotifyExtractor } from 'discord-player-spotify';
-import { YoutubeSabrExtractor } from '../extractors/YoutubeSabrExtractor';
 import defineCustomFilters from './defineCustomFilters';
 import deleteOpusCacheEntry from './deleteOpusCacheEntry';
 import getOpusCacheTrackPath from './getOpusCacheTrackPath';

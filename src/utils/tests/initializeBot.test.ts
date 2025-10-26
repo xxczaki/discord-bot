@@ -20,7 +20,7 @@ vi.mock('../../hooks/useDebugListeners');
 vi.mock('../../hooks/useDiscordEventHandlers');
 vi.mock('../../hooks/usePlayerEventHandlers');
 
-vi.mock('../../extractors/YoutubeSabrExtractor', () => ({
+vi.mock('discord-player-googlevideo', () => ({
 	YoutubeSabrExtractor: vi.fn(),
 }));
 

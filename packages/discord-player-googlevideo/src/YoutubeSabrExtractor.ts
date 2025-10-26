@@ -17,8 +17,7 @@ import {
 	UniversalCache,
 	YTNodes,
 } from 'youtubei.js';
-import { generateWebPoToken } from '../utils/generateWebPoToken';
-import logger from '../utils/logger';
+import { generateWebPoToken } from './utils/generateWebPoToken';
 
 const MAX_SEARCH_RESULTS = 10;
 const MAX_RELATED_TRACKS = 5;
@@ -70,12 +69,12 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 
 		this.protocols = ['ytsearch', 'youtube'];
 
-		logger.info('YoutubeSabrExtractor activated');
+		console.log('[YoutubeSabrExtractor] Activated');
 	}
 
 	async deactivate(): Promise<void> {
 		this.#innertube = null;
-		logger.info('YoutubeSabrExtractor deactivated');
+		console.log('[YoutubeSabrExtractor] Deactivated');
 	}
 
 	async validate(
@@ -124,7 +123,7 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 
 		const outputStream = new PassThrough();
 		this.#startStreamWithReconnect(videoId, outputStream).catch((error) => {
-			logger.error(error, 'Fatal error in stream');
+			console.error('[YoutubeSabrExtractor] Fatal error in stream:', error);
 			outputStream.destroy(error);
 		});
 
@@ -147,7 +146,9 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 		}
 
 		if (attempt > 1) {
-			logger.info({ videoId, attempt }, 'Reconnecting stream');
+			console.log(
+				`[YoutubeSabrExtractor] Reconnecting stream for video ${videoId} (attempt ${attempt})`,
+			);
 		}
 
 		const playerResponse = await this.#makePlayerRequest(
@@ -178,13 +179,15 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 			// biome-ignore lint/suspicious/noExplicitAny: googlevideo types are not exported
 		) || []) as any;
 
-		// Generate PO token bound to video ID to authenticate stream
 		let poToken: string | undefined;
 		try {
 			const poTokenResult = await generateWebPoToken(videoId);
 			poToken = poTokenResult.poToken;
 		} catch (error) {
-			logger.warn({ error, videoId }, 'Failed to generate PO token');
+			console.warn(
+				`[YoutubeSabrExtractor] Failed to generate PO token for video ${videoId}:`,
+				error,
+			);
 		}
 
 		const serverAbrStream = new SabrStream({
@@ -283,9 +286,9 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 							streamState || undefined,
 						);
 					} catch (reconnectError) {
-						logger.error(
-							{ error: reconnectError, videoId },
-							'Reconnect failed',
+						console.error(
+							`[YoutubeSabrExtractor] Reconnect failed for video ${videoId}:`,
+							reconnectError,
 						);
 						if (!outputStream.destroyed) {
 							outputStream.destroy(
@@ -296,7 +299,10 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 						}
 					}
 				} else {
-					logger.error({ error, videoId }, 'Stream error');
+					console.error(
+						`[YoutubeSabrExtractor] Stream error for video ${videoId}:`,
+						error,
+					);
 					serverAbrStream.removeAllListeners();
 					if (!outputStream.destroyed) {
 						outputStream.destroy(error);
@@ -318,7 +324,10 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 					savedState || undefined,
 				);
 			}
-			logger.error({ error, videoId }, 'Fatal stream start error');
+			console.error(
+				`[YoutubeSabrExtractor] Fatal stream start error for video ${videoId}:`,
+				error,
+			);
 			throw error;
 		}
 	}
@@ -360,7 +369,10 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 
 			return this.createResponse(null, tracks);
 		} catch (error) {
-			logger.error(error, 'Failed to get related tracks');
+			console.error(
+				'[YoutubeSabrExtractor] Failed to get related tracks:',
+				error,
+			);
 			return this.createResponse();
 		}
 	}
@@ -421,19 +433,7 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 
 			return this.createResponse(null, tracks);
 		} catch (error) {
-			logger.error(
-				{
-					query,
-					errorMessage: error instanceof Error ? error.message : String(error),
-					errorName: error instanceof Error ? error.name : typeof error,
-					errorStack:
-						error instanceof Error
-							? error.stack?.split('\n').slice(0, 5)
-							: undefined,
-				},
-				'Failed to search YouTube with current client',
-			);
-			// Return empty results instead of throwing
+			console.error('[YoutubeSabrExtractor] Failed to search YouTube:', error);
 			return this.createResponse();
 		}
 	}

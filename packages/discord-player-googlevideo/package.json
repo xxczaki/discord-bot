@@ -1,0 +1,69 @@
+{
+	"name": "discord-player-googlevideo",
+	"version": "0.1.0",
+	"description": "A discord-player extractor using YouTube SABR streaming with googlevideo and youtubei.js",
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
+	},
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE"
+	],
+	"scripts": {
+		"build": "tsc",
+		"lint": "biome check --write ./src",
+		"tsc": "tsc --noEmit",
+		"test": "vitest run",
+		"prepublishOnly": "pnpm build",
+		"release": "pnpm publish",
+		"version-packages": "changeset version"
+	},
+	"keywords": [
+		"discord",
+		"discord-player",
+		"youtube",
+		"extractor",
+		"music",
+		"streaming",
+		"sabr",
+		"youtubei",
+		"googlevideo"
+	],
+	"author": "xxczaki",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/xxczaki/discord-bot.git",
+		"directory": "packages/discord-player-googlevideo"
+	},
+	"bugs": {
+		"url": "https://github.com/xxczaki/discord-bot/issues"
+	},
+	"peerDependencies": {
+		"discord-player": "^7.0.0"
+	},
+	"dependencies": {
+		"bgutils-js": "catalog:",
+		"googlevideo": "catalog:",
+		"jsdom": "catalog:",
+		"youtubei.js": "catalog:"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "catalog:",
+		"@changesets/cli": "^2.27.11",
+		"@types/jsdom": "catalog:",
+		"@types/node": "catalog:",
+		"@vitest/coverage-v8": "catalog:",
+		"discord-player": "^7.2.0-dev.2",
+		"typescript": "catalog:",
+		"vitest": "catalog:"
+	},
+	"packageManager": "pnpm@10.19.0"
+}
