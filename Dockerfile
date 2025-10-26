@@ -9,7 +9,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages ./packages/
 RUN pnpm fetch && pnpm install --offline
 
-RUN pnpm --filter './packages/**' build
+RUN pnpm -r --filter='./packages/*' build
 
 COPY src ./src/
 COPY esbuild.js ./
