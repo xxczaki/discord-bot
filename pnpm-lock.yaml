@@ -9,9 +9,6 @@ catalogs:
     '@biomejs/biome':
       specifier: 2.3.0
       version: 2.3.0
-    '@changesets/cli':
-      specifier: ^2.29.7
-      version: 2.29.7
     '@types/node':
       specifier: ^24.9.1
       version: 24.9.1
@@ -19,7 +16,7 @@ catalogs:
       specifier: ^3.2.4
       version: 3.2.4
     typescript:
-      specifier: ^5.9.3
+      specifier: ^5.9.3i
       version: 5.9.3
     vitest:
       specifier: ^3.2.4
@@ -82,7 +79,7 @@ importers:
         specifier: 'catalog:'
         version: 2.3.0
       '@changesets/cli':
-        specifier: 'catalog:'
+        specifier: ^2.29.7
         version: 2.29.7(@types/node@24.9.1)
       '@discordjs/rest':
         specifier: ^2.6.0
