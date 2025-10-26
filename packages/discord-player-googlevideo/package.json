@@ -18,12 +18,11 @@
 	],
 	"scripts": {
 		"build": "tsc",
+		"clean": "rm -rf dist",
 		"lint": "biome check --write ./src",
 		"tsc": "tsc --noEmit",
 		"test": "vitest run",
-		"prepublishOnly": "pnpm build",
-		"release": "pnpm publish",
-		"version-packages": "changeset version"
+		"prepublishOnly": "pnpm clean && pnpm build && pnpm test"
 	},
 	"keywords": [
 		"discord",
@@ -50,15 +49,14 @@
 		"discord-player": "^7.0.0"
 	},
 	"dependencies": {
-		"bgutils-js": "catalog:",
-		"googlevideo": "catalog:",
-		"jsdom": "catalog:",
-		"youtubei.js": "catalog:"
+		"bgutils-js": "^3.2.0",
+		"googlevideo": "^4.0.4",
+		"jsdom": "^27.0.1",
+		"youtubei.js": "^16.0.1"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "catalog:",
-		"@changesets/cli": "^2.27.11",
-		"@types/jsdom": "catalog:",
+		"@types/jsdom": "^27.0.0",
 		"@types/node": "catalog:",
 		"@vitest/coverage-v8": "catalog:",
 		"discord-player": "^7.2.0-dev.2",

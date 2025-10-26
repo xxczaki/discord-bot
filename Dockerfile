@@ -5,7 +5,7 @@ RUN apk add --no-cache build-base python3 make g++ cairo-dev pango-dev && \
 
 FROM base AS build
 
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm fetch && pnpm install --offline
 
 COPY src ./src/

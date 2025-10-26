@@ -9,33 +9,21 @@ catalogs:
     '@biomejs/biome':
       specifier: 2.3.0
       version: 2.3.0
-    '@types/jsdom':
-      specifier: ^27.0.0
-      version: 27.0.0
+    '@changesets/cli':
+      specifier: ^2.29.7
+      version: 2.29.7
     '@types/node':
       specifier: ^24.9.1
       version: 24.9.1
     '@vitest/coverage-v8':
-      specifier: 3.2.4
+      specifier: ^3.2.4
       version: 3.2.4
-    bgutils-js:
-      specifier: ^3.2.0
-      version: 3.2.0
-    googlevideo:
-      specifier: ^4.0.4
-      version: 4.0.4
-    jsdom:
-      specifier: ^27.0.1
-      version: 27.0.1
     typescript:
       specifier: ^5.9.3
       version: 5.9.3
     vitest:
       specifier: ^3.2.4
       version: 3.2.4
-    youtubei.js:
-      specifier: ^16.0.1
-      version: 16.0.1
 
 overrides:
   libsodium-wrappers: '-'
@@ -93,24 +81,21 @@ importers:
       '@biomejs/biome':
         specifier: 'catalog:'
         version: 2.3.0
+      '@changesets/cli':
+        specifier: 'catalog:'
+        version: 2.29.7(@types/node@24.9.1)
       '@discordjs/rest':
         specifier: ^2.6.0
         version: 2.6.0
       '@sentry/esbuild-plugin':
         specifier: ^4.5.0
         version: 4.5.0
-      '@types/jsdom':
-        specifier: 'catalog:'
-        version: 27.0.0
       '@types/node':
         specifier: 'catalog:'
         version: 24.9.1
       '@vitest/coverage-v8':
         specifier: 'catalog:'
         version: 3.2.4(vitest@3.2.4(@types/node@24.9.1)(jsdom@27.0.1(bufferutil@4.0.9)(postcss@8.5.3))(tsx@4.19.4))
-      bgutils-js:
-        specifier: 'catalog:'
-        version: 3.2.0
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
@@ -123,12 +108,6 @@ importers:
       fuse.js:
         specifier: ^7.1.0
         version: 7.1.0
-      googlevideo:
-        specifier: 'catalog:'
-        version: 4.0.4
-      jsdom:
-        specifier: 'catalog:'
-        version: 27.0.1(bufferutil@4.0.9)(postcss@8.5.3)
       memoize:
         specifier: ^10.2.0
         version: 10.2.0
@@ -150,33 +129,27 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 3.2.4(@types/node@24.9.1)(jsdom@27.0.1(bufferutil@4.0.9)(postcss@8.5.3))(tsx@4.19.4)
-      youtubei.js:
-        specifier: 'catalog:'
-        version: 16.0.1
 
   packages/discord-player-googlevideo:
     dependencies:
       bgutils-js:
-        specifier: 'catalog:'
+        specifier: ^3.2.0
         version: 3.2.0
       googlevideo:
-        specifier: 'catalog:'
+        specifier: ^4.0.4
         version: 4.0.4
       jsdom:
-        specifier: 'catalog:'
+        specifier: ^27.0.1
         version: 27.0.1(bufferutil@4.0.9)(postcss@8.5.3)
       youtubei.js:
-        specifier: 'catalog:'
+        specifier: ^16.0.1
         version: 16.0.1
     devDependencies:
       '@biomejs/biome':
         specifier: 'catalog:'
         version: 2.3.0
-      '@changesets/cli':
-        specifier: ^2.27.11
-        version: 2.29.7(@types/node@24.9.1)
       '@types/jsdom':
-        specifier: 'catalog:'
+        specifier: ^27.0.0
         version: 27.0.0
       '@types/node':
         specifier: 'catalog:'
