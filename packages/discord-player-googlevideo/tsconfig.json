@@ -2,9 +2,9 @@
 	"compilerOptions": {
 		"lib": ["ESNext"],
 		"target": "ESNext",
-		"module": "ESNext",
+		"module": "NodeNext",
 		"moduleDetection": "force",
-		"moduleResolution": "bundler",
+		"moduleResolution": "NodeNext",
 		"allowImportingTsExtensions": false,
 		"verbatimModuleSyntax": true,
 		"strict": true,

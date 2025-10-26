@@ -1,2 +1,2 @@
-export { generateWebPoToken } from './utils/generateWebPoToken';
-export { YoutubeSabrExtractor } from './YoutubeSabrExtractor';
+export { generateWebPoToken } from './utils/generateWebPoToken.js';
+export { YoutubeSabrExtractor } from './YoutubeSabrExtractor.js';

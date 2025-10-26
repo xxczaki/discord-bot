@@ -17,12 +17,11 @@ const buildOptions = {
 	target: 'node22',
 	external: [
 		'@kubernetes/client-node',
-		'bgutils-js',
 		'bufferutil',
 		'discord-player',
+		'discord-player-googlevideo',
 		'discord-player-spotify',
 		'discord.js',
-		'jsdom',
 		'sodium-native',
 		'zlib-sync',
 
