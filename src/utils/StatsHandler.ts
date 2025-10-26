@@ -27,7 +27,7 @@ export class StatsHandler {
 	getStats(type: 'play') {
 		return redis.scanStream({
 			match: `discord-player:stats:${type}:*`,
-			count: 500,
+			count: 1000,
 		});
 	}
 }

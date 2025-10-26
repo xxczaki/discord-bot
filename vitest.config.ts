@@ -26,14 +26,7 @@ export default defineConfig({
 					},
 				},
 			},
-			{
-				extends: true,
-				test: {
-					name: 'discord-player-googlevideo',
-					root: './packages/discord-player-googlevideo',
-					include: ['src/**/*.test.ts'],
-				},
-			},
+			'packages/*',
 		],
 
 		coverage: {

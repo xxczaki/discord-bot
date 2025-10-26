@@ -21,7 +21,7 @@
 		"clean": "rm -rf dist",
 		"lint": "biome check --write ./src",
 		"tsc": "tsc --noEmit",
-		"test": "vitest run --silent",
+		"test": "vitest run",
 		"prepublishOnly": "pnpm clean && pnpm build && pnpm test"
 	},
 	"keywords": [

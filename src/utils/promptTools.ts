@@ -42,6 +42,80 @@ interface ToolDefinition {
 }
 
 /**
+ * Execute removeTracksByPattern operation
+ */
+export function executeRemoveTracksByPattern(
+	queue: GuildQueue,
+	artistPattern?: string | null,
+	titlePattern?: string | null,
+) {
+	try {
+		return removeTracksByPattern(
+			queue,
+			artistPattern ?? undefined,
+			titlePattern ?? undefined,
+		);
+	} catch (error) {
+		logger.error(
+			{
+				error: error instanceof Error ? error.message : String(error),
+				artistPattern,
+				titlePattern,
+			},
+			'[PromptTool] removeTracksByPattern failed',
+		);
+		throw error;
+	}
+}
+
+/**
+ * Execute moveTracksByPattern operation
+ */
+export function executeMoveTracksByPattern(
+	queue: GuildQueue,
+	artistPattern: string | null | undefined,
+	titlePattern: string | null | undefined,
+	position: number,
+) {
+	try {
+		return moveTracksByPattern(
+			queue,
+			artistPattern ?? undefined,
+			titlePattern ?? undefined,
+			position,
+		);
+	} catch (error) {
+		logger.error(
+			{
+				error: error instanceof Error ? error.message : String(error),
+				artistPattern,
+				titlePattern,
+				position,
+			},
+			'[PromptTool] moveTracksByPattern failed',
+		);
+		throw error;
+	}
+}
+
+/**
+ * Execute skipCurrentTrack operation
+ */
+export function executeSkipCurrentTrack(queue: GuildQueue) {
+	try {
+		return skipCurrentTrack(queue);
+	} catch (error) {
+		logger.error(
+			{
+				error: error instanceof Error ? error.message : String(error),
+			},
+			'[PromptTool] skipCurrentTrack failed',
+		);
+		throw error;
+	}
+}
+
+/**
  * Unified registry of tools with their definitions and UI messages
  */
 const TOOL_REGISTRY: Record<string, ToolDefinition> = {
@@ -61,23 +135,11 @@ const TOOL_REGISTRY: Record<string, ToolDefinition> = {
 						.describe('Track title pattern to match (case-insensitive)'),
 				}),
 				execute: async ({ artistPattern, titlePattern }) => {
-					try {
-						return removeTracksByPattern(
-							context.queue,
-							artistPattern ?? undefined,
-							titlePattern ?? undefined,
-						);
-					} catch (error) {
-						logger.error(
-							{
-								error: error instanceof Error ? error.message : String(error),
-								artistPattern,
-								titlePattern,
-							},
-							'[PromptTool] removeTracksByPattern failed',
-						);
-						throw error;
-					}
+					return executeRemoveTracksByPattern(
+						context.queue,
+						artistPattern,
+						titlePattern,
+					);
 				},
 			}),
 		messages: {
@@ -109,25 +171,12 @@ const TOOL_REGISTRY: Record<string, ToolDefinition> = {
 						),
 				}),
 				execute: async ({ artistPattern, titlePattern, position }) => {
-					try {
-						return moveTracksByPattern(
-							context.queue,
-							artistPattern ?? undefined,
-							titlePattern ?? undefined,
-							position,
-						);
-					} catch (error) {
-						logger.error(
-							{
-								error: error instanceof Error ? error.message : String(error),
-								artistPattern,
-								titlePattern,
-								position,
-							},
-							'[PromptTool] moveTracksByPattern failed',
-						);
-						throw error;
-					}
+					return executeMoveTracksByPattern(
+						context.queue,
+						artistPattern,
+						titlePattern,
+						position,
+					);
 				},
 			}),
 		messages: {
@@ -145,17 +194,7 @@ const TOOL_REGISTRY: Record<string, ToolDefinition> = {
 					'Skip the currently playing track to play the next track in queue',
 				inputSchema: z.object({}),
 				execute: async () => {
-					try {
-						return skipCurrentTrack(context.queue);
-					} catch (error) {
-						logger.error(
-							{
-								error: error instanceof Error ? error.message : String(error),
-							},
-							'[PromptTool] skipCurrentTrack failed',
-						);
-						throw error;
-					}
+					return executeSkipCurrentTrack(context.queue);
 				},
 			}),
 		messages: {

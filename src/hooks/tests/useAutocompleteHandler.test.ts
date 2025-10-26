@@ -1,5 +1,5 @@
 import { captureException } from '@sentry/node';
-import type { AutocompleteInteraction } from 'discord.js';
+import type { AutocompleteInteraction, Channel } from 'discord.js';
 import { useMainPlayer, useQueue } from 'discord-player';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import determineSearchEngine from '../../utils/determineSearchEngine';
@@ -22,6 +22,11 @@ const mockedDetermineSearchEngine = vi.mocked(determineSearchEngine);
 const mockedGetTrackPosition = vi.mocked(getTrackPosition);
 
 const mockGetEnvironmentVariable = vi.hoisted(() => vi.fn());
+const mockGetAllPlaylists = vi.hoisted(() => vi.fn());
+
+interface MockTextChannel {
+	isTextBased: () => boolean;
+}
 
 vi.mock('@sentry/node');
 vi.mock('discord-player');
@@ -29,6 +34,9 @@ vi.mock('../../utils/determineSearchEngine');
 vi.mock('../../utils/getTrackPosition');
 vi.mock('../../utils/getEnvironmentVariable', () => ({
 	default: mockGetEnvironmentVariable,
+}));
+vi.mock('../../utils/getPlaylists', () => ({
+	getAllPlaylists: mockGetAllPlaylists,
 }));
 vi.mock('p-debounce', () => ({
 	default: <T extends (...args: unknown[]) => unknown>(fn: T) => fn, // Return the function immediately without debounce
@@ -450,13 +458,13 @@ describe('playlists command autocomplete', () => {
 			'playlist1',
 		);
 
-		const mockNonTextChannel = {
+		const mockNonTextChannel: MockTextChannel = {
 			isTextBased: vi.fn().mockReturnValue(false),
 		};
 
 		interaction.client.channels.cache.get = vi
 			.fn()
-			.mockReturnValue(mockNonTextChannel);
+			.mockReturnValue(mockNonTextChannel as Channel);
 
 		await useAutocompleteHandler(interaction);
 
@@ -475,11 +483,297 @@ describe('playlists command autocomplete', () => {
 			'playlist1',
 		);
 
-		interaction.client.channels.cache.get = vi.fn(() => undefined);
+		interaction.client.channels.cache.get = vi.fn(
+			() => undefined as Channel | undefined,
+		);
 
 		await useAutocompleteHandler(interaction);
 
 		expect(interaction.respond).toHaveBeenCalledWith([]);
+	});
+
+	it('should filter out already selected playlists', async () => {
+		const mockChannel: MockTextChannel = {
+			isTextBased: vi.fn().mockReturnValue(true),
+		};
+
+		const interaction = createMockAutocompleteInteraction(
+			'playlists',
+			'',
+			false,
+			'playlist3',
+			{
+				playlist1: 'https://open.spotify.com/playlist/1?si=test1',
+				playlist2: 'https://open.spotify.com/playlist/2?si=test2',
+				playlist3: null,
+			},
+		);
+
+		interaction.client.channels.cache.get = vi.fn(() => mockChannel as Channel);
+
+		mockGetAllPlaylists.mockResolvedValue([
+			{
+				name: 'Playlist 1',
+				value: 'https://open.spotify.com/playlist/1?si=test1',
+			},
+			{
+				name: 'Playlist 2',
+				value: 'https://open.spotify.com/playlist/2?si=test2',
+			},
+			{
+				name: 'Playlist 3',
+				value: 'https://open.spotify.com/playlist/3?si=test3',
+			},
+		]);
+
+		await useAutocompleteHandler(interaction);
+
+		expect(interaction.respond).toHaveBeenCalledWith([
+			{
+				name: 'Playlist 3',
+				value: 'https://open.spotify.com/playlist/3?si=test3',
+			},
+		]);
+	});
+
+	it('should return all playlists when none are selected', async () => {
+		const mockChannel: MockTextChannel = {
+			isTextBased: vi.fn().mockReturnValue(true),
+		};
+
+		const interaction = createMockAutocompleteInteraction(
+			'playlists',
+			'',
+			false,
+			'playlist1',
+			{
+				playlist1: null,
+				playlist2: null,
+				playlist3: null,
+				playlist4: null,
+				playlist5: null,
+			},
+		);
+
+		interaction.client.channels.cache.get = vi.fn(() => mockChannel as Channel);
+
+		mockGetAllPlaylists.mockResolvedValue([
+			{
+				name: 'Playlist 1',
+				value: 'https://open.spotify.com/playlist/1?si=test1',
+			},
+			{
+				name: 'Playlist 2',
+				value: 'https://open.spotify.com/playlist/2?si=test2',
+			},
+		]);
+
+		await useAutocompleteHandler(interaction);
+
+		expect(interaction.respond).toHaveBeenCalledWith([
+			{
+				name: 'Playlist 1',
+				value: 'https://open.spotify.com/playlist/1?si=test1',
+			},
+			{
+				name: 'Playlist 2',
+				value: 'https://open.spotify.com/playlist/2?si=test2',
+			},
+		]);
+	});
+
+	it('should search playlists with fuzzy matching when query is provided', async () => {
+		const mockChannel: MockTextChannel = {
+			isTextBased: vi.fn().mockReturnValue(true),
+		};
+
+		const interaction = createMockAutocompleteInteraction(
+			'playlists',
+			'class',
+			false,
+			'playlist1',
+			{},
+		);
+
+		interaction.client.channels.cache.get = vi.fn(() => mockChannel as Channel);
+
+		mockGetAllPlaylists.mockResolvedValue([
+			{
+				name: 'Rock Classics',
+				value: 'https://open.spotify.com/playlist/1?si=test1',
+			},
+			{
+				name: 'Jazz Evening',
+				value: 'https://open.spotify.com/playlist/2?si=test2',
+			},
+			{
+				name: 'Classical Music',
+				value: 'https://open.spotify.com/playlist/3?si=test3',
+			},
+		]);
+
+		await useAutocompleteHandler(interaction);
+
+		const respondCall = vi.mocked(interaction.respond).mock.calls[0]?.[0];
+		expect(respondCall).toHaveLength(2);
+		expect(respondCall).toContainEqual({
+			name: 'Rock Classics',
+			value: 'https://open.spotify.com/playlist/1?si=test1',
+		});
+		expect(respondCall).toContainEqual({
+			name: 'Classical Music',
+			value: 'https://open.spotify.com/playlist/3?si=test3',
+		});
+	});
+
+	it('should handle playlist autocomplete errors', async () => {
+		const mockChannel: MockTextChannel = {
+			isTextBased: vi.fn().mockReturnValue(true),
+		};
+
+		const interaction = createMockAutocompleteInteraction(
+			'playlists',
+			'',
+			false,
+			'playlist1',
+		);
+
+		interaction.client.channels.cache.get = vi.fn(() => mockChannel as Channel);
+
+		mockGetAllPlaylists.mockRejectedValue(
+			new Error('Failed to fetch messages'),
+		);
+
+		await useAutocompleteHandler(interaction);
+
+		expect(interaction.respond).toHaveBeenCalledWith([]);
+	});
+});
+
+describe('head command autocomplete', () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		mockGetEnvironmentVariable.mockReturnValue('test-channel-id');
+	});
+
+	it('should return all playlists without filtering', async () => {
+		const mockChannel: MockTextChannel = {
+			isTextBased: vi.fn().mockReturnValue(true),
+		};
+
+		const interaction = createMockAutocompleteInteraction(
+			'head',
+			'',
+			false,
+			'playlist',
+		);
+
+		interaction.client.channels.cache.get = vi.fn(() => mockChannel as Channel);
+
+		mockGetAllPlaylists.mockResolvedValue([
+			{
+				name: 'Playlist 1',
+				value: 'https://open.spotify.com/playlist/1?si=test1',
+			},
+			{
+				name: 'Playlist 2',
+				value: 'https://open.spotify.com/playlist/2?si=test2',
+			},
+		]);
+
+		await useAutocompleteHandler(interaction);
+
+		expect(interaction.respond).toHaveBeenCalledWith([
+			{
+				name: 'Playlist 1',
+				value: 'https://open.spotify.com/playlist/1?si=test1',
+			},
+			{
+				name: 'Playlist 2',
+				value: 'https://open.spotify.com/playlist/2?si=test2',
+			},
+		]);
+	});
+
+	it('should support fuzzy search', async () => {
+		const mockChannel: MockTextChannel = {
+			isTextBased: vi.fn().mockReturnValue(true),
+		};
+
+		const interaction = createMockAutocompleteInteraction(
+			'head',
+			'rock',
+			false,
+			'playlist',
+		);
+
+		interaction.client.channels.cache.get = vi.fn(() => mockChannel as Channel);
+
+		mockGetAllPlaylists.mockResolvedValue([
+			{
+				name: 'Rock Music',
+				value: 'https://open.spotify.com/playlist/1?si=test1',
+			},
+			{
+				name: 'Jazz Vibes',
+				value: 'https://open.spotify.com/playlist/2?si=test2',
+			},
+		]);
+
+		await useAutocompleteHandler(interaction);
+
+		expect(interaction.respond).toHaveBeenCalledWith([
+			{
+				name: 'Rock Music',
+				value: 'https://open.spotify.com/playlist/1?si=test1',
+			},
+		]);
+	});
+});
+
+describe('tail command autocomplete', () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		mockGetEnvironmentVariable.mockReturnValue('test-channel-id');
+	});
+
+	it('should return all playlists without filtering', async () => {
+		const mockChannel: MockTextChannel = {
+			isTextBased: vi.fn().mockReturnValue(true),
+		};
+
+		const interaction = createMockAutocompleteInteraction(
+			'tail',
+			'',
+			false,
+			'playlist',
+		);
+
+		interaction.client.channels.cache.get = vi.fn(() => mockChannel as Channel);
+
+		mockGetAllPlaylists.mockResolvedValue([
+			{
+				name: 'Playlist 1',
+				value: 'https://open.spotify.com/playlist/1?si=test1',
+			},
+			{
+				name: 'Playlist 2',
+				value: 'https://open.spotify.com/playlist/2?si=test2',
+			},
+		]);
+
+		await useAutocompleteHandler(interaction);
+
+		expect(interaction.respond).toHaveBeenCalledWith([
+			{
+				name: 'Playlist 1',
+				value: 'https://open.spotify.com/playlist/1?si=test1',
+			},
+			{
+				name: 'Playlist 2',
+				value: 'https://open.spotify.com/playlist/2?si=test2',
+			},
+		]);
 	});
 });
 

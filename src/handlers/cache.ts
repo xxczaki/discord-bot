@@ -44,7 +44,7 @@ export default async function cacheCommandHandler(
 	try {
 		const usedButtons = new Set<string>();
 		const actionRow = createActionRow(interaction.user.id === OWNER_ID);
-		const stats = await gatherCacheStatsWithLiveUpdates(
+		let stats = await gatherCacheStatsWithLiveUpdates(
 			interaction,
 			usedButtons,
 			actionRow,
@@ -97,14 +97,11 @@ export default async function cacheCommandHandler(
 						return;
 				}
 
-				const newStats = await gatherCacheStatsWithLiveUpdates(
-					interaction,
-					usedButtons,
-				);
+				stats = await gatherCacheStatsWithLiveUpdates(interaction, usedButtons);
 
 				try {
 					await interaction.editReply({
-						embeds: [createCacheStatsEmbed(newStats)],
+						embeds: [createCacheStatsEmbed(stats)],
 						components:
 							remainingActionRow.components.length > 0
 								? [remainingActionRow]

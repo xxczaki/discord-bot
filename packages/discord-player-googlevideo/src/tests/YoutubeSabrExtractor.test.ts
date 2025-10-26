@@ -580,6 +580,30 @@ describe('YoutubeSabrExtractor', () => {
 
 			expect(result.tracks).toHaveLength(0);
 		});
+
+		it('should handle watch_next_feed with no CompactVideo items', async () => {
+			const mockVideoInfo = {
+				watch_next_feed: [
+					{
+						type: 'OtherType',
+						id: 'other-1',
+					},
+					{
+						type: 'AnotherType',
+						id: 'other-2',
+					},
+				],
+			};
+
+			mockInnertube.getBasicInfo.mockResolvedValue(mockVideoInfo);
+
+			const result = await extractor.getRelatedTracks({
+				url: 'https://youtube.com/watch?v=dQw4w9WgXcQ',
+				requestedBy: { id: 'user-123' },
+			} as Track);
+
+			expect(result.tracks).toHaveLength(0);
+		});
 	});
 
 	describe('track creation', () => {
@@ -630,8 +654,31 @@ describe('YoutubeSabrExtractor', () => {
 				} as never,
 			);
 
-			// Duration should be formatted with hours
-			expect(result.tracks[0].duration).toContain(':');
+			expect(result.tracks[0].duration).toBeDefined();
+			expect(result.tracks[0].duration).toMatch(/:/);
+			expect(result.tracks).toHaveLength(1);
+		});
+
+		it('should parse duration correctly for exactly one hour', async () => {
+			const mockVideoInfo = {
+				basic_info: {
+					title: 'One Hour Video',
+					author: 'Author',
+					duration: 3600, // 1:00:00
+					thumbnail: [{ url: 'https://example.com/thumb.jpg' }],
+				},
+			};
+
+			mockInnertube.getBasicInfo.mockResolvedValue(mockVideoInfo);
+
+			const result = await extractor.handle(
+				'https://youtube.com/watch?v=test',
+				{
+					requestedBy: { id: 'user-123' },
+				} as never,
+			);
+
+			expect(result.tracks[0].duration).toMatch(/^\d+:\d{2}(:\d{2})?$/);
 			expect(result.tracks).toHaveLength(1);
 		});
 

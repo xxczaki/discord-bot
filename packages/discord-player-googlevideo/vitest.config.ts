@@ -1,3 +1,9 @@
-import { defineConfig } from 'vitest/config';
+import { defineProject } from 'vitest/config';
 
-export default defineConfig({});
+export default defineProject({
+	test: {
+		name: 'discord-player-googlevideo',
+		include: ['src/**/*.test.ts'],
+		setupFiles: ['./src/setupTests.ts'],
+	},
+});

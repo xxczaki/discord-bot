@@ -25,6 +25,15 @@ vi.mock('node:fs/promises', () => ({
 const mockOpendir = vi.mocked(opendir);
 const mockStat = vi.mocked(stat);
 
+interface MockCollector {
+	on: ReturnType<typeof vi.fn>;
+	stop?: ReturnType<typeof vi.fn>;
+}
+
+interface MockChannel {
+	createMessageComponentCollector: (options?: unknown) => MockCollector;
+}
+
 interface MockButtonData {
 	custom_id: string;
 	label: string;
@@ -257,9 +266,9 @@ describe('cache command handler', () => {
 		const mockCreateCollector = vi.fn(() => mockCollector as never);
 
 		if (mockInteraction.channel) {
-			// biome-ignore lint/suspicious/noExplicitAny: Mock type for Discord.js channel
-			(mockInteraction.channel as any).createMessageComponentCollector =
-				mockCreateCollector;
+			(
+				mockInteraction.channel as unknown as MockChannel
+			).createMessageComponentCollector = mockCreateCollector;
 		}
 
 		mockOpendir.mockResolvedValue(createMockDirectory([]) as never);
@@ -330,9 +339,9 @@ describe('cache command handler', () => {
 		const mockCreateCollector = vi.fn(() => mockCollector);
 
 		if (mockInteraction.channel) {
-			// biome-ignore lint/suspicious/noExplicitAny: Mock type for Discord.js channel
-			(mockInteraction.channel as any).createMessageComponentCollector =
-				mockCreateCollector;
+			(
+				mockInteraction.channel as unknown as MockChannel
+			).createMessageComponentCollector = mockCreateCollector;
 		}
 
 		mockOpendir.mockResolvedValue(createMockDirectory([]) as never);
@@ -369,9 +378,9 @@ describe('cache command handler', () => {
 		const mockCreateCollector = vi.fn(() => mockCollector);
 
 		if (mockInteraction.channel) {
-			// biome-ignore lint/suspicious/noExplicitAny: Mock type for Discord.js channel
-			(mockInteraction.channel as any).createMessageComponentCollector =
-				mockCreateCollector;
+			(
+				mockInteraction.channel as unknown as MockChannel
+			).createMessageComponentCollector = mockCreateCollector;
 		}
 
 		mockOpendir.mockResolvedValue(createMockDirectory([]) as never);
@@ -419,6 +428,283 @@ describe('cache command handler', () => {
 
 		expect(opusCacheField?.value).toContain('1 file');
 		expect(opusCacheField?.value).toContain('1.02 kB');
+	});
+
+	it('should skip button processing if already deferred', async () => {
+		const mockInteraction = createMockInteraction('owner-123');
+		const mockButtonInteraction = {
+			user: { id: 'owner-123' },
+			customId: 'flush_query_cache',
+			deferred: true,
+			replied: false,
+			update: vi.fn().mockResolvedValue({}),
+		};
+
+		const mockCollector = {
+			on: vi.fn(),
+			stop: vi.fn(),
+		};
+
+		const mockCreateCollector = vi.fn(() => mockCollector);
+
+		if (mockInteraction.channel) {
+			(
+				mockInteraction.channel as unknown as MockChannel
+			).createMessageComponentCollector = mockCreateCollector;
+		}
+
+		mockOpendir.mockResolvedValue(createMockDirectory([]) as never);
+
+		await cacheCommandHandler(mockInteraction);
+
+		const collectCallback = mockCollector.on.mock.calls.find(
+			(call) => call[0] === 'collect',
+		)?.[1];
+
+		expect(collectCallback).toBeDefined();
+
+		await collectCallback(mockButtonInteraction);
+
+		expect(mockButtonInteraction.update).not.toHaveBeenCalled();
+	});
+
+	it('should skip button processing if already replied', async () => {
+		const mockInteraction = createMockInteraction('owner-123');
+		const mockButtonInteraction = {
+			user: { id: 'owner-123' },
+			customId: 'flush_query_cache',
+			deferred: false,
+			replied: true,
+			update: vi.fn().mockResolvedValue({}),
+		};
+
+		const mockCollector = {
+			on: vi.fn(),
+			stop: vi.fn(),
+		};
+
+		const mockCreateCollector = vi.fn(() => mockCollector);
+
+		if (mockInteraction.channel) {
+			(
+				mockInteraction.channel as unknown as MockChannel
+			).createMessageComponentCollector = mockCreateCollector;
+		}
+
+		mockOpendir.mockResolvedValue(createMockDirectory([]) as never);
+
+		await cacheCommandHandler(mockInteraction);
+
+		const collectCallback = mockCollector.on.mock.calls.find(
+			(call) => call[0] === 'collect',
+		)?.[1];
+
+		expect(collectCallback).toBeDefined();
+
+		await collectCallback(mockButtonInteraction);
+
+		expect(mockButtonInteraction.update).not.toHaveBeenCalled();
+	});
+
+	it('should handle collector end event', async () => {
+		const mockInteraction = createMockInteraction('owner-123');
+
+		const mockCollector = {
+			on: vi.fn(),
+			stop: vi.fn(),
+		};
+
+		const mockCreateCollector = vi.fn(() => mockCollector);
+
+		if (mockInteraction.channel) {
+			(
+				mockInteraction.channel as unknown as MockChannel
+			).createMessageComponentCollector = mockCreateCollector;
+		}
+
+		mockOpendir.mockResolvedValue(createMockDirectory([]) as never);
+
+		await cacheCommandHandler(mockInteraction);
+
+		const endCallback = mockCollector.on.mock.calls.find(
+			(call) => call[0] === 'end',
+		)?.[1];
+
+		expect(endCallback).toBeDefined();
+
+		await endCallback();
+
+		expect(mockInteraction.editReply).toHaveBeenCalled();
+	});
+
+	it('should handle collector end event errors gracefully', async () => {
+		const mockInteraction = createMockInteraction('owner-123');
+
+		const mockCollector = {
+			on: vi.fn(),
+			stop: vi.fn(),
+		};
+
+		const mockCreateCollector = vi.fn(() => mockCollector);
+
+		if (mockInteraction.channel) {
+			(
+				mockInteraction.channel as unknown as MockChannel
+			).createMessageComponentCollector = mockCreateCollector;
+		}
+
+		mockOpendir.mockResolvedValue(createMockDirectory([]) as never);
+
+		mockInteraction.editReply = vi
+			.fn()
+			.mockResolvedValueOnce({})
+			.mockRejectedValueOnce(new Error('Edit failed'));
+
+		await cacheCommandHandler(mockInteraction);
+
+		const endCallback = mockCollector.on.mock.calls.find(
+			(call) => call[0] === 'end',
+		)?.[1];
+
+		expect(endCallback).toBeDefined();
+
+		await endCallback();
+
+		expect(mockInteraction.editReply).toHaveBeenCalled();
+	});
+
+	it('should show updated stats when clicking multiple flush buttons sequentially', async () => {
+		const mockInteraction = createMockInteraction('owner-123');
+
+		const mockCollector = {
+			on: vi.fn(),
+			stop: vi.fn(),
+		};
+
+		const mockCreateCollector = vi.fn(() => mockCollector);
+
+		if (mockInteraction.channel) {
+			(
+				mockInteraction.channel as unknown as MockChannel
+			).createMessageComponentCollector = mockCreateCollector;
+		}
+
+		mockOpendir.mockResolvedValue(createMockDirectory([]) as never);
+
+		const queryCacheStream = createMockStream();
+		const playlistCacheStream = createMockStream();
+		let scanCallCount = 0;
+
+		vi.mocked(redis.scanStream).mockImplementation((options) => {
+			scanCallCount++;
+
+			if (
+				options &&
+				typeof options === 'object' &&
+				'match' in options &&
+				options.match === 'discord-player:query-cache:*'
+			) {
+				if (scanCallCount <= 2) {
+					setTimeout(() => {
+						queryCacheStream.emit('data', ['query-key-1', 'query-key-2']);
+						queryCacheStream.emit('end');
+					}, 5);
+					return queryCacheStream as never;
+				}
+
+				const emptyStream = createMockStream();
+				setTimeout(() => {
+					emptyStream.emit('data', []);
+					emptyStream.emit('end');
+				}, 5);
+				return emptyStream as never;
+			}
+
+			if (
+				options &&
+				typeof options === 'object' &&
+				'match' in options &&
+				options.match === 'external-playlist-cache:*'
+			) {
+				if (scanCallCount <= 2) {
+					setTimeout(() => {
+						playlistCacheStream.emit('data', [
+							'playlist-key-1',
+							'playlist-key-2',
+						]);
+						playlistCacheStream.emit('end');
+					}, 5);
+					return playlistCacheStream as never;
+				}
+
+				const emptyStreamForPlaylist = createMockStream();
+				setTimeout(() => {
+					emptyStreamForPlaylist.emit('data', []);
+					emptyStreamForPlaylist.emit('end');
+				}, 5);
+				return emptyStreamForPlaylist as never;
+			}
+
+			return createMockStream() as never;
+		});
+
+		vi.mocked(redis.mget).mockResolvedValue(['data1', 'data2']);
+
+		await cacheCommandHandler(mockInteraction);
+
+		const collectCallback = mockCollector.on.mock.calls.find(
+			(call) => call[0] === 'collect',
+		)?.[1];
+
+		expect(collectCallback).toBeDefined();
+
+		const firstButtonInteraction = {
+			user: { id: 'owner-123' },
+			customId: 'flush_query_cache',
+			deferred: false,
+			replied: false,
+			update: vi.fn().mockResolvedValue({}),
+		};
+
+		await collectCallback(firstButtonInteraction);
+
+		await new Promise((resolve) => setTimeout(resolve, 50));
+
+		expect(firstButtonInteraction.update).toHaveBeenCalled();
+
+		const firstUpdateCall = vi.mocked(firstButtonInteraction.update).mock
+			.calls[0][0] as MockEditReplyCall;
+
+		const firstUpdateEmbed = firstUpdateCall.embeds?.[0];
+		const firstQueryCacheField = firstUpdateEmbed?.data.fields.find(
+			(field) => field.name === 'Query cache',
+		);
+
+		expect(firstQueryCacheField?.value).toContain('2 entries');
+
+		const secondButtonInteraction = {
+			user: { id: 'owner-123' },
+			customId: 'flush_external_playlist_cache',
+			deferred: false,
+			replied: false,
+			update: vi.fn().mockResolvedValue({}),
+		};
+
+		await collectCallback(secondButtonInteraction);
+
+		await new Promise((resolve) => setTimeout(resolve, 50));
+
+		expect(secondButtonInteraction.update).toHaveBeenCalled();
+
+		const secondUpdateCall = vi.mocked(secondButtonInteraction.update).mock
+			.calls[0][0] as MockEditReplyCall;
+
+		const secondUpdateEmbed = secondUpdateCall.embeds?.[0];
+		const secondQueryCacheField = secondUpdateEmbed?.data.fields.find(
+			(field) => field.name === 'Query cache',
+		);
+
+		expect(secondQueryCacheField?.value).toContain('0 entries');
 	});
 });
 

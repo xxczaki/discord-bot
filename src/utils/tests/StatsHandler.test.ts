@@ -77,7 +77,7 @@ describe('StatsHandler', () => {
 
 			expect(mockedRedis.scanStream).toHaveBeenCalledWith({
 				match: 'discord-player:stats:play:*',
-				count: 500,
+				count: 1000,
 			});
 			expect(result).toBe(mockStream);
 		});
