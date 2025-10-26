@@ -6,14 +6,17 @@ RUN apk add --no-cache build-base python3 make g++ cairo-dev pango-dev && \
 FROM base AS build
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY packages ./packages/
 RUN pnpm fetch && pnpm install --offline
+
+RUN pnpm --filter './packages/**' build
 
 COPY src ./src/
 COPY esbuild.js ./
 
 ARG GIT_COMMIT_SHA
 
-RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN,env=SENTRY_AUTH_TOKEN \ 
+RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN,env=SENTRY_AUTH_TOKEN \
 		SENTRY_RELEASE_NAME=$GIT_COMMIT_SHA pnpm build
 
 RUN pnpm prune --prod
