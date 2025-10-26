@@ -44,27 +44,34 @@ let onBeforeCreateStreamCallback: TrackCallback | null;
 let onStreamExtractedCallback: StreamCallback | null;
 
 vi.mock('discord.js', () => ({
-	Client: vi.fn(() => ({ intents: [] })),
+	Client: vi.fn(function () {
+		return { intents: [] };
+	}),
 }));
 
 vi.mock('discord-player', () => ({
-	Player: vi.fn(() => ({
-		extractors: {
-			register: vi.fn().mockResolvedValue(undefined),
-			loadMulti: vi.fn().mockResolvedValue(undefined),
-		},
-	})),
+	Player: vi.fn(function () {
+		return {
+			extractors: {
+				register: vi.fn().mockResolvedValue(undefined),
+				loadMulti: vi.fn().mockResolvedValue(undefined),
+			},
+		};
+	}),
 	onBeforeCreateStream: vi.fn((callback: TrackCallback) => {
 		onBeforeCreateStreamCallback = callback;
 	}),
 	onStreamExtracted: vi.fn((callback: StreamCallback) => {
 		onStreamExtractedCallback = callback;
 	}),
-	InterceptedStream: vi.fn(() => ({
-		interceptors: {
+	InterceptedStream: vi.fn(function (this: {
+		interceptors: { add: ReturnType<typeof vi.fn> };
+	}) {
+		this.interceptors = {
 			add: vi.fn(),
-		},
-	})),
+		};
+		return this;
+	}),
 	AudioFilters: {
 		defineBulk: vi.fn(),
 	},
@@ -80,9 +87,11 @@ vi.mock('discord-player-spotify', () => ({
 
 vi.mock('node:fs', () => ({
 	createReadStream: vi.fn(),
-	createWriteStream: vi.fn(() => ({
-		on: vi.fn(),
-	})),
+	createWriteStream: vi.fn(function () {
+		return {
+			on: vi.fn(),
+		};
+	}),
 	existsSync: vi.fn(),
 }));
 
@@ -317,9 +326,13 @@ describe('onStreamExtracted callback', () => {
 		vi.mocked(createWriteStream).mockReturnValue(
 			mockWriteStream as unknown as import('fs').WriteStream,
 		);
-		vi.mocked(InterceptedStream).mockReturnValue(
-			mockInterceptor as unknown as InstanceType<typeof InterceptedStream>,
-		);
+		vi.mocked(
+			InterceptedStream as unknown as ReturnType<typeof vi.fn>,
+		).mockImplementation(function () {
+			return mockInterceptor as unknown as InstanceType<
+				typeof InterceptedStream
+			>;
+		});
 
 		await getInitializedPlayer(mockClient);
 
@@ -351,9 +364,13 @@ describe('onStreamExtracted callback', () => {
 		vi.mocked(createWriteStream).mockReturnValue(
 			mockWriteStream as unknown as import('fs').WriteStream,
 		);
-		vi.mocked(InterceptedStream).mockReturnValue(
-			mockInterceptor as unknown as InstanceType<typeof InterceptedStream>,
-		);
+		vi.mocked(
+			InterceptedStream as unknown as ReturnType<typeof vi.fn>,
+		).mockImplementation(function () {
+			return mockInterceptor as unknown as InstanceType<
+				typeof InterceptedStream
+			>;
+		});
 
 		await getInitializedPlayer(mockClient);
 

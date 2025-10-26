@@ -31,7 +31,9 @@ vi.mock('../redis', () => ({
 }));
 
 vi.mock('../ExternalPlaylistCache', () => ({
-	ExternalPlaylistCache: vi.fn(() => mockedExternalPlaylistCache),
+	ExternalPlaylistCache: vi.fn(function () {
+		return mockedExternalPlaylistCache;
+	}),
 }));
 
 function createMockMessage(content: string): Message {

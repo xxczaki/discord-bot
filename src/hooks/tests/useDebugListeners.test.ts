@@ -71,7 +71,9 @@ let mockEmbed: EmbedBuilder;
 beforeEach(() => {
 	vi.clearAllMocks();
 
-	vi.mocked(EmbedBuilder).mockImplementation(() => mockEmbed);
+	vi.mocked(EmbedBuilder).mockImplementation(function () {
+		return mockEmbed;
+	});
 
 	mockedGetEnvironmentVariable.mockImplementation((key: string) => {
 		if (key === 'BOT_DEBUG_CHANNEL_ID') return TEST_DEBUG_CHANNEL_ID;

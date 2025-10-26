@@ -30,7 +30,12 @@ vi.mock('discord-player', () => ({
 	serialize: vi.fn(),
 	deserialize: vi.fn(),
 	useMainPlayer: vi.fn(),
-	DiscordPlayerQueryResultCache: vi.fn(),
+	DiscordPlayerQueryResultCache: vi.fn(function (
+		this: Record<string, unknown>,
+		item: unknown,
+	) {
+		Object.assign(this, item as Record<string, unknown>);
+	}),
 	SearchResult: vi.fn(),
 	QueryType: {
 		AUTO: 'auto',
@@ -38,7 +43,9 @@ vi.mock('discord-player', () => ({
 }));
 
 vi.mock('../ExternalPlaylistCache', () => ({
-	ExternalPlaylistCache: vi.fn(() => mockedExternalPlaylistCache),
+	ExternalPlaylistCache: vi.fn(function () {
+		return mockedExternalPlaylistCache;
+	}),
 }));
 
 vi.mock('../isUrlSpotifyPlaylist', () => ({
@@ -190,9 +197,9 @@ describe('RedisQueryCache', () => {
 			vi.mocked(mockRedis.keys).mockResolvedValue([EXAMPLE_CACHE_KEY]);
 			vi.mocked(mockRedis.mget).mockResolvedValue(['{"title":"Test Song"}']);
 			vi.mocked(deserialize).mockReturnValue(mockTrack as never);
-			vi.mocked(DiscordPlayerQueryResultCache).mockReturnValue(
-				mockCacheItem as never,
-			);
+			vi.mocked(DiscordPlayerQueryResultCache).mockImplementation(function () {
+				return mockCacheItem as never;
+			});
 
 			const result = await redisQueryCache.getData();
 
@@ -217,9 +224,9 @@ describe('RedisQueryCache', () => {
 			vi.mocked(mockRedis.keys).mockResolvedValue(['key1', 'key2']);
 			vi.mocked(mockRedis.mget).mockResolvedValue(['{"title":"Test"}', null]);
 			vi.mocked(deserialize).mockReturnValue(mockTrack as never);
-			vi.mocked(DiscordPlayerQueryResultCache).mockReturnValue(
-				mockCacheItem as never,
-			);
+			vi.mocked(DiscordPlayerQueryResultCache).mockImplementation(function () {
+				return mockCacheItem as never;
+			});
 
 			const result = await redisQueryCache.getData();
 

@@ -10,9 +10,9 @@ vi.mock('discord.js', async () => {
 	const actual = await vi.importActual('discord.js');
 	return {
 		...actual,
-		Client: vi.fn().mockImplementation((options: unknown) => ({
-			options,
-		})),
+		Client: vi.fn().mockImplementation(function (options: unknown) {
+			return { options };
+		}),
 	};
 });
 

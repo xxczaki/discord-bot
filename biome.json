@@ -16,6 +16,9 @@
 				"useNumberNamespace": "error",
 				"noInferrableTypes": "error",
 				"noUselessElse": "error"
+			},
+			"complexity": {
+				"useArrowFunction": "off"
 			}
 		}
 	},

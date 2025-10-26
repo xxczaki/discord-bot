@@ -23,7 +23,9 @@ const mocks = vi.hoisted(() => {
 			throw new Error(`Unexpected environment variable: ${name}`);
 		}),
 		applicationCommands: vi.fn(() => MOCK_ROUTE),
-		RESTConstructor: vi.fn(() => mocks.mockREST),
+		RESTConstructor: vi.fn(function () {
+			return mocks.mockREST;
+		}),
 	};
 });
 

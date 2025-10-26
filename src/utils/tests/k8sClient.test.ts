@@ -13,10 +13,12 @@ vi.mock('@kubernetes/client-node', () => ({
 
 beforeEach(() => {
 	vi.clearAllMocks();
-	mockKubeConfig.mockImplementation(() => ({
-		loadFromCluster: mockLoadFromCluster,
-		makeApiClient: mockMakeApiClient,
-	}));
+	mockKubeConfig.mockImplementation(function () {
+		return {
+			loadFromCluster: mockLoadFromCluster,
+			makeApiClient: mockMakeApiClient,
+		};
+	});
 });
 
 afterEach(() => {
