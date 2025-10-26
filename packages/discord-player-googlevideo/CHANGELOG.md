@@ -1,5 +1,11 @@
 # discord-player-googlevideo
 
+## 0.1.2
+
+### Patch Changes
+
+- 1274910: README and package.json updates
+
 ## 0.1.1
 
 ### Patch Changes
