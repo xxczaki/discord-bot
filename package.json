@@ -20,7 +20,7 @@
 		"@ai-sdk/openai": "^2.0.53",
 		"@kubernetes/client-node": "^1.4.0",
 		"@sentry/node": "^10.22.0",
-		"ai": "^5.0.80",
+		"ai": "^5.0.81",
 		"bufferutil": "^4.0.9",
 		"discord-player": "^7.2.0-dev.2",
 		"discord-player-googlevideo": "workspace:*",
