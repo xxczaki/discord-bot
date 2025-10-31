@@ -52,7 +52,7 @@
 	"dependencies": {
 		"bgutils-js": "^3.2.0",
 		"googlevideo": "^4.0.4",
-		"jsdom": "^27.0.1",
+		"jsdom": "^27.1.0",
 		"youtubei.js": "^16.0.1"
 	},
 	"devDependencies": {
