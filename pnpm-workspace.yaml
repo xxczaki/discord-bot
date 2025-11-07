@@ -7,9 +7,9 @@ catalogs:
   default:
     '@biomejs/biome': 2.3.4
     '@types/node': ^24.9.1
-    '@vitest/coverage-v8': ^4.0.7
+    '@vitest/coverage-v8': ^4.0.8
     typescript: ^5.9.3i
-    vitest: ^4.0.7
+    vitest: ^4.0.8
 
 onlyBuiltDependencies:
   - esbuild
