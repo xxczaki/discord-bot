@@ -5,7 +5,7 @@ catalogMode: strict
 
 catalogs:
   default:
-    '@biomejs/biome': 2.3.4
+    '@biomejs/biome': 2.3.5
     '@types/node': ^24.9.1
     '@vitest/coverage-v8': ^4.0.8
     typescript: ^5.9.3i
