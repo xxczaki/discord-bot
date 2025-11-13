@@ -1,5 +1,11 @@
 # discord-player-googlevideo
 
+## 0.2.0
+
+### Minor Changes
+
+- e2e72cd: Update dependencies, fix CJS compatibility
+
 ## 0.1.2
 
 ### Patch Changes
