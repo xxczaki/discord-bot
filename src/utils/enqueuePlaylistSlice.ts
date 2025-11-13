@@ -139,7 +139,10 @@ export default async function enqueuePlaylistSlice(
 				? allNewTracks.slice(0, count)
 				: allNewTracks.slice(-count);
 
-		if (isCurrentTrackNew && !tracksToKeep.includes(updatedQueue.currentTrack)) {
+		if (
+			isCurrentTrackNew &&
+			!tracksToKeep.includes(updatedQueue.currentTrack)
+		) {
 			updatedQueue.node.skip();
 		}
 

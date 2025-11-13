@@ -817,8 +817,7 @@ it('should properly pluralize success message for multiple songs', async () => {
 		embeds: [
 			expect.objectContaining({
 				data: expect.objectContaining({
-					description:
-						'Added the first 3 songs from the playlist to the queue',
+					description: 'Added the first 3 songs from the playlist to the queue',
 				}),
 			}),
 		],
