@@ -11,6 +11,7 @@ import redis from './redis';
 const DEFAULT_CONTENTS = {
 	tracks: [],
 	progress: 0,
+	savedAt: null,
 };
 
 export class QueueRecoveryService {
@@ -37,11 +38,12 @@ export class QueueRecoveryService {
 
 		const pipeline = redis.pipeline();
 
-		pipeline.set('discord-player:queue', JSON.stringify(tracks));
+		pipeline.set('queue-recovery:tracks', JSON.stringify(tracks));
 		pipeline.set(
-			'discord-player:progress',
+			'queue-recovery:progress',
 			queue.node.getTimestamp()?.current.value ?? 0,
 		);
+		pipeline.set('queue-recovery:saved-at', Date.now());
 
 		await pipeline.exec();
 	}
@@ -49,8 +51,9 @@ export class QueueRecoveryService {
 	async deleteQueue() {
 		const pipeline = redis.pipeline();
 
-		pipeline.del('discord-player:queue');
-		pipeline.del('discord-player:progress');
+		pipeline.del('queue-recovery:tracks');
+		pipeline.del('queue-recovery:progress');
+		pipeline.del('queue-recovery:saved-at');
 
 		await pipeline.exec();
 	}
@@ -58,8 +61,9 @@ export class QueueRecoveryService {
 	async getContents(player: Player) {
 		const pipeline = redis.pipeline();
 
-		pipeline.get('discord-player:queue');
-		pipeline.get('discord-player:progress');
+		pipeline.get('queue-recovery:tracks');
+		pipeline.get('queue-recovery:progress');
+		pipeline.get('queue-recovery:saved-at');
 
 		const result = await pipeline.exec();
 
@@ -67,10 +71,15 @@ export class QueueRecoveryService {
 			return DEFAULT_CONTENTS;
 		}
 
-		const [[, tracks], [, progress]] = result as [
-			[error: Error | null, tracks: string],
+		const [[, tracks], [, progress], [, savedAt]] = result as [
+			[error: Error | null, tracks: string | null],
 			[error: Error | null, progress: number],
+			[error: Error | null, savedAt: string | null],
 		];
+
+		if (!tracks) {
+			return DEFAULT_CONTENTS;
+		}
 
 		try {
 			const parsedTracks = JSON.parse(tracks) as SerializedTrack[];
@@ -80,6 +89,7 @@ export class QueueRecoveryService {
 					deserialize(player, track),
 				) as Track[],
 				progress,
+				savedAt: savedAt ? Number.parseInt(savedAt, 10) : null,
 			};
 		} catch {
 			return DEFAULT_CONTENTS;

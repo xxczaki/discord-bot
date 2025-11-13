@@ -157,6 +157,7 @@ it('should reply with "Nothing to recover" when no tracks are found', async () =
 	mockedQueueRecoveryService.getContents.mockResolvedValue({
 		tracks: [],
 		progress: 0,
+		savedAt: null,
 	});
 
 	await recoverCommandHandler(interaction);
@@ -186,6 +187,7 @@ it('should show recovery prompt when tracks are found', async () => {
 	mockedQueueRecoveryService.getContents.mockResolvedValue({
 		tracks,
 		progress: EXAMPLE_PROGRESS,
+		savedAt: null,
 	});
 
 	await recoverCommandHandler(interaction);
@@ -202,6 +204,7 @@ it('should show recovery prompt when tracks are found', async () => {
 		.mock.calls.find((call) => isObject(call[0]) && 'components' in call[0]);
 	expect(editReplyCall).toBeDefined();
 	expect(editReplyCall?.[0]).toMatchObject({
+		embeds: expect.arrayContaining([expect.any(Object)]),
 		components: expect.arrayContaining([expect.any(ActionRowBuilder)]),
 	});
 
@@ -225,6 +228,7 @@ it('should proceed with recovery when `proceed` button is clicked', async () => 
 	mockedQueueRecoveryService.getContents.mockResolvedValue({
 		tracks,
 		progress: EXAMPLE_PROGRESS,
+		savedAt: null,
 	});
 	mockedEnqueueTracks.mockResolvedValue(undefined);
 
@@ -258,6 +262,7 @@ it('should cancel recovery when `cancel` button is clicked', async () => {
 	mockedQueueRecoveryService.getContents.mockResolvedValue({
 		tracks,
 		progress: EXAMPLE_PROGRESS,
+		savedAt: null,
 	});
 
 	await recoverCommandHandler(interaction);
@@ -285,6 +290,7 @@ it('should cancel recovery when button interaction times out', async () => {
 	mockedQueueRecoveryService.getContents.mockResolvedValue({
 		tracks,
 		progress: EXAMPLE_PROGRESS,
+		savedAt: null,
 	});
 
 	await recoverCommandHandler(interaction);
@@ -311,6 +317,7 @@ it('should handle unknown button `customId` as cancel', async () => {
 	mockedQueueRecoveryService.getContents.mockResolvedValue({
 		tracks,
 		progress: EXAMPLE_PROGRESS,
+		savedAt: null,
 	});
 
 	await recoverCommandHandler(interaction);

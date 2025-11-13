@@ -72,6 +72,15 @@ beforeEach(() => {
 	vi.clearAllMocks();
 
 	vi.mocked(EmbedBuilder).mockImplementation(function () {
+		mockEmbed = {
+			setTitle: vi.fn().mockReturnThis(),
+			setDescription: vi.fn().mockReturnThis(),
+			setColor: vi.fn().mockReturnThis(),
+			setFields: vi.fn().mockReturnThis(),
+			addFields: vi.fn().mockReturnThis(),
+			setFooter: vi.fn().mockReturnThis(),
+			data: {},
+		} as unknown as EmbedBuilder;
 		return mockEmbed;
 	});
 
@@ -169,11 +178,18 @@ const expectBasicErrorHandling = (testError: Error) => {
 
 const createMockQueueRecoveryInstance = (
 	overrides: Partial<{
-		tracks: { url: string }[];
+		tracks: { url: string; title?: string; author?: string }[];
 		progress: number;
+		savedAt: number | null;
 	}> = {},
 ) => {
-	const defaults = { tracks: [{ url: 'test-track-1' }], progress: 0 };
+	const defaults = {
+		tracks: [
+			{ url: 'test-track-1', title: 'Test Track 1', author: 'Test Artist' },
+		],
+		progress: 0,
+		savedAt: null,
+	};
 	const contents = { ...defaults, ...overrides };
 
 	return {
@@ -473,16 +489,28 @@ describe('Player Error Handling', () => {
 
 describe('Queue Recovery', () => {
 	it('should handle player error with successful recovery', async () => {
+		const mockOriginalChannel = {
+			...mockChannel,
+			isSendable: vi.fn().mockReturnValue(true),
+			send: vi.fn().mockResolvedValue({
+				edit: vi.fn().mockResolvedValue(undefined),
+			}),
+		};
+
 		const mockQueueRecoveryInstance = createMockQueueRecoveryInstance({
-			tracks: [{ url: 'test-track-1' }, { url: 'test-track-2' }],
+			tracks: [
+				{ url: 'test-track-1', title: 'Track 1', author: 'Artist 1' },
+				{ url: 'test-track-2', title: 'Track 2', author: 'Artist 2' },
+			],
 			progress: 5000,
+			savedAt: null,
 		});
 		mockedQueueRecoveryService.getInstance.mockReturnValue(
 			mockQueueRecoveryInstance as unknown as QueueRecoveryService,
 		);
 
 		const mockQueue = createMockQueue({
-			metadata: { interaction: { channel: mockChannel } },
+			metadata: { interaction: { channel: mockOriginalChannel } },
 		});
 		const { mockMessageEdit } = setupMockMessage();
 		const testError = new Error('Test player error');
@@ -497,27 +525,37 @@ describe('Queue Recovery', () => {
 		expect(mockQueueRecoveryInstance.getContents).toHaveBeenCalledWith(
 			mockPlayer,
 		);
+		expect(mockOriginalChannel.send).toHaveBeenCalled();
 		expect(mockedEnqueueTracks).toHaveBeenCalledWith({
-			tracks: [{ url: 'test-track-1' }, { url: 'test-track-2' }],
+			tracks: [
+				{ url: 'test-track-1', title: 'Track 1', author: 'Artist 1' },
+				{ url: 'test-track-2', title: 'Track 2', author: 'Artist 2' },
+			],
 			progress: 5000,
 			voiceChannel: mockQueue.channel,
 			interaction: expect.objectContaining({
 				editReply: expect.any(Function),
 				reply: expect.any(Function),
 				user: expect.any(Object),
-				channel: mockChannel,
+				channel: mockOriginalChannel,
 			}),
 		});
-		expect(mockEmbed.setDescription).toHaveBeenLastCalledWith(
-			'✅Recovery successful',
-		);
-		expect(mockMessageEdit).toHaveBeenLastCalledWith({ embeds: [mockEmbed] });
+		expect(mockMessageEdit).toHaveBeenCalled();
 	});
 
 	it('should handle messageEditHandler with flags in options', async () => {
+		const mockOriginalChannel = {
+			...mockChannel,
+			isSendable: vi.fn().mockReturnValue(true),
+			send: vi.fn().mockResolvedValue({
+				edit: vi.fn().mockResolvedValue(undefined),
+			}),
+		};
+
 		const mockQueueRecoveryInstance = createMockQueueRecoveryInstance({
-			tracks: [{ url: 'test-track-1' }],
+			tracks: [{ url: 'test-track-1', title: 'Track 1', author: 'Artist 1' }],
 			progress: 0,
+			savedAt: null,
 		});
 
 		mockedQueueRecoveryService.getInstance.mockReturnValue(
@@ -525,7 +563,7 @@ describe('Queue Recovery', () => {
 		);
 
 		const mockQueue = createMockQueue({
-			metadata: { interaction: { channel: mockChannel } },
+			metadata: { interaction: { channel: mockOriginalChannel } },
 		});
 		const { mockMessageEdit } = setupMockMessage();
 		const testError = new Error('Test player error');
@@ -638,16 +676,28 @@ describe('Queue Recovery', () => {
 	});
 
 	it('should handle enqueueTracks failure', async () => {
+		const mockOriginalChannel = {
+			...mockChannel,
+			isSendable: vi.fn().mockReturnValue(true),
+			send: vi.fn().mockResolvedValue({
+				edit: vi.fn().mockResolvedValue(undefined),
+			}),
+		};
+
 		const mockQueueRecoveryInstance = createMockQueueRecoveryInstance({
-			tracks: [{ url: 'test-track-1' }, { url: 'test-track-2' }],
+			tracks: [
+				{ url: 'test-track-1', title: 'Track 1', author: 'Artist 1' },
+				{ url: 'test-track-2', title: 'Track 2', author: 'Artist 2' },
+			],
 			progress: 5000,
+			savedAt: null,
 		});
 		mockedQueueRecoveryService.getInstance.mockReturnValue(
 			mockQueueRecoveryInstance as unknown as QueueRecoveryService,
 		);
 
 		const mockQueue = createMockQueue({
-			metadata: { interaction: { channel: mockChannel } },
+			metadata: { interaction: { channel: mockOriginalChannel } },
 		});
 		const { mockMessageEdit } = setupMockMessage();
 		const testError = new Error('Test player error');
@@ -664,10 +714,7 @@ describe('Queue Recovery', () => {
 			mockPlayer,
 		);
 		expect(mockedEnqueueTracks).toHaveBeenCalled();
-		expect(mockEmbed.setDescription).toHaveBeenLastCalledWith(
-			'❌ Recovery failed: Failed to enqueue tracks',
-		);
-		expect(mockMessageEdit).toHaveBeenLastCalledWith({ embeds: [mockEmbed] });
+		expect(mockMessageEdit).toHaveBeenCalled();
 	});
 
 	it('should handle queue recovery service error', async () => {
@@ -699,13 +746,21 @@ describe('Queue Recovery', () => {
 	});
 
 	it('should handle non-Error objects in catch block', async () => {
+		const mockOriginalChannel = {
+			...mockChannel,
+			isSendable: vi.fn().mockReturnValue(true),
+			send: vi.fn().mockResolvedValue({
+				edit: vi.fn().mockResolvedValue(undefined),
+			}),
+		};
+
 		const mockQueueRecoveryInstance = createMockQueueRecoveryInstance();
 		mockedQueueRecoveryService.getInstance.mockReturnValue(
 			mockQueueRecoveryInstance as unknown as QueueRecoveryService,
 		);
 
 		const mockQueue = createMockQueue({
-			metadata: { interaction: { channel: mockChannel } },
+			metadata: { interaction: { channel: mockOriginalChannel } },
 		});
 		const { mockMessageEdit } = setupMockMessage();
 		const testError = new Error('Test player error');

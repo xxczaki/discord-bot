@@ -11,7 +11,11 @@ import { QueueRecoveryService } from '../utils/QueueRecoveryService';
 import useAutocompleteHandler from './useAutocompleteHandler';
 import useCommandHandlers from './useCommandHandlers';
 
+const QUEUE_SAVE_DEBOUNCE_MS = 2000;
+
 const queueRecoveryService = QueueRecoveryService.getInstance();
+
+let queueSaveTimeout: NodeJS.Timeout | null = null;
 
 export function useReadyEventHandler(client: Client): void {
 	client.on('clientReady', async () => {
@@ -63,9 +67,20 @@ export default function useDiscordEventHandlers(
 	client.on('voiceStateUpdate', async (oldState) => {
 		const queue = useQueue(oldState.guild.id);
 
-		void queueRecoveryService.saveQueue(queue);
+		if (!queue || queue.size === 0) {
+			return;
+		}
 
-		const track = queue?.currentTrack;
+		if (queueSaveTimeout) {
+			clearTimeout(queueSaveTimeout);
+		}
+
+		queueSaveTimeout = setTimeout(() => {
+			void queueRecoveryService.saveQueue(queue);
+			queueSaveTimeout = null;
+		}, QUEUE_SAVE_DEBOUNCE_MS);
+
+		const track = queue.currentTrack;
 
 		if (!track) {
 			return;

@@ -7,6 +7,7 @@ import {
 	type TextBasedChannel,
 	type VoiceBasedChannel,
 } from 'discord.js';
+import type { Track } from 'discord-player';
 import { useQueue } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
 import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../../constants/miscellaneous';
@@ -22,6 +23,16 @@ vi.mock('discord-player', () => ({
 vi.mock('../cleanUpPlaylistContent');
 vi.mock('../getEnvironmentVariable');
 vi.mock('../processTracksWithQueue');
+
+const mockStatsHandlerInstance = vi.hoisted(() => ({
+	saveStat: vi.fn(),
+}));
+
+vi.mock('../StatsHandler', () => ({
+	StatsHandler: {
+		getInstance: vi.fn(() => mockStatsHandlerInstance),
+	},
+}));
 
 const mockUseQueue = vi.mocked(useQueue);
 const mockCleanUpPlaylistContent = vi.mocked(cleanUpPlaylistContent);
@@ -74,6 +85,9 @@ function createMockInteraction(
 	} as unknown as Message;
 
 	return {
+		user: {
+			id: 'user-12345',
+		},
 		member: {
 			voice: {
 				channel: createMockVoiceChannel(),
@@ -95,33 +109,66 @@ function createMockInteraction(
 	} as unknown as ChatInputCommandInteraction;
 }
 
-function createMockQueue(): NonNullable<ReturnType<typeof useQueue>> {
+function createMockTrack(id: string, title: string): Track {
 	return {
+		id,
+		title,
+		url: `https://example.com/${id}`,
+	} as Track;
+}
+
+function createMockQueue(
+	initialTracks: Track[] = [],
+): NonNullable<ReturnType<typeof useQueue>> {
+	let store = [...initialTracks];
+
+	const queue = {
 		tracks: {
+			get size() {
+				return store.length;
+			},
+			get store() {
+				return store;
+			},
+			set store(value: Track[]) {
+				store = value;
+			},
+			toArray: () => [...store],
 			shuffle: vi.fn(),
 		},
 	} as unknown as NonNullable<ReturnType<typeof useQueue>>;
+
+	return queue;
 }
 
-it('should process head slice correctly', async () => {
-	const interaction = createMockInteraction('rock-classics', 3);
+it('should process head slice correctly with no slicing needed', async () => {
+	const interaction = createMockInteraction('rock-classics', 5);
 	const voiceChannel = createMockVoiceChannel();
 	const mockQueue = createMockQueue();
 
 	mockCleanUpPlaylistContent.mockReturnValue(
-		'Bohemian Rhapsody\nSweet Child O Mine\nStairway to Heaven\nHotel California\nSmells Like Teen Spirit',
+		'Bohemian Rhapsody\nSweet Child O Mine\nStairway to Heaven',
 	);
-	mockUseQueue.mockReturnValue(mockQueue);
+
+	mockUseQueue.mockReturnValueOnce(mockQueue);
+	mockProcessTracksWithQueue.mockImplementation(async () => {
+		mockQueue.tracks.store = [
+			createMockTrack('1', 'Bohemian Rhapsody'),
+			createMockTrack('2', 'Sweet Child O Mine'),
+			createMockTrack('3', 'Stairway to Heaven'),
+		];
+		return { enqueued: 3 };
+	});
+	mockUseQueue.mockReturnValueOnce(mockQueue);
 
 	await enqueuePlaylistSlice(
 		interaction,
 		voiceChannel,
 		'rock-classics',
 		'head',
-		3,
+		5,
 	);
 
-	expect(mockCleanUpPlaylistContent).toHaveBeenCalled();
 	expect(mockProcessTracksWithQueue).toHaveBeenCalledWith({
 		items: ['Bohemian Rhapsody', 'Sweet Child O Mine', 'Stairway to Heaven'],
 		voiceChannel,
@@ -136,14 +183,10 @@ it('should process head slice correctly', async () => {
 		},
 	});
 
-	expect(interaction.editReply).toHaveBeenCalledWith({
-		content: null,
-		embeds: [expect.any(EmbedBuilder)],
-		components: [expect.any(ActionRowBuilder)],
-	});
+	expect(mockQueue.tracks.store).toHaveLength(3);
 });
 
-it('should process tail slice correctly', async () => {
+it('should process tail slice and remove excess tracks', async () => {
 	const interaction = createMockInteraction('rock-classics', 2);
 	const voiceChannel = createMockVoiceChannel();
 	const mockQueue = createMockQueue();
@@ -151,7 +194,19 @@ it('should process tail slice correctly', async () => {
 	mockCleanUpPlaylistContent.mockReturnValue(
 		'Bohemian Rhapsody\nSweet Child O Mine\nStairway to Heaven\nHotel California\nSmells Like Teen Spirit',
 	);
-	mockUseQueue.mockReturnValue(mockQueue);
+
+	mockUseQueue.mockReturnValueOnce(mockQueue);
+	mockProcessTracksWithQueue.mockImplementation(async () => {
+		mockQueue.tracks.store = [
+			createMockTrack('1', 'Bohemian Rhapsody'),
+			createMockTrack('2', 'Sweet Child O Mine'),
+			createMockTrack('3', 'Stairway to Heaven'),
+			createMockTrack('4', 'Hotel California'),
+			createMockTrack('5', 'Smells Like Teen Spirit'),
+		];
+		return { enqueued: 5 };
+	});
+	mockUseQueue.mockReturnValueOnce(mockQueue);
 
 	await enqueuePlaylistSlice(
 		interaction,
@@ -161,18 +216,9 @@ it('should process tail slice correctly', async () => {
 		2,
 	);
 
-	expect(mockProcessTracksWithQueue).toHaveBeenCalledWith({
-		items: ['Hotel California', 'Smells Like Teen Spirit'],
-		voiceChannel,
-		interaction,
-		embed: expect.any(EmbedBuilder),
-		nodeMetadata: {
-			queries: {
-				'0': 'Hotel California',
-				'1': 'Smells Like Teen Spirit',
-			},
-		},
-	});
+	expect(mockQueue.tracks.store).toHaveLength(2);
+	expect(mockQueue.tracks.store[0].title).toBe('Hotel California');
+	expect(mockQueue.tracks.store[1].title).toBe('Smells Like Teen Spirit');
 });
 
 it('should handle playlist not found', async () => {
@@ -693,8 +739,12 @@ it('should properly pluralize success message for single song', async () => {
 		.mockReturnValue(mockPlaylistsChannel);
 
 	mockCleanUpPlaylistContent.mockReturnValue('Only Song');
-	mockUseQueue.mockReturnValue(mockQueue);
-	mockProcessTracksWithQueue.mockResolvedValue({ enqueued: 1 });
+	mockUseQueue.mockReturnValueOnce(mockQueue);
+	mockProcessTracksWithQueue.mockImplementation(async () => {
+		mockQueue.tracks.store = [createMockTrack('1', 'Only Song')];
+		return { enqueued: 1 };
+	});
+	mockUseQueue.mockReturnValueOnce(mockQueue);
 
 	await enqueuePlaylistSlice(
 		interaction,
@@ -709,8 +759,7 @@ it('should properly pluralize success message for single song', async () => {
 		embeds: [
 			expect.objectContaining({
 				data: expect.objectContaining({
-					description:
-						'1 entry from 1 song had been processed and added to the queue.\n0 skipped.',
+					description: 'Added 1 song from the playlist to the queue',
 				}),
 			}),
 		],
@@ -742,8 +791,18 @@ it('should properly pluralize success message for multiple songs', async () => {
 	mockCleanUpPlaylistContent.mockReturnValue(
 		'Song 1\nSong 2\nSong 3\nSong 4\nSong 5',
 	);
-	mockUseQueue.mockReturnValue(mockQueue);
-	mockProcessTracksWithQueue.mockResolvedValue({ enqueued: 3 });
+	mockUseQueue.mockReturnValueOnce(mockQueue);
+	mockProcessTracksWithQueue.mockImplementation(async () => {
+		mockQueue.tracks.store = [
+			createMockTrack('1', 'Song 1'),
+			createMockTrack('2', 'Song 2'),
+			createMockTrack('3', 'Song 3'),
+			createMockTrack('4', 'Song 4'),
+			createMockTrack('5', 'Song 5'),
+		];
+		return { enqueued: 5 };
+	});
+	mockUseQueue.mockReturnValueOnce(mockQueue);
 
 	await enqueuePlaylistSlice(
 		interaction,
@@ -759,7 +818,7 @@ it('should properly pluralize success message for multiple songs', async () => {
 			expect.objectContaining({
 				data: expect.objectContaining({
 					description:
-						'3 entries from the first 3 of 5 songs had been processed and added to the queue.\n0 skipped.',
+						'Added the first 3 songs from the playlist to the queue',
 				}),
 			}),
 		],
@@ -788,8 +847,16 @@ it('should use simplified wording when processing all songs', async () => {
 		.mockReturnValue(mockPlaylistsChannel);
 
 	mockCleanUpPlaylistContent.mockReturnValue('Song 1\nSong 2\nSong 3');
-	mockUseQueue.mockReturnValue(mockQueue);
-	mockProcessTracksWithQueue.mockResolvedValue({ enqueued: 3 });
+	mockUseQueue.mockReturnValueOnce(mockQueue);
+	mockProcessTracksWithQueue.mockImplementation(async () => {
+		mockQueue.tracks.store = [
+			createMockTrack('1', 'Song 1'),
+			createMockTrack('2', 'Song 2'),
+			createMockTrack('3', 'Song 3'),
+		];
+		return { enqueued: 3 };
+	});
+	mockUseQueue.mockReturnValueOnce(mockQueue);
 
 	await enqueuePlaylistSlice(
 		interaction,
@@ -804,8 +871,7 @@ it('should use simplified wording when processing all songs', async () => {
 		embeds: [
 			expect.objectContaining({
 				data: expect.objectContaining({
-					description:
-						'3 entries from 3 songs had been processed and added to the queue.\n0 skipped.',
+					description: 'Added 3 songs from the playlist to the queue',
 				}),
 			}),
 		],

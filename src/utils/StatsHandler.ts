@@ -15,8 +15,10 @@ export class StatsHandler {
 	}
 
 	async saveStat(
-		type: 'play',
-		payload: { title: string; author: string; requestedById?: string },
+		type: 'play' | 'playlist',
+		payload:
+			| { title: string; author: string; requestedById?: string }
+			| { playlistId: string; requestedById: string },
 	) {
 		await redis.set(
 			`discord-player:stats:${type}:${ulid()}`,
@@ -24,7 +26,7 @@ export class StatsHandler {
 		);
 	}
 
-	getStats(type: 'play') {
+	getStats(type: 'play' | 'playlist') {
 		return redis.scanStream({
 			match: `discord-player:stats:${type}:*`,
 			count: 1000,

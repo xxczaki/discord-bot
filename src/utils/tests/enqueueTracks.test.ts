@@ -114,9 +114,7 @@ it('should handle single track successfully', async () => {
 	const lastEditCall =
 		mockEditReply.mock.calls[mockEditReply.mock.calls.length - 1];
 	const embed = lastEditCall?.[0]?.embeds?.[0] as EmbedBuilder;
-	expect(embed.data.description).toBe(
-		'1 track had been processed and added to the queue.\n0 skipped.',
-	);
+	expect(embed.data.description).toBe('Successfully recovered 1 track.');
 });
 
 it('should handle play error for first track', async () => {
@@ -220,9 +218,7 @@ it('should handle multiple tracks successfully', async () => {
 	const lastEditCall =
 		mockEditReply.mock.calls[mockEditReply.mock.calls.length - 1];
 	const embed = lastEditCall?.[0]?.embeds?.[0] as EmbedBuilder;
-	expect(embed.data.description).toBe(
-		'3 tracks had been processed and added to the queue.\n0 skipped.',
-	);
+	expect(embed.data.description).toBe('Successfully recovered all 3 tracks.');
 });
 
 it('should handle `processTracksWithQueue` errors', async () => {

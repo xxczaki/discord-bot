@@ -4,11 +4,14 @@ import {
 	ButtonStyle,
 	type ChatInputCommandInteraction,
 	type ComponentType,
+	EmbedBuilder,
 	type GuildMember,
 } from 'discord.js';
 import { useMainPlayer, useQueue } from 'discord-player';
 import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
 import enqueueTracks from '../utils/enqueueTracks';
+import formatDuration from '../utils/formatDuration';
+import formatRelativeTime from '../utils/formatRelativeTime';
 import pluralize from '../utils/pluralize';
 import { QueueRecoveryService } from '../utils/QueueRecoveryService';
 
@@ -38,11 +41,56 @@ export default async function recoverCommandHandler(
 	await interaction.reply('Looking up what can be recovered…');
 
 	const player = useMainPlayer();
-	const { tracks, progress } = await queueRecoveryService.getContents(player);
+	const { tracks, progress, savedAt } =
+		await queueRecoveryService.getContents(player);
 
 	if (tracks.length === 0) {
 		return interaction.editReply('Nothing to recover.');
 	}
+
+	const [currentTrack, ...queuedTracks] = tracks;
+
+	const embed = new EmbedBuilder()
+		.setTitle('🔄 Queue Recovery Available')
+		.setColor('Blue')
+		.setDescription(
+			pluralize(
+				'track',
+				'tracks',
+			)`Found a queue with ${tracks.length} ${null} that can be recovered.`,
+		)
+		.addFields([
+			{
+				name: 'Current Track',
+				value: `**${currentTrack.title}** by ${currentTrack.author}`,
+				inline: false,
+			},
+			{
+				name: 'Progress',
+				value:
+					progress > 0 ? formatDuration(progress) : 'Starting from beginning',
+				inline: true,
+			},
+			{
+				name: 'Queued Tracks',
+				value: queuedTracks.length.toString(),
+				inline: true,
+			},
+		]);
+
+	if (savedAt) {
+		embed.addFields([
+			{
+				name: 'Last Saved',
+				value: formatRelativeTime(savedAt),
+				inline: true,
+			},
+		]);
+	}
+
+	embed.setFooter({
+		text: 'Click "Proceed" to restore the queue or "Cancel" to dismiss.',
+	});
 
 	const yes = new ButtonBuilder()
 		.setCustomId('proceed')
@@ -56,10 +104,8 @@ export default async function recoverCommandHandler(
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(yes, cancel);
 
 	const response = await interaction.editReply({
-		content: pluralize(
-			'track',
-			'tracks',
-		)`Found a queue to recover, with ${tracks.length} ${null}.\n`,
+		content: null,
+		embeds: [embed],
 		components: [row],
 	});
 

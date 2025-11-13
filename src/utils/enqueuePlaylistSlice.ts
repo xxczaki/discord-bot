@@ -12,9 +12,10 @@ import cleanUpPlaylistContent from './cleanUpPlaylistContent';
 import getEnvironmentVariable from './getEnvironmentVariable';
 import pluralize from './pluralize';
 import processTracksWithQueue from './processTracksWithQueue';
+import { StatsHandler } from './StatsHandler';
 
-const pluralizeEntries = pluralize('entry', 'entries');
 const pluralizeSongs = pluralize('song', 'songs');
+const statsHandler = StatsHandler.getInstance();
 
 export default async function enqueuePlaylistSlice(
 	interaction: ChatInputCommandInteraction,
@@ -82,21 +83,75 @@ export default async function enqueuePlaylistSlice(
 		return;
 	}
 
-	// Apply head or tail slicing
-	const slicedSongs =
-		sliceType === 'head' ? allSongs.slice(0, count) : allSongs.slice(-count);
-
 	const queries = Object.fromEntries(
-		slicedSongs.map((song, index) => [index.toString(), song]),
+		allSongs.map((song, index) => [index.toString(), song]),
 	);
 
+	const queue = useQueue();
+	const initialQueueSize = queue?.tracks.size ?? 0;
+
 	const { enqueued } = await processTracksWithQueue({
-		items: slicedSongs,
+		items: allSongs,
 		voiceChannel,
 		interaction,
 		embed,
 		nodeMetadata: { queries },
 	});
+
+	if (enqueued === 0) {
+		await interaction.editReply({
+			content: 'No tracks were added to the queue.',
+			embeds: [],
+			components: [],
+		});
+		return;
+	}
+
+	const updatedQueue = useQueue();
+
+	if (!updatedQueue) {
+		await interaction.editReply({
+			content: 'Queue not found after processing.',
+			embeds: [],
+			components: [],
+		});
+		return;
+	}
+
+	const finalQueueSize = updatedQueue.tracks.size;
+	const isCurrentTrackNew = initialQueueSize === 0 && updatedQueue.currentTrack;
+	const addedTracksCount =
+		finalQueueSize - initialQueueSize + (isCurrentTrackNew ? 1 : 0);
+
+	if (addedTracksCount > count) {
+		const allTracks = updatedQueue.tracks.toArray();
+		const newlyAddedTracks = allTracks.slice(
+			initialQueueSize,
+			initialQueueSize + addedTracksCount - (isCurrentTrackNew ? 1 : 0),
+		);
+
+		const allNewTracks = isCurrentTrackNew
+			? [updatedQueue.currentTrack, ...newlyAddedTracks]
+			: newlyAddedTracks;
+
+		const tracksToKeep =
+			sliceType === 'head'
+				? allNewTracks.slice(0, count)
+				: allNewTracks.slice(-count);
+
+		if (isCurrentTrackNew && !tracksToKeep.includes(updatedQueue.currentTrack)) {
+			updatedQueue.node.skip();
+		}
+
+		const remainingTracksToQueue = tracksToKeep.filter(
+			(track) => track !== updatedQueue.currentTrack,
+		);
+
+		updatedQueue.tracks.store = [
+			...allTracks.slice(0, initialQueueSize),
+			...remainingTracksToQueue,
+		];
+	}
 
 	const shuffle = new ButtonBuilder()
 		.setCustomId('shuffle')
@@ -106,32 +161,28 @@ export default async function enqueuePlaylistSlice(
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(shuffle);
 
 	const sliceDescription = sliceType === 'head' ? 'first' : 'last';
-	const actualCount = slicedSongs.length;
-	const totalCount = allSongs.length;
+	const keptTracksCount = Math.min(addedTracksCount, count);
+	const removedTracksCount = addedTracksCount - keptTracksCount;
 
-	let fromDescription: string;
+	const description =
+		removedTracksCount > 0
+			? pluralizeSongs`Added the ${sliceDescription} ${keptTracksCount} ${null} from the playlist to the queue`
+			: pluralizeSongs`Added ${keptTracksCount} ${null} from the playlist to the queue`;
 
-	if (actualCount === totalCount) {
-		fromDescription = pluralizeSongs`${actualCount} ${null}`;
-	} else {
-		fromDescription = `the ${sliceDescription} ${actualCount} of ${pluralizeSongs`${totalCount} ${null}`}`;
-	}
+	const descriptionParts = [description];
+
+	void statsHandler.saveStat('playlist', {
+		playlistId,
+		requestedById: interaction.user.id,
+	});
 
 	const response = await interaction.editReply({
 		content: null,
 		embeds: [
-			embed
-				.setTitle('✅ Done')
-				.setDescription(
-					pluralizeEntries`${enqueued} ${null} from ${fromDescription} had been processed and added to the queue.\n${
-						slicedSongs.length - enqueued
-					} skipped.`,
-				),
+			embed.setTitle('✅ Done').setDescription(descriptionParts.join('\n')),
 		],
 		components: [row],
 	});
-
-	const queue = useQueue();
 
 	try {
 		const answer = await response.awaitMessageComponent({
@@ -139,7 +190,7 @@ export default async function enqueuePlaylistSlice(
 		});
 
 		if (answer.customId === 'shuffle') {
-			queue?.tracks.shuffle();
+			updatedQueue.tracks.shuffle();
 		}
 
 		await response.edit({ components: [] });

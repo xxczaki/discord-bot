@@ -93,6 +93,9 @@ beforeEach(() => {
 
 	mockInteraction = {
 		values: EXAMPLE_PLAYLIST_IDS,
+		user: {
+			id: 'user123',
+		},
 		client: {
 			channels: {
 				cache: {
@@ -380,6 +383,9 @@ describe('enqueuePlaylists with ChatInputCommandInteraction and playlist IDs', (
 		} as unknown as Message;
 
 		mockChatInputInteraction = {
+			user: {
+				id: 'user123',
+			},
 			client: {
 				channels: {
 					cache: {

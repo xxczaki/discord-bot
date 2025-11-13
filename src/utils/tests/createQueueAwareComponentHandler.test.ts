@@ -28,7 +28,7 @@ function getEventHandler(eventName: string) {
 describe('createQueueAwareComponentHandler', () => {
 	let mockResponse: InteractionResponse<boolean>;
 	let mockQueue: GuildQueue<unknown>;
-	let mockOnQueueDestroyed: ReturnType<typeof vi.fn>;
+	let mockOnQueueDestroyed: () => void | Promise<void>;
 
 	beforeEach(() => {
 		vi.clearAllMocks();

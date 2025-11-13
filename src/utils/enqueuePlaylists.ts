@@ -13,8 +13,10 @@ import cleanUpPlaylistContent from './cleanUpPlaylistContent';
 import getEnvironmentVariable from './getEnvironmentVariable';
 import pluralize from './pluralize';
 import processTracksWithQueue from './processTracksWithQueue';
+import { StatsHandler } from './StatsHandler';
 
 const pluralizeEntries = pluralize('entry', 'entries');
+const statsHandler = StatsHandler.getInstance();
 
 export default async function enqueuePlaylists(
 	interaction: StringSelectMenuInteraction,
@@ -83,6 +85,17 @@ export default async function enqueuePlaylists(
 		embed,
 		nodeMetadata: { queries },
 	});
+
+	const actualPlaylistIds = playlistIds.map((id) =>
+		id.replace(/^id="/, '').replace(/"$/, ''),
+	);
+
+	for (const playlistId of actualPlaylistIds) {
+		void statsHandler.saveStat('playlist', {
+			playlistId,
+			requestedById: interaction.user.id,
+		});
+	}
 
 	const shuffle = new ButtonBuilder()
 		.setCustomId('shuffle')

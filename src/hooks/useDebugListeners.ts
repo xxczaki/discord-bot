@@ -5,19 +5,24 @@ import {
 	EmbedBuilder,
 	type InteractionEditReplyOptions,
 	type InteractionReplyOptions,
+	type Message,
 } from 'discord.js';
 import type { GuildQueue, Player } from 'discord-player';
 import deleteOpusCacheEntry from '../utils/deleteOpusCacheEntry';
 import enqueueTracks from '../utils/enqueueTracks';
+import formatDuration from '../utils/formatDuration';
+import formatRelativeTime from '../utils/formatRelativeTime';
 import getEnvironmentVariable from '../utils/getEnvironmentVariable';
 import isObject from '../utils/isObject';
 import logger from '../utils/logger';
+import pluralize from '../utils/pluralize';
 import { QueueRecoveryService } from '../utils/QueueRecoveryService';
 import reportError from '../utils/reportError';
 
 const FATAL_ERROR_MESSAGE_DEBOUNCE = 1000 * 30; // 30 seconds
 
 const botDebugChannelId = getEnvironmentVariable('BOT_DEBUG_CHANNEL_ID');
+const pluralizeTracks = pluralize('track', 'tracks');
 
 const server = createServer();
 
@@ -153,7 +158,7 @@ function initializePlayerErrorReporter(
 				return message.edit({ embeds: [embed] });
 			}
 
-			const { tracks, progress } =
+			const { tracks, progress, savedAt } =
 				await queueRecoveryService.getContents(player);
 
 			if (tracks.length === 0) {
@@ -165,17 +170,74 @@ function initializePlayerErrorReporter(
 
 			const originalChannel = queue.metadata?.interaction?.channel;
 
-			if (!originalChannel) {
+			if (!originalChannel?.isSendable()) {
 				embed.setDescription(
 					'🛑 Unable to recover – original channel not found.\n\nTip: try using the `/recover` command directly.',
 				);
 				return message.edit({ embeds: [embed] });
 			}
 
+			const [currentTrack, ...queuedTracks] = tracks;
+
+			const userEmbed = new EmbedBuilder()
+				.setTitle('🔄 Automatic Queue Recovery')
+				.setColor('Blue')
+				.setDescription(
+					pluralize(
+						'track',
+						'tracks',
+					)`The bot encountered an error. Attempting to recover ${tracks.length} ${null}…`,
+				)
+				.addFields([
+					{
+						name: 'Current Track',
+						value: `**${currentTrack.title}** by ${currentTrack.author}`,
+						inline: false,
+					},
+					{
+						name: 'Progress',
+						value:
+							progress > 0
+								? formatDuration(progress)
+								: 'Starting from beginning',
+						inline: true,
+					},
+					{
+						name: 'Queued Tracks',
+						value: queuedTracks.length.toString(),
+						inline: true,
+					},
+				]);
+
+			if (savedAt) {
+				userEmbed.addFields([
+					{
+						name: 'Last Saved',
+						value: formatRelativeTime(savedAt),
+						inline: true,
+					},
+				]);
+			}
+
+			let userMessage: Message | null = null;
+
+			try {
+				userMessage = await originalChannel.send({ embeds: [userEmbed] });
+			} catch (error) {
+				logger.error(
+					error,
+					'Failed to send recovery message to original channel',
+				);
+			}
+
 			const messageEditHandler = (
 				options: InteractionEditReplyOptions | InteractionReplyOptions,
 			) => {
 				const { flags: _flags, ...messageOptions } = options;
+
+				if (userMessage) {
+					void userMessage.edit(messageOptions);
+				}
 
 				return message.edit(messageOptions);
 			};
@@ -192,7 +254,9 @@ function initializePlayerErrorReporter(
 				},
 			});
 
-			embed.setDescription('✅Recovery successful');
+			embed.setDescription(
+				pluralizeTracks`✅ Recovery successful – ${tracks.length} ${null} restored`,
+			);
 			await message.edit({ embeds: [embed] });
 		} catch (error) {
 			if (!(error instanceof Error)) {

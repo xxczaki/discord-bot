@@ -132,7 +132,7 @@ describe('QueueRecoveryService', () => {
 	});
 
 	describe('saveQueue', () => {
-		it('should save queue tracks and progress to Redis', async () => {
+		it('should save queue tracks, progress, and timestamp to Redis', async () => {
 			const mockQueue = createMockQueue();
 			const allTracks = [mockQueue.currentTrack, ...mockQueue.tracks.store];
 
@@ -143,12 +143,16 @@ describe('QueueRecoveryService', () => {
 
 			expect(mockedSerialize).toHaveBeenCalledTimes(allTracks.length);
 			expect(mockPipeline.set).toHaveBeenCalledWith(
-				'discord-player:queue',
+				'queue-recovery:tracks',
 				JSON.stringify(Array(allTracks.length).fill(EXAMPLE_SERIALIZED_TRACK)),
 			);
 			expect(mockPipeline.set).toHaveBeenCalledWith(
-				'discord-player:progress',
+				'queue-recovery:progress',
 				EXAMPLE_PROGRESS,
+			);
+			expect(mockPipeline.set).toHaveBeenCalledWith(
+				'queue-recovery:saved-at',
+				expect.any(Number),
 			);
 			expect(mockPipeline.exec).toHaveBeenCalledOnce();
 		});
@@ -192,40 +196,44 @@ describe('QueueRecoveryService', () => {
 			await queueRecoveryService.saveQueue(mockQueue);
 
 			expect(mockPipeline.set).toHaveBeenCalledWith(
-				'discord-player:progress',
+				'queue-recovery:progress',
 				0,
 			);
 		});
 	});
 
 	describe('deleteQueue', () => {
-		it('should delete queue and progress from Redis', async () => {
+		it('should delete queue, progress, and timestamp from Redis', async () => {
 			mockPipeline.exec.mockResolvedValue([]);
 
 			await queueRecoveryService.deleteQueue();
 
-			expect(mockPipeline.del).toHaveBeenCalledWith('discord-player:queue');
-			expect(mockPipeline.del).toHaveBeenCalledWith('discord-player:progress');
+			expect(mockPipeline.del).toHaveBeenCalledWith('queue-recovery:tracks');
+			expect(mockPipeline.del).toHaveBeenCalledWith('queue-recovery:progress');
+			expect(mockPipeline.del).toHaveBeenCalledWith('queue-recovery:saved-at');
 			expect(mockPipeline.exec).toHaveBeenCalledOnce();
 		});
 	});
 
 	describe('getContents', () => {
-		it('should return tracks and progress from Redis', async () => {
+		it('should return tracks, progress, and savedAt from Redis', async () => {
 			const mockPlayer = createMockPlayer();
 			const mockTrack = createMockTrack();
 			const serializedTracks = [EXAMPLE_SERIALIZED_TRACK];
+			const savedAt = Date.now();
 
 			mockPipeline.exec.mockResolvedValue([
 				[null, JSON.stringify(serializedTracks)],
 				[null, EXAMPLE_PROGRESS],
+				[null, savedAt.toString()],
 			]);
 			mockedDeserialize.mockReturnValue(mockTrack);
 
 			const result = await queueRecoveryService.getContents(mockPlayer);
 
-			expect(mockPipeline.get).toHaveBeenCalledWith('discord-player:queue');
-			expect(mockPipeline.get).toHaveBeenCalledWith('discord-player:progress');
+			expect(mockPipeline.get).toHaveBeenCalledWith('queue-recovery:tracks');
+			expect(mockPipeline.get).toHaveBeenCalledWith('queue-recovery:progress');
+			expect(mockPipeline.get).toHaveBeenCalledWith('queue-recovery:saved-at');
 			expect(mockedDeserialize).toHaveBeenCalledWith(
 				mockPlayer,
 				EXAMPLE_SERIALIZED_TRACK,
@@ -233,6 +241,7 @@ describe('QueueRecoveryService', () => {
 			expect(result).toEqual({
 				tracks: [mockTrack],
 				progress: EXAMPLE_PROGRESS,
+				savedAt,
 			});
 		});
 
@@ -246,6 +255,25 @@ describe('QueueRecoveryService', () => {
 			expect(result).toEqual({
 				tracks: [],
 				progress: 0,
+				savedAt: null,
+			});
+		});
+
+		it('should return default contents when tracks is null', async () => {
+			const mockPlayer = createMockPlayer();
+
+			mockPipeline.exec.mockResolvedValue([
+				[null, null],
+				[null, EXAMPLE_PROGRESS],
+				[null, null],
+			]);
+
+			const result = await queueRecoveryService.getContents(mockPlayer);
+
+			expect(result).toEqual({
+				tracks: [],
+				progress: 0,
+				savedAt: null,
 			});
 		});
 
@@ -255,6 +283,7 @@ describe('QueueRecoveryService', () => {
 			mockPipeline.exec.mockResolvedValue([
 				[null, 'invalid-json'],
 				[null, EXAMPLE_PROGRESS],
+				[null, null],
 			]);
 
 			const result = await queueRecoveryService.getContents(mockPlayer);
@@ -262,6 +291,7 @@ describe('QueueRecoveryService', () => {
 			expect(result).toEqual({
 				tracks: [],
 				progress: 0,
+				savedAt: null,
 			});
 		});
 
@@ -271,6 +301,7 @@ describe('QueueRecoveryService', () => {
 			mockPipeline.exec.mockResolvedValue([
 				[null, JSON.stringify([])],
 				[null, EXAMPLE_PROGRESS],
+				[null, null],
 			]);
 
 			const result = await queueRecoveryService.getContents(mockPlayer);
@@ -278,6 +309,7 @@ describe('QueueRecoveryService', () => {
 			expect(result).toEqual({
 				tracks: [],
 				progress: EXAMPLE_PROGRESS,
+				savedAt: null,
 			});
 		});
 
@@ -293,6 +325,7 @@ describe('QueueRecoveryService', () => {
 			mockPipeline.exec.mockResolvedValue([
 				[null, JSON.stringify(serializedTracks)],
 				[null, EXAMPLE_PROGRESS],
+				[null, null],
 			]);
 			mockedDeserialize
 				.mockReturnValueOnce(mockTrack1)
@@ -304,7 +337,27 @@ describe('QueueRecoveryService', () => {
 			expect(result).toEqual({
 				tracks: [mockTrack1, mockTrack2],
 				progress: EXAMPLE_PROGRESS,
+				savedAt: null,
 			});
+		});
+
+		it('should parse savedAt as a number', async () => {
+			const mockPlayer = createMockPlayer();
+			const mockTrack = createMockTrack();
+			const serializedTracks = [EXAMPLE_SERIALIZED_TRACK];
+			const savedAt = Date.now();
+
+			mockPipeline.exec.mockResolvedValue([
+				[null, JSON.stringify(serializedTracks)],
+				[null, EXAMPLE_PROGRESS],
+				[null, savedAt.toString()],
+			]);
+			mockedDeserialize.mockReturnValue(mockTrack);
+
+			const result = await queueRecoveryService.getContents(mockPlayer);
+
+			expect(result.savedAt).toBe(savedAt);
+			expect(typeof result.savedAt).toBe('number');
 		});
 	});
 });

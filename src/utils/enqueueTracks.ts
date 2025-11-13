@@ -38,6 +38,8 @@ export default async function enqueueTracks({
 		embeds: [embed],
 	});
 
+	let firstTrackFailed = false;
+
 	try {
 		await player.play(voiceChannel, firstTrackUrl, {
 			searchEngine: determineSearchEngine(firstTrackUrl),
@@ -58,13 +60,40 @@ export default async function enqueueTracks({
 			],
 		});
 	} catch (error) {
+		firstTrackFailed = true;
 		reportError(error, 'Queue recovery error (first track)');
+
+		embed
+			.setTitle('⚠️ Partial Recovery')
+			.setDescription(
+				'The first track failed to load. Attempting to load remaining tracks…',
+			)
+			.setColor('Orange');
+
+		await interaction.editReply({
+			components: [],
+			embeds: [embed],
+		});
 	}
 
 	if (toQueue.length === 0) {
 		const queue = useQueue();
 
 		if (!queue) {
+			if (firstTrackFailed) {
+				return interaction.editReply({
+					content: null,
+					embeds: [
+						embed
+							.setTitle('❌ Recovery Failed')
+							.setDescription(
+								'The only track in the queue failed to load. Recovery could not be completed.',
+							)
+							.setColor('Red'),
+					],
+				});
+			}
+
 			return interaction.editReply({
 				content: 'The queue is empty.',
 				embeds: [],
@@ -75,10 +104,13 @@ export default async function enqueueTracks({
 			content: null,
 			embeds: [
 				embed
-					.setTitle('✅ Done')
+					.setTitle(firstTrackFailed ? '⚠️ Partial Recovery' : '✅ Complete')
 					.setDescription(
-						pluralizeTracks`${1} ${null} had been processed and added to the queue.\n${0} skipped.`,
-					),
+						firstTrackFailed
+							? 'The first track failed to load, but the queue is ready.'
+							: pluralizeTracks`Successfully recovered ${1} ${null}.`,
+					)
+					.setColor(firstTrackFailed ? 'Orange' : 'Green'),
 			],
 		});
 	}
@@ -117,14 +149,21 @@ export default async function enqueueTracks({
 			}) || [];
 	}
 
+	const successfullyEnqueued = firstTrackFailed ? enqueued : enqueued + 1;
+	const skipped = tracks.length - successfullyEnqueued;
+	const wasPartial = firstTrackFailed || skipped > 0;
+
 	await interaction.editReply({
 		content: null,
 		embeds: [
-			embed.setTitle('✅ Done').setDescription(
-				pluralizeTracks`${enqueued + 1} ${null} had been processed and added to the queue.\n${
-					tracks.length - enqueued - 1 // excludes `queue.currentTrack`
-				} skipped.`,
-			),
+			embed
+				.setTitle(wasPartial ? '⚠️ Partial Recovery' : '✅ Complete')
+				.setDescription(
+					skipped > 0
+						? pluralizeTracks`Successfully recovered ${successfullyEnqueued} ${null}.\n\n${skipped} ${null} could not be loaded (may be unavailable, region-locked, or removed).`
+						: pluralizeTracks`Successfully recovered all ${successfullyEnqueued} ${null}.`,
+				)
+				.setColor(wasPartial ? 'Orange' : 'Green'),
 		],
 	});
 }
