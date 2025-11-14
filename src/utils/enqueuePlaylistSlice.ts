@@ -182,7 +182,10 @@ export default async function enqueuePlaylistSlice(
 	const response = await interaction.editReply({
 		content: null,
 		embeds: [
-			embed.setTitle('✅ Done').setDescription(descriptionParts.join('\n')),
+			embed
+				.setTitle('✅ Processing Complete')
+				.setDescription(descriptionParts.join('\n'))
+				.setColor('Green'),
 		],
 		components: [row],
 	});

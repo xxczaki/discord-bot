@@ -70,7 +70,7 @@ function initializeUnhandledErrorReporter(
 			previousMessageTimestamp = Date.now();
 
 			await channel.send(
-				'☠️ Encountered a fatal error, the bot will restart promptly – consider using `/recover` afterward.',
+				'Encountered a fatal error, the bot will restart promptly. Consider using `/recover` afterward.',
 			);
 
 			server.close();
@@ -102,9 +102,9 @@ function initializePlayerErrorReporter(
 				: 'Unknown track';
 
 			const embed = new EmbedBuilder()
-				.setTitle('Track unavailable')
+				.setTitle('Track Unavailable')
 				.setDescription(
-					`❌ Could not play ${trackInfo}\n\nThis track appears to be unplayable (possibly region-locked, removed, or restricted). The queue will continue with the next track.`,
+					`Could not play ${trackInfo}.\n\nThis track appears to be unplayable (possibly region-locked, removed, or restricted). The queue will continue with the next track.`,
 				)
 				.setColor('Orange');
 
@@ -114,13 +114,13 @@ function initializePlayerErrorReporter(
 		const sentryId = captureException(error);
 
 		const embed = new EmbedBuilder()
-			.setTitle('Player error')
+			.setTitle('Player Error')
 			.setDescription('Attempting to recover…')
 			.setColor('Red')
 			.setFields([
 				{
 					name: 'Sentry Issue ID',
-					value: sentryId ? `\`${sentryId}\`` : 'unavailable',
+					value: sentryId ? `\`${sentryId}\`` : 'Unavailable',
 				},
 			]);
 
@@ -144,7 +144,7 @@ function initializePlayerErrorReporter(
 
 			if (!queue.channel) {
 				embed.setDescription(
-					'🛑 Unable to recover – the queue has no voice channel associated with it.\n\nTip: try using the `/recover` command directly.',
+					'Unable to recover. The queue has no voice channel associated with it.\n\nTip: Try using the `/recover` command directly.',
 				);
 				return message.edit({ embeds: [embed] });
 			}
@@ -153,7 +153,7 @@ function initializePlayerErrorReporter(
 
 			if (!queueRecoveryService) {
 				embed.setDescription(
-					'🛑 Unable to recover – queue recovery service unavailable.',
+					'Unable to recover. Queue recovery service unavailable.',
 				);
 				return message.edit({ embeds: [embed] });
 			}
@@ -164,7 +164,7 @@ function initializePlayerErrorReporter(
 			if (tracks.length === 0) {
 				queue.delete();
 
-				embed.setDescription('🛑 Found nothing to recover.');
+				embed.setDescription('Found nothing to recover.');
 				return message.edit({ embeds: [embed] });
 			}
 
@@ -172,7 +172,7 @@ function initializePlayerErrorReporter(
 
 			if (!originalChannel?.isSendable()) {
 				embed.setDescription(
-					'🛑 Unable to recover – original channel not found.\n\nTip: try using the `/recover` command directly.',
+					'Unable to recover. Original channel not found.\n\nTip: Try using the `/recover` command directly.',
 				);
 				return message.edit({ embeds: [embed] });
 			}
@@ -255,7 +255,7 @@ function initializePlayerErrorReporter(
 			});
 
 			embed.setDescription(
-				pluralizeTracks`✅ Recovery successful – ${tracks.length} ${null} restored`,
+				pluralizeTracks`Recovery successful. ${tracks.length} ${null} restored.`,
 			);
 			await message.edit({ embeds: [embed] });
 		} catch (error) {
@@ -263,7 +263,7 @@ function initializePlayerErrorReporter(
 				return;
 			}
 
-			embed.setDescription(`❌ Recovery failed: ${error.message}`);
+			embed.setDescription(`Recovery failed: ${error.message}`);
 
 			await message.edit({ embeds: [embed] });
 		}

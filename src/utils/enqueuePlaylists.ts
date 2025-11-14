@@ -108,12 +108,13 @@ export default async function enqueuePlaylists(
 		content: null,
 		embeds: [
 			embed
-				.setTitle('✅ Done')
+				.setTitle('✅ Processing Complete')
 				.setDescription(
 					pluralizeEntries`${enqueued} ${null} had been processed and added to the queue.\n${
 						songsArray.length - enqueued
 					} skipped.`,
-				),
+				)
+				.setColor('Green'),
 		],
 		components: [row],
 	});

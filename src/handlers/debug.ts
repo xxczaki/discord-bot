@@ -12,11 +12,13 @@ export default async function debugCommandHandler(
 	const clientLatency = interaction.client.ws.ping.toFixed(0);
 
 	const queueEmbed = new EmbedBuilder()
+		.setTitle('Debug Information')
+		.setColor('Blue')
 		.setDescription(`\`\`\`\n${player.scanDeps()}\n\`\`\``)
 		.setFields([
-			{ name: 'Client latency', value: `${clientLatency}ms`, inline: true },
+			{ name: 'Client Latency', value: `${clientLatency}ms`, inline: true },
 			{
-				name: 'Event loop lag',
+				name: 'Event Loop Lag',
 				value: `${player.eventLoopLag}ms`,
 				inline: true,
 			},
@@ -26,7 +28,7 @@ export default async function debugCommandHandler(
 				inline: true,
 			},
 		])
-		.setFooter({ text: 'Event loop lag should be under 20ms.' });
+		.setFooter({ text: 'Event loop lag should be under 20ms' });
 
 	await interaction.reply({ embeds: [queueEmbed], flags: ['Ephemeral'] });
 }

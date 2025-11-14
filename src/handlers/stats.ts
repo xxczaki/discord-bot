@@ -161,19 +161,20 @@ export default async function statsCommandHandler(
 
 			const embed = new EmbedBuilder()
 				.setTitle('Statistics')
+				.setColor('Blue')
 				.setDescription(
-					`**Top 10 most frequently played**:\n${
+					`**Top 10 Most Frequently Played**:\n${
 						playedList || '*empty*'
-					}\n\n**Most requested by**:\n${requestedList || '*empty*'}\n\n**Top 10 most enqueued playlists**:\n${playlistList || '*empty*'}`,
+					}\n\n**Most Requested By**:\n${requestedList || '*empty*'}\n\n**Top 10 Most Enqueued Playlists**:\n${playlistList || '*empty*'}`,
 				)
 				.setFields([
 					{
-						name: 'Total played',
+						name: 'Total Played',
 						value: listToCount.reduce((a, [, b]) => a + b, 0).toString(),
 						inline: true,
 					},
 				])
-				.setFooter({ text: 'Not showing tracks played just once.' });
+				.setFooter({ text: 'Not showing tracks played just once' });
 
 			await interaction.editReply({ embeds: [embed], content: null });
 			resolve(void 'empty');

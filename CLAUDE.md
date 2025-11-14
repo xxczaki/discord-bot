@@ -131,6 +131,15 @@ This is a Discord music bot built with TypeScript using the discord-player libra
 - **Type Safety**: Use `isObject()`, `getEnvironmentVariable()` and other type-safe utilities
 - **Variable Naming**: Use descriptive names, avoid single-letter variables (e.g., use `field` instead of `f`, `item` instead of `i`)
 
+### Discord.js Embed Styling
+
+- **Colors**: Always set a color using `.setColor()` - use `'Blue'` for informational embeds, `'Green'` for success, `'Orange'` for warnings, `'Red'` for errors
+- **Titles**: All embeds should have a title using `.setTitle()` - use Title Case
+- **Field Names**: Use Title Case for all field names (e.g., "Total Played", "Client Latency")
+- **Emojis**: Use sparingly - only in titles where they add meaningful context (e.g., "🔄 Queue Recovery", "⚠️ Partial Recovery") - avoid in regular content messages unless providing functional information
+- **Text Style**: Use simple, grammatically correct American English - avoid unnecessary punctuation in footers
+- **Consistency**: Maintain uniform styling across all embeds for a professional appearance
+
 ### Key Utilities Available
 
 - `isObject()` - Type-safe object checking

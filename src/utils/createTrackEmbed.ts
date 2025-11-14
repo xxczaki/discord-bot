@@ -13,6 +13,7 @@ const CACHE_DURATION_MS = 30_000;
 async function createTrackEmbed(track: Track, description: string) {
 	const embed = new EmbedBuilder()
 		.setTitle(track.title)
+		.setColor('Blue')
 		.setDescription(description)
 		.setThumbnail(getTrackThumbnail(track))
 		.setURL(track.url)

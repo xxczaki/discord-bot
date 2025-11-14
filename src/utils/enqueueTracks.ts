@@ -66,7 +66,7 @@ export default async function enqueueTracks({
 		embed
 			.setTitle('⚠️ Partial Recovery')
 			.setDescription(
-				'The first track failed to load. Attempting to load remaining tracks…',
+				'The first track failed to load. Attempting to load the remaining tracks…',
 			)
 			.setColor('Orange');
 
@@ -104,7 +104,9 @@ export default async function enqueueTracks({
 			content: null,
 			embeds: [
 				embed
-					.setTitle(firstTrackFailed ? '⚠️ Partial Recovery' : '✅ Complete')
+					.setTitle(
+						firstTrackFailed ? '⚠️ Partial Recovery' : '✅ Recovery Complete',
+					)
 					.setDescription(
 						firstTrackFailed
 							? 'The first track failed to load, but the queue is ready.'
@@ -157,7 +159,7 @@ export default async function enqueueTracks({
 		content: null,
 		embeds: [
 			embed
-				.setTitle(wasPartial ? '⚠️ Partial Recovery' : '✅ Complete')
+				.setTitle(wasPartial ? '⚠️ Partial Recovery' : '✅ Recovery Complete')
 				.setDescription(
 					skipped > 0
 						? pluralizeTracks`Successfully recovered ${successfullyEnqueued} ${null}.\n\n${skipped} ${null} could not be loaded (may be unavailable, region-locked, or removed).`

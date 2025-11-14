@@ -6,6 +6,8 @@ export default async function avatarCommandHandler(
 	const user = interaction.options.getUser('user', true);
 
 	const queueEmbed = new EmbedBuilder()
+		.setTitle('Avatar')
+		.setColor('Blue')
 		.setDescription(`Server avatar of <@!${user.id}>`)
 		.setImage(user.avatarURL({ size: 512 }));
 

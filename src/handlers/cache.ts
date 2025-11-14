@@ -64,7 +64,7 @@ export default async function cacheCommandHandler(
 		collector?.on('collect', async (buttonInteraction: ButtonInteraction) => {
 			if (buttonInteraction.user.id !== OWNER_ID) {
 				await buttonInteraction.reply({
-					content: '❌ Only the bot owner can use these buttons.',
+					content: 'Only the bot owner can use these buttons.',
 					flags: ['Ephemeral'],
 				});
 				return;
@@ -126,7 +126,7 @@ export default async function cacheCommandHandler(
 	} catch (error) {
 		reportError(error, 'Failed to gather cache statistics');
 		await interaction.editReply({
-			content: '❌ Something went wrong while gathering cache statistics.',
+			content: 'Something went wrong while gathering cache statistics.',
 		});
 	}
 }
@@ -302,38 +302,41 @@ function formatCacheField(
 }
 
 function createCacheStatsEmbed(stats: CacheStats): EmbedBuilder {
-	return new EmbedBuilder().setFields([
-		{
-			name: 'Query cache',
-			value: formatCacheField(
-				stats.queryCache.count,
-				stats.queryCache.size,
-				'entry',
-				'entries',
-			),
-			inline: true,
-		},
-		{
-			name: 'External playlist cache',
-			value: formatCacheField(
-				stats.externalPlaylistCache.count,
-				stats.externalPlaylistCache.size,
-				'entry',
-				'entries',
-			),
-			inline: true,
-		},
-		{
-			name: 'Opus cache',
-			value: formatCacheField(
-				stats.opusCache.count,
-				stats.opusCache.size,
-				'file',
-				'files',
-			),
-			inline: true,
-		},
-	]);
+	return new EmbedBuilder()
+		.setTitle('Cache Statistics')
+		.setColor('Blue')
+		.setFields([
+			{
+				name: 'Query Cache',
+				value: formatCacheField(
+					stats.queryCache.count,
+					stats.queryCache.size,
+					'entry',
+					'entries',
+				),
+				inline: true,
+			},
+			{
+				name: 'External Playlist Cache',
+				value: formatCacheField(
+					stats.externalPlaylistCache.count,
+					stats.externalPlaylistCache.size,
+					'entry',
+					'entries',
+				),
+				inline: true,
+			},
+			{
+				name: 'Opus Cache',
+				value: formatCacheField(
+					stats.opusCache.count,
+					stats.opusCache.size,
+					'file',
+					'files',
+				),
+				inline: true,
+			},
+		]);
 }
 
 function createActionRow(isOwner: boolean): ActionRowBuilder<ButtonBuilder> {

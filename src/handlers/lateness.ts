@@ -40,7 +40,7 @@ export default async function latenessCommandHandler(
 		);
 
 		const response = await interaction.reply({
-			content: '⚠️ Lateness measurement is already in progress\n',
+			content: 'Lateness measurement is already in progress.',
 			components: [row],
 		});
 
@@ -53,25 +53,25 @@ export default async function latenessCommandHandler(
 				case 'arrived':
 					await lateness.end(new Date());
 					return await answer.update({
-						content: '✅ Measurement stopped',
+						content: 'Measurement stopped.',
 						components: [],
 					});
 				case 'not-arrived':
 					await lateness.end(null);
 					return await answer.update({
-						content: '✅ Measurement stopped',
+						content: 'Measurement stopped.',
 						components: [],
 					});
 				default:
 					return await answer.update({
-						content: '⏳ Continuing to measure lateness',
+						content: 'Continuing to measure lateness.',
 						components: [],
 					});
 			}
 		} catch {
 			return interaction.editReply({
 				content:
-					'⏳ Answer not received within 1 minute, continuing to measure lateness',
+					'Answer not received within 1 minute, continuing to measure lateness.',
 				components: [],
 			});
 		}
@@ -135,15 +135,16 @@ export default async function latenessCommandHandler(
 
 				const embed = new EmbedBuilder()
 					.setTitle('Lateness')
-					.setDescription(`**20 most recent records**:\n${list || '*empty*'}`)
+					.setColor('Blue')
+					.setDescription(`**20 Most Recent Records**:\n${list || '*empty*'}`)
 					.setFields([
 						{
-							name: 'Total records',
+							name: 'Total Records',
 							value: entries.length.toString(),
 							inline: true,
 						},
 						{
-							name: 'Average delay',
+							name: 'Average Delay',
 							value: `\`${
 								Math.round(delays.reduce((a, b) => a + b, 0) / delays.length) ||
 								0
@@ -152,7 +153,7 @@ export default async function latenessCommandHandler(
 						},
 					])
 					.setFooter({
-						text: 'Not showing and counting records spanning more than 2 days.',
+						text: 'Not showing and counting records spanning more than 2 days',
 					});
 
 				try {
@@ -179,24 +180,24 @@ export default async function latenessCommandHandler(
 	await lateness.start(today);
 
 	await interaction.reply(
-		`✅ Measuring lateness, expected today at: \`${today.toLocaleTimeString(
+		`Measuring lateness, expected today at: \`${today.toLocaleTimeString(
 			'pl',
-		)}\`.`,
+		)}\``,
 	);
 }
 
 function calculateLateness(differenceInMinutes: number | null) {
 	if (!differenceInMinutes) {
-		return '❌ NOT ARRIVED';
+		return 'Not arrived';
 	}
 
 	if (differenceInMinutes <= 0) {
-		return '🟢 ON TIME / EARLY';
+		return 'On time / Early';
 	}
 
 	if (differenceInMinutes <= 15) {
-		return '🟡 LATE ≤ 15 min';
+		return 'Late ≤ 15 min';
 	}
 
-	return '🔴 LATE';
+	return 'Late';
 }

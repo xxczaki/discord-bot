@@ -78,6 +78,7 @@ export default async function queueCommandHandler(
 
 	const queueEmbed = new EmbedBuilder()
 		.setTitle('Queue')
+		.setColor('Blue')
 		.addFields([
 			{
 				name: 'Tracks',
@@ -92,7 +93,7 @@ export default async function queueCommandHandler(
 				inline: true,
 			},
 			{
-				name: 'Ending time',
+				name: 'Ending Time',
 				value: !queue?.estimatedDuration ? 'N/A' : endingTime,
 				inline: true,
 			},
