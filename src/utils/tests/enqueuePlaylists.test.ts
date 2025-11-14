@@ -198,7 +198,7 @@ it('should edit reply with completion message and shuffle button', async () => {
 		embeds: [
 			expect.objectContaining({
 				data: expect.objectContaining({
-					title: '✅ Done',
+					title: '✅ Processing Complete',
 					description: expect.stringContaining(
 						'had been processed and added to the queue',
 					),

@@ -384,7 +384,7 @@ describe('Player Error Handling', () => {
 		expect(mockEmbed.setFields).toHaveBeenCalledWith([
 			{
 				name: 'Sentry Issue ID',
-				value: 'unavailable',
+				value: 'Unavailable',
 			},
 		]);
 		expect(mockMessageEdit).toHaveBeenCalledWith({ embeds: [mockEmbed] });
@@ -408,9 +408,9 @@ describe('Player Error Handling', () => {
 		expect(mockedLogger.error).toHaveBeenCalledWith(testError, 'Player error');
 		expect(mockedCaptureException).not.toHaveBeenCalled();
 		expect(mockChannel.send).toHaveBeenCalledWith({ embeds: [mockEmbed] });
-		expect(mockEmbed.setTitle).toHaveBeenCalledWith('Track unavailable');
+		expect(mockEmbed.setTitle).toHaveBeenCalledWith('Track Unavailable');
 		expect(mockEmbed.setDescription).toHaveBeenCalledWith(
-			'❌ Could not play **Test Song** by Test Artist\n\nThis track appears to be unplayable (possibly region-locked, removed, or restricted). The queue will continue with the next track.',
+			'Could not play **Test Song** by Test Artist.\n\nThis track appears to be unplayable (possibly region-locked, removed, or restricted). The queue will continue with the next track.',
 		);
 		expect(mockEmbed.setColor).toHaveBeenCalledWith('Orange');
 	});
@@ -436,7 +436,7 @@ describe('Player Error Handling', () => {
 		expect(mockedCaptureException).not.toHaveBeenCalled();
 		expect(mockChannel.send).toHaveBeenCalledWith({ embeds: [mockEmbed] });
 		expect(mockEmbed.setDescription).toHaveBeenCalledWith(
-			'❌ Could not play **Another Song** by Another Artist\n\nThis track appears to be unplayable (possibly region-locked, removed, or restricted). The queue will continue with the next track.',
+			'Could not play **Another Song** by Another Artist.\n\nThis track appears to be unplayable (possibly region-locked, removed, or restricted). The queue will continue with the next track.',
 		);
 	});
 
@@ -453,7 +453,7 @@ describe('Player Error Handling', () => {
 		expect(mockedCaptureException).not.toHaveBeenCalled();
 		expect(mockChannel.send).toHaveBeenCalledWith({ embeds: [mockEmbed] });
 		expect(mockEmbed.setDescription).toHaveBeenCalledWith(
-			'❌ Could not play Unknown track\n\nThis track appears to be unplayable (possibly region-locked, removed, or restricted). The queue will continue with the next track.',
+			'Could not play Unknown track.\n\nThis track appears to be unplayable (possibly region-locked, removed, or restricted). The queue will continue with the next track.',
 		);
 	});
 
@@ -481,8 +481,8 @@ describe('Player Error Handling', () => {
 
 		expectBasicErrorHandling(testError);
 		expect(mockChannel.send).toHaveBeenCalledWith({ embeds: [mockEmbed] });
-		expect(mockEmbed.setDescription).toHaveBeenCalledWith(
-			'🛑 Unable to recover – the queue has no voice channel associated with it.\n\nTip: try using the `/recover` command directly.',
+		expect(mockEmbed.setDescription).toHaveBeenLastCalledWith(
+			'Unable to recover. The queue has no voice channel associated with it.\n\nTip: Try using the `/recover` command directly.',
 		);
 	});
 });
@@ -619,8 +619,8 @@ describe('Queue Recovery', () => {
 		await errorHandler(mockQueue, testError);
 
 		expect(mockQueue.delete).toHaveBeenCalled();
-		expect(mockEmbed.setDescription).toHaveBeenCalledWith(
-			'🛑 Found nothing to recover.',
+		expect(mockEmbed.setDescription).toHaveBeenLastCalledWith(
+			'Found nothing to recover.',
 		);
 		expect(mockMessageEdit).toHaveBeenCalledWith({ embeds: [mockEmbed] });
 		expect(mockedEnqueueTracks).not.toHaveBeenCalled();
@@ -649,8 +649,8 @@ describe('Queue Recovery', () => {
 		expect(mockQueueRecoveryInstance.getContents).toHaveBeenCalledWith(
 			mockPlayer,
 		);
-		expect(mockEmbed.setDescription).toHaveBeenCalledWith(
-			'🛑 Unable to recover – original channel not found.\n\nTip: try using the `/recover` command directly.',
+		expect(mockEmbed.setDescription).toHaveBeenLastCalledWith(
+			'Unable to recover. Original channel not found.\n\nTip: Try using the `/recover` command directly.',
 		);
 		expect(mockMessageEdit).toHaveBeenCalledWith({ embeds: [mockEmbed] });
 		expect(mockedEnqueueTracks).not.toHaveBeenCalled();
@@ -669,8 +669,8 @@ describe('Queue Recovery', () => {
 		const errorHandler = getPlayerEventsErrorHandler();
 		await errorHandler(mockQueue, testError);
 
-		expect(mockEmbed.setDescription).toHaveBeenCalledWith(
-			'🛑 Unable to recover – queue recovery service unavailable.',
+		expect(mockEmbed.setDescription).toHaveBeenLastCalledWith(
+			'Unable to recover. Queue recovery service unavailable.',
 		);
 		expect(mockMessageEdit).toHaveBeenCalledWith({ embeds: [mockEmbed] });
 	});
@@ -740,7 +740,7 @@ describe('Queue Recovery', () => {
 			mockPlayer,
 		);
 		expect(mockEmbed.setDescription).toHaveBeenLastCalledWith(
-			'❌ Recovery failed: Failed to get queue contents',
+			'Recovery failed: Failed to get queue contents',
 		);
 		expect(mockMessageEdit).toHaveBeenLastCalledWith({ embeds: [mockEmbed] });
 	});

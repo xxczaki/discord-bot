@@ -74,7 +74,7 @@ describe('when lateness is already locked', () => {
 		await latenessCommandHandler(mockInteraction);
 
 		expect(mockInteraction.reply).toHaveBeenCalledWith({
-			content: '⚠️ Lateness measurement is already in progress\n',
+			content: 'Lateness measurement is already in progress.',
 			components: expect.arrayContaining([
 				expect.objectContaining({
 					components: expect.arrayContaining([
@@ -113,7 +113,7 @@ describe('when lateness is already locked', () => {
 
 		expect(mockLatenessHandler.end).toHaveBeenCalledWith(expect.any(Date));
 		expect(mockAnswer.update).toHaveBeenCalledWith({
-			content: '✅ Measurement stopped',
+			content: 'Measurement stopped.',
 			components: [],
 		});
 	});
@@ -126,7 +126,7 @@ describe('when lateness is already locked', () => {
 
 		expect(mockLatenessHandler.end).toHaveBeenCalledWith(null);
 		expect(mockAnswer.update).toHaveBeenCalledWith({
-			content: '✅ Measurement stopped',
+			content: 'Measurement stopped.',
 			components: [],
 		});
 	});
@@ -139,7 +139,7 @@ describe('when lateness is already locked', () => {
 
 		expect(mockLatenessHandler.end).not.toHaveBeenCalled();
 		expect(mockAnswer.update).toHaveBeenCalledWith({
-			content: '⏳ Continuing to measure lateness',
+			content: 'Continuing to measure lateness.',
 			components: [],
 		});
 	});
@@ -151,7 +151,7 @@ describe('when lateness is already locked', () => {
 
 		expect(mockInteraction.editReply).toHaveBeenCalledWith({
 			content:
-				'⏳ Answer not received within 1 minute, continuing to measure lateness',
+				'Answer not received within 1 minute, continuing to measure lateness.',
 			components: [],
 		});
 	});
@@ -178,7 +178,7 @@ describe('when starting new measurement', () => {
 		await latenessCommandHandler(mockInteraction);
 
 		expect(mockInteraction.reply).toHaveBeenCalledWith(
-			expect.stringContaining('✅ Measuring lateness, expected today at:'),
+			expect.stringContaining('Measuring lateness, expected today at:'),
 		);
 	});
 });
@@ -227,21 +227,21 @@ describe('when showing stats without expected hour', () => {
 				expect.objectContaining({
 					data: expect.objectContaining({
 						title: 'Lateness',
-						description: expect.stringContaining('**20 most recent records**:'),
+						description: expect.stringContaining('**20 Most Recent Records**:'),
 						fields: expect.arrayContaining([
 							expect.objectContaining({
-								name: 'Total records',
+								name: 'Total Records',
 								value: '1',
 								inline: true,
 							}),
 							expect.objectContaining({
-								name: 'Average delay',
+								name: 'Average Delay',
 								value: expect.stringContaining('5 min'),
 								inline: true,
 							}),
 						]),
 						footer: expect.objectContaining({
-							text: 'Not showing and counting records spanning more than 2 days.',
+							text: 'Not showing and counting records spanning more than 2 days',
 						}),
 					}),
 				}),
@@ -268,11 +268,11 @@ describe('when showing stats without expected hour', () => {
 						description: expect.stringContaining('*empty*'),
 						fields: expect.arrayContaining([
 							expect.objectContaining({
-								name: 'Total records',
+								name: 'Total Records',
 								value: '0',
 							}),
 							expect.objectContaining({
-								name: 'Average delay',
+								name: 'Average Delay',
 								value: expect.stringContaining('0 min'),
 							}),
 						]),
@@ -348,7 +348,7 @@ describe('when showing stats without expected hour', () => {
 					data: expect.objectContaining({
 						fields: expect.arrayContaining([
 							expect.objectContaining({
-								name: 'Average delay',
+								name: 'Average Delay',
 								value: expect.stringContaining('5 min'),
 							}),
 						]),
@@ -380,7 +380,7 @@ describe('when showing stats without expected hour', () => {
 			embeds: [
 				expect.objectContaining({
 					data: expect.objectContaining({
-						description: expect.stringContaining('❌ NOT ARRIVED'),
+						description: expect.stringContaining('Not arrived'),
 					}),
 				}),
 			],
@@ -418,7 +418,7 @@ describe('calculateLateness function behavior', () => {
 			embeds: [
 				expect.objectContaining({
 					data: expect.objectContaining({
-						description: expect.stringContaining('❌ NOT ARRIVED'),
+						description: expect.stringContaining('Not arrived'),
 					}),
 				}),
 			],
@@ -454,7 +454,7 @@ describe('calculateLateness function behavior', () => {
 			embeds: [
 				expect.objectContaining({
 					data: expect.objectContaining({
-						description: expect.stringContaining('🟢 ON TIME / EARLY'),
+						description: expect.stringContaining('On time / Early'),
 					}),
 				}),
 			],
@@ -490,7 +490,7 @@ describe('calculateLateness function behavior', () => {
 			embeds: [
 				expect.objectContaining({
 					data: expect.objectContaining({
-						description: expect.stringContaining('🟡 LATE ≤ 15 min'),
+						description: expect.stringContaining('Late ≤ 15 min'),
 					}),
 				}),
 			],
@@ -526,7 +526,7 @@ describe('calculateLateness function behavior', () => {
 			embeds: [
 				expect.objectContaining({
 					data: expect.objectContaining({
-						description: expect.stringContaining('🔴 LATE'),
+						description: expect.stringContaining('Late'),
 					}),
 				}),
 			],

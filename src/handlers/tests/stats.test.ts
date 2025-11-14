@@ -353,10 +353,8 @@ it('should only show tracks played more than once in top list', async () => {
 		const embed = (callArg as { embeds: EmbedBuilder[] }).embeds[0];
 
 		expect(embed.data.description).toContain(
-			'**Top 10 most frequently played**:\n*empty*',
+			'**Top 10 Most Frequently Played**:\n*empty*',
 		);
-		expect(embed.data.footer?.text).toBe(
-			'Not showing tracks played just once.',
-		);
+		expect(embed.data.footer?.text).toBe('Not showing tracks played just once');
 	}
 });

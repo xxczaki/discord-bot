@@ -151,14 +151,14 @@ describe('cache command handler', () => {
 		expect(call).toHaveProperty('embeds');
 
 		const embed = call.embeds?.[0];
-		expect(embed?.data.title).toBeUndefined();
+		expect(embed?.data.title).toBe('Cache Statistics');
 		expect(embed?.data.fields).toHaveLength(3);
 
 		const fieldNames = embed?.data.fields.map((field) => field.name);
 		expect(fieldNames).toEqual([
-			'Query cache',
-			'External playlist cache',
-			'Opus cache',
+			'Query Cache',
+			'External Playlist Cache',
+			'Opus Cache',
 		]);
 	});
 
@@ -171,13 +171,13 @@ describe('cache command handler', () => {
 		const call = getEditReplyCall(mockInteraction);
 		const fields = call.embeds?.[0]?.data.fields;
 
-		expect(fields?.find((field) => field.name === 'Query cache')?.value).toBe(
+		expect(fields?.find((field) => field.name === 'Query Cache')?.value).toBe(
 			'0 entries\n0 B',
 		);
 		expect(
-			fields?.find((field) => field.name === 'External playlist cache')?.value,
+			fields?.find((field) => field.name === 'External Playlist Cache')?.value,
 		).toBe('0 entries\n0 B');
-		expect(fields?.find((f) => f.name === 'Opus cache')?.value).toBe(
+		expect(fields?.find((f) => f.name === 'Opus Cache')?.value).toBe(
 			'0 files\n0 B',
 		);
 	});
@@ -218,7 +218,7 @@ describe('cache command handler', () => {
 
 		const call = getEditReplyCall(mockInteraction);
 		const opusCacheField = call.embeds?.[0]?.data.fields.find(
-			(field) => field.name === 'Opus cache',
+			(field) => field.name === 'Opus Cache',
 		);
 
 		expect(opusCacheField?.value).toBe('0 files\n0 B');
@@ -236,7 +236,7 @@ describe('cache command handler', () => {
 
 		const call = getEditReplyCall(mockInteraction);
 		const opusCacheField = call.embeds?.[0]?.data.fields.find(
-			(field) => field.name === 'Opus cache',
+			(field) => field.name === 'Opus Cache',
 		);
 
 		expect(opusCacheField?.value).toContain('5.24 MB');
@@ -254,7 +254,7 @@ describe('cache command handler', () => {
 
 		const call = getEditReplyCall(mockInteraction);
 		const opusCacheField = call.embeds?.[0]?.data.fields.find(
-			(field) => field.name === 'Opus cache',
+			(field) => field.name === 'Opus Cache',
 		);
 
 		expect(opusCacheField?.value).toContain('1 file');
@@ -357,7 +357,7 @@ describe('cache command handler', () => {
 		await collectCallback(mockButtonInteraction);
 
 		expect(mockButtonInteraction.reply).toHaveBeenCalledWith({
-			content: '❌ Only the bot owner can use these buttons.',
+			content: 'Only the bot owner can use these buttons.',
 			flags: ['Ephemeral'],
 		});
 	});
@@ -423,7 +423,7 @@ describe('cache command handler', () => {
 
 		const call = getEditReplyCall(mockInteraction);
 		const opusCacheField = call.embeds?.[0]?.data.fields.find(
-			(field) => field.name === 'Opus cache',
+			(field) => field.name === 'Opus Cache',
 		);
 
 		expect(opusCacheField?.value).toContain('1 file');
@@ -677,7 +677,7 @@ describe('cache command handler', () => {
 
 		const firstUpdateEmbed = firstUpdateCall.embeds?.[0];
 		const firstQueryCacheField = firstUpdateEmbed?.data.fields.find(
-			(field) => field.name === 'Query cache',
+			(field) => field.name === 'Query Cache',
 		);
 
 		expect(firstQueryCacheField?.value).toContain('2 entries');
@@ -701,7 +701,7 @@ describe('cache command handler', () => {
 
 		const secondUpdateEmbed = secondUpdateCall.embeds?.[0];
 		const secondQueryCacheField = secondUpdateEmbed?.data.fields.find(
-			(field) => field.name === 'Query cache',
+			(field) => field.name === 'Query Cache',
 		);
 
 		expect(secondQueryCacheField?.value).toContain('0 entries');

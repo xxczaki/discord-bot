@@ -77,12 +77,12 @@ it('should reply with debug information embed when commit hash is available', as
 
 	if (embedData.fields) {
 		expect(embedData.fields[0]).toEqual({
-			name: 'Client latency',
+			name: 'Client Latency',
 			value: `${CLIENT_LATENCY}ms`,
 			inline: true,
 		});
 		expect(embedData.fields[1]).toEqual({
-			name: 'Event loop lag',
+			name: 'Event Loop Lag',
 			value: `${EVENT_LOOP_LAG}ms`,
 			inline: true,
 		});
@@ -94,7 +94,8 @@ it('should reply with debug information embed when commit hash is available', as
 	}
 
 	expect(embedData.footer).toEqual({
-		text: 'Event loop lag should be under 20ms.',
+		text: 'Event loop lag should be under 20ms',
+		icon_url: undefined,
 	});
 });
 
