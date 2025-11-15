@@ -19,66 +19,75 @@ export default async function statsCommandHandler(
 
 	await interaction.reply('Loading latest stats…');
 
+	const pendingPromises: Promise<void>[] = [];
+
 	return new Promise((resolve) => {
-		playStatsStream.on('data', async (keys = []) => {
+		playStatsStream.on('data', (keys = []) => {
 			playStatsStream.pause();
 
-			if (keys.length > 0) {
-				try {
-					const pipeline = redis.pipeline();
+			const processingPromise = (async () => {
+				if (keys.length > 0) {
+					try {
+						const pipeline = redis.pipeline();
 
-					for (const key of keys) {
-						pipeline.get(key);
-					}
+						for (const key of keys) {
+							pipeline.get(key);
+						}
 
-					const results = await pipeline.exec();
+						const results = await pipeline.exec();
 
-					if (results) {
-						for (const [error, rawKeyValue] of results) {
-							if (error || !rawKeyValue) {
-								continue;
-							}
-
-							try {
-								const value: {
-									title: string;
-									author: string;
-									requestedById?: string;
-								} = JSON.parse(rawKeyValue as string);
-
-								if (!value.requestedById || value.requestedById === botId) {
+						if (results) {
+							for (const [error, rawKeyValue] of results) {
+								if (error || !rawKeyValue) {
 									continue;
 								}
 
-								const identifier = `"${value.title}" by ${value.author}`;
+								try {
+									const value: {
+										title: string;
+										author: string;
+										requestedById?: string;
+									} = JSON.parse(rawKeyValue as string);
 
-								if (identifier in playStatsMap) {
-									playStatsMap[identifier] = playStatsMap[identifier] + 1;
-								} else {
-									playStatsMap[identifier] = 1;
+									if (!value.requestedById || value.requestedById === botId) {
+										continue;
+									}
+
+									const identifier = `"${value.title}" by ${value.author}`;
+
+									if (identifier in playStatsMap) {
+										playStatsMap[identifier] = playStatsMap[identifier] + 1;
+									} else {
+										playStatsMap[identifier] = 1;
+									}
+
+									if (value.requestedById in requestedStatsMap) {
+										requestedStatsMap[value.requestedById] =
+											requestedStatsMap[value.requestedById] + 1;
+										continue;
+									}
+
+									requestedStatsMap[value.requestedById] = 1;
+								} catch (error) {
+									reportError(error, 'Failed to parse stats JSON value');
 								}
-
-								if (value.requestedById in requestedStatsMap) {
-									requestedStatsMap[value.requestedById] =
-										requestedStatsMap[value.requestedById] + 1;
-									continue;
-								}
-
-								requestedStatsMap[value.requestedById] = 1;
-							} catch (error) {
-								reportError(error, 'Failed to parse stats JSON value');
 							}
 						}
+					} catch (error) {
+						reportError(error, 'Failed to process stats data from Redis');
 					}
-				} catch (error) {
-					reportError(error, 'Failed to process stats data from Redis');
 				}
-			}
+			})();
 
-			playStatsStream.resume();
+			pendingPromises.push(processingPromise);
+
+			processingPromise.finally(() => {
+				playStatsStream.resume();
+			});
 		});
 
-		playStatsStream.on('end', () => {
+		playStatsStream.on('end', async () => {
+			await Promise.all(pendingPromises);
 			playlistStatsStream.emit('start');
 		});
 
@@ -86,58 +95,68 @@ export default async function statsCommandHandler(
 			playlistStatsStream.resume();
 		});
 
-		playlistStatsStream.on('data', async (keys = []) => {
+		playlistStatsStream.on('data', (keys = []) => {
 			playlistStatsStream.pause();
 
-			if (keys.length > 0) {
-				try {
-					const pipeline = redis.pipeline();
+			const processingPromise = (async () => {
+				if (keys.length > 0) {
+					try {
+						const pipeline = redis.pipeline();
 
-					for (const key of keys) {
-						pipeline.get(key);
-					}
+						for (const key of keys) {
+							pipeline.get(key);
+						}
 
-					const results = await pipeline.exec();
+						const results = await pipeline.exec();
 
-					if (results) {
-						for (const [error, rawKeyValue] of results) {
-							if (error || !rawKeyValue) {
-								continue;
-							}
-
-							try {
-								const value: {
-									playlistId: string;
-									requestedById: string;
-								} = JSON.parse(rawKeyValue as string);
-
-								if (value.requestedById === botId) {
+						if (results) {
+							for (const [error, rawKeyValue] of results) {
+								if (error || !rawKeyValue) {
 									continue;
 								}
 
-								if (value.playlistId in playlistStatsMap) {
-									playlistStatsMap[value.playlistId] =
-										playlistStatsMap[value.playlistId] + 1;
-								} else {
-									playlistStatsMap[value.playlistId] = 1;
+								try {
+									const value: {
+										playlistId: string;
+										requestedById: string;
+									} = JSON.parse(rawKeyValue as string);
+
+									if (value.requestedById === botId) {
+										continue;
+									}
+
+									if (value.playlistId in playlistStatsMap) {
+										playlistStatsMap[value.playlistId] =
+											playlistStatsMap[value.playlistId] + 1;
+									} else {
+										playlistStatsMap[value.playlistId] = 1;
+									}
+								} catch (error) {
+									reportError(
+										error,
+										'Failed to parse playlist stats JSON value',
+									);
 								}
-							} catch (error) {
-								reportError(error, 'Failed to parse playlist stats JSON value');
 							}
 						}
+					} catch (error) {
+						reportError(
+							error,
+							'Failed to process playlist stats data from Redis',
+						);
 					}
-				} catch (error) {
-					reportError(
-						error,
-						'Failed to process playlist stats data from Redis',
-					);
 				}
-			}
+			})();
 
-			playlistStatsStream.resume();
+			pendingPromises.push(processingPromise);
+
+			processingPromise.finally(() => {
+				playlistStatsStream.resume();
+			});
 		});
 
 		playlistStatsStream.on('end', async () => {
+			await Promise.all(pendingPromises);
 			const playedList = Object.entries(playStatsMap)
 				.filter(([, occurences]) => occurences > 1)
 				.sort(([, a], [, b]) => b - a)
@@ -159,21 +178,16 @@ export default async function statsCommandHandler(
 				.map(([playlistId, count]) => `${count} — ${playlistId}`)
 				.join('\n');
 
+			const totalPlayed = listToCount.reduce((a, [, b]) => a + b, 0);
+
 			const embed = new EmbedBuilder()
 				.setTitle('Statistics')
 				.setColor('Blue')
 				.setDescription(
 					`**Top 10 Most Frequently Played**:\n${
 						playedList || '*empty*'
-					}\n\n**Most Requested By**:\n${requestedList || '*empty*'}\n\n**Top 10 Most Enqueued Playlists**:\n${playlistList || '*empty*'}`,
+					}\n\n**Total Played**: ${totalPlayed}\n\n**Most Requested By**:\n${requestedList || '*empty*'}\n\n**Top 10 Most Enqueued Playlists**:\n${playlistList || '*empty*'}`,
 				)
-				.setFields([
-					{
-						name: 'Total Played',
-						value: listToCount.reduce((a, [, b]) => a + b, 0).toString(),
-						inline: true,
-					},
-				])
 				.setFooter({ text: 'Not showing tracks played just once' });
 
 			await interaction.editReply({ embeds: [embed], content: null });

@@ -210,7 +210,7 @@ it('should skip tracks without `requestedById`', async () => {
 	if (isObject(callArg) && 'embeds' in callArg) {
 		const embed = (callArg as { embeds: EmbedBuilder[] }).embeds[0];
 		expect(embed.data.description).toContain('*empty*');
-		expect(embed.data.fields?.[0]?.value).toBe('0');
+		expect(embed.data.description).toContain('**Total Played**: 0');
 	}
 });
 
@@ -356,5 +356,98 @@ it('should only show tracks played more than once in top list', async () => {
 			'**Top 10 Most Frequently Played**:\n*empty*',
 		);
 		expect(embed.data.footer?.text).toBe('Not showing tracks played just once');
+	}
+});
+
+it('should wait for all async processing to complete before calculating totals', async () => {
+	const interaction = createMockInteraction();
+
+	const mockPlayStream = createMockStream();
+	const mockPlaylistStream = createMockStream();
+
+	mockStatsHandlerInstance.getStats
+		.mockReturnValueOnce(mockPlayStream as unknown as ScanStream)
+		.mockReturnValueOnce(mockPlaylistStream as unknown as ScanStream);
+
+	const batch1Stats = [
+		{ title: 'Song 1', author: 'Artist 1', requestedById: '111' },
+		{ title: 'Song 2', author: 'Artist 2', requestedById: '222' },
+	];
+
+	const batch2Stats = [
+		{ title: 'Song 3', author: 'Artist 3', requestedById: '333' },
+		{ title: 'Song 4', author: 'Artist 4', requestedById: '444' },
+	];
+
+	let pipeline1Resolved = false;
+	let pipeline2Resolved = false;
+
+	const mockPipeline1 = {
+		get: vi.fn().mockReturnThis(),
+		exec: vi.fn().mockImplementation(() => {
+			return new Promise((resolve) => {
+				setTimeout(() => {
+					pipeline1Resolved = true;
+					resolve([
+						[null, JSON.stringify(batch1Stats[0])],
+						[null, JSON.stringify(batch1Stats[1])],
+					]);
+				}, 50);
+			});
+		}),
+	} as unknown as ReturnType<typeof redis.pipeline>;
+
+	const mockPipeline2 = {
+		get: vi.fn().mockReturnThis(),
+		exec: vi.fn().mockImplementation(() => {
+			return new Promise((resolve) => {
+				setTimeout(() => {
+					pipeline2Resolved = true;
+					resolve([
+						[null, JSON.stringify(batch2Stats[0])],
+						[null, JSON.stringify(batch2Stats[1])],
+					]);
+				}, 100);
+			});
+		}),
+	} as unknown as ReturnType<typeof redis.pipeline>;
+
+	mockedRedis.pipeline
+		.mockReturnValueOnce(mockPipeline1)
+		.mockReturnValueOnce(mockPipeline2);
+
+	const promise = statsCommandHandler(interaction);
+
+	setTimeout(() => {
+		mockPlayStream.emit('data', ['key1', 'key2']);
+	}, 10);
+
+	setTimeout(() => {
+		mockPlayStream.emit('data', ['key3', 'key4']);
+	}, 20);
+
+	setTimeout(() => {
+		mockPlayStream.emit('end');
+	}, 30);
+
+	setTimeout(() => {
+		mockPlaylistStream.emit('data', []);
+	}, 40);
+
+	setTimeout(() => {
+		mockPlaylistStream.emit('end');
+	}, 50);
+
+	await promise;
+
+	expect(pipeline1Resolved).toBe(true);
+	expect(pipeline2Resolved).toBe(true);
+
+	const editReplyCall = vi.mocked(interaction.editReply).mock.calls[0];
+	const callArg = editReplyCall?.[0];
+
+	if (isObject(callArg) && 'embeds' in callArg) {
+		const embed = (callArg as { embeds: EmbedBuilder[] }).embeds[0];
+		expect(embed.data.description).toContain('**Total Played**: 4');
 	}
 });
