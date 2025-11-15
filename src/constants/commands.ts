@@ -295,6 +295,11 @@ export const RAW_COMMANDS: CategorizedCommand[] = [
 		category: 'Music',
 	},
 	{
+		name: 'relocate',
+		description: 'Relocate queue updates to the current text channel',
+		category: 'Music',
+	},
+	{
 		name: 'help',
 		description: 'Shos the available commands and their purpose',
 		category: 'Other',
