@@ -8,7 +8,7 @@ FROM base AS build
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/discord-player-googlevideo/package.json ./packages/discord-player-googlevideo/
 
-RUN pnpm fetch && pnpm install --offline
+RUN pnpm fetch && pnpm install --offline --frozen-lockfile
 
 COPY src ./src/
 COPY esbuild.js ./
@@ -24,7 +24,7 @@ RUN CI=true pnpm prune --prod
 
 FROM node:24.11.1-alpine
 
-ENV TZ="Europe/Warsaw"
+ENV TZ="Europe/Berlin"
 
 RUN apk add --no-cache ffmpeg
 
