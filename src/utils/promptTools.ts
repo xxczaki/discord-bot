@@ -4,18 +4,25 @@ import { z } from 'zod';
 import logger from './logger';
 import pluralize from './pluralize';
 import {
+	deduplicateQueue,
 	moveTracksByPattern,
+	pausePlayback,
 	removeTracksByPattern,
+	resumePlayback,
+	setVolume,
 	skipCurrentTrack,
 } from './queueOperations';
 
 const pluralizeTracks = pluralize('track', 'tracks');
+const pluralizeDuplicates = pluralize('duplicate', 'duplicates');
 
 export interface ToolResult {
 	success?: boolean;
 	removedCount?: number;
 	movedCount?: number;
 	skippedCurrent?: boolean;
+	wasPaused?: boolean;
+	volume?: number;
 	error?: string;
 	[key: string]: unknown;
 }
@@ -116,6 +123,75 @@ export function executeSkipCurrentTrack(queue: GuildQueue) {
 }
 
 /**
+ * Execute pausePlayback operation
+ */
+export function executePausePlayback(queue: GuildQueue) {
+	try {
+		return pausePlayback(queue);
+	} catch (error) {
+		logger.error(
+			{
+				error: error instanceof Error ? error.message : String(error),
+			},
+			'[PromptTool] pausePlayback failed',
+		);
+		throw error;
+	}
+}
+
+/**
+ * Execute resumePlayback operation
+ */
+export function executeResumePlayback(queue: GuildQueue) {
+	try {
+		return resumePlayback(queue);
+	} catch (error) {
+		logger.error(
+			{
+				error: error instanceof Error ? error.message : String(error),
+			},
+			'[PromptTool] resumePlayback failed',
+		);
+		throw error;
+	}
+}
+
+/**
+ * Execute setVolume operation
+ */
+export function executeSetVolume(queue: GuildQueue, volume: number) {
+	try {
+		return setVolume(queue, volume);
+	} catch (error) {
+		logger.error(
+			{
+				error: error instanceof Error ? error.message : String(error),
+				volume,
+			},
+			'[PromptTool] setVolume failed',
+		);
+		throw error;
+	}
+}
+
+/**
+ * Execute deduplicateQueue operation
+ */
+export function executeDeduplicateQueue(queue: GuildQueue) {
+	try {
+		return deduplicateQueue(queue);
+	} catch (error) {
+		logger.error(
+			{
+				error: error instanceof Error ? error.message : String(error),
+			},
+			'[PromptTool] deduplicateQueue failed',
+		);
+		throw error;
+	}
+}
+
+/**
  * Unified registry of tools with their definitions and UI messages
  */
 const TOOL_REGISTRY: Record<string, ToolDefinition> = {
@@ -202,6 +278,78 @@ const TOOL_REGISTRY: Record<string, ToolDefinition> = {
 			success: () => 'Skipped current track',
 		},
 	},
+	pausePlayback: {
+		createTool: (context: ToolContext) =>
+			tool({
+				description: 'Pause the currently playing track',
+				inputSchema: z.object({}),
+				execute: async () => {
+					return executePausePlayback(context.queue);
+				},
+			}),
+		messages: {
+			pending: () => 'Pausing playback…',
+			success: (result) => {
+				if (result.wasPaused) {
+					return 'Playback was already paused';
+				}
+				return 'Paused playback';
+			},
+		},
+	},
+	resumePlayback: {
+		createTool: (context: ToolContext) =>
+			tool({
+				description: 'Resume the paused track',
+				inputSchema: z.object({}),
+				execute: async () => {
+					return executeResumePlayback(context.queue);
+				},
+			}),
+		messages: {
+			pending: () => 'Resuming playback…',
+			success: () => 'Resumed playback',
+		},
+	},
+	setVolume: {
+		createTool: (context: ToolContext) =>
+			tool({
+				description:
+					'Set the playback volume (0-100, where 100 is maximum volume)',
+				inputSchema: z.object({
+					volume: z.number().min(0).max(100).describe('Volume level (0-100)'),
+				}),
+				execute: async ({ volume }) => {
+					return executeSetVolume(context.queue, volume);
+				},
+			}),
+		messages: {
+			pending: () => 'Setting volume…',
+			success: (result) => {
+				return `Set volume to ${result.volume}`;
+			},
+		},
+	},
+	deduplicateQueue: {
+		createTool: (context: ToolContext) =>
+			tool({
+				description: 'Remove duplicate tracks from the queue',
+				inputSchema: z.object({}),
+				execute: async () => {
+					return executeDeduplicateQueue(context.queue);
+				},
+			}),
+		messages: {
+			pending: () => 'Removing duplicates…',
+			success: (result) => {
+				const count = result.removedCount ?? 0;
+				if (count === 0) {
+					return 'No duplicates found';
+				}
+				return pluralizeDuplicates`Removed ${count} ${null}`;
+			},
+		},
+	},
 };
 
 /**
@@ -276,6 +424,10 @@ Available actions:
 - Remove tracks matching criteria (e.g., by artist, title)
 - Move tracks matching criteria to a specific position
 - Skip the current track
+- Pause playback
+- Resume playback
+- Set volume (0-100)
+- Remove duplicate tracks from queue
 
 Be precise with pattern matching. Use case-insensitive matching for artist/title names.`;
 }

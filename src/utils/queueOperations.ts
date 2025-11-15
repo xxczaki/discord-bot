@@ -135,3 +135,77 @@ export function skipCurrentTrack(queue: GuildQueue): SkipTrackResult {
 	queue.node.skip();
 	return { success: true };
 }
+
+export interface PausePlaybackResult {
+	success: boolean;
+	wasPaused: boolean;
+}
+
+/**
+ * Pause playback
+ */
+export function pausePlayback(queue: GuildQueue): PausePlaybackResult {
+	const wasPaused = queue.node.isPaused();
+	queue.node.setPaused(true);
+	return { success: true, wasPaused };
+}
+
+export interface ResumePlaybackResult {
+	success: boolean;
+}
+
+/**
+ * Resume playback
+ */
+export function resumePlayback(queue: GuildQueue): ResumePlaybackResult {
+	queue.node.setPaused(false);
+	return { success: true };
+}
+
+export interface SetVolumeResult {
+	success: boolean;
+	volume: number;
+}
+
+/**
+ * Set playback volume
+ */
+export function setVolume(queue: GuildQueue, volume: number): SetVolumeResult {
+	queue.node.setVolume(volume);
+	return { success: true, volume };
+}
+
+export interface DeduplicateQueueResult {
+	success: boolean;
+	removedCount: number;
+}
+
+/**
+ * Remove duplicate tracks from the queue
+ */
+export function deduplicateQueue(queue: GuildQueue): DeduplicateQueueResult {
+	const fullQueue = [queue.currentTrack ?? [], ...queue.tracks.store].flat();
+	const seenUrls = new Set<string>();
+	const tracksToRemove: Track[] = [];
+
+	for (const [index, track] of fullQueue.entries()) {
+		const trackUrl = track.url;
+
+		if (seenUrls.has(trackUrl)) {
+			if (index !== 0) {
+				tracksToRemove.push(track);
+			}
+		} else {
+			seenUrls.add(trackUrl);
+		}
+	}
+
+	for (const track of tracksToRemove) {
+		queue.removeTrack(track);
+	}
+
+	return {
+		success: true,
+		removedCount: tracksToRemove.length,
+	};
+}

@@ -1,8 +1,12 @@
 import type { GuildQueue, Track } from 'discord-player';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+	deduplicateQueue,
 	moveTracksByPattern,
+	pausePlayback,
 	removeTracksByPattern,
+	resumePlayback,
+	setVolume,
 	skipCurrentTrack,
 	TrackMatcher,
 } from '../queueOperations';
@@ -25,12 +29,16 @@ function createMockQueue(
 	return {
 		tracks: {
 			toArray: vi.fn().mockReturnValue(tracks),
+			store: tracks,
 		},
 		currentTrack: currentTrack ?? null,
 		removeTrack: vi.fn(),
 		moveTrack: vi.fn(),
 		node: {
 			skip: vi.fn(),
+			isPaused: vi.fn().mockReturnValue(false),
+			setPaused: vi.fn(),
+			setVolume: vi.fn(),
 		},
 	} as unknown as GuildQueue;
 }
@@ -271,5 +279,164 @@ describe('skipCurrentTrack', () => {
 
 		expect(result.success).toBe(true);
 		expect(queue.node.skip).toHaveBeenCalledTimes(1);
+	});
+});
+
+describe('pausePlayback', () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it('should pause playback when not already paused', () => {
+		const queue = createMockQueue([]);
+		queue.node.isPaused = vi.fn().mockReturnValue(false);
+
+		const result = pausePlayback(queue);
+
+		expect(result.success).toBe(true);
+		expect(result.wasPaused).toBe(false);
+		expect(queue.node.setPaused).toHaveBeenCalledWith(true);
+	});
+
+	it('should return wasPaused when already paused', () => {
+		const queue = createMockQueue([]);
+		queue.node.isPaused = vi.fn().mockReturnValue(true);
+
+		const result = pausePlayback(queue);
+
+		expect(result.success).toBe(true);
+		expect(result.wasPaused).toBe(true);
+		expect(queue.node.setPaused).toHaveBeenCalledWith(true);
+	});
+});
+
+describe('resumePlayback', () => {
+	it('should resume playback', () => {
+		const queue = createMockQueue([]);
+
+		const result = resumePlayback(queue);
+
+		expect(result.success).toBe(true);
+		expect(queue.node.setPaused).toHaveBeenCalledWith(false);
+	});
+});
+
+describe('setVolume', () => {
+	it('should set volume to specified level', () => {
+		const queue = createMockQueue([]);
+
+		const result = setVolume(queue, 50);
+
+		expect(result.success).toBe(true);
+		expect(result.volume).toBe(50);
+		expect(queue.node.setVolume).toHaveBeenCalledWith(50);
+	});
+
+	it('should handle minimum volume', () => {
+		const queue = createMockQueue([]);
+
+		const result = setVolume(queue, 0);
+
+		expect(result.success).toBe(true);
+		expect(result.volume).toBe(0);
+		expect(queue.node.setVolume).toHaveBeenCalledWith(0);
+	});
+
+	it('should handle maximum volume', () => {
+		const queue = createMockQueue([]);
+
+		const result = setVolume(queue, 100);
+
+		expect(result.success).toBe(true);
+		expect(result.volume).toBe(100);
+		expect(queue.node.setVolume).toHaveBeenCalledWith(100);
+	});
+});
+
+describe('deduplicateQueue', () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it('should remove duplicate tracks by URL', () => {
+		const track1 = createMockTrack('Song 1', 'Artist 1', 'track-1');
+		track1.url = 'https://example.com/track1';
+		const track2 = createMockTrack('Song 2', 'Artist 2', 'track-2');
+		track2.url = 'https://example.com/track2';
+		const track3 = createMockTrack('Song 1', 'Artist 1', 'track-3');
+		track3.url = 'https://example.com/track1';
+
+		const tracks = [track1, track2, track3];
+		const queue = createMockQueue(tracks);
+
+		const result = deduplicateQueue(queue);
+
+		expect(result.success).toBe(true);
+		expect(result.removedCount).toBe(1);
+		expect(queue.removeTrack).toHaveBeenCalledWith(track3);
+	});
+
+	it('should not remove current track even if duplicate', () => {
+		const currentTrack = createMockTrack('Current Song', 'Artist 1', 'current');
+		currentTrack.url = 'https://example.com/track1';
+		const track1 = createMockTrack('Song 1', 'Artist 1', 'track-1');
+		track1.url = 'https://example.com/track1';
+
+		const tracks = [track1];
+		const queue = createMockQueue(tracks, currentTrack);
+
+		const result = deduplicateQueue(queue);
+
+		expect(result.success).toBe(true);
+		expect(result.removedCount).toBe(1);
+		expect(queue.removeTrack).toHaveBeenCalledWith(track1);
+	});
+
+	it('should return 0 when no duplicates found', () => {
+		const track1 = createMockTrack('Song 1', 'Artist 1', 'track-1');
+		track1.url = 'https://example.com/track1';
+		const track2 = createMockTrack('Song 2', 'Artist 2', 'track-2');
+		track2.url = 'https://example.com/track2';
+
+		const tracks = [track1, track2];
+		const queue = createMockQueue(tracks);
+
+		const result = deduplicateQueue(queue);
+
+		expect(result.success).toBe(true);
+		expect(result.removedCount).toBe(0);
+		expect(queue.removeTrack).not.toHaveBeenCalled();
+	});
+
+	it('should handle empty queue', () => {
+		const queue = createMockQueue([]);
+
+		const result = deduplicateQueue(queue);
+
+		expect(result.success).toBe(true);
+		expect(result.removedCount).toBe(0);
+		expect(queue.removeTrack).not.toHaveBeenCalled();
+	});
+
+	it('should remove all duplicates in queue with multiple duplicates', () => {
+		const track1 = createMockTrack('Song 1', 'Artist 1', 'track-1');
+		track1.url = 'https://example.com/track1';
+		const track2 = createMockTrack('Song 2', 'Artist 2', 'track-2');
+		track2.url = 'https://example.com/track2';
+		const track3 = createMockTrack('Song 1', 'Artist 1', 'track-3');
+		track3.url = 'https://example.com/track1';
+		const track4 = createMockTrack('Song 2', 'Artist 2', 'track-4');
+		track4.url = 'https://example.com/track2';
+
+		const tracks = [track1, track2, track3, track4];
+		const queue = createMockQueue(tracks);
+
+		const result = deduplicateQueue(queue);
+
+		expect(result.success).toBe(true);
+		expect(result.removedCount).toBe(2);
+		expect(queue.removeTrack).toHaveBeenCalledTimes(2);
+		expect(queue.removeTrack).toHaveBeenCalledWith(track3);
+		expect(queue.removeTrack).toHaveBeenCalledWith(track4);
 	});
 });

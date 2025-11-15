@@ -2,8 +2,12 @@ import type { GuildQueue } from 'discord-player';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import logger from '../logger';
 import {
+	executeDeduplicateQueue,
 	executeMoveTracksByPattern,
+	executePausePlayback,
 	executeRemoveTracksByPattern,
+	executeResumePlayback,
+	executeSetVolume,
 	executeSkipCurrentTrack,
 	generateErrorMessage,
 	generatePendingMessage,
@@ -33,6 +37,26 @@ describe('promptToolMessages', () => {
 		it('should return pending message for skipCurrentTrack', () => {
 			expect(generatePendingMessage('skipCurrentTrack')).toBe(
 				'Skipping track…',
+			);
+		});
+
+		it('should return pending message for pausePlayback', () => {
+			expect(generatePendingMessage('pausePlayback')).toBe('Pausing playback…');
+		});
+
+		it('should return pending message for resumePlayback', () => {
+			expect(generatePendingMessage('resumePlayback')).toBe(
+				'Resuming playback…',
+			);
+		});
+
+		it('should return pending message for setVolume', () => {
+			expect(generatePendingMessage('setVolume')).toBe('Setting volume…');
+		});
+
+		it('should return pending message for deduplicateQueue', () => {
+			expect(generatePendingMessage('deduplicateQueue')).toBe(
+				'Removing duplicates…',
 			);
 		});
 
@@ -117,6 +141,112 @@ describe('promptToolMessages', () => {
 
 			expect(generateSuccessMessage('skipCurrentTrack', result)).toBe(
 				'Skipped current track',
+			);
+		});
+	});
+
+	describe('generateSuccessMessage - pausePlayback', () => {
+		it('should generate message for pausing playback', () => {
+			const result: ToolResult = {
+				success: true,
+				wasPaused: false,
+			};
+
+			expect(generateSuccessMessage('pausePlayback', result)).toBe(
+				'Paused playback',
+			);
+		});
+
+		it('should generate message when already paused', () => {
+			const result: ToolResult = {
+				success: true,
+				wasPaused: true,
+			};
+
+			expect(generateSuccessMessage('pausePlayback', result)).toBe(
+				'Playback was already paused',
+			);
+		});
+	});
+
+	describe('generateSuccessMessage - resumePlayback', () => {
+		it('should generate message for resuming playback', () => {
+			const result: ToolResult = {
+				success: true,
+			};
+
+			expect(generateSuccessMessage('resumePlayback', result)).toBe(
+				'Resumed playback',
+			);
+		});
+	});
+
+	describe('generateSuccessMessage - setVolume', () => {
+		it('should generate message with volume level', () => {
+			const result: ToolResult = {
+				success: true,
+				volume: 50,
+			};
+
+			expect(generateSuccessMessage('setVolume', result)).toBe(
+				'Set volume to 50',
+			);
+		});
+
+		it('should handle minimum volume', () => {
+			const result: ToolResult = {
+				success: true,
+				volume: 0,
+			};
+
+			expect(generateSuccessMessage('setVolume', result)).toBe(
+				'Set volume to 0',
+			);
+		});
+
+		it('should handle maximum volume', () => {
+			const result: ToolResult = {
+				success: true,
+				volume: 100,
+			};
+
+			expect(generateSuccessMessage('setVolume', result)).toBe(
+				'Set volume to 100',
+			);
+		});
+	});
+
+	describe('generateSuccessMessage - deduplicateQueue', () => {
+		it('should generate message for no duplicates found', () => {
+			const result: ToolResult = {
+				success: true,
+				removedCount: 0,
+			};
+
+			expect(generateSuccessMessage('deduplicateQueue', result)).toBe(
+				'No duplicates found',
+			);
+		});
+
+		it('should generate message for removing single duplicate', () => {
+			const result: ToolResult = {
+				success: true,
+				removedCount: 1,
+			};
+
+			expect(generateSuccessMessage('deduplicateQueue', result)).toBe(
+				'Removed 1 duplicate',
+			);
+		});
+
+		it('should generate message for removing multiple duplicates', () => {
+			const result: ToolResult = {
+				success: true,
+				removedCount: 5,
+			};
+
+			expect(generateSuccessMessage('deduplicateQueue', result)).toBe(
+				'Removed 5 duplicates',
 			);
 		});
 	});
@@ -209,6 +339,34 @@ describe('promptToolMessages', () => {
 			expect(messages?.pending()).toBe('Skipping track…');
 		});
 
+		it('should return messages for pausePlayback', () => {
+			const messages = getToolMessages('pausePlayback');
+
+			expect(messages).toBeDefined();
+			expect(messages?.pending()).toBe('Pausing playback…');
+		});
+
+		it('should return messages for resumePlayback', () => {
+			const messages = getToolMessages('resumePlayback');
+
+			expect(messages).toBeDefined();
+			expect(messages?.pending()).toBe('Resuming playback…');
+		});
+
+		it('should return messages for setVolume', () => {
+			const messages = getToolMessages('setVolume');
+
+			expect(messages).toBeDefined();
+			expect(messages?.pending()).toBe('Setting volume…');
+		});
+
+		it('should return messages for deduplicateQueue', () => {
+			const messages = getToolMessages('deduplicateQueue');
+
+			expect(messages).toBeDefined();
+			expect(messages?.pending()).toBe('Removing duplicates…');
+		});
+
 		it('should return undefined for unknown tool', () => {
 			const messages = getToolMessages('unknownTool');
 
@@ -234,6 +392,10 @@ describe('promptToolMessages', () => {
 			expect(tools).toHaveProperty('removeTracksByPattern');
 			expect(tools).toHaveProperty('moveTracksByPattern');
 			expect(tools).toHaveProperty('skipCurrentTrack');
+			expect(tools).toHaveProperty('pausePlayback');
+			expect(tools).toHaveProperty('resumePlayback');
+			expect(tools).toHaveProperty('setVolume');
+			expect(tools).toHaveProperty('deduplicateQueue');
 		});
 
 		it('should return tools with correct schema for removeTracksByPattern', () => {
@@ -258,6 +420,38 @@ describe('promptToolMessages', () => {
 
 			expect(tool).toBeDefined();
 			expect(tool.description).toContain('Skip the currently playing track');
+		});
+
+		it('should return tools with correct schema for pausePlayback', () => {
+			const tools = getAvailableTools(mockContext);
+			const tool = tools.pausePlayback;
+
+			expect(tool).toBeDefined();
+			expect(tool.description).toBe('Pause the currently playing track');
+		});
+
+		it('should return tools with correct schema for resumePlayback', () => {
+			const tools = getAvailableTools(mockContext);
+			const tool = tools.resumePlayback;
+
+			expect(tool).toBeDefined();
+			expect(tool.description).toBe('Resume the paused track');
+		});
+
+		it('should return tools with correct schema for setVolume', () => {
+			const tools = getAvailableTools(mockContext);
+			const tool = tools.setVolume;
+
+			expect(tool).toBeDefined();
+			expect(tool.description).toContain('Set the playback volume');
+		});
+
+		it('should return tools with correct schema for deduplicateQueue', () => {
+			const tools = getAvailableTools(mockContext);
+			const tool = tools.deduplicateQueue;
+
+			expect(tool).toBeDefined();
+			expect(tool.description).toBe('Remove duplicate tracks from the queue');
 		});
 	});
 
@@ -302,6 +496,10 @@ describe('promptToolMessages', () => {
 			expect(prompt).toContain('Remove tracks');
 			expect(prompt).toContain('Move tracks');
 			expect(prompt).toContain('Skip the current track');
+			expect(prompt).toContain('Pause playback');
+			expect(prompt).toContain('Resume playback');
+			expect(prompt).toContain('Set volume');
+			expect(prompt).toContain('Remove duplicate tracks');
 		});
 
 		it('should emphasize queue-only functionality', () => {
@@ -337,6 +535,10 @@ describe('promptToolMessages', () => {
 			expect(tools.removeTracksByPattern.inputSchema).toBeDefined();
 			expect(tools.moveTracksByPattern.inputSchema).toBeDefined();
 			expect(tools.skipCurrentTrack.inputSchema).toBeDefined();
+			expect(tools.pausePlayback.inputSchema).toBeDefined();
+			expect(tools.resumePlayback.inputSchema).toBeDefined();
+			expect(tools.setVolume.inputSchema).toBeDefined();
+			expect(tools.deduplicateQueue.inputSchema).toBeDefined();
 		});
 
 		it('should create removeTracksByPattern tool with artist and title pattern parameters', () => {
@@ -759,6 +961,179 @@ describe('promptToolMessages', () => {
 						error: '[object Object]',
 					},
 					'[PromptTool] skipCurrentTrack failed',
+				);
+			});
+		});
+
+		describe('executePausePlayback', () => {
+			it('should successfully pause playback', () => {
+				const mockResult = { success: true, wasPaused: false };
+				vi.spyOn(queueOperations, 'pausePlayback').mockReturnValue(mockResult);
+
+				const result = executePausePlayback(mockQueue);
+
+				expect(queueOperations.pausePlayback).toHaveBeenCalledWith(mockQueue);
+				expect(result).toEqual(mockResult);
+			});
+
+			it('should return wasPaused when already paused', () => {
+				const mockResult = { success: true, wasPaused: true };
+				vi.spyOn(queueOperations, 'pausePlayback').mockReturnValue(mockResult);
+
+				const result = executePausePlayback(mockQueue);
+
+				expect(queueOperations.pausePlayback).toHaveBeenCalledWith(mockQueue);
+				expect(result).toEqual(mockResult);
+			});
+
+			it('should handle errors and log them', () => {
+				const error = new Error('Pause operation failed');
+				vi.spyOn(queueOperations, 'pausePlayback').mockImplementation(() => {
+					throw error;
+				});
+				vi.spyOn(logger, 'error').mockImplementation(() => {});
+
+				expect(() => executePausePlayback(mockQueue)).toThrow(
+					'Pause operation failed',
+				);
+
+				expect(logger.error).toHaveBeenCalledWith(
+					{
+						error: 'Pause operation failed',
+					},
+					'[PromptTool] pausePlayback failed',
+				);
+			});
+		});
+
+		describe('executeResumePlayback', () => {
+			it('should successfully resume playback', () => {
+				const mockResult = { success: true };
+				vi.spyOn(queueOperations, 'resumePlayback').mockReturnValue(mockResult);
+
+				const result = executeResumePlayback(mockQueue);
+
+				expect(queueOperations.resumePlayback).toHaveBeenCalledWith(mockQueue);
+				expect(result).toEqual(mockResult);
+			});
+
+			it('should handle errors and log them', () => {
+				const error = new Error('Resume operation failed');
+				vi.spyOn(queueOperations, 'resumePlayback').mockImplementation(() => {
+					throw error;
+				});
+				vi.spyOn(logger, 'error').mockImplementation(() => {});
+
+				expect(() => executeResumePlayback(mockQueue)).toThrow(
+					'Resume operation failed',
+				);
+
+				expect(logger.error).toHaveBeenCalledWith(
+					{
+						error: 'Resume operation failed',
+					},
+					'[PromptTool] resumePlayback failed',
+				);
+			});
+		});
+
+		describe('executeSetVolume', () => {
+			it('should successfully set volume', () => {
+				const mockResult = { success: true, volume: 50 };
+				vi.spyOn(queueOperations, 'setVolume').mockReturnValue(mockResult);
+
+				const result = executeSetVolume(mockQueue, 50);
+
+				expect(queueOperations.setVolume).toHaveBeenCalledWith(mockQueue, 50);
+				expect(result).toEqual(mockResult);
+			});
+
+			it('should handle minimum volume', () => {
+				const mockResult = { success: true, volume: 0 };
+				vi.spyOn(queueOperations, 'setVolume').mockReturnValue(mockResult);
+
+				const result = executeSetVolume(mockQueue, 0);
+
+				expect(queueOperations.setVolume).toHaveBeenCalledWith(mockQueue, 0);
+				expect(result).toEqual(mockResult);
+			});
+
+			it('should handle maximum volume', () => {
+				const mockResult = { success: true, volume: 100 };
+				vi.spyOn(queueOperations, 'setVolume').mockReturnValue(mockResult);
+
+				const result = executeSetVolume(mockQueue, 100);
+
+				expect(queueOperations.setVolume).toHaveBeenCalledWith(mockQueue, 100);
+				expect(result).toEqual(mockResult);
+			});
+
+			it('should handle errors and log them', () => {
+				const error = new Error('Volume operation failed');
+				vi.spyOn(queueOperations, 'setVolume').mockImplementation(() => {
+					throw error;
+				});
+				vi.spyOn(logger, 'error').mockImplementation(() => {});
+
+				expect(() => executeSetVolume(mockQueue, 75)).toThrow(
+					'Volume operation failed',
+				);
+
+				expect(logger.error).toHaveBeenCalledWith(
+					{
+						error: 'Volume operation failed',
+						volume: 75,
+					},
+					'[PromptTool] setVolume failed',
+				);
+			});
+		});
+
+		describe('executeDeduplicateQueue', () => {
+			it('should successfully deduplicate queue', () => {
+				const mockResult = { success: true, removedCount: 3 };
+				vi.spyOn(queueOperations, 'deduplicateQueue').mockReturnValue(
+					mockResult,
+				);
+
+				const result = executeDeduplicateQueue(mockQueue);
+
+				expect(queueOperations.deduplicateQueue).toHaveBeenCalledWith(
+					mockQueue,
+				);
+				expect(result).toEqual(mockResult);
+			});
+
+			it('should handle no duplicates found', () => {
+				const mockResult = { success: true, removedCount: 0 };
+				vi.spyOn(queueOperations, 'deduplicateQueue').mockReturnValue(
+					mockResult,
+				);
+
+				const result = executeDeduplicateQueue(mockQueue);
+
+				expect(queueOperations.deduplicateQueue).toHaveBeenCalledWith(
+					mockQueue,
+				);
+				expect(result).toEqual(mockResult);
+			});
+
+			it('should handle errors and log them', () => {
+				const error = new Error('Deduplicate operation failed');
+				vi.spyOn(queueOperations, 'deduplicateQueue').mockImplementation(() => {
+					throw error;
+				});
+				vi.spyOn(logger, 'error').mockImplementation(() => {});
+
+				expect(() => executeDeduplicateQueue(mockQueue)).toThrow(
+					'Deduplicate operation failed',
+				);
+
+				expect(logger.error).toHaveBeenCalledWith(
+					{
+						error: 'Deduplicate operation failed',
+					},
+					'[PromptTool] deduplicateQueue failed',
 				);
 			});
 		});
