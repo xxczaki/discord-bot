@@ -1,5 +1,9 @@
 import { openai } from '@ai-sdk/openai';
-import { streamText } from 'ai';
+import {
+	InvalidArgumentError,
+	NoSuchToolError,
+	streamText,
+} from 'ai';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import type { GuildQueue, Track } from 'discord-player';
 import { useQueue } from 'discord-player';
@@ -219,6 +223,88 @@ describe('/prompt command', () => {
 
 			expect(interaction.editReply).toHaveBeenCalledWith({
 				content: 'An error occurred while processing your request.',
+			});
+		});
+
+		it('should handle stream error events', async () => {
+			const tracks = [createMockTrack()];
+			const mockQueue = createMockQueue(tracks);
+			const interaction = createMockInteraction('test');
+
+			mockedUseQueue.mockReturnValue(mockQueue);
+			mockedStreamText.mockReturnValue({
+				fullStream: (async function* () {
+					yield {
+						type: 'error' as const,
+						error: 'Stream processing error',
+					};
+
+					yield {
+						type: 'tool-call' as const,
+						toolName: 'removeTracksByPattern',
+						toolCallId: 'call-123',
+						input: { artistPattern: 'test' },
+					};
+
+					yield {
+						type: 'tool-result' as const,
+						toolCallId: 'call-123',
+						toolName: 'removeTracksByPattern',
+						output: { success: true, removedCount: 1 },
+					};
+				})(),
+			} as never);
+
+			await promptCommandHandler(interaction);
+
+			expect(interaction.editReply).toHaveBeenCalled();
+		});
+
+		it('should handle NoSuchToolError', async () => {
+			const tracks = [createMockTrack()];
+			const mockQueue = createMockQueue(tracks);
+			const interaction = createMockInteraction('test');
+
+			mockedUseQueue.mockReturnValue(mockQueue);
+
+			const mockError = new Error('Tool not found: unknownTool');
+			vi.mocked(NoSuchToolError.isInstance).mockReturnValueOnce(true);
+
+			mockedStreamText.mockReturnValue({
+				fullStream: (async function* () {
+					yield { type: 'text-delta' as const, textDelta: '' };
+					throw mockError;
+				})(),
+			} as never);
+
+			await promptCommandHandler(interaction);
+
+			expect(interaction.editReply).toHaveBeenCalledWith({
+				content: expect.stringContaining('Tool not found'),
+			});
+		});
+
+		it('should handle InvalidArgumentError', async () => {
+			const tracks = [createMockTrack()];
+			const mockQueue = createMockQueue(tracks);
+			const interaction = createMockInteraction('test');
+
+			mockedUseQueue.mockReturnValue(mockQueue);
+
+			const mockError = new Error('Invalid arguments for tool');
+			vi.mocked(InvalidArgumentError.isInstance).mockReturnValueOnce(true);
+
+			mockedStreamText.mockReturnValue({
+				fullStream: (async function* () {
+					yield { type: 'text-delta' as const, textDelta: '' };
+					throw mockError;
+				})(),
+			} as never);
+
+			await promptCommandHandler(interaction);
+
+			expect(interaction.editReply).toHaveBeenCalledWith({
+				content: expect.stringContaining('Invalid arguments'),
 			});
 		});
 	});

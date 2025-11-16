@@ -766,3 +766,147 @@ describe('createActionRowWithRemovedButton', () => {
 		expect(remainingButtons).toHaveLength(0);
 	});
 });
+
+describe('cache flush error handling', () => {
+	it('should handle flush query cache Redis pipeline error gracefully', async () => {
+		const mockInteraction = createMockInteraction('owner-123');
+
+		const mockCollector = {
+			on: vi.fn(),
+			stop: vi.fn(),
+		};
+
+		const mockCreateCollector = vi.fn(() => mockCollector);
+
+		if (mockInteraction.channel) {
+			(
+				mockInteraction.channel as unknown as MockChannel
+			).createMessageComponentCollector = mockCreateCollector;
+		}
+
+		mockOpendir.mockResolvedValue(createMockDirectory([]) as never);
+
+		const queryCacheStream = createMockStream();
+
+		vi.mocked(redis.scanStream).mockImplementation((options) => {
+			if (
+				options &&
+				typeof options === 'object' &&
+				'match' in options &&
+				options.match === 'discord-player:query-cache:*'
+			) {
+				setTimeout(() => {
+					queryCacheStream.emit('data', ['query-key-1']);
+				}, 5);
+
+				setTimeout(() => {
+					queryCacheStream.emit('end');
+				}, 10);
+
+				return queryCacheStream as never;
+			}
+
+			return createMockStream() as never;
+		});
+
+		const mockPipeline = {
+			del: vi.fn().mockReturnThis(),
+			exec: vi.fn().mockRejectedValue(new Error('Redis pipeline failed')),
+		};
+
+		vi.mocked(redis.pipeline).mockReturnValue(mockPipeline as never);
+
+		await cacheCommandHandler(mockInteraction);
+
+		const collectCallback = mockCollector.on.mock.calls.find(
+			(call) => call[0] === 'collect',
+		)?.[1];
+
+		expect(collectCallback).toBeDefined();
+
+		const buttonInteraction = {
+			user: { id: 'owner-123' },
+			customId: 'flush_query_cache',
+			deferred: false,
+			replied: false,
+			update: vi.fn().mockResolvedValue({}),
+		};
+
+		await collectCallback(buttonInteraction);
+
+		await new Promise((resolve) => setTimeout(resolve, 50));
+
+		expect(buttonInteraction.update).toHaveBeenCalled();
+	});
+
+	it('should handle flush external playlist cache Redis pipeline error gracefully', async () => {
+		const mockInteraction = createMockInteraction('owner-123');
+
+		const mockCollector = {
+			on: vi.fn(),
+			stop: vi.fn(),
+		};
+
+		const mockCreateCollector = vi.fn(() => mockCollector);
+
+		if (mockInteraction.channel) {
+			(
+				mockInteraction.channel as unknown as MockChannel
+			).createMessageComponentCollector = mockCreateCollector;
+		}
+
+		mockOpendir.mockResolvedValue(createMockDirectory([]) as never);
+
+		const playlistCacheStream = createMockStream();
+
+		vi.mocked(redis.scanStream).mockImplementation((options) => {
+			if (
+				options &&
+				typeof options === 'object' &&
+				'match' in options &&
+				options.match === 'external-playlist-cache:*'
+			) {
+				setTimeout(() => {
+					playlistCacheStream.emit('data', ['playlist-key-1']);
+				}, 5);
+
+				setTimeout(() => {
+					playlistCacheStream.emit('end');
+				}, 10);
+
+				return playlistCacheStream as never;
+			}
+
+			return createMockStream() as never;
+		});
+
+		const mockPipeline = {
+			del: vi.fn().mockReturnThis(),
+			exec: vi.fn().mockRejectedValue(new Error('Redis pipeline failed')),
+		};
+
+		vi.mocked(redis.pipeline).mockReturnValue(mockPipeline as never);
+
+		await cacheCommandHandler(mockInteraction);
+
+		const collectCallback = mockCollector.on.mock.calls.find(
+			(call) => call[0] === 'collect',
+		)?.[1];
+
+		expect(collectCallback).toBeDefined();
+
+		const buttonInteraction = {
+			user: { id: 'owner-123' },
+			customId: 'flush_external_playlist_cache',
+			deferred: false,
+			replied: false,
+			update: vi.fn().mockResolvedValue({}),
+		};
+
+		await collectCallback(buttonInteraction);
+
+		await new Promise((resolve) => setTimeout(resolve, 50));
+
+		expect(buttonInteraction.update).toHaveBeenCalled();
+	});
+});
