@@ -1,9 +1,5 @@
 import { openai } from '@ai-sdk/openai';
-import {
-	InvalidArgumentError,
-	NoSuchToolError,
-	streamText,
-} from 'ai';
+import { InvalidArgumentError, NoSuchToolError, streamText } from 'ai';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import type { GuildQueue, Track } from 'discord-player';
 import { useQueue } from 'discord-player';
