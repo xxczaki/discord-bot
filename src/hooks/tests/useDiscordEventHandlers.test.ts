@@ -247,6 +247,12 @@ it('should handle `voiceStateUpdate` and save queue', async () => {
 
 	mockedUseQueue.mockReturnValue(mockQueue as ReturnType<typeof useQueue>);
 
+	(mockPlayer.context.provide as ReturnType<typeof vi.fn>).mockImplementation(
+		async (_, callback) => {
+			await callback();
+		},
+	);
+
 	useDiscordEventHandlers(mockClient, mockPlayer);
 
 	const mockOnCalls = (mockClient.on as ReturnType<typeof vi.fn>).mock
@@ -257,9 +263,13 @@ it('should handle `voiceStateUpdate` and save queue', async () => {
 	const voiceStateHandler = voiceStateCall?.[1];
 
 	if (voiceStateHandler) {
-		voiceStateHandler(mockVoiceState);
+		await voiceStateHandler(mockVoiceState);
 	}
 
+	expect(mockPlayer.context.provide).toHaveBeenCalledWith(
+		{ guild: mockVoiceState.guild },
+		expect.any(Function),
+	);
 	expect(useQueue).toHaveBeenCalledWith(MOCK_GUILD_ID);
 });
 
@@ -277,6 +287,12 @@ it('should delete opus cache when track is not from cache', async () => {
 
 	mockedUseQueue.mockReturnValue(mockQueue as ReturnType<typeof useQueue>);
 
+	(mockPlayer.context.provide as ReturnType<typeof vi.fn>).mockImplementation(
+		async (_, callback) => {
+			await callback();
+		},
+	);
+
 	useDiscordEventHandlers(mockClient, mockPlayer);
 
 	const mockOnCalls = (mockClient.on as ReturnType<typeof vi.fn>).mock
@@ -287,7 +303,7 @@ it('should delete opus cache when track is not from cache', async () => {
 	const voiceStateHandler = voiceStateCall?.[1];
 
 	if (voiceStateHandler) {
-		voiceStateHandler(mockVoiceState);
+		await voiceStateHandler(mockVoiceState);
 	}
 
 	expect(mockedDeleteOpusCacheEntry).toHaveBeenCalledWith(mockTrack.url);
@@ -309,6 +325,12 @@ it('should not delete opus cache when track is from cache', async () => {
 
 	mockedUseQueue.mockReturnValue(mockQueue as ReturnType<typeof useQueue>);
 
+	(mockPlayer.context.provide as ReturnType<typeof vi.fn>).mockImplementation(
+		async (_, callback) => {
+			await callback();
+		},
+	);
+
 	useDiscordEventHandlers(mockClient, mockPlayer);
 
 	const mockOnCalls = (mockClient.on as ReturnType<typeof vi.fn>).mock
@@ -319,7 +341,7 @@ it('should not delete opus cache when track is from cache', async () => {
 	const voiceStateHandler = voiceStateCall?.[1];
 
 	if (voiceStateHandler) {
-		voiceStateHandler(mockVoiceState);
+		await voiceStateHandler(mockVoiceState);
 	}
 
 	expect(mockedDeleteOpusCacheEntry).not.toHaveBeenCalled();

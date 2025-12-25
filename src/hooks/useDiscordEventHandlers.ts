@@ -65,31 +65,37 @@ export default function useDiscordEventHandlers(
 	});
 
 	client.on('voiceStateUpdate', async (oldState) => {
-		const queue = useQueue(oldState.guild.id);
+		const context = {
+			guild: oldState.guild,
+		};
 
-		if (!queue || queue.size === 0) {
-			return;
-		}
+		await player.context.provide(context, async () => {
+			const queue = useQueue(oldState.guild.id);
 
-		if (queueSaveTimeout) {
-			clearTimeout(queueSaveTimeout);
-		}
+			if (!queue || queue.size === 0) {
+				return;
+			}
 
-		queueSaveTimeout = setTimeout(() => {
-			void queueRecoveryService.saveQueue(queue);
-			queueSaveTimeout = null;
-		}, QUEUE_SAVE_DEBOUNCE_MS);
+			if (queueSaveTimeout) {
+				clearTimeout(queueSaveTimeout);
+			}
 
-		const track = queue.currentTrack;
+			queueSaveTimeout = setTimeout(() => {
+				void queueRecoveryService.saveQueue(queue);
+				queueSaveTimeout = null;
+			}, QUEUE_SAVE_DEBOUNCE_MS);
 
-		if (!track) {
-			return;
-		}
+			const track = queue.currentTrack;
 
-		if (isObject(track.metadata) && track.metadata.isFromCache) {
-			return;
-		}
+			if (!track) {
+				return;
+			}
 
-		void deleteOpusCacheEntry(track.url);
+			if (isObject(track.metadata) && track.metadata.isFromCache) {
+				return;
+			}
+
+			void deleteOpusCacheEntry(track.url);
+		});
 	});
 }
