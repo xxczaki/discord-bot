@@ -192,34 +192,31 @@ describe('createSmartInteractionHandler', () => {
 		['playerSkip', () => mockTrack],
 		['emptyQueue', () => undefined],
 		['queueDelete', () => undefined],
-	])(
-		'should ignore %s events from different guilds',
-		async (eventName, getEventArgs) => {
-			const onTrackChange = vi.fn();
-			const onQueueEmpty = vi.fn();
+	])('should ignore %s events from different guilds', async (eventName, getEventArgs) => {
+		const onTrackChange = vi.fn();
+		const onQueueEmpty = vi.fn();
 
-			createSmartInteractionHandler({
-				response: mockResponse as unknown as InteractionResponse<boolean>,
-				queue: mockQueue,
-				track: mockTrack,
-				onTrackChange,
-				onQueueEmpty,
-			});
+		createSmartInteractionHandler({
+			response: mockResponse as unknown as InteractionResponse<boolean>,
+			queue: mockQueue,
+			track: mockTrack,
+			onTrackChange,
+			onQueueEmpty,
+		});
 
-			const eventHandler = getEventHandler(eventName);
-			const differentGuildQueue = createDifferentGuildQueue();
-			const eventArgs = getEventArgs();
+		const eventHandler = getEventHandler(eventName);
+		const differentGuildQueue = createDifferentGuildQueue();
+		const eventArgs = getEventArgs();
 
-			if (eventArgs) {
-				await eventHandler?.(differentGuildQueue, eventArgs);
-			} else {
-				await eventHandler?.(differentGuildQueue);
-			}
+		if (eventArgs) {
+			await eventHandler?.(differentGuildQueue, eventArgs);
+		} else {
+			await eventHandler?.(differentGuildQueue);
+		}
 
-			expect(onTrackChange).not.toHaveBeenCalled();
-			expect(onQueueEmpty).not.toHaveBeenCalled();
-		},
-	);
+		expect(onTrackChange).not.toHaveBeenCalled();
+		expect(onQueueEmpty).not.toHaveBeenCalled();
+	});
 
 	describe('playerStart event handler', () => {
 		it('should not trigger when same track starts in empty queue', async () => {
@@ -315,25 +312,25 @@ describe('createSmartInteractionHandler', () => {
 		});
 	});
 
-	it.each(['emptyQueue', 'queueDelete'])(
-		'should trigger queue empty callback for %s event',
-		async (eventName) => {
-			const onQueueEmpty = vi.fn();
+	it.each([
+		'emptyQueue',
+		'queueDelete',
+	])('should trigger queue empty callback for %s event', async (eventName) => {
+		const onQueueEmpty = vi.fn();
 
-			createSmartInteractionHandler({
-				response: mockResponse as unknown as InteractionResponse<boolean>,
-				queue: mockQueue,
-				track: mockTrack,
-				onQueueEmpty,
-			});
+		createSmartInteractionHandler({
+			response: mockResponse as unknown as InteractionResponse<boolean>,
+			queue: mockQueue,
+			track: mockTrack,
+			onQueueEmpty,
+		});
 
-			const eventHandler = getEventHandler(eventName);
-			await eventHandler?.(mockQueue);
+		const eventHandler = getEventHandler(eventName);
+		await eventHandler?.(mockQueue);
 
-			expect(onQueueEmpty).toHaveBeenCalled();
-			expect(mockResponse.edit).toHaveBeenCalledWith({ components: [] });
-		},
-	);
+		expect(onQueueEmpty).toHaveBeenCalled();
+		expect(mockResponse.edit).toHaveBeenCalledWith({ components: [] });
+	});
 
 	describe('cleanup function', () => {
 		it('should prevent cleanup from triggering multiple times', async () => {
