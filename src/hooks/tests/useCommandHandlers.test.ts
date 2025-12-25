@@ -75,26 +75,26 @@ it('should validate command against `RAW_COMMANDS` before proceeding', async () 
 it.each([
 	{ input: 'tic_tac_toe', expected: 'ticTacToe' },
 	{ input: 'help', expected: 'help' },
-])(
-	'should handle snake_case to camelCase conversion correctly for `$input` -> `$expected`',
-	async ({ input, expected }) => {
-		const interaction = createMockInteraction(input);
+])('should handle snake_case to camelCase conversion correctly for `$input` -> `$expected`', async ({
+	input,
+	expected,
+}) => {
+	const interaction = createMockInteraction(input);
 
-		await useCommandHandlers(interaction);
+	await useCommandHandlers(interaction);
 
-		expect(mockJoin).toHaveBeenCalledWith(
-			expect.any(String),
-			'handlers',
-			`${expected}.js`,
-		);
+	expect(mockJoin).toHaveBeenCalledWith(
+		expect.any(String),
+		'handlers',
+		`${expected}.js`,
+	);
 
-		expect(mockJoin).toHaveBeenCalledTimes(1);
-		const [dirname, folder, filename] = mockJoin.mock.calls[0];
-		expect(dirname).toMatch(/hooks$/);
-		expect(folder).toBe('handlers');
-		expect(filename).toBe(`${expected}.js`);
-	},
-);
+	expect(mockJoin).toHaveBeenCalledTimes(1);
+	const [dirname, folder, filename] = mockJoin.mock.calls[0];
+	expect(dirname).toMatch(/hooks$/);
+	expect(folder).toBe('handlers');
+	expect(filename).toBe(`${expected}.js`);
+});
 
 it('should handle lockdown permission denied for owner-only commands', async () => {
 	const interaction = createMockInteraction('maintenance', {
