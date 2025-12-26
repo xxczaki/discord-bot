@@ -5,3 +5,4 @@ dist/
 opus-cache
 .examples
 coverage
+.idea
