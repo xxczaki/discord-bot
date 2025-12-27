@@ -19,6 +19,7 @@ const mockInnertube = vi.hoisted(() => {
 		},
 		actions: {},
 		getBasicInfo: vi.fn(),
+		getPlaylist: vi.fn(),
 		search: vi.fn(),
 	};
 });
@@ -342,6 +343,90 @@ describe('YoutubeSabrExtractor', () => {
 
 			expect(result.tracks).toHaveLength(1);
 			expect(result.tracks[0].title).toBe('Valid Video');
+		});
+
+		it('should handle direct playlist URL', async () => {
+			const mockPlaylistInfo = {
+				info: {
+					title: 'Playlist title',
+				},
+				has_continuation: false,
+				videos: [
+					{
+						id: 'video-1',
+						title: { text: 'Playlist Video 1' },
+						author: { name: 'Author 1' },
+						duration: { seconds: 120 },
+					},
+					{
+						id: 'video-2',
+						title: { text: 'Playlist Video 2' },
+						author: { name: 'Author 2' },
+						duration: { seconds: 120 },
+					},
+				],
+			};
+
+			mockInnertube.getPlaylist.mockResolvedValue(mockPlaylistInfo);
+
+			const result = await extractor.handle(
+				'https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PLE0hg-LdSfycrpTtMImPSqFLle4yYNzWD',
+				{
+					requestedBy: { id: 'user-123' },
+				} as never,
+			);
+
+			console.log(result);
+			expect(result.playlist).toBeTruthy();
+			expect(mockInnertube.search).not.toHaveBeenCalled();
+			expect(result.tracks).toHaveLength(2);
+			expect(result.tracks[0].title).toBe('Playlist Video 1');
+			expect(result.tracks[0].author).toBe('Author 1');
+			expect(result.tracks[1].title).toBe('Playlist Video 2');
+			expect(result.tracks[1].author).toBe('Author 2');
+		});
+
+		it('should fetch playlist until everything is fetched', async () => {
+			let hasContinuation = true;
+			let callCount = 0;
+			const mockPlaylistInfo = {
+				info: {
+					title: 'Playlist title',
+				},
+				get has_continuation() {
+					return hasContinuation;
+				},
+				videos: [
+					{
+						id: 'video-1',
+						title: { text: 'Playlist Video 1' },
+						author: { name: 'Author 1' },
+						duration: { seconds: 120 },
+					},
+				],
+				getContinuation: vi.fn().mockImplementation(() => {
+					callCount++;
+					if (callCount >= 3) {
+						hasContinuation = false;
+					}
+				}),
+			};
+
+			mockInnertube.getPlaylist.mockResolvedValue(mockPlaylistInfo);
+
+			const result = await extractor.handle(
+				'https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PLE0hg-LdSfycrpTtMImPSqFLle4yYNzWD',
+				{
+					requestedBy: { id: 'user-123' },
+				} as never,
+			);
+
+			expect(result.playlist).toBeTruthy();
+			expect(mockInnertube.search).not.toHaveBeenCalled();
+			expect(mockPlaylistInfo.getContinuation).toHaveBeenCalledTimes(3);
+			expect(result.tracks).toHaveLength(1);
+			expect(result.tracks[0].title).toBe('Playlist Video 1');
+			expect(result.tracks[0].author).toBe('Author 1');
 		});
 	});
 
@@ -792,6 +877,56 @@ describe('YoutubeSabrExtractor', () => {
 			);
 
 			expect(mockInnertube.getBasicInfo).toHaveBeenCalledWith('dQw4w9WgXcQ');
+		});
+
+		it('should extract playlist ID from standard URL with query parameters', async () => {
+			await extractor.activate();
+
+			const mockVideoInfo = {
+				info: {
+					title: 'Playlist title',
+				},
+				has_continuation: false,
+				videos: [],
+			};
+
+			mockInnertube.getPlaylist.mockResolvedValue(mockVideoInfo);
+
+			await extractor.handle(
+				'https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PLE0hg-LdSfycrpTtMImPSqFLle4yYNzWD',
+				{
+					requestedBy: { id: 'user-123' },
+				} as never,
+			);
+
+			expect(mockInnertube.getPlaylist).toHaveBeenCalledWith(
+				'PLE0hg-LdSfycrpTtMImPSqFLle4yYNzWD',
+			);
+		});
+
+		it('should extract playlist ID from playlist URL', async () => {
+			await extractor.activate();
+
+			const mockVideoInfo = {
+				info: {
+					title: 'Playlist title',
+				},
+				has_continuation: false,
+				videos: [],
+			};
+
+			mockInnertube.getPlaylist.mockResolvedValue(mockVideoInfo);
+
+			await extractor.handle(
+				'https://www.youtube.com/playlist?list=PLE0hg-LdSfycrpTtMImPSqFLle4yYNzWD',
+				{
+					requestedBy: { id: 'user-123' },
+				} as never,
+			);
+
+			expect(mockInnertube.getPlaylist).toHaveBeenCalledWith(
+				'PLE0hg-LdSfycrpTtMImPSqFLle4yYNzWD',
+			);
 		});
 	});
 });
