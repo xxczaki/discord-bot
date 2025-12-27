@@ -323,7 +323,7 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 
 		const youtubePlaylist = await this.#innertube.getPlaylist(playlistId);
 		if (!youtubePlaylist) {
-			this.createResponse();
+			return this.createResponse();
 		}
 
 		while (youtubePlaylist.has_continuation) {
