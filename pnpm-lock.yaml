@@ -31,7 +31,7 @@ importers:
     dependencies:
       '@ai-sdk/openai':
         specifier: ^3.0.2
-        version: 3.0.2(zod@4.2.1)
+        version: 3.0.2(zod@4.3.2)
       '@kubernetes/client-node':
         specifier: ^1.4.0
         version: 1.4.0(bufferutil@4.1.0)
@@ -40,7 +40,7 @@ importers:
         version: 10.32.1
       ai:
         specifier: ^6.0.5
-        version: 6.0.5(zod@4.2.1)
+        version: 6.0.5(zod@4.3.2)
       bufferutil:
         specifier: ^4.1.0
         version: 4.1.0
@@ -72,8 +72,8 @@ importers:
         specifier: ^0.1.10
         version: 0.1.10
       zod:
-        specifier: ^4.2.1
-        version: 4.2.1
+        specifier: ^4.3.2
+        version: 4.3.2
     devDependencies:
       '@biomejs/biome':
         specifier: 'catalog:'
@@ -3210,32 +3210,32 @@ packages:
   zlib-sync@0.1.10:
     resolution: {integrity: sha512-t7/pYg5tLBznL1RuhmbAt8rNp5tbhr+TSrJFnMkRtrGIaPJZ6Dc0uR4u3OoQI2d6cGlVI62E3Gy6gwkxyIqr/w==}
 
-  zod@4.2.1:
-    resolution: {integrity: sha512-0wZ1IRqGGhMP76gLqz8EyfBXKk0J2qo2+H3fi4mcUP/KtTocoX08nmIAHl1Z2kJIZbZee8KOpBCSNPRgauucjw==}
+  zod@4.3.2:
+    resolution: {integrity: sha512-b8L8yn4rIVfiXyHAmnr52/ZEpDumlT0bmxiq3Ws1ybrinhflGpt12Hvv54kYnEsGPRs6o/Ka3/ppA2OWY21IVg==}
 
 snapshots:
 
   '@acemir/cssom@0.9.28': {}
 
-  '@ai-sdk/gateway@3.0.4(zod@4.2.1)':
+  '@ai-sdk/gateway@3.0.4(zod@4.3.2)':
     dependencies:
       '@ai-sdk/provider': 3.0.1
-      '@ai-sdk/provider-utils': 4.0.2(zod@4.2.1)
+      '@ai-sdk/provider-utils': 4.0.2(zod@4.3.2)
       '@vercel/oidc': 3.0.5
-      zod: 4.2.1
+      zod: 4.3.2
 
-  '@ai-sdk/openai@3.0.2(zod@4.2.1)':
+  '@ai-sdk/openai@3.0.2(zod@4.3.2)':
     dependencies:
       '@ai-sdk/provider': 3.0.1
-      '@ai-sdk/provider-utils': 4.0.2(zod@4.2.1)
-      zod: 4.2.1
+      '@ai-sdk/provider-utils': 4.0.2(zod@4.3.2)
+      zod: 4.3.2
 
-  '@ai-sdk/provider-utils@4.0.2(zod@4.2.1)':
+  '@ai-sdk/provider-utils@4.0.2(zod@4.3.2)':
     dependencies:
       '@ai-sdk/provider': 3.0.1
       '@standard-schema/spec': 1.1.0
       eventsource-parser: 3.0.6
-      zod: 4.2.1
+      zod: 4.3.2
 
   '@ai-sdk/provider@3.0.1':
     dependencies:
@@ -4504,13 +4504,13 @@ snapshots:
 
   agent-base@7.1.3: {}
 
-  ai@6.0.5(zod@4.2.1):
+  ai@6.0.5(zod@4.3.2):
     dependencies:
-      '@ai-sdk/gateway': 3.0.4(zod@4.2.1)
+      '@ai-sdk/gateway': 3.0.4(zod@4.3.2)
       '@ai-sdk/provider': 3.0.1
-      '@ai-sdk/provider-utils': 4.0.2(zod@4.2.1)
+      '@ai-sdk/provider-utils': 4.0.2(zod@4.3.2)
       '@opentelemetry/api': 1.9.0
-      zod: 4.2.1
+      zod: 4.3.2
 
   ansi-colors@4.1.3: {}
 
@@ -6258,4 +6258,4 @@ snapshots:
     dependencies:
       nan: 2.22.2
 
-  zod@4.2.1: {}
+  zod@4.3.2: {}
