@@ -4,6 +4,7 @@ import {
 	type ExtractorInfo,
 	type ExtractorSearchContext,
 	type ExtractorStreamable,
+	Playlist,
 	type SearchQueryType,
 	Track,
 } from 'discord-player';
@@ -23,6 +24,8 @@ const MAX_SEARCH_RESULTS = 10;
 const MAX_RELATED_TRACKS = 5;
 const YOUTUBE_URL_REGEX =
 	/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+const YOUTUBE_PLAYLIST_REGEX =
+	/youtube\.com\/(?:watch|playlist).*[&?]list=([a-zA-Z0-9_-]{34})/;
 const YOUTUBE_DOMAIN_REGEX = /^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\//;
 
 type VideoData = {
@@ -135,6 +138,12 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 		}
 
 		const cleanQuery = query.replace(/^(youtube:|ytsearch:)/, '').trim();
+		const playlistId = this.#extractPlaylistId(cleanQuery);
+
+		if (playlistId) {
+			return this.#handleDirectPlaylist(playlistId, context);
+		}
+
 		const videoId = this.#extractVideoId(cleanQuery);
 
 		if (videoId) {
@@ -306,6 +315,56 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 		}
 	}
 
+	async #handleDirectPlaylist(
+		playlistId: string,
+		context: ExtractorSearchContext,
+	): Promise<ExtractorInfo> {
+		if (!this.#innertube) {
+			throw new Error('YoutubeSabrExtractor not initialized');
+		}
+
+		const youtubePlaylist = await this.#innertube.getPlaylist(playlistId);
+
+		if (!youtubePlaylist) {
+			return this.createResponse();
+		}
+
+		while (youtubePlaylist.has_continuation) {
+			await youtubePlaylist.getContinuation();
+		}
+
+		const tracks = await Promise.all(
+			youtubePlaylist.videos
+				.map((video) => {
+					if (!('id' in video)) {
+						return null;
+					}
+
+					return this.#createTrackFromVideoData(
+						video as VideoData,
+						context.requestedBy,
+						video,
+					);
+				})
+				.filter((track) => !!track),
+		);
+
+		const discordPlayerPlaylist = new Playlist(this.context.player, {
+			title: youtubePlaylist.info.title || 'Unknown',
+			author: youtubePlaylist.info.author || 'Unknown',
+			type: 'playlist',
+			url: `https://www.youtube.com/playlist?list=${playlistId}`,
+			id: playlistId,
+			source: 'youtube',
+			rawPlaylist: youtubePlaylist,
+			thumbnail: youtubePlaylist.info.thumbnails?.[0]?.url,
+			description: youtubePlaylist.info.description || 'Unknown',
+			tracks,
+		});
+
+		return this.createResponse(discordPlayerPlaylist);
+	}
+
 	async #handleDirectVideo(
 		videoId: string,
 		context: ExtractorSearchContext,
@@ -423,6 +482,11 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 
 	#extractVideoId(url: string): string | null {
 		const match = url.match(YOUTUBE_URL_REGEX);
+		return match?.[1] || null;
+	}
+
+	#extractPlaylistId(url: string): string | null {
+		const match = url.match(YOUTUBE_PLAYLIST_REGEX);
 		return match?.[1] || null;
 	}
 
