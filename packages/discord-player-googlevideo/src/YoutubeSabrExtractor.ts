@@ -139,11 +139,13 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 
 		const cleanQuery = query.replace(/^(youtube:|ytsearch:)/, '').trim();
 		const playlistId = this.#extractPlaylistId(cleanQuery);
+
 		if (playlistId) {
 			return this.#handleDirectPlaylist(playlistId, context);
 		}
 
 		const videoId = this.#extractVideoId(cleanQuery);
+
 		if (videoId) {
 			return this.#handleDirectVideo(videoId, context);
 		}
@@ -322,6 +324,7 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 		}
 
 		const youtubePlaylist = await this.#innertube.getPlaylist(playlistId);
+
 		if (!youtubePlaylist) {
 			return this.createResponse();
 		}
@@ -345,6 +348,7 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 				})
 				.filter((track) => !!track),
 		);
+
 		const discordPlayerPlaylist = new Playlist(this.context.player, {
 			title: youtubePlaylist.info.title || 'Unknown',
 			author: youtubePlaylist.info.author || 'Unknown',
@@ -370,6 +374,7 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 		}
 
 		const videoInfo = await this.#innertube.getBasicInfo(videoId);
+
 		if (!videoInfo.basic_info) {
 			return this.createResponse();
 		}

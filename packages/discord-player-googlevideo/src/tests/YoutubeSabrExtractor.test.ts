@@ -376,7 +376,6 @@ describe('YoutubeSabrExtractor', () => {
 				} as never,
 			);
 
-			console.log(result);
 			expect(result.playlist).toBeTruthy();
 			expect(mockInnertube.search).not.toHaveBeenCalled();
 			expect(result.tracks).toHaveLength(2);
@@ -389,6 +388,7 @@ describe('YoutubeSabrExtractor', () => {
 		it('should fetch playlist until everything is fetched', async () => {
 			let hasContinuation = true;
 			let callCount = 0;
+
 			const mockPlaylistInfo = {
 				info: {
 					title: 'Playlist title',
@@ -406,6 +406,7 @@ describe('YoutubeSabrExtractor', () => {
 				],
 				getContinuation: vi.fn().mockImplementation(() => {
 					callCount++;
+
 					if (callCount >= 3) {
 						hasContinuation = false;
 					}
