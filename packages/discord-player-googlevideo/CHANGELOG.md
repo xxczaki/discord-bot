@@ -1,5 +1,11 @@
 # discord-player-googlevideo
 
+## 0.2.1
+
+### Patch Changes
+
+- a3b4820: YouTube playlist support
+
 ## 0.2.0
 
 ### Minor Changes
