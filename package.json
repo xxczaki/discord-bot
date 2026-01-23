@@ -27,7 +27,7 @@
 		"discord-player-spotify": "^1.1.7",
 		"discord.js": "^14.25.1",
 		"ioredis": "^5.9.2",
-		"pino": "^10.2.1",
+		"pino": "^10.3.0",
 		"sodium-native": "^5.0.10",
 		"ulid": "^3.0.2",
 		"zlib-sync": "^0.1.10",
