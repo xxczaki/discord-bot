@@ -18,6 +18,7 @@ vi.mock('../getOpusCacheDirectoryPath', () => ({
 
 interface MockTrack {
 	url: string;
+	durationMS?: number;
 	metadata?: Record<string, unknown>;
 	setMetadata: ReturnType<typeof vi.fn>;
 }
@@ -222,6 +223,61 @@ describe('onBeforeCreateStream callback', () => {
 		const result = await onBeforeCreateStreamCallback?.(mockTrack);
 
 		expect(result).toBeNull();
+	});
+
+	it('should return null and delete when file is incomplete based on duration', async () => {
+		const mockStat = vi.mocked(stat);
+
+		mockStat.mockResolvedValue({
+			size: 2_000_000,
+			mtime: new Date(Date.now() - 10000),
+		} as unknown as import('fs').Stats);
+
+		await getInitializedPlayer(mockClient);
+
+		const mockTrack: MockTrack = {
+			url: 'https://example.com/track',
+			durationMS: 300_000,
+			metadata: {},
+			setMetadata: vi.fn(),
+		};
+
+		const result = await onBeforeCreateStreamCallback?.(mockTrack);
+
+		expect(result).toBeNull();
+		expect(mockTrack.setMetadata).toHaveBeenCalledWith({
+			cacheInvalidated: true,
+		});
+	});
+
+	it('should skip duration check when `durationMS` is 0', async () => {
+		const mockStat = vi.mocked(stat);
+		const mockCreateReadStream = vi.mocked(createReadStream);
+		const mockReadStream = { pipe: vi.fn() };
+
+		mockStat.mockResolvedValue({
+			size: 2048,
+			mtime: new Date(Date.now() - 10000),
+		} as unknown as import('fs').Stats);
+		mockCreateReadStream.mockReturnValue(
+			mockReadStream as unknown as import('fs').ReadStream,
+		);
+
+		await getInitializedPlayer(mockClient);
+
+		const mockTrack: MockTrack = {
+			url: 'https://example.com/track',
+			durationMS: 0,
+			metadata: {},
+			setMetadata: vi.fn(),
+		};
+
+		const result = await onBeforeCreateStreamCallback?.(mockTrack);
+
+		expect(mockTrack.setMetadata).toHaveBeenCalledWith({
+			isFromCache: true,
+		});
+		expect(result).toBe(mockReadStream);
 	});
 
 	it('should return null on file stat error', async () => {

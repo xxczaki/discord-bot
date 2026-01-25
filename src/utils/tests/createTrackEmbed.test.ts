@@ -126,6 +126,20 @@ it('should return embed when track metadata is not an object', async () => {
 	expect(result.data.footer).toBeUndefined();
 });
 
+it('should add cache invalidated footer when `cacheInvalidated` is true', async () => {
+	const track = createMockTrack({
+		metadata: {
+			cacheInvalidated: true,
+		},
+	});
+
+	const result = await createTrackEmbed(track, EXAMPLE_DESCRIPTION);
+
+	expect(result.data.footer).toEqual({
+		text: '⚠️ Corrupted cache detected and removed',
+	});
+});
+
 it('should add cache footer when track `isFromCache`', async () => {
 	vi.mocked(stat).mockResolvedValue({
 		size: EXAMPLE_FILE_SIZE_BYTES,

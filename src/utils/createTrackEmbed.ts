@@ -39,6 +39,12 @@ async function createTrackEmbed(track: Track, description: string) {
 		return embed;
 	}
 
+	if (track.metadata.cacheInvalidated) {
+		embed.setFooter({
+			text: '⚠️ Corrupted cache detected and removed',
+		});
+	}
+
 	if (track.metadata.isFromCache) {
 		let footerText = '♻️ Streaming from the offline cache';
 

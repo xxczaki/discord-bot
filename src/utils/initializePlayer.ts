@@ -18,7 +18,15 @@ import { RedisQueryCache } from './RedisQueryCache';
 import redis from './redis';
 
 const CACHE_WRITE_BUFFER_MS = 5000;
-const MIN_CACHE_FILE_SIZE_BYTES = 1024; // 1KB
+const MIN_CACHE_FILE_SIZE_BYTES = 1024;
+
+/*
+	YouTube streams Opus audio at ~128-136 kbps (~17 KB/s).
+	We use this to estimate expected file size from track duration
+	and detect corrupted cache files (e.g., from interrupted downloads).
+*/
+const EXPECTED_BYTES_PER_SECOND = 17_000;
+const MIN_CACHE_SIZE_RATIO = 0.8;
 
 let initializedPlayer: Player;
 
@@ -66,6 +74,33 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 					void deleteOpusCacheEntry(track.url);
 
 					return null;
+				}
+
+				if (track.durationMS > 0) {
+					const expectedSize =
+						(track.durationMS / 1000) * EXPECTED_BYTES_PER_SECOND;
+					const minValidSize = expectedSize * MIN_CACHE_SIZE_RATIO;
+
+					if (stats.size < minValidSize) {
+						logger.warn(
+							{
+								filePath,
+								actualSize: stats.size,
+								expectedSize: Math.round(expectedSize),
+								durationMS: track.durationMS,
+							},
+							'Deleting corrupted cache file',
+						);
+
+						void deleteOpusCacheEntry(track.url);
+
+						track.setMetadata({
+							...(track.metadata ?? {}),
+							cacheInvalidated: true,
+						});
+
+						return null;
+					}
 				}
 
 				track.setMetadata({
