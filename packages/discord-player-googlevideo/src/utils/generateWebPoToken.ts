@@ -1,59 +1,110 @@
-import { BG, type BgConfig } from 'bgutils-js';
+import { BG, GOOG_API_KEY, USER_AGENT, buildURL } from 'bgutils-js';
+import type { WebPoSignalOutput } from 'bgutils-js';
 import { JSDOM } from 'jsdom';
+import { Innertube } from 'youtubei.js';
 
 const REQUEST_KEY = 'O43z0dpjhgX20SCx4KAo';
 
-export async function generateWebPoToken(contentBinding: string): Promise<{
+export async function generateWebPoToken(videoId: string): Promise<{
 	visitorData: string;
-	placeholderPoToken: string;
 	poToken: string;
 }> {
-	if (!contentBinding) {
-		throw new Error('Content binding required for PO token generation');
+	if (!videoId) {
+		throw new Error('Video ID required for PO token generation');
 	}
 
-	const dom = new JSDOM();
+	// Create Innertube instance without session cache to get fresh visitor data
+	const innertube = await Innertube.create({
+		user_agent: USER_AGENT,
+		enable_session_cache: false,
+	});
+	const visitorData = innertube.session.context.client.visitorData || '';
+
+	// Setup JSDOM environment for BotGuard
+	const dom = new JSDOM(
+		'<!DOCTYPE html><html lang="en"><head><title></title></head><body></body></html>',
+		{
+			url: 'https://www.youtube.com/',
+			referrer: 'https://www.youtube.com/',
+			userAgent: USER_AGENT,
+		},
+	);
 
 	Object.assign(globalThis, {
 		window: dom.window,
 		document: dom.window.document,
+		location: dom.window.location,
+		origin: dom.window.origin,
 	});
 
-	const bgConfig: BgConfig = {
-		fetch: (input: string | URL | globalThis.Request, init?: RequestInit) =>
-			fetch(input, init),
-		globalObj: globalThis,
-		identifier: contentBinding,
-		requestKey: REQUEST_KEY,
-	};
-
-	const bgChallenge = await BG.Challenge.create(bgConfig);
-
-	if (!bgChallenge) {
-		throw new Error('Failed to create BotGuard challenge');
+	if (!Reflect.has(globalThis, 'navigator')) {
+		Object.defineProperty(globalThis, 'navigator', {
+			value: dom.window.navigator,
+		});
 	}
 
-	const interpreterJavascript =
-		bgChallenge.interpreterJavascript
-			.privateDoNotAccessOrElseSafeScriptWrappedValue;
+	// Get attestation challenge from YouTube
+	const challengeResponse = await innertube.getAttestationChallenge(
+		'ENGAGEMENT_TYPE_UNBOUND',
+	);
+
+	if (!challengeResponse.bg_challenge) {
+		throw new Error('Could not get attestation challenge');
+	}
+
+	// Load BotGuard script from YouTube
+	const interpreterUrl =
+		challengeResponse.bg_challenge.interpreter_url
+			.private_do_not_access_or_else_trusted_resource_url_wrapped_value;
+	const bgScriptResponse = await fetch(`https:${interpreterUrl}`);
+	const interpreterJavascript = await bgScriptResponse.text();
 
 	if (!interpreterJavascript) {
-		throw new Error('Failed to load BotGuard VM');
+		throw new Error('Could not load BotGuard VM');
 	}
 
+	// Execute BotGuard script
 	new Function(interpreterJavascript)();
 
-	const poTokenResult = await BG.PoToken.generate({
-		program: bgChallenge.program,
-		globalName: bgChallenge.globalName,
-		bgConfig,
+	// Create BotGuard client
+	const botguard = await BG.BotGuardClient.create({
+		program: challengeResponse.bg_challenge.program,
+		globalName: challengeResponse.bg_challenge.global_name,
+		globalObj: globalThis,
 	});
 
-	const placeholderPoToken = BG.PoToken.generatePlaceholder(contentBinding);
+	// Generate WebPO token
+	const webPoSignalOutput: WebPoSignalOutput = [];
+	const botguardResponse = await botguard.snapshot({ webPoSignalOutput });
+
+	// Get integrity token
+	const integrityTokenResponse = await fetch(buildURL('GenerateIT', true), {
+		method: 'POST',
+		headers: {
+			'content-type': 'application/json+protobuf',
+			'x-goog-api-key': GOOG_API_KEY,
+			'x-user-agent': 'grpc-web-javascript/0.1',
+			'user-agent': USER_AGENT,
+		},
+		body: JSON.stringify([REQUEST_KEY, botguardResponse]),
+	});
+
+	const response = (await integrityTokenResponse.json()) as unknown[];
+
+	if (typeof response[0] !== 'string') {
+		throw new Error('Could not get integrity token');
+	}
+
+	// Create minter and generate poToken
+	const integrityTokenBasedMinter = await BG.WebPoMinter.create(
+		{ integrityToken: response[0] },
+		webPoSignalOutput,
+	);
+
+	const poToken = await integrityTokenBasedMinter.mintAsWebsafeString(videoId);
 
 	return {
-		visitorData: contentBinding,
-		placeholderPoToken,
-		poToken: poTokenResult.poToken,
+		visitorData,
+		poToken,
 	};
 }

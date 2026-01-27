@@ -1,27 +1,38 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { generateWebPoToken } from '../generateWebPoToken.js';
 
-const mockBGChallenge = {
-	interpreterJavascript: {
-		privateDoNotAccessOrElseSafeScriptWrappedValue: '',
-	},
-	program: 'test-program',
-	globalName: 'test-global',
+const mockBotGuardClient = {
+	snapshot: vi.fn(),
 };
 
-const mockBGCreate = vi.hoisted(() => vi.fn());
-const mockBGPoTokenGenerate = vi.hoisted(() => vi.fn());
-const mockBGPoTokenGeneratePlaceholder = vi.hoisted(() => vi.fn());
+const mockWebPoMinter = {
+	mintAsWebsafeString: vi.fn(),
+};
+
+const mockBGBotGuardClientCreate = vi.hoisted(() => vi.fn());
+const mockBGWebPoMinterCreate = vi.hoisted(() => vi.fn());
+const mockBuildURL = vi.hoisted(() => vi.fn());
 
 vi.mock('bgutils-js', () => ({
 	BG: {
-		Challenge: {
-			create: mockBGCreate,
+		BotGuardClient: {
+			create: mockBGBotGuardClientCreate,
 		},
-		PoToken: {
-			generate: mockBGPoTokenGenerate,
-			generatePlaceholder: mockBGPoTokenGeneratePlaceholder,
+		WebPoMinter: {
+			create: mockBGWebPoMinterCreate,
 		},
+	},
+	buildURL: mockBuildURL,
+	GOOG_API_KEY: 'test-api-key',
+	USER_AGENT: 'test-user-agent',
+}));
+
+const mockInnertubeCreate = vi.hoisted(() => vi.fn());
+const mockGetAttestationChallenge = vi.hoisted(() => vi.fn());
+
+vi.mock('youtubei.js', () => ({
+	Innertube: {
+		create: mockInnertubeCreate,
 	},
 }));
 
@@ -30,85 +41,189 @@ vi.mock('jsdom', () => {
 		JSDOM: class {
 			window = {
 				document: {},
+				location: {},
+				origin: 'https://www.youtube.com/',
+				navigator: {},
 			};
 		},
 	};
 });
+
+const mockFetch = vi.fn();
+global.fetch = mockFetch;
 
 beforeEach(() => {
 	vi.clearAllMocks();
 });
 
 describe('generateWebPoToken', () => {
-	it('should throw error when content binding is empty', async () => {
+	it('should throw error when video ID is empty', async () => {
 		await expect(generateWebPoToken('')).rejects.toThrow(
-			'Content binding required for PO token generation',
+			'Video ID required for PO token generation',
 		);
 	});
 
-	it('should throw error when BotGuard challenge creation fails', async () => {
-		mockBGCreate.mockResolvedValue(null);
-
-		await expect(generateWebPoToken('test-binding')).rejects.toThrow(
-			'Failed to create BotGuard challenge',
-		);
-	});
-
-	it('should throw error when interpreter javascript is missing', async () => {
-		mockBGCreate.mockResolvedValue({
-			interpreterJavascript: {
-				privateDoNotAccessOrElseSafeScriptWrappedValue: '',
+	it('should throw error when attestation challenge is missing', async () => {
+		mockInnertubeCreate.mockResolvedValue({
+			session: {
+				context: {
+					client: {
+						visitorData: 'test-visitor-data',
+					},
+				},
 			},
-			program: 'test-program',
-			globalName: 'test-global',
+			getAttestationChallenge: mockGetAttestationChallenge,
 		});
 
-		await expect(generateWebPoToken('test-binding')).rejects.toThrow(
-			'Failed to load BotGuard VM',
+		mockGetAttestationChallenge.mockResolvedValue({
+			bg_challenge: null,
+		});
+
+		await expect(generateWebPoToken('test-video-id')).rejects.toThrow(
+			'Could not get attestation challenge',
+		);
+	});
+
+	it('should throw error when BotGuard script fails to load', async () => {
+		mockInnertubeCreate.mockResolvedValue({
+			session: {
+				context: {
+					client: {
+						visitorData: 'test-visitor-data',
+					},
+				},
+			},
+			getAttestationChallenge: mockGetAttestationChallenge,
+		});
+
+		mockGetAttestationChallenge.mockResolvedValue({
+			bg_challenge: {
+				interpreter_url: {
+					private_do_not_access_or_else_trusted_resource_url_wrapped_value:
+						'//example.com/script.js',
+				},
+				program: 'test-program',
+				global_name: 'test-global',
+			},
+		});
+
+		mockFetch.mockResolvedValueOnce({
+			text: async () => '',
+		});
+
+		await expect(generateWebPoToken('test-video-id')).rejects.toThrow(
+			'Could not load BotGuard VM',
+		);
+	});
+
+	it('should throw error when integrity token is invalid', async () => {
+		mockInnertubeCreate.mockResolvedValue({
+			session: {
+				context: {
+					client: {
+						visitorData: 'test-visitor-data',
+					},
+				},
+			},
+			getAttestationChallenge: mockGetAttestationChallenge,
+		});
+
+		mockGetAttestationChallenge.mockResolvedValue({
+			bg_challenge: {
+				interpreter_url: {
+					private_do_not_access_or_else_trusted_resource_url_wrapped_value:
+						'//example.com/script.js',
+				},
+				program: 'test-program',
+				global_name: 'testGlobal',
+			},
+		});
+
+		mockFetch
+			.mockResolvedValueOnce({
+				text: async () => 'function testGlobal() {}',
+			})
+			.mockResolvedValueOnce({
+				json: async () => [123], // Invalid - should be string
+			});
+
+		mockBGBotGuardClientCreate.mockResolvedValue(mockBotGuardClient);
+		mockBotGuardClient.snapshot.mockResolvedValue('botguard-response');
+		mockBuildURL.mockReturnValue('https://example.com/GenerateIT');
+
+		await expect(generateWebPoToken('test-video-id')).rejects.toThrow(
+			'Could not get integrity token',
 		);
 	});
 
 	/* v8 ignore start */
 	it('should generate PO token with valid inputs', async () => {
-		mockBGCreate.mockResolvedValue({
-			...mockBGChallenge,
-			interpreterJavascript: {
-				privateDoNotAccessOrElseSafeScriptWrappedValue:
-					'var exportedVars = {}; exportedVars.nFunction = function(n) { return n; }; exportedVars.sigFunction = function(sig) { return sig; };',
+		mockInnertubeCreate.mockResolvedValue({
+			session: {
+				context: {
+					client: {
+						visitorData: 'test-visitor-data',
+					},
+				},
+			},
+			getAttestationChallenge: mockGetAttestationChallenge,
+		});
+
+		mockGetAttestationChallenge.mockResolvedValue({
+			bg_challenge: {
+				interpreter_url: {
+					private_do_not_access_or_else_trusted_resource_url_wrapped_value:
+						'//example.com/script.js',
+				},
+				program: 'test-program',
+				global_name: 'testGlobal',
 			},
 		});
 
-		mockBGPoTokenGenerate.mockResolvedValue({
-			poToken: 'generated-po-token',
-		});
+		mockFetch
+			.mockResolvedValueOnce({
+				text: async () => 'function testGlobal() {}',
+			})
+			.mockResolvedValueOnce({
+				json: async () => ['test-integrity-token'],
+			});
 
-		mockBGPoTokenGeneratePlaceholder.mockReturnValue('placeholder-token');
+		mockBGBotGuardClientCreate.mockResolvedValue(mockBotGuardClient);
+		mockBotGuardClient.snapshot.mockResolvedValue('botguard-response');
+		mockBuildURL.mockReturnValue('https://example.com/GenerateIT');
 
-		const result = await generateWebPoToken('test-binding');
+		mockBGWebPoMinterCreate.mockResolvedValue(mockWebPoMinter);
+		mockWebPoMinter.mintAsWebsafeString.mockResolvedValue('generated-po-token');
+
+		const result = await generateWebPoToken('test-video-id');
 
 		expect(result).toEqual({
-			visitorData: 'test-binding',
-			placeholderPoToken: 'placeholder-token',
+			visitorData: 'test-visitor-data',
 			poToken: 'generated-po-token',
 		});
 
-		expect(mockBGCreate).toHaveBeenCalledWith({
-			fetch: expect.any(Function),
-			globalObj: globalThis,
-			identifier: 'test-binding',
-			requestKey: 'O43z0dpjhgX20SCx4KAo',
+		expect(mockInnertubeCreate).toHaveBeenCalledWith({
+			user_agent: 'test-user-agent',
+			enable_session_cache: false,
 		});
 
-		expect(mockBGPoTokenGenerate).toHaveBeenCalledWith({
+		expect(mockGetAttestationChallenge).toHaveBeenCalledWith(
+			'ENGAGEMENT_TYPE_UNBOUND',
+		);
+
+		expect(mockBGBotGuardClientCreate).toHaveBeenCalledWith({
 			program: 'test-program',
-			globalName: 'test-global',
-			bgConfig: expect.objectContaining({
-				identifier: 'test-binding',
-			}),
+			globalName: 'testGlobal',
+			globalObj: globalThis,
 		});
 
-		expect(mockBGPoTokenGeneratePlaceholder).toHaveBeenCalledWith(
-			'test-binding',
+		expect(mockBGWebPoMinterCreate).toHaveBeenCalledWith(
+			{ integrityToken: 'test-integrity-token' },
+			expect.any(Array),
+		);
+
+		expect(mockWebPoMinter.mintAsWebsafeString).toHaveBeenCalledWith(
+			'test-video-id',
 		);
 	});
 	/* v8 ignore end */
