@@ -99,10 +99,10 @@ describe('YoutubeSabrExtractor', () => {
 		vi.clearAllMocks();
 		extractor = new YoutubeSabrExtractor({} as never, mockPlayer);
 
-	mockGenerateWebPoToken.mockResolvedValue({
-		visitorData: 'visitor-data',
-		poToken: 'po-token-123',
-	});
+		mockGenerateWebPoToken.mockResolvedValue({
+			visitorData: 'visitor-data',
+			poToken: 'po-token-123',
+		});
 	});
 
 	describe('identifier', () => {
