@@ -124,7 +124,7 @@ importers:
         specifier: ^7.1.0
         version: 7.1.0
       tsx:
-        specifier: ^4.19.4
+        specifier: ^4.21.0
         version: 4.21.0
       typescript:
         specifier: 'catalog:'
