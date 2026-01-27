@@ -1,6 +1,6 @@
 {
 	"name": "discord-player-googlevideo",
-	"version": "0.2.1",
+	"version": "0.2.2",
 	"description": "A discord-player extractor using YouTube SABR streaming with googlevideo and youtubei.js",
 	"type": "module",
 	"main": "./dist/index.js",

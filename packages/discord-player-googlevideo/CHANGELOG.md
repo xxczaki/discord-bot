@@ -1,5 +1,11 @@
 # discord-player-googlevideo
 
+## 0.2.2
+
+### Patch Changes
+
+- 284b449: Fix 60-second streaming limitation with proper PO token generation
+
 ## 0.2.1
 
 ### Patch Changes
