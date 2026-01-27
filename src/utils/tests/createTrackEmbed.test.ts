@@ -30,12 +30,18 @@ vi.mock('node:fs/promises', () => ({
 	stat: vi.fn(),
 }));
 
+vi.mock('../getOpusCacheDirectoryPath', () => ({
+	default: vi.fn(() => '/mock/cache/directory'),
+}));
+
 const createMockTrack = (overrides: Partial<Track> = {}): Track =>
 	({
 		id: EXAMPLE_TRACK_ID,
 		title: EXAMPLE_TRACK_TITLE,
+		cleanTitle: EXAMPLE_TRACK_TITLE,
 		author: EXAMPLE_TRACK_AUTHOR,
 		duration: EXAMPLE_TRACK_DURATION,
+		durationMS: 225000,
 		url: EXAMPLE_TRACK_URL,
 		thumbnail: 'https://example.com/thumb.jpg',
 		metadata: {},
@@ -163,6 +169,10 @@ it('should add cache footer without file size when stat fails', async () => {
 	vi.mocked(stat).mockRejectedValue(new Error('File not found'));
 
 	const track = createMockTrack({
+		title: 'Unique Track For Stat Fail Test',
+		cleanTitle: 'Unique Track For Stat Fail Test',
+		author: 'Unique Artist',
+		durationMS: 999000,
 		url: 'https://unique-url-for-stat-fail-test.com/track',
 		metadata: {
 			isFromCache: true,

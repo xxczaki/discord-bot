@@ -12,8 +12,11 @@ import { YoutubeSabrExtractor } from 'discord-player-googlevideo';
 import { SpotifyExtractor } from 'discord-player-spotify';
 import defineCustomFilters from './defineCustomFilters';
 import deleteOpusCacheEntry from './deleteOpusCacheEntry';
+import generateOpusCacheFilename from './generateOpusCacheFilename';
 import getOpusCacheTrackPath from './getOpusCacheTrackPath';
 import logger from './logger';
+import opusCacheIndex from './OpusCacheIndex';
+import parseOpusCacheFilename from './parseOpusCacheFilename';
 import { RedisQueryCache } from './RedisQueryCache';
 import redis from './redis';
 
@@ -40,13 +43,26 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 			queryCache: new RedisQueryCache(redis),
 		});
 
+		await opusCacheIndex.initialize();
+
 		/*
 			See:
 			- https://github.com/Androz2091/discord-player/discussions/1962
 			- https://github.com/Androz2091/discord-player/discussions/1985
 		*/
 		onBeforeCreateStream(async (track) => {
-			const filePath = getOpusCacheTrackPath(track.url);
+			const durationSeconds = Math.round(track.durationMS / 1000);
+			const matchedEntry = opusCacheIndex.findMatch(
+				track.cleanTitle,
+				track.author,
+				durationSeconds,
+			);
+
+			if (!matchedEntry) {
+				return null;
+			}
+
+			const filePath = opusCacheIndex.getFilePath(matchedEntry.filename);
 
 			if (activeWrites.has(filePath)) {
 				return null;
@@ -71,7 +87,7 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 						'Deleting undersized cache file',
 					);
 
-					void deleteOpusCacheEntry(track.url);
+					void deleteOpusCacheEntry(matchedEntry.filename);
 
 					return null;
 				}
@@ -92,7 +108,7 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 							'Deleting corrupted cache file',
 						);
 
-						void deleteOpusCacheEntry(track.url);
+						void deleteOpusCacheEntry(matchedEntry.filename);
 
 						track.setMetadata({
 							...(track.metadata ?? {}),
@@ -106,6 +122,7 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 				track.setMetadata({
 					...(track.metadata ?? {}),
 					isFromCache: true,
+					cacheFilename: matchedEntry.filename,
 				});
 
 				return createReadStream(filePath);
@@ -121,18 +138,39 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 
 			const isReadable = stream instanceof Readable;
 			const readable = isReadable ? stream : stream.stream;
+
+			if (
+				track.metadata &&
+				typeof track.metadata === 'object' &&
+				'isFromCache' in track.metadata &&
+				track.metadata.isFromCache
+			) {
+				if (isReadable) {
+					return readable;
+				}
+
+				return stream;
+			}
+
 			const interceptor = new InterceptedStream();
 
-			const filePath = getOpusCacheTrackPath(track.url);
+			const trackMetadata = {
+				title: track.cleanTitle,
+				author: track.author,
+				durationMS: track.durationMS,
+			};
+			const filePath = getOpusCacheTrackPath(trackMetadata);
+			const filename = generateOpusCacheFilename(trackMetadata);
 
 			try {
 				activeWrites.add(filePath);
 
 				const writeStream = createWriteStream(filePath);
+				let streamEndedNormally = false;
 
 				const cleanup = async () => {
 					activeWrites.delete(filePath);
-					void deleteOpusCacheEntry(track.url);
+					void deleteOpusCacheEntry(filename);
 				};
 
 				writeStream.on('error', async (error) => {
@@ -142,14 +180,28 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 
 				writeStream.on('close', () => {
 					activeWrites.delete(filePath);
+
+					const parsed = parseOpusCacheFilename(filename);
+					if (parsed) {
+						opusCacheIndex.addEntry({
+							filename,
+							title: parsed.title,
+							author: parsed.author,
+							durationSeconds: parsed.durationSeconds,
+						});
+					}
 				});
 
 				readable.on('error', async () => {
 					await cleanup();
 				});
 
+				readable.on('end', () => {
+					streamEndedNormally = true;
+				});
+
 				readable.on('close', () => {
-					if (activeWrites.has(filePath)) {
+					if (!streamEndedNormally && activeWrites.has(filePath)) {
 						void cleanup();
 					}
 				});

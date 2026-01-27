@@ -49,7 +49,11 @@ async function createTrackEmbed(track: Track, description: string) {
 		let footerText = '♻️ Streaming from the offline cache';
 
 		try {
-			const filePath = getOpusCacheTrackPath(track.url);
+			const filePath = getOpusCacheTrackPath({
+				title: track.cleanTitle,
+				author: track.author,
+				durationMS: track.durationMS,
+			});
 			const now = Date.now();
 
 			let fileSize: number | undefined;

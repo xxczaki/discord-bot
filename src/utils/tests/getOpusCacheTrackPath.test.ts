@@ -8,59 +8,80 @@ vi.mock('../getOpusCacheDirectoryPath', () => ({
 	default: vi.fn(() => '/mock/cache/directory'),
 }));
 
-vi.mock('memoize', () => ({
-	default: vi.fn((fn) => fn),
-}));
-
 beforeEach(() => {
 	vi.clearAllMocks();
 });
 
 it.each([
-	['simple URL', 'https://example.com/track.mp3'],
-	[
-		'URL with special characters',
-		'https://example.com/track with spaces & symbols!.mp3',
-	],
-	[
-		'URL with query parameters',
-		'https://example.com/track.mp3?quality=high&format=opus',
-	],
-	['very long URL', `https://example.com/${'a'.repeat(1000)}.mp3`],
-])('should generate correct path for %s', (_, url) => {
-	const expectedFilename = `${Buffer.from(url).toString('base64url')}.opus`;
+	{
+		description: 'simple track',
+		metadata: {
+			title: 'Never Gonna Give You Up',
+			author: 'Rick Astley',
+			durationMS: 213000,
+		},
+		expectedFilename: 'never_gonna_give_you_up_rick_astley_213.opus',
+	},
+	{
+		description: 'track with special characters',
+		metadata: {
+			title: 'Song: With *Special* Characters!',
+			author: 'Artist "Name"',
+			durationMS: 180000,
+		},
+		expectedFilename: 'song_with_special_characters!_artist_name_180.opus',
+	},
+	{
+		description: 'live stream (zero duration)',
+		metadata: {
+			title: 'Live Stream',
+			author: 'Streamer',
+			durationMS: 0,
+		},
+		expectedFilename: 'live_stream_streamer.opus',
+	},
+])('should generate correct path for $description', ({
+	metadata,
+	expectedFilename,
+}) => {
 	const expectedPath = join(MOCK_CACHE_DIRECTORY, expectedFilename);
 
-	const result = getOpusCacheTrackPath(url);
+	const result = getOpusCacheTrackPath(metadata);
 
 	expect(result).toBe(expectedPath);
 });
 
-it('should generate different paths for different URLs', () => {
-	const url1 = 'https://example.com/track1.mp3';
-	const url2 = 'https://example.com/track2.mp3';
+it('should generate different paths for tracks with different metadata', () => {
+	const metadata1 = { title: 'Track 1', author: 'Artist', durationMS: 180000 };
+	const metadata2 = { title: 'Track 2', author: 'Artist', durationMS: 180000 };
 
-	const result1 = getOpusCacheTrackPath(url1);
-	const result2 = getOpusCacheTrackPath(url2);
+	const result1 = getOpusCacheTrackPath(metadata1);
+	const result2 = getOpusCacheTrackPath(metadata2);
 
 	expect(result1).not.toBe(result2);
 });
 
-it('should generate same path for identical URLs', () => {
-	const url = 'https://example.com/track.mp3';
+it('should generate same path for identical metadata', () => {
+	const metadata = {
+		title: 'Same Track',
+		author: 'Same Artist',
+		durationMS: 200000,
+	};
 
-	const result1 = getOpusCacheTrackPath(url);
-	const result2 = getOpusCacheTrackPath(url);
+	const result1 = getOpusCacheTrackPath(metadata);
+	const result2 = getOpusCacheTrackPath(metadata);
 
 	expect(result1).toBe(result2);
 });
 
-it.each([
-	'https://example.com/track.mp3',
-	'https://example.com/song.wav',
-	'https://example.com/audio',
-	'https://example.com/music.flac',
-])('should always append .opus extension for `%s`', (url) => {
-	const result = getOpusCacheTrackPath(url);
+it('should always append .opus extension', () => {
+	const metadata = {
+		title: 'Any Track',
+		author: 'Any Artist',
+		durationMS: 120000,
+	};
+
+	const result = getOpusCacheTrackPath(metadata);
+
 	expect(result).toMatch(/\.opus$/);
 });

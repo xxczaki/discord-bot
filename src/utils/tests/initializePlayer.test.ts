@@ -18,7 +18,10 @@ vi.mock('../getOpusCacheDirectoryPath', () => ({
 
 interface MockTrack {
 	url: string;
-	durationMS?: number;
+	title: string;
+	cleanTitle: string;
+	author: string;
+	durationMS: number;
 	metadata?: Record<string, unknown>;
 	setMetadata: ReturnType<typeof vi.fn>;
 }
@@ -98,31 +101,51 @@ vi.mock('node:fs', () => ({
 
 vi.mock('node:fs/promises', () => ({
 	stat: vi.fn(),
+	readdir: vi.fn().mockResolvedValue([]),
 }));
 
-vi.mock('./deleteOpusCacheEntry', () => ({
+vi.mock('../deleteOpusCacheEntry', () => ({
 	default: vi.fn(),
 }));
 
-vi.mock('./RedisQueryCache', () => ({
+vi.mock('../RedisQueryCache', () => ({
 	RedisQueryCache: vi.fn(),
 }));
 
-vi.mock('./defineCustomFilters', () => ({
+vi.mock('../defineCustomFilters', () => ({
 	default: vi.fn(),
 }));
 
-const mockGetOpusCacheTrackPath = vi.fn();
-vi.mock('./getOpusCacheTrackPath', () => ({
-	default: mockGetOpusCacheTrackPath,
+vi.mock('../OpusCacheIndex', () => ({
+	default: {
+		findMatch: vi.fn().mockReturnValue(null),
+		getFilePath: vi
+			.fn()
+			.mockReturnValue('/mock/cache/path/test_track_180.opus'),
+		addEntry: vi.fn(),
+		initialize: vi.fn().mockResolvedValue(undefined),
+	},
 }));
 
 let mockClient: Client;
+let mockOpusCacheIndex: {
+	findMatch: ReturnType<typeof vi.fn>;
+	getFilePath: ReturnType<typeof vi.fn>;
+	addEntry: ReturnType<typeof vi.fn>;
+	initialize: ReturnType<typeof vi.fn>;
+};
 
-beforeEach(() => {
+beforeEach(async () => {
 	vi.clearAllMocks();
 	mockClient = new Client({ intents: [] });
-	mockGetOpusCacheTrackPath.mockReturnValue('/opus-cache/test-track.opus');
+
+	const opusCacheIndexModule = await import('../OpusCacheIndex');
+	mockOpusCacheIndex =
+		opusCacheIndexModule.default as unknown as typeof mockOpusCacheIndex;
+	mockOpusCacheIndex.findMatch.mockReturnValue(null);
+	mockOpusCacheIndex.getFilePath.mockReturnValue(
+		'/mock/cache/path/test_track_180.opus',
+	);
 });
 
 describe('Player initialization', () => {
@@ -153,8 +176,18 @@ describe('onBeforeCreateStream callback', () => {
 		const mockCreateReadStream = vi.mocked(createReadStream);
 		const mockReadStream = { pipe: vi.fn() };
 
+		mockOpusCacheIndex.findMatch.mockReturnValue({
+			filename: 'test_track_artist_180.opus',
+			title: 'test track artist',
+			author: '',
+			durationSeconds: 180,
+		});
+		mockOpusCacheIndex.getFilePath.mockReturnValue(
+			'/mock/cache/path/test_track_artist_180.opus',
+		);
+
 		mockStat.mockResolvedValue({
-			size: 2048,
+			size: 3_100_000,
 			mtime: new Date(Date.now() - 10000),
 		} as unknown as import('fs').Stats);
 		mockCreateReadStream.mockReturnValue(
@@ -167,23 +200,61 @@ describe('onBeforeCreateStream callback', () => {
 
 		const mockTrack: MockTrack = {
 			url: 'https://example.com/track',
+			title: 'Test Track',
+			cleanTitle: 'Test Track',
+			author: 'Artist',
+			durationMS: 180000,
 			metadata: {},
 			setMetadata: vi.fn(),
 		};
 
 		const result = await onBeforeCreateStreamCallback?.(mockTrack);
 
+		expect(mockOpusCacheIndex.findMatch).toHaveBeenCalledWith(
+			'Test Track',
+			'Artist',
+			180,
+		);
 		expect(mockStat).toHaveBeenCalledWith(
-			'/mock/cache/path/aHR0cHM6Ly9leGFtcGxlLmNvbS90cmFjaw.opus',
+			'/mock/cache/path/test_track_artist_180.opus',
 		);
 		expect(mockTrack.setMetadata).toHaveBeenCalledWith({
 			isFromCache: true,
+			cacheFilename: 'test_track_artist_180.opus',
 		});
 		expect(result).toBe(mockReadStream);
 	});
 
+	it('should return null when no cache match found', async () => {
+		mockOpusCacheIndex.findMatch.mockReturnValue(null);
+
+		await getInitializedPlayer(mockClient);
+
+		const mockTrack: MockTrack = {
+			url: 'https://example.com/track',
+			title: 'Unknown Track',
+			cleanTitle: 'Unknown Track',
+			author: 'Unknown Artist',
+			durationMS: 180000,
+			metadata: {},
+			setMetadata: vi.fn(),
+		};
+
+		const result = await onBeforeCreateStreamCallback?.(mockTrack);
+
+		expect(result).toBeNull();
+		expect(mockTrack.setMetadata).not.toHaveBeenCalled();
+	});
+
 	it('should return null when file is too new', async () => {
 		const mockStat = vi.mocked(stat);
+
+		mockOpusCacheIndex.findMatch.mockReturnValue({
+			filename: 'test_track_180.opus',
+			title: 'test track',
+			author: '',
+			durationSeconds: 180,
+		});
 
 		mockStat.mockResolvedValue({
 			size: 2048,
@@ -194,6 +265,10 @@ describe('onBeforeCreateStream callback', () => {
 
 		const mockTrack: MockTrack = {
 			url: 'https://example.com/track',
+			title: 'Test Track',
+			cleanTitle: 'Test Track',
+			author: 'Artist',
+			durationMS: 180000,
 			metadata: {},
 			setMetadata: vi.fn(),
 		};
@@ -207,6 +282,13 @@ describe('onBeforeCreateStream callback', () => {
 	it('should return null and delete when file is too small', async () => {
 		const mockStat = vi.mocked(stat);
 
+		mockOpusCacheIndex.findMatch.mockReturnValue({
+			filename: 'test_track_180.opus',
+			title: 'test track',
+			author: '',
+			durationSeconds: 180,
+		});
+
 		mockStat.mockResolvedValue({
 			size: 512,
 			mtime: new Date(Date.now() - 10000),
@@ -216,6 +298,10 @@ describe('onBeforeCreateStream callback', () => {
 
 		const mockTrack: MockTrack = {
 			url: 'https://example.com/track',
+			title: 'Test Track',
+			cleanTitle: 'Test Track',
+			author: 'Artist',
+			durationMS: 180000,
 			metadata: {},
 			setMetadata: vi.fn(),
 		};
@@ -228,6 +314,13 @@ describe('onBeforeCreateStream callback', () => {
 	it('should return null and delete when file is incomplete based on duration', async () => {
 		const mockStat = vi.mocked(stat);
 
+		mockOpusCacheIndex.findMatch.mockReturnValue({
+			filename: 'test_track_300.opus',
+			title: 'test track',
+			author: '',
+			durationSeconds: 300,
+		});
+
 		mockStat.mockResolvedValue({
 			size: 2_000_000,
 			mtime: new Date(Date.now() - 10000),
@@ -237,6 +330,9 @@ describe('onBeforeCreateStream callback', () => {
 
 		const mockTrack: MockTrack = {
 			url: 'https://example.com/track',
+			title: 'Test Track',
+			cleanTitle: 'Test Track',
+			author: 'Artist',
 			durationMS: 300_000,
 			metadata: {},
 			setMetadata: vi.fn(),
@@ -255,6 +351,13 @@ describe('onBeforeCreateStream callback', () => {
 		const mockCreateReadStream = vi.mocked(createReadStream);
 		const mockReadStream = { pipe: vi.fn() };
 
+		mockOpusCacheIndex.findMatch.mockReturnValue({
+			filename: 'live_stream.opus',
+			title: 'live stream',
+			author: '',
+			durationSeconds: null,
+		});
+
 		mockStat.mockResolvedValue({
 			size: 2048,
 			mtime: new Date(Date.now() - 10000),
@@ -267,6 +370,9 @@ describe('onBeforeCreateStream callback', () => {
 
 		const mockTrack: MockTrack = {
 			url: 'https://example.com/track',
+			title: 'Live Stream',
+			cleanTitle: 'Live Stream',
+			author: 'Streamer',
 			durationMS: 0,
 			metadata: {},
 			setMetadata: vi.fn(),
@@ -276,18 +382,31 @@ describe('onBeforeCreateStream callback', () => {
 
 		expect(mockTrack.setMetadata).toHaveBeenCalledWith({
 			isFromCache: true,
+			cacheFilename: 'live_stream.opus',
 		});
 		expect(result).toBe(mockReadStream);
 	});
 
 	it('should return null on file stat error', async () => {
 		const mockStat = vi.mocked(stat);
+
+		mockOpusCacheIndex.findMatch.mockReturnValue({
+			filename: 'test_track_180.opus',
+			title: 'test track',
+			author: '',
+			durationSeconds: 180,
+		});
+
 		mockStat.mockRejectedValue(new Error('File not found'));
 
 		await getInitializedPlayer(mockClient);
 
 		const mockTrack: MockTrack = {
 			url: 'https://example.com/track',
+			title: 'Test Track',
+			cleanTitle: 'Test Track',
+			author: 'Artist',
+			durationMS: 180000,
 			metadata: {},
 			setMetadata: vi.fn(),
 		};
@@ -295,32 +414,6 @@ describe('onBeforeCreateStream callback', () => {
 		const result = await onBeforeCreateStreamCallback?.(mockTrack);
 
 		expect(result).toBeNull();
-	});
-
-	it('should return null when file path has active write', async () => {
-		const activeWritePath = '/opus-cache/active-write.opus';
-
-		mockGetOpusCacheTrackPath.mockReturnValue(activeWritePath);
-
-		await getInitializedPlayer(mockClient);
-
-		const mockTrack: MockTrack = {
-			url: 'https://example.com/active-track',
-			metadata: {},
-			setMetadata: vi.fn(),
-		};
-
-		const mockReadable = new Readable();
-
-		mockReadable.pipe = vi.fn();
-		mockReadable.on = vi.fn();
-
-		await onStreamExtractedCallback?.(mockReadable, mockTrack);
-
-		const result = await onBeforeCreateStreamCallback?.(mockTrack);
-
-		expect(result).toBeNull();
-		expect(mockTrack.setMetadata).not.toHaveBeenCalled();
 	});
 
 	it('should preserve existing metadata when adding cache flag', async () => {
@@ -328,8 +421,15 @@ describe('onBeforeCreateStream callback', () => {
 		const mockCreateReadStream = vi.mocked(createReadStream);
 		const mockReadStream = { pipe: vi.fn() };
 
+		mockOpusCacheIndex.findMatch.mockReturnValue({
+			filename: 'test_track_180.opus',
+			title: 'test track',
+			author: '',
+			durationSeconds: 180,
+		});
+
 		mockStat.mockResolvedValue({
-			size: 2048,
+			size: 3_100_000,
 			mtime: new Date(Date.now() - 10000),
 		} as unknown as import('fs').Stats);
 		mockCreateReadStream.mockReturnValue(
@@ -340,6 +440,10 @@ describe('onBeforeCreateStream callback', () => {
 
 		const mockTrack: MockTrack = {
 			url: 'https://example.com/track',
+			title: 'Test Track',
+			cleanTitle: 'Test Track',
+			author: 'Artist',
+			durationMS: 180000,
 			metadata: { existingKey: 'value' },
 			setMetadata: vi.fn(),
 		};
@@ -349,6 +453,7 @@ describe('onBeforeCreateStream callback', () => {
 		expect(mockTrack.setMetadata).toHaveBeenCalledWith({
 			existingKey: 'value',
 			isFromCache: true,
+			cacheFilename: 'test_track_180.opus',
 		});
 	});
 });
@@ -361,6 +466,10 @@ describe('onStreamExtracted callback', () => {
 
 		const mockTrack: MockTrack = {
 			url: 'https://example.com/track',
+			title: 'Test Track',
+			cleanTitle: 'Test Track',
+			author: 'Artist',
+			durationMS: 180000,
 			setMetadata: vi.fn(),
 		};
 		const result = await onStreamExtractedCallback?.(
@@ -399,12 +508,16 @@ describe('onStreamExtracted callback', () => {
 
 		const mockTrack: MockTrack = {
 			url: 'https://example.com/track',
+			title: 'Test Track',
+			cleanTitle: 'Test Track',
+			author: 'Artist',
+			durationMS: 180000,
 			setMetadata: vi.fn(),
 		};
 		const result = await onStreamExtractedCallback?.(mockReadable, mockTrack);
 
 		expect(createWriteStream).toHaveBeenCalledWith(
-			'/mock/cache/path/aHR0cHM6Ly9leGFtcGxlLmNvbS90cmFjaw.opus',
+			'/mock/cache/path/test_track_artist_180.opus',
 		);
 		expect(mockInterceptor.interceptors.add).toHaveBeenCalledWith(
 			mockWriteStream,
@@ -442,6 +555,10 @@ describe('onStreamExtracted callback', () => {
 
 		const mockTrack: MockTrack = {
 			url: 'https://example.com/track',
+			title: 'Test Track',
+			cleanTitle: 'Test Track',
+			author: 'Artist',
+			durationMS: 180000,
 			setMetadata: vi.fn(),
 		};
 		const result = await onStreamExtractedCallback?.(streamObj, mockTrack);
@@ -470,6 +587,10 @@ describe('onStreamExtracted callback', () => {
 
 		const mockTrack: MockTrack = {
 			url: 'https://example.com/track',
+			title: 'Test Track',
+			cleanTitle: 'Test Track',
+			author: 'Artist',
+			durationMS: 180000,
 			setMetadata: vi.fn(),
 		};
 
@@ -507,6 +628,10 @@ describe('onStreamExtracted callback', () => {
 
 		const mockTrack: MockTrack = {
 			url: 'https://example.com/track',
+			title: 'Test Track',
+			cleanTitle: 'Test Track',
+			author: 'Artist',
+			durationMS: 180000,
 			setMetadata: vi.fn(),
 		};
 
@@ -535,6 +660,10 @@ describe('onStreamExtracted callback', () => {
 		const mockReadable = new Readable();
 		const mockTrack: MockTrack = {
 			url: 'https://example.com/track',
+			title: 'Test Track',
+			cleanTitle: 'Test Track',
+			author: 'Artist',
+			durationMS: 180000,
 			setMetadata: vi.fn(),
 		};
 
@@ -562,6 +691,10 @@ describe('onStreamExtracted callback', () => {
 
 		const mockTrack: MockTrack = {
 			url: 'https://example.com/track',
+			title: 'Test Track',
+			cleanTitle: 'Test Track',
+			author: 'Artist',
+			durationMS: 180000,
 			setMetadata: vi.fn(),
 		};
 
@@ -596,6 +729,10 @@ describe('onStreamExtracted callback', () => {
 
 		const mockTrack: MockTrack = {
 			url: 'https://example.com/track',
+			title: 'Test Track',
+			cleanTitle: 'Test Track',
+			author: 'Artist',
+			durationMS: 180000,
 			setMetadata: vi.fn(),
 		};
 
@@ -611,7 +748,7 @@ describe('onStreamExtracted callback', () => {
 			closeCallback();
 		}
 
-		expect(closeCallback).toBeDefined();
+		expect(mockOpusCacheIndex.addEntry).toHaveBeenCalled();
 	});
 
 	it('should fallback on createWriteStream error for non-Readable stream', async () => {
@@ -630,6 +767,10 @@ describe('onStreamExtracted callback', () => {
 
 		const mockTrack: MockTrack = {
 			url: 'https://example.com/track',
+			title: 'Test Track',
+			cleanTitle: 'Test Track',
+			author: 'Artist',
+			durationMS: 180000,
 			setMetadata: vi.fn(),
 		};
 

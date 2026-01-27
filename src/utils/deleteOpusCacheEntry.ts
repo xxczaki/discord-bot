@@ -1,20 +1,25 @@
 import { unlink } from 'node:fs/promises';
-import getOpusCacheTrackPath from './getOpusCacheTrackPath';
-import logger from './logger';
+import { join } from 'node:path';
+import getOpusCacheDirectoryPath from './getOpusCacheDirectoryPath';
+import opusCacheIndex from './OpusCacheIndex';
 import reportError from './reportError';
 
-export default async function deleteOpusCacheEntry(url: string | undefined) {
-	if (!url) {
+const opusCacheDirectory = getOpusCacheDirectoryPath();
+
+export default async function deleteOpusCacheEntry(
+	filename: string | undefined,
+) {
+	if (!filename) {
 		return;
 	}
 
-	const filePath = getOpusCacheTrackPath(url);
+	const filePath = join(opusCacheDirectory, filename);
 
 	try {
 		await unlink(filePath);
+		opusCacheIndex.removeEntry(filename);
 	} catch (error) {
 		if (error instanceof Error && error.message.includes('ENOENT')) {
-			logger.warn("Cannot delete an Opus cache entry since it doesn't exist");
 			return;
 		}
 
