@@ -78,10 +78,10 @@ async function createTrackEmbed(track: Track, description: string) {
 		});
 	}
 
-	if (isObject(track.metadata.bridge) && track.metadata.bridge?.url) {
+	if (track.bridgedTrack?.url) {
 		embed.addFields({
 			name: 'Bridged URL',
-			value: `[YouTube](${track.metadata.bridge.url})`,
+			value: `[YouTube](${track.bridgedTrack.url})`,
 			inline: true,
 		});
 	}

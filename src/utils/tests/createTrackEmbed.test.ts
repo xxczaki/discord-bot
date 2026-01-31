@@ -196,13 +196,9 @@ it('should add cache footer without file size when stat fails', async () => {
 	});
 });
 
-it('should add bridged URL field when bridge metadata exists', async () => {
+it('should add bridged URL field when `bridgedTrack` exists', async () => {
 	const track = createMockTrack({
-		metadata: {
-			bridge: {
-				url: EXAMPLE_BRIDGE_URL,
-			},
-		},
+		bridgedTrack: { url: EXAMPLE_BRIDGE_URL } as Track,
 	});
 
 	const result = await createTrackEmbed(track, EXAMPLE_DESCRIPTION);
@@ -214,26 +210,9 @@ it('should add bridged URL field when bridge metadata exists', async () => {
 	});
 });
 
-it('should not add bridged URL field when bridge metadata is not an object', async () => {
+it('should not add bridged URL field when `bridgedTrack` is null', async () => {
 	const track = createMockTrack({
-		metadata: {
-			bridge: null,
-		},
-	});
-
-	const result = await createTrackEmbed(track, EXAMPLE_DESCRIPTION);
-
-	const bridgeField = result.data.fields?.find(
-		(field) => field.name === 'Bridged URL',
-	);
-	expect(bridgeField).toBeUndefined();
-});
-
-it('should not add bridged URL field when bridge URL is missing', async () => {
-	const track = createMockTrack({
-		metadata: {
-			bridge: {},
-		},
+		bridgedTrack: null,
 	});
 
 	const result = await createTrackEmbed(track, EXAMPLE_DESCRIPTION);
@@ -248,11 +227,9 @@ it('should handle both cache footer and bridged URL together', async () => {
 	vi.mocked(stat).mockResolvedValue({ size: EXAMPLE_FILE_SIZE_BYTES } as Stats);
 
 	const track = createMockTrack({
+		bridgedTrack: { url: EXAMPLE_BRIDGE_URL } as Track,
 		metadata: {
 			isFromCache: true,
-			bridge: {
-				url: EXAMPLE_BRIDGE_URL,
-			},
 		},
 	});
 
