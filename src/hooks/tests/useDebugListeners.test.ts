@@ -5,7 +5,6 @@ import type { Client, TextChannel } from 'discord.js';
 import { EmbedBuilder } from 'discord.js';
 import type { GuildQueue, Player } from 'discord-player';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import deleteOpusCacheEntry from '../../utils/deleteOpusCacheEntry';
 import enqueueTracks from '../../utils/enqueueTracks';
 import getEnvironmentVariable from '../../utils/getEnvironmentVariable';
 import logger from '../../utils/logger';
@@ -25,8 +24,15 @@ vi.mock('../../utils/QueueRecoveryService', () => ({
 	},
 }));
 
-vi.mock('../../utils/deleteOpusCacheEntry', () => ({
-	default: vi.fn(),
+const mockOpusCacheManagerInstance = vi.hoisted(() => ({
+	generateFilename: vi.fn().mockReturnValue('mock_filename.opus'),
+	deleteEntry: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock('../../utils/OpusCacheManager', () => ({
+	OpusCacheManager: {
+		getInstance: vi.fn(() => mockOpusCacheManagerInstance),
+	},
 }));
 
 vi.mock('../../utils/enqueueTracks', () => ({
@@ -59,7 +65,6 @@ const mockedGetEnvironmentVariable = vi.mocked(getEnvironmentVariable);
 const mockedLogger = vi.mocked(logger);
 const mockedCreateServer = vi.mocked(createServer);
 const mockedEnqueueTracks = vi.mocked(enqueueTracks);
-const mockedDeleteOpusCacheEntry = vi.mocked(deleteOpusCacheEntry);
 const mockedQueueRecoveryService = vi.mocked(QueueRecoveryService);
 
 let mockClient: Client<boolean>;
@@ -70,6 +75,10 @@ let mockEmbed: EmbedBuilder;
 
 beforeEach(() => {
 	vi.clearAllMocks();
+
+	mockOpusCacheManagerInstance.generateFilename.mockReturnValue(
+		'mock_filename.opus',
+	);
 
 	vi.mocked(EmbedBuilder).mockImplementation(function () {
 		mockEmbed = {
@@ -212,6 +221,9 @@ const createMockQueue = (
 		channel: { id: 'test-voice-channel' },
 		currentTrack: {
 			url: 'test-current-track',
+			cleanTitle: 'Test Track',
+			author: 'Test Artist',
+			durationMS: 180000,
 			metadata: { someProperty: 'value' },
 		},
 		delete: vi.fn(),
@@ -796,14 +808,13 @@ describe('Opus Cache Management', () => {
 		const testError = new Error('Test player error');
 
 		mockedEnqueueTracks.mockResolvedValue(undefined);
-		mockedDeleteOpusCacheEntry.mockResolvedValue(undefined);
 
 		useDebugListeners(mockClient, mockPlayer);
 		const errorHandler = getPlayerEventsErrorHandler();
 		await errorHandler(mockQueue, testError);
 
-		expect(mockedDeleteOpusCacheEntry).toHaveBeenCalledWith(
-			'test-current-track',
+		expect(mockOpusCacheManagerInstance.deleteEntry).toHaveBeenCalledWith(
+			'mock_filename.opus',
 		);
 	});
 
@@ -828,7 +839,7 @@ describe('Opus Cache Management', () => {
 		const errorHandler = getPlayerEventsErrorHandler();
 		await errorHandler(mockQueue, testError);
 
-		expect(mockedDeleteOpusCacheEntry).not.toHaveBeenCalled();
+		expect(mockOpusCacheManagerInstance.deleteEntry).not.toHaveBeenCalled();
 	});
 });
 

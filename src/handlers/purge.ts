@@ -1,6 +1,6 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
-import deleteOpusCacheEntry from '../utils/deleteOpusCacheEntry';
 import isObject from '../utils/isObject';
+import { OpusCacheManager } from '../utils/OpusCacheManager';
 import { QueueRecoveryService } from '../utils/QueueRecoveryService';
 import useQueueWithValidation from '../utils/useQueueWithValidation';
 
@@ -16,7 +16,13 @@ export default async function purgeCommandHandler(
 	const track = queue.currentTrack;
 
 	if (track && isObject(track.metadata) && !('isFromCache' in track.metadata)) {
-		void deleteOpusCacheEntry(track.url);
+		const opusCacheManager = OpusCacheManager.getInstance();
+		const filename = opusCacheManager.generateFilename({
+			title: track.cleanTitle,
+			author: track.author,
+			durationMS: track.durationMS,
+		});
+		void opusCacheManager.deleteEntry(filename);
 	}
 
 	if (queue.size > 0) {

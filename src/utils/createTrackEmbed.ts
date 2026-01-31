@@ -3,9 +3,9 @@ import { EmbedBuilder } from 'discord.js';
 import type { Track } from 'discord-player';
 import prettyBytes from 'pretty-bytes';
 import isObject from '../utils/isObject';
-import getOpusCacheTrackPath from './getOpusCacheTrackPath';
 import getTrackThumbnail from './getTrackThumbnail';
 import isUrlSpotifyPlaylist from './isUrlSpotifyPlaylist';
+import { OpusCacheManager } from './OpusCacheManager';
 
 const fileStatsCache = new Map<string, { size: number; timestamp: number }>();
 const CACHE_DURATION_MS = 30_000;
@@ -49,11 +49,13 @@ async function createTrackEmbed(track: Track, description: string) {
 		let footerText = '♻️ Streaming from the offline cache';
 
 		try {
-			const filePath = getOpusCacheTrackPath({
+			const opusCacheManager = OpusCacheManager.getInstance();
+			const filename = opusCacheManager.generateFilename({
 				title: track.cleanTitle,
 				author: track.author,
 				durationMS: track.durationMS,
 			});
+			const filePath = opusCacheManager.getFilePath(filename);
 			const now = Date.now();
 
 			let fileSize: number | undefined;

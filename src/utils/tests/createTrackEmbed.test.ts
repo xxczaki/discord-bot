@@ -30,8 +30,18 @@ vi.mock('node:fs/promises', () => ({
 	stat: vi.fn(),
 }));
 
-vi.mock('../getOpusCacheDirectoryPath', () => ({
-	default: vi.fn(() => '/mock/cache/directory'),
+vi.mock('../OpusCacheManager', () => ({
+	OpusCacheManager: {
+		getInstance: vi.fn(() => ({
+			generateFilename: vi.fn(
+				(meta: { title: string; author: string; durationMS: number }) =>
+					`${meta.title}_${meta.author}_${meta.durationMS}.opus`,
+			),
+			getFilePath: vi.fn(
+				(filename: string) => `/mock/cache/directory/${filename}`,
+			),
+		})),
+	},
 }));
 
 const createMockTrack = (overrides: Partial<Track> = {}): Track =>

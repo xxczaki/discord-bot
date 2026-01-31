@@ -12,10 +12,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import getInitializedPlayer from '../initializePlayer';
 import { RedisQueryCache } from '../RedisQueryCache';
 
-vi.mock('../getOpusCacheDirectoryPath', () => ({
-	default: vi.fn().mockReturnValue('/mock/cache/path'),
-}));
-
 interface MockTrack {
 	url: string;
 	title: string;
@@ -104,10 +100,6 @@ vi.mock('node:fs/promises', () => ({
 	readdir: vi.fn().mockResolvedValue([]),
 }));
 
-vi.mock('../deleteOpusCacheEntry', () => ({
-	default: vi.fn(),
-}));
-
 vi.mock('../RedisQueryCache', () => ({
 	RedisQueryCache: vi.fn(),
 }));
@@ -116,35 +108,33 @@ vi.mock('../defineCustomFilters', () => ({
 	default: vi.fn(),
 }));
 
-vi.mock('../OpusCacheIndex', () => ({
-	default: {
-		findMatch: vi.fn().mockReturnValue(null),
-		getFilePath: vi
-			.fn()
-			.mockReturnValue('/mock/cache/path/test_track_180.opus'),
-		addEntry: vi.fn(),
-		initialize: vi.fn().mockResolvedValue(undefined),
+const mockOpusCacheManagerInstance = vi.hoisted(() => ({
+	findMatch: vi.fn().mockReturnValue(null),
+	getFilePath: vi
+		.fn()
+		.mockReturnValue('/mock/cache/path/test_track_artist_180.opus'),
+	generateFilename: vi.fn().mockReturnValue('test_track_artist_180.opus'),
+	addEntry: vi.fn(),
+	deleteEntry: vi.fn().mockResolvedValue(undefined),
+	scan: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock('../OpusCacheManager', () => ({
+	OpusCacheManager: {
+		initialize: vi.fn(() => mockOpusCacheManagerInstance),
+		getInstance: vi.fn(() => mockOpusCacheManagerInstance),
 	},
 }));
 
 let mockClient: Client;
-let mockOpusCacheIndex: {
-	findMatch: ReturnType<typeof vi.fn>;
-	getFilePath: ReturnType<typeof vi.fn>;
-	addEntry: ReturnType<typeof vi.fn>;
-	initialize: ReturnType<typeof vi.fn>;
-};
 
 beforeEach(async () => {
 	vi.clearAllMocks();
 	mockClient = new Client({ intents: [] });
 
-	const opusCacheIndexModule = await import('../OpusCacheIndex');
-	mockOpusCacheIndex =
-		opusCacheIndexModule.default as unknown as typeof mockOpusCacheIndex;
-	mockOpusCacheIndex.findMatch.mockReturnValue(null);
-	mockOpusCacheIndex.getFilePath.mockReturnValue(
-		'/mock/cache/path/test_track_180.opus',
+	mockOpusCacheManagerInstance.findMatch.mockReturnValue(null);
+	mockOpusCacheManagerInstance.getFilePath.mockReturnValue(
+		'/mock/cache/path/test_track_artist_180.opus',
 	);
 });
 
@@ -176,13 +166,13 @@ describe('onBeforeCreateStream callback', () => {
 		const mockCreateReadStream = vi.mocked(createReadStream);
 		const mockReadStream = { pipe: vi.fn() };
 
-		mockOpusCacheIndex.findMatch.mockReturnValue({
+		mockOpusCacheManagerInstance.findMatch.mockReturnValue({
 			filename: 'test_track_artist_180.opus',
 			title: 'test track artist',
 			author: '',
 			durationSeconds: 180,
 		});
-		mockOpusCacheIndex.getFilePath.mockReturnValue(
+		mockOpusCacheManagerInstance.getFilePath.mockReturnValue(
 			'/mock/cache/path/test_track_artist_180.opus',
 		);
 
@@ -210,7 +200,7 @@ describe('onBeforeCreateStream callback', () => {
 
 		const result = await onBeforeCreateStreamCallback?.(mockTrack);
 
-		expect(mockOpusCacheIndex.findMatch).toHaveBeenCalledWith(
+		expect(mockOpusCacheManagerInstance.findMatch).toHaveBeenCalledWith(
 			'Test Track',
 			'Artist',
 			180,
@@ -226,7 +216,7 @@ describe('onBeforeCreateStream callback', () => {
 	});
 
 	it('should return null when no cache match found', async () => {
-		mockOpusCacheIndex.findMatch.mockReturnValue(null);
+		mockOpusCacheManagerInstance.findMatch.mockReturnValue(null);
 
 		await getInitializedPlayer(mockClient);
 
@@ -249,7 +239,7 @@ describe('onBeforeCreateStream callback', () => {
 	it('should return null when file is too new', async () => {
 		const mockStat = vi.mocked(stat);
 
-		mockOpusCacheIndex.findMatch.mockReturnValue({
+		mockOpusCacheManagerInstance.findMatch.mockReturnValue({
 			filename: 'test_track_180.opus',
 			title: 'test track',
 			author: '',
@@ -282,7 +272,7 @@ describe('onBeforeCreateStream callback', () => {
 	it('should return null and delete when file is too small', async () => {
 		const mockStat = vi.mocked(stat);
 
-		mockOpusCacheIndex.findMatch.mockReturnValue({
+		mockOpusCacheManagerInstance.findMatch.mockReturnValue({
 			filename: 'test_track_180.opus',
 			title: 'test track',
 			author: '',
@@ -314,7 +304,7 @@ describe('onBeforeCreateStream callback', () => {
 	it('should return null and delete when file is incomplete based on duration', async () => {
 		const mockStat = vi.mocked(stat);
 
-		mockOpusCacheIndex.findMatch.mockReturnValue({
+		mockOpusCacheManagerInstance.findMatch.mockReturnValue({
 			filename: 'test_track_300.opus',
 			title: 'test track',
 			author: '',
@@ -351,7 +341,7 @@ describe('onBeforeCreateStream callback', () => {
 		const mockCreateReadStream = vi.mocked(createReadStream);
 		const mockReadStream = { pipe: vi.fn() };
 
-		mockOpusCacheIndex.findMatch.mockReturnValue({
+		mockOpusCacheManagerInstance.findMatch.mockReturnValue({
 			filename: 'live_stream.opus',
 			title: 'live stream',
 			author: '',
@@ -390,7 +380,7 @@ describe('onBeforeCreateStream callback', () => {
 	it('should return null on file stat error', async () => {
 		const mockStat = vi.mocked(stat);
 
-		mockOpusCacheIndex.findMatch.mockReturnValue({
+		mockOpusCacheManagerInstance.findMatch.mockReturnValue({
 			filename: 'test_track_180.opus',
 			title: 'test track',
 			author: '',
@@ -421,7 +411,7 @@ describe('onBeforeCreateStream callback', () => {
 		const mockCreateReadStream = vi.mocked(createReadStream);
 		const mockReadStream = { pipe: vi.fn() };
 
-		mockOpusCacheIndex.findMatch.mockReturnValue({
+		mockOpusCacheManagerInstance.findMatch.mockReturnValue({
 			filename: 'test_track_180.opus',
 			title: 'test track',
 			author: '',
@@ -748,7 +738,7 @@ describe('onStreamExtracted callback', () => {
 			closeCallback();
 		}
 
-		expect(mockOpusCacheIndex.addEntry).toHaveBeenCalled();
+		expect(mockOpusCacheManagerInstance.addEntry).toHaveBeenCalled();
 	});
 
 	it('should fallback on createWriteStream error for non-Readable stream', async () => {

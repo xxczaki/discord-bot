@@ -11,7 +11,7 @@ import { beforeEach, expect, it, vi } from 'vitest';
 import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../../constants/miscellaneous';
 import createSmartInteractionHandler from '../../utils/createSmartInteractionHandler';
 import createTrackEmbed from '../../utils/createTrackEmbed';
-import deleteOpusCacheEntry from '../../utils/deleteOpusCacheEntry';
+import { OpusCacheManager } from '../../utils/OpusCacheManager';
 import { resetPresence, setPresence } from '../../utils/presenceManager';
 import { QueueRecoveryService } from '../../utils/QueueRecoveryService';
 import { StatsHandler } from '../../utils/StatsHandler';
@@ -43,8 +43,13 @@ vi.mock('../../utils/createTrackEmbed', () => ({
 	default: vi.fn().mockReturnValue({ title: 'Mock Embed' }),
 }));
 
-vi.mock('../../utils/deleteOpusCacheEntry', () => ({
-	default: vi.fn(),
+vi.mock('../../utils/OpusCacheManager', () => ({
+	OpusCacheManager: {
+		getInstance: vi.fn().mockReturnValue({
+			generateFilename: vi.fn().mockReturnValue('mock_filename.opus'),
+			deleteEntry: vi.fn().mockResolvedValue(undefined),
+		}),
+	},
 }));
 
 vi.mock('../../utils/presenceManager', () => ({
@@ -64,7 +69,7 @@ const mockedCreateSmartInteractionHandler = vi.mocked(
 	createSmartInteractionHandler,
 );
 const mockedCreateTrackEmbed = vi.mocked(createTrackEmbed);
-const mockedDeleteOpusCacheEntry = vi.mocked(deleteOpusCacheEntry);
+const mockedOpusCacheManager = vi.mocked(OpusCacheManager);
 const mockedResetPresence = vi.mocked(resetPresence);
 const mockedSetPresence = vi.mocked(setPresence);
 
@@ -132,8 +137,10 @@ function createMockQueue(): GuildQueue {
 function createMockTrack(overrides = {}): Track {
 	return {
 		title: MOCK_TRACK_TITLE,
+		cleanTitle: MOCK_TRACK_TITLE,
 		author: MOCK_TRACK_AUTHOR,
 		url: MOCK_TRACK_URL,
+		durationMS: 180000,
 		requestedBy: {
 			id: MOCK_USER_ID,
 		},
@@ -447,7 +454,9 @@ it('should handle `playerSkip` event and delete opus cache entry for non-cached 
 
 	await playerSkipHandler(mockQueue, mockTrack);
 
-	expect(mockedDeleteOpusCacheEntry).toHaveBeenCalledWith(MOCK_TRACK_URL);
+	expect(mockedOpusCacheManager.getInstance().deleteEntry).toHaveBeenCalledWith(
+		'mock_filename.opus',
+	);
 });
 
 it('should not delete opus cache entry for cached tracks on `playerSkip`', async () => {
@@ -466,7 +475,9 @@ it('should not delete opus cache entry for cached tracks on `playerSkip`', async
 
 	await playerSkipHandler(mockQueue, mockTrack);
 
-	expect(mockedDeleteOpusCacheEntry).not.toHaveBeenCalled();
+	expect(
+		mockedOpusCacheManager.getInstance().deleteEntry,
+	).not.toHaveBeenCalled();
 });
 
 it('should not delete opus cache entry when track metadata is not an object', async () => {
@@ -485,7 +496,9 @@ it('should not delete opus cache entry when track metadata is not an object', as
 
 	await playerSkipHandler(mockQueue, mockTrack);
 
-	expect(mockedDeleteOpusCacheEntry).toHaveBeenCalledWith(MOCK_TRACK_URL);
+	expect(mockedOpusCacheManager.getInstance().deleteEntry).toHaveBeenCalledWith(
+		'mock_filename.opus',
+	);
 });
 
 it('should handle unknown button interaction by falling through to catch block', async () => {

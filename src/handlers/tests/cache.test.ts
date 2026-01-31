@@ -9,12 +9,15 @@ import cacheCommandHandler, {
 vi.mock('../../utils/getEnvironmentVariable', () => ({
 	default: vi.fn((key: string) => {
 		if (key === 'OWNER_USER_ID') return 'owner-123';
+		if (key === 'NODE_ENV') return 'production';
 		throw new Error(`Unknown env var: ${key}`);
 	}),
 }));
 
-vi.mock('../../utils/getOpusCacheDirectoryPath', () => ({
-	default: vi.fn(() => '/tmp/opus-cache'),
+vi.mock('../../utils/OpusCacheManager', () => ({
+	OpusCacheManager: {
+		getDirectoryPath: vi.fn(() => '/tmp/opus-cache'),
+	},
 }));
 
 vi.mock('node:fs/promises', () => ({

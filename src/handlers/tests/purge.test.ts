@@ -2,11 +2,9 @@ import type { ChatInputCommandInteraction } from 'discord.js';
 import type { Track } from 'discord-player';
 import { useQueue } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
-import deleteOpusCacheEntry from '../../utils/deleteOpusCacheEntry';
+import { OpusCacheManager } from '../../utils/OpusCacheManager';
 import { QueueRecoveryService } from '../../utils/QueueRecoveryService';
 import purgeCommandHandler from '../purge';
-
-const EXAMPLE_TRACK_URL = 'https://example.com/track';
 
 vi.mock('discord-player', () => ({
 	useQueue: vi.fn(),
@@ -20,13 +18,20 @@ vi.mock('../../utils/QueueRecoveryService', () => ({
 	},
 }));
 
-vi.mock('../../utils/deleteOpusCacheEntry');
+vi.mock('../../utils/OpusCacheManager', () => ({
+	OpusCacheManager: {
+		getInstance: vi.fn().mockReturnValue({
+			generateFilename: vi.fn().mockReturnValue('mock_filename.opus'),
+			deleteEntry: vi.fn().mockResolvedValue(undefined),
+		}),
+	},
+}));
 
 const mockedUseQueue = vi.mocked(useQueue);
 const mockedQueueRecoveryService = vi.mocked(
 	QueueRecoveryService.getInstance(),
 );
-const mockedDeleteOpusCacheEntry = vi.mocked(deleteOpusCacheEntry);
+const mockedOpusCacheManager = vi.mocked(OpusCacheManager.getInstance());
 
 beforeEach(() => {
 	vi.clearAllMocks();
@@ -40,7 +45,9 @@ function createMockInteraction(): ChatInputCommandInteraction {
 
 function createMockTrack(overrides: Partial<Track> = {}): Track {
 	return {
-		url: EXAMPLE_TRACK_URL,
+		cleanTitle: 'Example Track',
+		author: 'Example Artist',
+		durationMS: 180000,
 		metadata: {},
 		...overrides,
 	} as Track;
@@ -64,7 +71,7 @@ it('should handle null queue', async () => {
 
 	await purgeCommandHandler(interaction);
 
-	expect(mockedDeleteOpusCacheEntry).not.toHaveBeenCalled();
+	expect(mockedOpusCacheManager.deleteEntry).not.toHaveBeenCalled();
 	expect(mockedQueueRecoveryService.saveQueue).not.toHaveBeenCalled();
 	expect(interaction.reply).toHaveBeenCalledWith({
 		content: 'No music is currently playing.',
@@ -80,7 +87,9 @@ it('should delete opus cache entry when track has non-cache metadata', async () 
 
 	await purgeCommandHandler(interaction);
 
-	expect(mockedDeleteOpusCacheEntry).toHaveBeenCalledWith(EXAMPLE_TRACK_URL);
+	expect(mockedOpusCacheManager.deleteEntry).toHaveBeenCalledWith(
+		'mock_filename.opus',
+	);
 });
 
 it('should not delete opus cache entry when track has `isFromCache` metadata', async () => {
@@ -93,7 +102,7 @@ it('should not delete opus cache entry when track has `isFromCache` metadata', a
 
 	await purgeCommandHandler(interaction);
 
-	expect(mockedDeleteOpusCacheEntry).not.toHaveBeenCalled();
+	expect(mockedOpusCacheManager.deleteEntry).not.toHaveBeenCalled();
 });
 
 it('should not delete opus cache entry when track metadata is not an object', async () => {
@@ -104,7 +113,7 @@ it('should not delete opus cache entry when track metadata is not an object', as
 
 	await purgeCommandHandler(interaction);
 
-	expect(mockedDeleteOpusCacheEntry).not.toHaveBeenCalled();
+	expect(mockedOpusCacheManager.deleteEntry).not.toHaveBeenCalled();
 });
 
 it('should not delete opus cache entry when track metadata is null', async () => {
@@ -115,7 +124,7 @@ it('should not delete opus cache entry when track metadata is null', async () =>
 
 	await purgeCommandHandler(interaction);
 
-	expect(mockedDeleteOpusCacheEntry).not.toHaveBeenCalled();
+	expect(mockedOpusCacheManager.deleteEntry).not.toHaveBeenCalled();
 });
 
 it('should not delete opus cache entry when there is no current track', async () => {
@@ -125,7 +134,7 @@ it('should not delete opus cache entry when there is no current track', async ()
 
 	await purgeCommandHandler(interaction);
 
-	expect(mockedDeleteOpusCacheEntry).not.toHaveBeenCalled();
+	expect(mockedOpusCacheManager.deleteEntry).not.toHaveBeenCalled();
 });
 
 it('should save queue when it is not empty', async () => {
@@ -178,7 +187,9 @@ it('should handle full purge workflow with track deletion and queue saving', asy
 
 	await purgeCommandHandler(interaction);
 
-	expect(mockedDeleteOpusCacheEntry).toHaveBeenCalledWith(EXAMPLE_TRACK_URL);
+	expect(mockedOpusCacheManager.deleteEntry).toHaveBeenCalledWith(
+		'mock_filename.opus',
+	);
 	expect(mockedQueueRecoveryService.saveQueue).toHaveBeenCalledWith(mockQueue);
 	expect(mockQueue.delete).toHaveBeenCalledOnce();
 	expect(interaction.reply).toHaveBeenCalledWith(

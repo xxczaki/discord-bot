@@ -8,8 +8,8 @@ import {
 import type { Player } from 'discord-player';
 import createSmartInteractionHandler from '../utils/createSmartInteractionHandler';
 import createTrackEmbed from '../utils/createTrackEmbed';
-import deleteOpusCacheEntry from '../utils/deleteOpusCacheEntry';
 import isObject from '../utils/isObject';
+import { OpusCacheManager } from '../utils/OpusCacheManager';
 import { resetPresence, setPresence } from '../utils/presenceManager';
 import { QueueRecoveryService } from '../utils/QueueRecoveryService';
 import { StatsHandler } from '../utils/StatsHandler';
@@ -100,6 +100,13 @@ export default function usePlayerEventHandlers(
 			return;
 		}
 
-		void deleteOpusCacheEntry(track.url);
+		const opusCacheManager = OpusCacheManager.getInstance();
+		const filename = opusCacheManager.generateFilename({
+			title: track.cleanTitle,
+			author: track.author,
+			durationMS: track.durationMS,
+		});
+
+		void opusCacheManager.deleteEntry(filename);
 	});
 }

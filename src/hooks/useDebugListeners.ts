@@ -8,13 +8,13 @@ import {
 	type Message,
 } from 'discord.js';
 import type { GuildQueue, Player } from 'discord-player';
-import deleteOpusCacheEntry from '../utils/deleteOpusCacheEntry';
 import enqueueTracks from '../utils/enqueueTracks';
 import formatDuration from '../utils/formatDuration';
 import formatRelativeTime from '../utils/formatRelativeTime';
 import getEnvironmentVariable from '../utils/getEnvironmentVariable';
 import isObject from '../utils/isObject';
 import logger from '../utils/logger';
+import { OpusCacheManager } from '../utils/OpusCacheManager';
 import pluralize from '../utils/pluralize';
 import { QueueRecoveryService } from '../utils/QueueRecoveryService';
 import reportError from '../utils/reportError';
@@ -139,7 +139,14 @@ function initializePlayerErrorReporter(
 				isObject(track.metadata) &&
 				!('isFromCache' in track.metadata)
 			) {
-				void deleteOpusCacheEntry(track.url);
+				const opusCacheManager = OpusCacheManager.getInstance();
+				const filename = opusCacheManager.generateFilename({
+					title: track.cleanTitle,
+					author: track.author,
+					durationMS: track.durationMS,
+				});
+
+				void opusCacheManager.deleteEntry(filename);
 			}
 
 			if (!queue.channel) {

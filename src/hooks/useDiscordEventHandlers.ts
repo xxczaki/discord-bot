@@ -1,12 +1,12 @@
 import type { Client } from 'discord.js';
 import type { Player } from 'discord-player';
 import { useQueue } from 'discord-player';
-import deleteOpusCacheEntry from '../utils/deleteOpusCacheEntry';
 import getCommitLink from '../utils/getCommitLink';
 import getDeploymentVersion from '../utils/getDeploymentVersion';
 import getEnvironmentVariable from '../utils/getEnvironmentVariable';
 import isObject from '../utils/isObject';
 import logger from '../utils/logger';
+import { OpusCacheManager } from '../utils/OpusCacheManager';
 import { QueueRecoveryService } from '../utils/QueueRecoveryService';
 import useAutocompleteHandler from './useAutocompleteHandler';
 import useCommandHandlers from './useCommandHandlers';
@@ -95,7 +95,14 @@ export default function useDiscordEventHandlers(
 				return;
 			}
 
-			void deleteOpusCacheEntry(track.url);
+			const opusCacheManager = OpusCacheManager.getInstance();
+			const filename = opusCacheManager.generateFilename({
+				title: track.cleanTitle,
+				author: track.author,
+				durationMS: track.durationMS,
+			});
+
+			void opusCacheManager.deleteEntry(filename);
 		});
 	});
 }

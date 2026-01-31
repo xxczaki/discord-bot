@@ -11,12 +11,8 @@ import {
 import { YoutubeSabrExtractor } from 'discord-player-googlevideo';
 import { SpotifyExtractor } from 'discord-player-spotify';
 import defineCustomFilters from './defineCustomFilters';
-import deleteOpusCacheEntry from './deleteOpusCacheEntry';
-import generateOpusCacheFilename from './generateOpusCacheFilename';
-import getOpusCacheTrackPath from './getOpusCacheTrackPath';
 import logger from './logger';
-import opusCacheIndex from './OpusCacheIndex';
-import parseOpusCacheFilename from './parseOpusCacheFilename';
+import { OpusCacheManager } from './OpusCacheManager';
 import { RedisQueryCache } from './RedisQueryCache';
 import redis from './redis';
 
@@ -34,6 +30,7 @@ const MIN_CACHE_SIZE_RATIO = 0.8;
 let initializedPlayer: Player;
 
 const activeWrites = new Set<string>();
+const opusCacheManager = OpusCacheManager.initialize();
 
 defineCustomFilters();
 
@@ -43,7 +40,7 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 			queryCache: new RedisQueryCache(redis),
 		});
 
-		await opusCacheIndex.initialize();
+		await opusCacheManager.scan();
 
 		/*
 			See:
@@ -52,7 +49,7 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 		*/
 		onBeforeCreateStream(async (track) => {
 			const durationSeconds = Math.round(track.durationMS / 1000);
-			const matchedEntry = opusCacheIndex.findMatch(
+			const matchedEntry = opusCacheManager.findMatch(
 				track.cleanTitle,
 				track.author,
 				durationSeconds,
@@ -62,7 +59,7 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 				return null;
 			}
 
-			const filePath = opusCacheIndex.getFilePath(matchedEntry.filename);
+			const filePath = opusCacheManager.getFilePath(matchedEntry.filename);
 
 			if (activeWrites.has(filePath)) {
 				return null;
@@ -87,7 +84,7 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 						'Deleting undersized cache file',
 					);
 
-					void deleteOpusCacheEntry(matchedEntry.filename);
+					void opusCacheManager.deleteEntry(matchedEntry.filename);
 
 					return null;
 				}
@@ -108,7 +105,7 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 							'Deleting corrupted cache file',
 						);
 
-						void deleteOpusCacheEntry(matchedEntry.filename);
+						void opusCacheManager.deleteEntry(matchedEntry.filename);
 
 						track.setMetadata({
 							...(track.metadata ?? {}),
@@ -159,8 +156,8 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 				author: track.author,
 				durationMS: track.durationMS,
 			};
-			const filePath = getOpusCacheTrackPath(trackMetadata);
-			const filename = generateOpusCacheFilename(trackMetadata);
+			const filename = opusCacheManager.generateFilename(trackMetadata);
+			const filePath = opusCacheManager.getFilePath(filename);
 
 			try {
 				activeWrites.add(filePath);
@@ -170,7 +167,7 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 
 				const cleanup = async () => {
 					activeWrites.delete(filePath);
-					void deleteOpusCacheEntry(filename);
+					void opusCacheManager.deleteEntry(filename);
 				};
 
 				writeStream.on('error', async (error) => {
@@ -181,15 +178,12 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 				writeStream.on('close', () => {
 					activeWrites.delete(filePath);
 
-					const parsed = parseOpusCacheFilename(filename);
-					if (parsed) {
-						opusCacheIndex.addEntry({
-							filename,
-							title: parsed.title,
-							author: parsed.author,
-							durationSeconds: parsed.durationSeconds,
-						});
-					}
+					opusCacheManager.addEntry({
+						filename,
+						title: trackMetadata.title,
+						author: trackMetadata.author,
+						durationSeconds: Math.round(trackMetadata.durationMS / 1000),
+					});
 				});
 
 				readable.on('error', async () => {

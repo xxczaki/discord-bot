@@ -12,13 +12,13 @@ import {
 import prettyBytes from 'pretty-bytes';
 import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
 import getEnvironmentVariable from '../utils/getEnvironmentVariable';
-import getOpusCacheDirectoryPath from '../utils/getOpusCacheDirectoryPath';
 import logger from '../utils/logger';
+import { OpusCacheManager } from '../utils/OpusCacheManager';
 import pluralize from '../utils/pluralize';
 import redis from '../utils/redis';
 import reportError from '../utils/reportError';
 
-const opusCacheDirectory = getOpusCacheDirectoryPath();
+const opusCacheDirectory = OpusCacheManager.getDirectoryPath();
 const OWNER_ID = getEnvironmentVariable('OWNER_USER_ID');
 
 interface CacheStats {

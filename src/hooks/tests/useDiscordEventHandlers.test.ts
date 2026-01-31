@@ -8,9 +8,9 @@ import type {
 import type { Player, Track } from 'discord-player';
 import { useQueue } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
-import deleteOpusCacheEntry from '../../utils/deleteOpusCacheEntry';
 import getCommitLink from '../../utils/getCommitLink';
 import getDeploymentVersion from '../../utils/getDeploymentVersion';
+import { OpusCacheManager } from '../../utils/OpusCacheManager';
 import useDiscordEventHandlers, {
 	useReadyEventHandler,
 } from '../useDiscordEventHandlers';
@@ -30,8 +30,13 @@ vi.mock('../useCommandHandlers', () => ({
 	default: vi.fn(),
 }));
 
-vi.mock('../../utils/deleteOpusCacheEntry', () => ({
-	default: vi.fn(),
+vi.mock('../../utils/OpusCacheManager', () => ({
+	OpusCacheManager: {
+		getInstance: vi.fn().mockReturnValue({
+			generateFilename: vi.fn().mockReturnValue('mock_filename.opus'),
+			deleteEntry: vi.fn().mockResolvedValue(undefined),
+		}),
+	},
 }));
 
 vi.mock('../../utils/QueueRecoveryService', () => ({
@@ -55,7 +60,7 @@ vi.mock('../../utils/getCommitLink', () => ({
 }));
 
 const mockedUseQueue = vi.mocked(useQueue);
-const mockedDeleteOpusCacheEntry = vi.mocked(deleteOpusCacheEntry);
+const mockedOpusCacheManager = vi.mocked(OpusCacheManager);
 const mockedGetDeploymentVersion = vi.mocked(getDeploymentVersion);
 const mockedGetCommitLink = vi.mocked(getCommitLink);
 
@@ -279,6 +284,9 @@ it('should delete opus cache when track is not from cache', async () => {
 	const mockVoiceState = createMockVoiceState();
 	const mockTrack = {
 		url: 'https://example.com/track.mp3',
+		cleanTitle: 'Test Track',
+		author: 'Test Artist',
+		durationMS: 180000,
 		metadata: { isFromCache: false },
 	} as Track;
 	const mockQueue = {
@@ -306,7 +314,9 @@ it('should delete opus cache when track is not from cache', async () => {
 		await voiceStateHandler(mockVoiceState);
 	}
 
-	expect(mockedDeleteOpusCacheEntry).toHaveBeenCalledWith(mockTrack.url);
+	expect(mockedOpusCacheManager.getInstance().deleteEntry).toHaveBeenCalledWith(
+		'mock_filename.opus',
+	);
 });
 
 it('should not delete opus cache when track is from cache', async () => {
@@ -344,7 +354,9 @@ it('should not delete opus cache when track is from cache', async () => {
 		await voiceStateHandler(mockVoiceState);
 	}
 
-	expect(mockedDeleteOpusCacheEntry).not.toHaveBeenCalled();
+	expect(
+		mockedOpusCacheManager.getInstance().deleteEntry,
+	).not.toHaveBeenCalled();
 });
 
 it('should send commit link when deployment version is not available', async () => {
