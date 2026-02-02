@@ -163,16 +163,23 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 				activeWrites.add(filePath);
 
 				const writeStream = createWriteStream(filePath);
+
 				let streamEndedNormally = false;
 
-				const cleanup = async () => {
+				const cleanup = () => {
+					interceptor.interceptors.delete(writeStream);
+
+					if (!writeStream.destroyed) {
+						writeStream.destroy();
+					}
+
 					activeWrites.delete(filePath);
 					void opusCacheManager.deleteEntry(filename);
 				};
 
-				writeStream.on('error', async (error) => {
+				writeStream.on('error', (error) => {
 					logger.error(error, 'Opus cache write stream error');
-					await cleanup();
+					cleanup();
 				});
 
 				writeStream.on('close', () => {
@@ -186,8 +193,8 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 					});
 				});
 
-				readable.on('error', async () => {
-					await cleanup();
+				readable.on('error', () => {
+					cleanup();
 				});
 
 				readable.on('end', () => {
