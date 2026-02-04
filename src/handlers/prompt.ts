@@ -32,10 +32,9 @@ export default async function promptCommandHandler(
 		});
 	}
 
-	const queue = useQueueWithValidation(
-		interaction,
-		'The queue is empty. Cannot process prompt.',
-	);
+	const queue = useQueueWithValidation(interaction, {
+		message: 'The queue is empty. Cannot process prompt.',
+	});
 
 	if (!queue) return;
 

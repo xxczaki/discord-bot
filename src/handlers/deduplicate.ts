@@ -11,7 +11,9 @@ const pluralizeDuplicates = pluralize('duplicate', 'duplicates');
 export default async function deduplicateCommandHandler(
 	interaction: ChatInputCommandInteraction,
 ) {
-	const queue = useQueueWithValidation(interaction, 'The queue is empty.');
+	const queue = useQueueWithValidation(interaction, {
+		message: 'The queue is empty.',
+	});
 
 	if (!queue) return;
 

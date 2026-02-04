@@ -98,7 +98,9 @@ export class OpusCacheManager {
 
 	static getInstance(): OpusCacheManager {
 		if (!OpusCacheManager.#instance) {
-			throw new Error('OpusCacheManager not initialized');
+			OpusCacheManager.#instance = new OpusCacheManager(
+				OpusCacheManager.getDirectoryPath(),
+			);
 		}
 
 		return OpusCacheManager.#instance;

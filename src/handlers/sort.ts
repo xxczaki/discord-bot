@@ -4,7 +4,9 @@ import useQueueWithValidation from '../utils/useQueueWithValidation';
 export default async function sortCommandHandler(
 	interaction: ChatInputCommandInteraction,
 ) {
-	const queue = useQueueWithValidation(interaction, 'The queue is empty.');
+	const queue = useQueueWithValidation(interaction, {
+		message: 'The queue is empty.',
+	});
 
 	if (!queue) return;
 

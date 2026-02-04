@@ -4,11 +4,13 @@ import useQueueWithValidation from '../utils/useQueueWithValidation';
 export default async function skipCommandHandler(
 	interaction: ChatInputCommandInteraction,
 ) {
-	const queue = useQueueWithValidation(interaction);
+	await interaction.deferReply();
+
+	const queue = useQueueWithValidation(interaction, { deferred: true });
 
 	if (!queue) return;
 
 	queue.node.skip();
 
-	await interaction.reply('Track skipped.');
+	await interaction.editReply('Track skipped.');
 }

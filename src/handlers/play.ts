@@ -24,6 +24,10 @@ export default async function playCommandHandler(
 		});
 	}
 
+	if (interaction.replied || interaction.deferred) {
+		return;
+	}
+
 	await interaction.reply('Processing the track to play…');
 
 	const query = interaction.options.getString('query', true);

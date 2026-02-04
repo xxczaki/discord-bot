@@ -22,10 +22,9 @@ import useQueueWithValidation from '../utils/useQueueWithValidation';
 export default async function queueCommandHandler(
 	interaction: ChatInputCommandInteraction,
 ) {
-	const queue = useQueueWithValidation(
-		interaction,
-		'The queue is empty and nothing is being played.',
-	);
+	const queue = useQueueWithValidation(interaction, {
+		message: 'The queue is empty and nothing is being played.',
+	});
 
 	if (!queue) return;
 

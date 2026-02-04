@@ -1,6 +1,7 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
 import type { GuildQueue } from 'discord-player';
-import { expect, it, vi } from 'vitest';
+import { useQueue } from 'discord-player';
+import { beforeEach, expect, it, vi } from 'vitest';
 import useQueueWithValidation from '../useQueueWithValidation';
 
 const MOCK_QUEUE = { id: 'test-queue' } as GuildQueue;
@@ -9,13 +10,19 @@ vi.mock('discord-player', () => ({
 	useQueue: vi.fn(),
 }));
 
-const mockInteraction = {
-	reply: vi.fn().mockResolvedValue(undefined),
-} as unknown as ChatInputCommandInteraction;
+const createMockInteraction = () =>
+	({
+		reply: vi.fn().mockResolvedValue(undefined),
+		editReply: vi.fn().mockResolvedValue(undefined),
+	}) as unknown as ChatInputCommandInteraction;
 
-it('should return queue when useQueue returns a valid queue', async () => {
-	const { useQueue } = await import('discord-player');
+beforeEach(() => {
+	vi.clearAllMocks();
+});
+
+it('should return queue when useQueue returns a valid queue', () => {
 	vi.mocked(useQueue).mockReturnValue(MOCK_QUEUE);
+	const mockInteraction = createMockInteraction();
 
 	const result = useQueueWithValidation(mockInteraction);
 
@@ -23,9 +30,9 @@ it('should return queue when useQueue returns a valid queue', async () => {
 	expect(mockInteraction.reply).not.toHaveBeenCalled();
 });
 
-it('should return null and reply with default message when queue is null', async () => {
-	const { useQueue } = await import('discord-player');
+it('should return null and reply with default message when queue is null', () => {
 	vi.mocked(useQueue).mockReturnValue(null);
+	const mockInteraction = createMockInteraction();
 
 	const result = useQueueWithValidation(mockInteraction);
 
@@ -36,16 +43,32 @@ it('should return null and reply with default message when queue is null', async
 	});
 });
 
-it('should return null and reply with custom message when queue is null', async () => {
-	const { useQueue } = await import('discord-player');
+it('should return null and reply with custom message when queue is null', () => {
 	vi.mocked(useQueue).mockReturnValue(null);
-	const customMessage = 'Custom error message';
+	const mockInteraction = createMockInteraction();
 
-	const result = useQueueWithValidation(mockInteraction, customMessage);
+	const result = useQueueWithValidation(mockInteraction, {
+		message: 'Custom error message',
+	});
 
 	expect(result).toBeNull();
 	expect(mockInteraction.reply).toHaveBeenCalledWith({
-		content: customMessage,
+		content: 'Custom error message',
 		flags: ['Ephemeral'],
 	});
+});
+
+it('should use `editReply` when `deferred` option is true', () => {
+	vi.mocked(useQueue).mockReturnValue(null);
+	const mockInteraction = createMockInteraction();
+
+	const result = useQueueWithValidation(mockInteraction, {
+		deferred: true,
+	});
+
+	expect(result).toBeNull();
+	expect(mockInteraction.editReply).toHaveBeenCalledWith(
+		'No music is currently playing.',
+	);
+	expect(mockInteraction.reply).not.toHaveBeenCalled();
 });

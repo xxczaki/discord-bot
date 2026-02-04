@@ -15,7 +15,8 @@ beforeEach(() => {
 
 function createMockInteraction(): ChatInputCommandInteraction {
 	return {
-		reply: vi.fn().mockResolvedValue({}),
+		deferReply: vi.fn().mockResolvedValue({}),
+		editReply: vi.fn().mockResolvedValue({}),
 	} as unknown as ChatInputCommandInteraction;
 }
 
@@ -34,8 +35,9 @@ it('should skip the track and reply with success message', async () => {
 
 	await skipCommandHandler(interaction);
 
+	expect(interaction.deferReply).toHaveBeenCalled();
 	expect(mockQueue.node.skip).toHaveBeenCalledWith();
-	expect(interaction.reply).toHaveBeenCalledWith('Track skipped.');
+	expect(interaction.editReply).toHaveBeenCalledWith('Track skipped.');
 });
 
 it('should handle when queue is null', async () => {
@@ -44,8 +46,8 @@ it('should handle when queue is null', async () => {
 
 	await skipCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'No music is currently playing.',
-		flags: ['Ephemeral'],
-	});
+	expect(interaction.deferReply).toHaveBeenCalled();
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'No music is currently playing.',
+	);
 });
