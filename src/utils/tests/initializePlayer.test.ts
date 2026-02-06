@@ -68,7 +68,10 @@ vi.mock('discord-player', () => ({
 		onStreamExtractedCallback = callback;
 	}),
 	InterceptedStream: vi.fn(function (this: {
-		interceptors: { add: ReturnType<typeof vi.fn>; delete: ReturnType<typeof vi.fn> };
+		interceptors: {
+			add: ReturnType<typeof vi.fn>;
+			delete: ReturnType<typeof vi.fn>;
+		};
 	}) {
 		this.interceptors = {
 			add: vi.fn(),
@@ -523,8 +526,14 @@ describe('onStreamExtracted callback', () => {
 	});
 
 	it('should handle non-Readable stream with caching', async () => {
-		const mockWriteStream: MockWriteStream = { on: vi.fn(), destroy: vi.fn(), destroyed: false };
-		const mockInterceptor: MockInterceptor = { interceptors: { add: vi.fn(), delete: vi.fn() } };
+		const mockWriteStream: MockWriteStream = {
+			on: vi.fn(),
+			destroy: vi.fn(),
+			destroyed: false,
+		};
+		const mockInterceptor: MockInterceptor = {
+			interceptors: { add: vi.fn(), delete: vi.fn() },
+		};
 
 		vi.mocked(createWriteStream).mockReturnValue(
 			mockWriteStream as unknown as import('fs').WriteStream,
@@ -608,7 +617,11 @@ describe('onStreamExtracted callback', () => {
 	});
 
 	it('should trigger cleanup on readable error', async () => {
-		const mockWriteStream: MockWriteStream = { on: vi.fn(), destroy: vi.fn(), destroyed: false };
+		const mockWriteStream: MockWriteStream = {
+			on: vi.fn(),
+			destroy: vi.fn(),
+			destroyed: false,
+		};
 
 		vi.mocked(createWriteStream).mockReturnValue(
 			mockWriteStream as unknown as import('fs').WriteStream,
@@ -671,7 +684,11 @@ describe('onStreamExtracted callback', () => {
 	});
 
 	it('should trigger cleanup on readable close when active write exists', async () => {
-		const mockWriteStream: MockWriteStream = { on: vi.fn(), destroy: vi.fn(), destroyed: false };
+		const mockWriteStream: MockWriteStream = {
+			on: vi.fn(),
+			destroy: vi.fn(),
+			destroyed: false,
+		};
 
 		vi.mocked(createWriteStream).mockReturnValue(
 			mockWriteStream as unknown as import('fs').WriteStream,
@@ -712,7 +729,11 @@ describe('onStreamExtracted callback', () => {
 	});
 
 	it('should clean up active writes on writeStream close', async () => {
-		const mockWriteStream: MockWriteStream = { on: vi.fn(), destroy: vi.fn(), destroyed: false };
+		const mockWriteStream: MockWriteStream = {
+			on: vi.fn(),
+			destroy: vi.fn(),
+			destroyed: false,
+		};
 
 		vi.mocked(createWriteStream).mockReturnValue(
 			mockWriteStream as unknown as import('fs').WriteStream,
