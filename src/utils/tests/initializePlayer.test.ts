@@ -243,39 +243,6 @@ describe('onBeforeCreateStream callback', () => {
 		expect(mockTrack.setMetadata).not.toHaveBeenCalled();
 	});
 
-	it('should return null when file is too new', async () => {
-		const mockStat = vi.mocked(stat);
-
-		mockOpusCacheManagerInstance.findMatch.mockReturnValue({
-			filename: 'test_track_180.opus',
-			title: 'test track',
-			author: '',
-			durationSeconds: 180,
-		});
-
-		mockStat.mockResolvedValue({
-			size: 2048,
-			mtime: new Date(Date.now() - 1000),
-		} as unknown as import('fs').Stats);
-
-		await getInitializedPlayer(mockClient);
-
-		const mockTrack: MockTrack = {
-			url: 'https://example.com/track',
-			title: 'Test Track',
-			cleanTitle: 'Test Track',
-			author: 'Artist',
-			durationMS: 180000,
-			metadata: {},
-			setMetadata: vi.fn(),
-		};
-
-		const result = await onBeforeCreateStreamCallback?.(mockTrack);
-
-		expect(result).toBeNull();
-		expect(mockTrack.setMetadata).not.toHaveBeenCalled();
-	});
-
 	it('should return null and delete when file is too small', async () => {
 		const mockStat = vi.mocked(stat);
 

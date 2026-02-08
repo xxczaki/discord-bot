@@ -50,11 +50,14 @@ async function createTrackEmbed(track: Track, description: string) {
 
 		try {
 			const opusCacheManager = OpusCacheManager.getInstance();
-			const filename = opusCacheManager.generateFilename({
-				title: track.cleanTitle,
-				author: track.author,
-				durationMS: track.durationMS,
-			});
+			const filename =
+				typeof track.metadata.cacheFilename === 'string'
+					? track.metadata.cacheFilename
+					: opusCacheManager.generateFilename({
+							title: track.cleanTitle,
+							author: track.author,
+							durationMS: track.durationMS,
+						});
 			const filePath = opusCacheManager.getFilePath(filename);
 			const now = Date.now();
 

@@ -16,7 +16,6 @@ import { OpusCacheManager } from './OpusCacheManager';
 import { RedisQueryCache } from './RedisQueryCache';
 import redis from './redis';
 
-const CACHE_WRITE_BUFFER_MS = 5000;
 const MIN_CACHE_FILE_SIZE_BYTES = 1024;
 
 /*
@@ -67,13 +66,6 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 
 			try {
 				const stats = await stat(filePath);
-
-				const now = Date.now();
-				const fileAge = now - stats.mtime.getTime();
-
-				if (fileAge < CACHE_WRITE_BUFFER_MS) {
-					return null;
-				}
 
 				if (stats.size < MIN_CACHE_FILE_SIZE_BYTES) {
 					logger.warn(
@@ -142,6 +134,21 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 				'isFromCache' in track.metadata &&
 				track.metadata.isFromCache
 			) {
+				if (isReadable) {
+					return readable;
+				}
+
+				return stream;
+			}
+
+			const durationSeconds = Math.round(track.durationMS / 1000);
+			const existingEntry = opusCacheManager.findMatch(
+				track.cleanTitle,
+				track.author,
+				durationSeconds,
+			);
+
+			if (existingEntry) {
 				if (isReadable) {
 					return readable;
 				}
