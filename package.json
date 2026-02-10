@@ -38,7 +38,7 @@
 		"@biomejs/biome": "catalog:",
 		"@changesets/cli": "^2.29.8",
 		"@discordjs/rest": "^2.6.0",
-		"@sentry/esbuild-plugin": "^4.9.0",
+		"@sentry/esbuild-plugin": "^4.9.1",
 		"@types/node": "catalog:",
 		"@vitest/coverage-v8": "catalog:",
 		"date-fns": "^4.1.0",
