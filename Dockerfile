@@ -1,4 +1,4 @@
-FROM node:24.13.0-alpine AS base
+FROM node:24.13.1-alpine AS base
 
 RUN apk add --no-cache build-base python3 make g++ cairo-dev pango-dev && \
 		corepack enable
@@ -22,7 +22,7 @@ RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN,env=SENTRY_AUTH_TOKEN \
 RUN CI=true pnpm prune --prod
 
 
-FROM node:24.13.0-alpine
+FROM node:24.13.1-alpine
 
 ENV TZ="Europe/Berlin"
 
