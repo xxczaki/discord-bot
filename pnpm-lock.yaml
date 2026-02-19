@@ -39,8 +39,8 @@ importers:
         specifier: ^10.39.0
         version: 10.39.0
       ai:
-        specifier: ^6.0.91
-        version: 6.0.91(zod@4.3.6)
+        specifier: ^6.0.92
+        version: 6.0.92(zod@4.3.6)
       bufferutil:
         specifier: ^4.1.0
         version: 4.1.0
@@ -175,8 +175,8 @@ packages:
   '@acemir/cssom@0.9.31':
     resolution: {integrity: sha512-ZnR3GSaH+/vJ0YlHau21FjfLYjMpYVIzTD8M8vIEQvIGxeOXyXdzCI140rrCY862p/C/BbzWsjc1dgnM9mkoTA==}
 
-  '@ai-sdk/gateway@3.0.50':
-    resolution: {integrity: sha512-Jdd1a8VgbD7l7r+COj0h5SuaYRfPvOJ/AO6l0OrmTPEcI2MUQPr3C4JttfpNkcheEN+gOdy0CtZWuG17bW2fjw==}
+  '@ai-sdk/gateway@3.0.51':
+    resolution: {integrity: sha512-VXYxgDv2U1GJj6xY3aVd9glEmotGmsQllmKDUEghoghlZhEX6F64JsBQx/TukmlJGM98iAYCmofIwGFddv8ZTA==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -1309,8 +1309,8 @@ packages:
     resolution: {integrity: sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==}
     engines: {node: '>= 14'}
 
-  ai@6.0.91:
-    resolution: {integrity: sha512-k1/8BusZMhYVxxLZt0BUZzm9HVDCCh117nyWfWUx5xjR2+tWisJbXgysL7EBMq2lgyHwgpA1jDR3tVjWSdWZXw==}
+  ai@6.0.92:
+    resolution: {integrity: sha512-TeXJX2PBv2djoqZN5J5+pL5etJFwxEiv55i6iZF4/qthLx1SjWDk6i3SETd7r9XZfvOlDaOJBQZ6MIHkAaOnhw==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -3115,7 +3115,7 @@ snapshots:
 
   '@acemir/cssom@0.9.31': {}
 
-  '@ai-sdk/gateway@3.0.50(zod@4.3.6)':
+  '@ai-sdk/gateway@3.0.51(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.8
       '@ai-sdk/provider-utils': 4.0.15(zod@4.3.6)
@@ -4358,9 +4358,9 @@ snapshots:
 
   agent-base@7.1.4: {}
 
-  ai@6.0.91(zod@4.3.6):
+  ai@6.0.92(zod@4.3.6):
     dependencies:
-      '@ai-sdk/gateway': 3.0.50(zod@4.3.6)
+      '@ai-sdk/gateway': 3.0.51(zod@4.3.6)
       '@ai-sdk/provider': 3.0.8
       '@ai-sdk/provider-utils': 4.0.15(zod@4.3.6)
       '@opentelemetry/api': 1.9.0
