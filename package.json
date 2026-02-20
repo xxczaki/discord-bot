@@ -15,7 +15,7 @@
 		"version-packages": "changeset version",
 		"release": "pnpm recursive run build && changeset publish"
 	},
-	"packageManager": "pnpm@10.30.0",
+	"packageManager": "pnpm@10.30.1",
 	"dependencies": {
 		"@ai-sdk/openai": "^3.0.30",
 		"@kubernetes/client-node": "^1.4.0",
