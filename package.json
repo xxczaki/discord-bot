@@ -22,7 +22,7 @@
 		"@sentry/node": "^10.41.0",
 		"ai": "^6.0.105",
 		"bufferutil": "^4.1.0",
-		"discord-player": "^7.2.0-dev.2",
+		"discord-player": "^7.2.0",
 		"discord-player-googlevideo": "workspace:*",
 		"discord-player-spotify": "^1.1.7",
 		"discord.js": "^14.25.1",

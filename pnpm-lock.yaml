@@ -45,8 +45,8 @@ importers:
         specifier: ^4.1.0
         version: 4.1.0
       discord-player:
-        specifier: ^7.2.0-dev.2
-        version: 7.2.0-dev.2(@discord-player/extractor@7.1.0)(mediaplex@1.0.0)(postcss@8.5.6)(tsx@4.21.0)
+        specifier: ^7.2.0
+        version: 7.2.0(@discord-player/extractor@7.1.0)(mediaplex@1.0.0)(postcss@8.5.6)(tsx@4.21.0)
       discord-player-googlevideo:
         specifier: workspace:*
         version: link:packages/discord-player-googlevideo
@@ -161,8 +161,8 @@ importers:
         specifier: 'catalog:'
         version: 4.0.18(vitest@4.0.18(@opentelemetry/api@1.9.0)(@types/node@24.11.0)(jsdom@28.1.0(@noble/hashes@1.8.0))(tsx@4.21.0))
       discord-player:
-        specifier: ^7.2.0-dev.2
-        version: 7.2.0-dev.2(@discord-player/extractor@7.1.0)(mediaplex@1.0.0)(postcss@8.5.6)(tsx@4.21.0)
+        specifier: ^7.2.0
+        version: 7.2.0(@discord-player/extractor@7.1.0)(mediaplex@1.0.0)(postcss@8.5.6)(tsx@4.21.0)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -431,20 +431,20 @@ packages:
     resolution: {integrity: sha512-QxULHAm7cNu72w97JUNCBFODFaXpbDg+dP8b/oWFAZ2MTRppA3U00Y2L1HqaS4J6yBqxwa/Y3nMBaxVKbB/NsA==}
     engines: {node: '>=20.19.0'}
 
-  '@discord-player/equalizer@7.1.0':
-    resolution: {integrity: sha512-bF5MRDDcm0BeZbTHMcG3UHdTZKHC7w21iEqrjt89KDzis6qz9oRsRWIG1w0NH3UYSCf1X3jdS/WiKdMqGHmmiA==}
+  '@discord-player/equalizer@7.2.0':
+    resolution: {integrity: sha512-k0mzMC92YrooRrSeT7LAgJNf+ce8VCxXJNDtRXL+Eli0WtUwvv30+Wz1vpIMdcuqEX+HRRDkBnMDY1thL5449A==}
 
   '@discord-player/extractor@7.1.0':
     resolution: {integrity: sha512-/ttNFkN0hacSS/KJNcPP8Dvk1W8+QGbdlbtJNIPHO1oBfEMazs6BimokMG5eCVmSLPb2MaWPGKTjhoQzHLlBlw==}
 
-  '@discord-player/ffmpeg@7.1.0':
-    resolution: {integrity: sha512-4pKY6S5AwrM2aUWLklELOljKH1S2M2CN4vcel/15U6OGmg1sCJEWWVxLNvWIek/zH5Ua2yU4EN8gNxzZbjq/pw==}
+  '@discord-player/ffmpeg@7.2.0':
+    resolution: {integrity: sha512-XjBbi+Zpm7dtDE7gf4KLYf53J3PNKk0gDigFt1dvRVJ38WmrUUpqRn0QdrH7CwRJhXfexTimSg71xj7Zn65jWw==}
 
-  '@discord-player/opus@7.1.0':
-    resolution: {integrity: sha512-kQdkiCdyPKiKt+2YRgYfx8ymS8ZesvRZXC5Ok8UUoSYVl658yAxwLPlDrziZnVqcuSvGjnAFTcwAZcU00iuRZg==}
+  '@discord-player/opus@7.2.0':
+    resolution: {integrity: sha512-R6/hdU95o42Xdt/oNVtpi6PLL8FqBVOCLalH3kmpQ42F2adLwA3E9V0qfQcyZuUW7NcVbWfLYevV8rmcj/75lg==}
 
-  '@discord-player/utils@7.1.0':
-    resolution: {integrity: sha512-Glaj91FRoi6GRHLQ+rDZWmWL8GEnnUl1OXotIZ1A66flk/C+p99KZahBdHV9u24QZrU5mL+yqGYxqqIQYf4rxQ==}
+  '@discord-player/utils@7.2.0':
+    resolution: {integrity: sha512-07zpzOXbSKIKwwZxKdj1UznB1MYHFZjrC3mZeggreY21yJzNE+MYeH2ueDRH8V4f9tOR8KGustJc36Qza6+uMQ==}
 
   '@discordjs/builders@1.13.1':
     resolution: {integrity: sha512-cOU0UDHc3lp/5nKByDxkmRiNZBpdp0kx55aarbiAfakfKJHlxv/yFW1zmIqCAmwH5CRlrH9iMFKJMpvW4DPB+w==}
@@ -1638,14 +1638,14 @@ packages:
   discord-player-spotify@1.1.7:
     resolution: {integrity: sha512-Hw86G2RRq5BeaA/S3Ukm1RYKIIBmrvAyQ4vQ0zTDGhHDQ8oa0IAeAvi/wkqRxvlc7mBEp+N2eAlrvMXQV5hRYw==}
 
-  discord-player@7.2.0-dev.2:
-    resolution: {integrity: sha512-WwNu/Z/XDYVpzQNqEqcOdzJEaIAQ40loDO+pUsXGE++5mcfM7KYaVJuJC86w4Gh6PnSIpmMQ1d2IatdySfSKBg==}
+  discord-player@7.2.0:
+    resolution: {integrity: sha512-0UCo/IKZjEqkv3DLdEWh2jQ0hyzqaTxm25yCCG3NQpiRfCetaRVPbjdTgo4/4YOdNcZEypIPZtkE6lJxpkbtnA==}
     peerDependencies:
-      '@discord-player/extractor': ^7.1.0
+      '@discord-player/extractor': ^7.2.0
       mediaplex: ^1
 
-  discord-voip@7.1.0:
-    resolution: {integrity: sha512-6aQgI3QUj0Ee5tqaAV+pgBcOrgnkBh5/1UxAqbKMYQinQNs9LEZA7OoCxlWdiJVpVM2c1AxCdqhfryQMvM10+A==}
+  discord-voip@7.2.0:
+    resolution: {integrity: sha512-bteX8XrSSqltsjV13jd6uTr5qVZ+c8yjnx2hV/AhvxgA/9qJ2i43Hkrs4qisw/o94s23Ni3tXXQohvu0EzB4+w==}
 
   discord.js@14.25.1:
     resolution: {integrity: sha512-2l0gsPOLPs5t6GFZfQZKnL1OJNYFcuC/ETWsW4VtKVD/tg4ICa9x+jb9bkPffkMdRpRpuUaO/fKkHCBeiCKh8g==}
@@ -3495,7 +3495,7 @@ snapshots:
 
   '@csstools/css-tokenizer@4.0.0': {}
 
-  '@discord-player/equalizer@7.1.0': {}
+  '@discord-player/equalizer@7.2.0': {}
 
   '@discord-player/extractor@7.1.0':
     dependencies:
@@ -3508,11 +3508,11 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@discord-player/ffmpeg@7.1.0': {}
+  '@discord-player/ffmpeg@7.2.0': {}
 
-  '@discord-player/opus@7.1.0': {}
+  '@discord-player/opus@7.2.0': {}
 
-  '@discord-player/utils@7.1.0':
+  '@discord-player/utils@7.2.0':
     dependencies:
       '@discordjs/collection': 1.5.3
 
@@ -4676,14 +4676,14 @@ snapshots:
       node-html-parser: 7.0.2
       otpauth: 9.4.1
 
-  discord-player@7.2.0-dev.2(@discord-player/extractor@7.1.0)(mediaplex@1.0.0)(postcss@8.5.6)(tsx@4.21.0):
+  discord-player@7.2.0(@discord-player/extractor@7.1.0)(mediaplex@1.0.0)(postcss@8.5.6)(tsx@4.21.0):
     dependencies:
-      '@discord-player/equalizer': 7.1.0
+      '@discord-player/equalizer': 7.2.0
       '@discord-player/extractor': 7.1.0
-      '@discord-player/ffmpeg': 7.1.0
-      '@discord-player/utils': 7.1.0
+      '@discord-player/ffmpeg': 7.2.0
+      '@discord-player/utils': 7.2.0
       '@web-scrobbler/metadata-filter': 3.2.0
-      discord-voip: 7.1.0(postcss@8.5.6)(tsx@4.21.0)
+      discord-voip: 7.2.0(postcss@8.5.6)(tsx@4.21.0)
       mediaplex: 1.0.0
     transitivePeerDependencies:
       - '@microsoft/api-extractor'
@@ -4694,11 +4694,11 @@ snapshots:
       - tsx
       - yaml
 
-  discord-voip@7.1.0(postcss@8.5.6)(tsx@4.21.0):
+  discord-voip@7.2.0(postcss@8.5.6)(tsx@4.21.0):
     dependencies:
-      '@discord-player/ffmpeg': 7.1.0
-      '@discord-player/opus': 7.1.0
-      '@discord-player/utils': 7.1.0
+      '@discord-player/ffmpeg': 7.2.0
+      '@discord-player/opus': 7.2.0
+      '@discord-player/utils': 7.2.0
       '@types/ws': 8.18.1
       tsup: 8.5.1(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)
       typescript: 5.9.3
