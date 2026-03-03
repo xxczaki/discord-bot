@@ -26,7 +26,9 @@ export async function generateWebPoToken(videoId: string): Promise<{
 		{
 			url: 'https://www.youtube.com/',
 			referrer: 'https://www.youtube.com/',
-			userAgent: USER_AGENT,
+			resources: {
+				userAgent: USER_AGENT,
+			},
 		},
 	);
 

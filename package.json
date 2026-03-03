@@ -39,6 +39,7 @@
 		"@changesets/cli": "^2.30.0",
 		"@discordjs/rest": "^2.6.0",
 		"@sentry/esbuild-plugin": "^5.1.1",
+		"@snazzah/davey": "^0.1.10",
 		"@types/node": "catalog:",
 		"@vitest/coverage-v8": "catalog:",
 		"date-fns": "^4.1.0",
