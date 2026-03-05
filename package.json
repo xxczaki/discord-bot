@@ -17,7 +17,7 @@
 	},
 	"packageManager": "pnpm@10.30.3",
 	"dependencies": {
-		"@ai-sdk/openai": "^3.0.39",
+		"@ai-sdk/openai": "^3.0.41",
 		"@kubernetes/client-node": "^1.4.0",
 		"@sentry/node": "^10.42.0",
 		"@snazzah/davey": "^0.1.10",
