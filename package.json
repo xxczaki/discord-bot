@@ -21,7 +21,7 @@
 		"@kubernetes/client-node": "^1.4.0",
 		"@sentry/node": "^10.42.0",
 		"@snazzah/davey": "^0.1.10",
-		"ai": "^6.0.109",
+		"ai": "^6.0.116",
 		"bufferutil": "^4.1.0",
 		"discord-player": "^7.2.0",
 		"discord-player-googlevideo": "workspace:*",
