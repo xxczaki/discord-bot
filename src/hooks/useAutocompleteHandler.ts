@@ -1,4 +1,8 @@
-import type { Interaction } from 'discord.js';
+import {
+	type AutocompleteInteraction,
+	DiscordAPIError,
+	type Interaction,
+} from 'discord.js';
 import { useMainPlayer, useQueue } from 'discord-player';
 import Fuse from 'fuse.js';
 import debounce from 'p-debounce';
@@ -9,6 +13,8 @@ import getTrackPosition from '../utils/getTrackPosition';
 import reportError from '../utils/reportError';
 import truncateString from '../utils/truncateString';
 
+const EXPIRED_INTERACTION_CODES = new Set([10_062, 40_060]);
+
 async function useAutocompleteHandler(interaction: Interaction) {
 	if (!interaction.isAutocomplete()) {
 		return;
@@ -18,6 +24,21 @@ async function useAutocompleteHandler(interaction: Interaction) {
 		return;
 	}
 
+	try {
+		await handleAutocomplete(interaction);
+	} catch (error) {
+		if (
+			error instanceof DiscordAPIError &&
+			EXPIRED_INTERACTION_CODES.has(Number(error.code))
+		) {
+			return;
+		}
+
+		throw error;
+	}
+}
+
+async function handleAutocomplete(interaction: AutocompleteInteraction) {
 	if (interaction.commandName === 'play') {
 		const query = interaction.options.getString('query', true);
 

@@ -22,8 +22,11 @@ import useQueueWithValidation from '../utils/useQueueWithValidation';
 export default async function queueCommandHandler(
 	interaction: ChatInputCommandInteraction,
 ) {
+	await interaction.deferReply();
+
 	const queue = useQueueWithValidation(interaction, {
 		message: 'The queue is empty and nothing is being played.',
+		deferred: true,
 	});
 
 	if (!queue) return;
@@ -32,10 +35,10 @@ export default async function queueCommandHandler(
 	const currentTrack = queue.currentTrack;
 
 	if (!currentTrack) {
-		return interaction.reply('The queue is empty and nothing is being played.');
+		return interaction.editReply(
+			'The queue is empty and nothing is being played.',
+		);
 	}
-
-	await interaction.reply('Fetching the queue…');
 
 	let descriptionLength = 0;
 	let currentDescriptionIndex = 0;

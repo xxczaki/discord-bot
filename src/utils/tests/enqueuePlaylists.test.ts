@@ -103,6 +103,7 @@ beforeEach(() => {
 				},
 			},
 		},
+		deferReply: vi.fn(),
 		reply: vi.fn(),
 		editReply: vi.fn().mockResolvedValue(mockResponse),
 	} as unknown as StringSelectMenuInteraction;
@@ -127,7 +128,8 @@ it('should return early when playlists channel is not text-based', async () => {
 
 	await enqueuePlaylists(mockInteraction, mockVoiceChannel);
 
-	expect(mockInteraction.reply).toHaveBeenCalledWith({
+	expect(mockInteraction.deferReply).toHaveBeenCalled();
+	expect(mockInteraction.editReply).toHaveBeenCalledWith({
 		content: 'Invalid playlists channel type!',
 		components: [],
 	});
@@ -144,19 +146,11 @@ it('should fetch playlists channel using environment variable', async () => {
 	);
 });
 
-it('should reply with processing embed initially', async () => {
-	let replyCallArgs: unknown;
-	(mockInteraction.reply as ReturnType<typeof vi.fn>).mockImplementationOnce(
-		(args) => {
-			replyCallArgs = args;
-			return Promise.resolve();
-		},
-	);
-
+it('should defer reply and send processing embed initially', async () => {
 	await enqueuePlaylists(mockInteraction, mockVoiceChannel);
 
-	expect(mockInteraction.reply).toHaveBeenCalled();
-	expect(replyCallArgs).toEqual({
+	expect(mockInteraction.deferReply).toHaveBeenCalled();
+	expect(mockInteraction.editReply).toHaveBeenCalledWith({
 		components: [],
 		embeds: [expect.any(EmbedBuilder)],
 	});
@@ -292,7 +286,7 @@ it('should handle playlist channel fetch failure', async () => {
 
 	await enqueuePlaylists(mockInteraction, mockVoiceChannel);
 
-	expect(mockInteraction.reply).toHaveBeenCalledWith({
+	expect(mockInteraction.editReply).toHaveBeenCalledWith({
 		content: 'Invalid playlists channel type!',
 		components: [],
 	});
@@ -393,6 +387,7 @@ describe('enqueuePlaylists with ChatInputCommandInteraction and playlist IDs', (
 					},
 				},
 			},
+			deferReply: vi.fn(),
 			reply: vi.fn(),
 			editReply: vi.fn().mockResolvedValue(mockResponse),
 		} as unknown as ChatInputCommandInteraction;
@@ -474,7 +469,8 @@ describe('enqueuePlaylists with ChatInputCommandInteraction and playlist IDs', (
 			'playlist1',
 		]);
 
-		expect(mockChatInputInteraction.reply).toHaveBeenCalledWith({
+		expect(mockChatInputInteraction.deferReply).toHaveBeenCalled();
+		expect(mockChatInputInteraction.editReply).toHaveBeenCalledWith({
 			content: 'Invalid playlists channel type!',
 			components: [],
 		});

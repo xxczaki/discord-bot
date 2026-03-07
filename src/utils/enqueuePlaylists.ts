@@ -42,8 +42,10 @@ export default async function enqueuePlaylists(
 		getEnvironmentVariable('PLAYLISTS_CHANNEL_ID'),
 	);
 
+	await interaction.deferReply();
+
 	if (!playlistsChannel?.isTextBased()) {
-		await interaction.reply({
+		await interaction.editReply({
 			content: 'Invalid playlists channel type!',
 			components: [],
 		});
@@ -54,7 +56,7 @@ export default async function enqueuePlaylists(
 		.setTitle('⏳ Processing')
 		.setDescription('Fetching all the songs…');
 
-	await interaction.reply({
+	await interaction.editReply({
 		components: [],
 		embeds: [embed],
 	});

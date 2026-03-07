@@ -105,6 +105,8 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 
 		this.#innertube = await Innertube.create({
 			cache: new UniversalCache(true, '/tmp/.cache'),
+			// Workaround for https://github.com/LuanRT/YouTube.js/issues/1146
+			player_id: '4eecba16',
 		});
 
 		this.protocols = ['ytsearch', 'youtube'];
