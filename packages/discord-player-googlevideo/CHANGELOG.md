@@ -1,5 +1,11 @@
 # discord-player-googlevideo
 
+## 0.2.3
+
+### Patch Changes
+
+- 5a1e735: Fix https://github.com/LuanRT/YouTube.js/issues/1146
+
 ## 0.2.2
 
 ### Patch Changes
