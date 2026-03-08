@@ -2,7 +2,6 @@ import type { Tool } from 'ai';
 import type { GuildQueue } from 'discord-player';
 import { expect, it, vi } from 'vitest';
 import {
-	generateErrorMessage,
 	generatePendingMessage,
 	generateSuccessMessage,
 	generateSystemPrompt,
@@ -136,20 +135,6 @@ it('should generate success messages', () => {
 	expect(generateSuccessMessage('deduplicateQueue', {})).toBe(
 		'No duplicates found',
 	);
-});
-
-it('should generate error messages', () => {
-	expect(
-		generateErrorMessage('removeTracksByPattern', {
-			error: 'Pattern failed',
-		}),
-	).toBe('Failed: Pattern failed');
-
-	expect(generateErrorMessage('removeTracksByPattern', {})).toBe(
-		'Operation failed',
-	);
-
-	expect(generateErrorMessage('unknownTool', {})).toBe('Operation failed');
 });
 
 it('should generate system prompt with context', () => {

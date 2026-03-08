@@ -1,7 +1,6 @@
 import { type Tool, tool } from 'ai';
 import type { GuildQueue } from 'discord-player';
 import { z } from 'zod';
-import logger from './logger';
 import pluralize from './pluralize';
 import {
 	deduplicateQueue,
@@ -40,169 +39,11 @@ export interface ToolContext {
 interface ToolMessages {
 	pending: () => string;
 	success: (result: ToolResult) => string;
-	error?: (result: ToolResult) => string;
 }
 
 interface ToolDefinition {
 	createTool: (context: ToolContext) => Tool;
 	messages: ToolMessages;
-}
-
-/**
- * Execute removeTracksByPattern operation
- */
-export function executeRemoveTracksByPattern(
-	queue: GuildQueue,
-	artistPattern?: string | null,
-	titlePattern?: string | null,
-) {
-	try {
-		return removeTracksByPattern(
-			queue,
-			artistPattern ?? undefined,
-			titlePattern ?? undefined,
-		);
-		/* v8 ignore start */
-	} catch (error) {
-		logger.error(
-			{
-				error: error instanceof Error ? error.message : String(error),
-				artistPattern,
-				titlePattern,
-			},
-			'[PromptTool] removeTracksByPattern failed',
-		);
-		throw error;
-	}
-	/* v8 ignore stop */
-}
-
-/**
- * Execute moveTracksByPattern operation
- */
-export function executeMoveTracksByPattern(
-	queue: GuildQueue,
-	artistPattern: string | null | undefined,
-	titlePattern: string | null | undefined,
-	position: number,
-) {
-	try {
-		return moveTracksByPattern(
-			queue,
-			artistPattern ?? undefined,
-			titlePattern ?? undefined,
-			position,
-		);
-		/* v8 ignore start */
-	} catch (error) {
-		logger.error(
-			{
-				error: error instanceof Error ? error.message : String(error),
-				artistPattern,
-				titlePattern,
-				position,
-			},
-			'[PromptTool] moveTracksByPattern failed',
-		);
-		throw error;
-	}
-	/* v8 ignore stop */
-}
-
-/**
- * Execute skipCurrentTrack operation
- */
-export function executeSkipCurrentTrack(queue: GuildQueue) {
-	try {
-		return skipCurrentTrack(queue);
-		/* v8 ignore start */
-	} catch (error) {
-		logger.error(
-			{
-				error: error instanceof Error ? error.message : String(error),
-			},
-			'[PromptTool] skipCurrentTrack failed',
-		);
-		throw error;
-	}
-	/* v8 ignore stop */
-}
-
-/**
- * Execute pausePlayback operation
- */
-export function executePausePlayback(queue: GuildQueue) {
-	try {
-		return pausePlayback(queue);
-		/* v8 ignore start */
-	} catch (error) {
-		logger.error(
-			{
-				error: error instanceof Error ? error.message : String(error),
-			},
-			'[PromptTool] pausePlayback failed',
-		);
-		throw error;
-	}
-	/* v8 ignore stop */
-}
-
-/**
- * Execute resumePlayback operation
- */
-export function executeResumePlayback(queue: GuildQueue) {
-	try {
-		return resumePlayback(queue);
-		/* v8 ignore start */
-	} catch (error) {
-		logger.error(
-			{
-				error: error instanceof Error ? error.message : String(error),
-			},
-			'[PromptTool] resumePlayback failed',
-		);
-		throw error;
-	}
-	/* v8 ignore stop */
-}
-
-/**
- * Execute setVolume operation
- */
-export function executeSetVolume(queue: GuildQueue, volume: number) {
-	try {
-		return setVolume(queue, volume);
-		/* v8 ignore start */
-	} catch (error) {
-		logger.error(
-			{
-				error: error instanceof Error ? error.message : String(error),
-				volume,
-			},
-			'[PromptTool] setVolume failed',
-		);
-		throw error;
-	}
-	/* v8 ignore stop */
-}
-
-/**
- * Execute deduplicateQueue operation
- */
-export function executeDeduplicateQueue(queue: GuildQueue) {
-	try {
-		return deduplicateQueue(queue);
-		/* v8 ignore start */
-	} catch (error) {
-		logger.error(
-			{
-				error: error instanceof Error ? error.message : String(error),
-			},
-			'[PromptTool] deduplicateQueue failed',
-		);
-		throw error;
-	}
-	/* v8 ignore stop */
 }
 
 /**
@@ -225,10 +66,10 @@ const TOOL_REGISTRY: Record<string, ToolDefinition> = {
 						.describe('Track title pattern to match (case-insensitive)'),
 				}),
 				execute: async ({ artistPattern, titlePattern }) => {
-					return executeRemoveTracksByPattern(
+					return removeTracksByPattern(
 						context.queue,
-						artistPattern,
-						titlePattern,
+						artistPattern ?? undefined,
+						titlePattern ?? undefined,
 					);
 				},
 			}),
@@ -261,10 +102,10 @@ const TOOL_REGISTRY: Record<string, ToolDefinition> = {
 						),
 				}),
 				execute: async ({ artistPattern, titlePattern, position }) => {
-					return executeMoveTracksByPattern(
+					return moveTracksByPattern(
 						context.queue,
-						artistPattern,
-						titlePattern,
+						artistPattern ?? undefined,
+						titlePattern ?? undefined,
 						position,
 					);
 				},
@@ -284,7 +125,7 @@ const TOOL_REGISTRY: Record<string, ToolDefinition> = {
 					'Skip the currently playing track to play the next track in queue',
 				inputSchema: z.object({}),
 				execute: async () => {
-					return executeSkipCurrentTrack(context.queue);
+					return skipCurrentTrack(context.queue);
 				},
 			}),
 		messages: {
@@ -298,7 +139,7 @@ const TOOL_REGISTRY: Record<string, ToolDefinition> = {
 				description: 'Pause the currently playing track',
 				inputSchema: z.object({}),
 				execute: async () => {
-					return executePausePlayback(context.queue);
+					return pausePlayback(context.queue);
 				},
 			}),
 		messages: {
@@ -317,7 +158,7 @@ const TOOL_REGISTRY: Record<string, ToolDefinition> = {
 				description: 'Resume the paused track',
 				inputSchema: z.object({}),
 				execute: async () => {
-					return executeResumePlayback(context.queue);
+					return resumePlayback(context.queue);
 				},
 			}),
 		messages: {
@@ -334,7 +175,7 @@ const TOOL_REGISTRY: Record<string, ToolDefinition> = {
 					volume: z.number().min(0).max(100).describe('Volume level (0-100)'),
 				}),
 				execute: async ({ volume }) => {
-					return executeSetVolume(context.queue, volume);
+					return setVolume(context.queue, volume);
 				},
 			}),
 		messages: {
@@ -350,7 +191,7 @@ const TOOL_REGISTRY: Record<string, ToolDefinition> = {
 				description: 'Remove duplicate tracks from the queue',
 				inputSchema: z.object({}),
 				execute: async () => {
-					return executeDeduplicateQueue(context.queue);
+					return deduplicateQueue(context.queue);
 				},
 			}),
 		messages: {
@@ -403,29 +244,6 @@ export function generateSuccessMessage(
 ): string {
 	const messages = getToolMessages(toolName);
 	return messages?.success(result) ?? `${toolName} completed`;
-}
-
-/**
- * Generate error message for a tool execution failure
- */
-export function generateErrorMessage(
-	toolName: string,
-	result: ToolResult,
-): string {
-	const messages = getToolMessages(toolName);
-
-	/* v8 ignore start */
-	if (messages?.error) {
-		return messages.error(result);
-	}
-	/* v8 ignore stop */
-
-	// Default error message
-	if (typeof result === 'object' && result !== null && 'error' in result) {
-		return `Failed: ${result.error}`;
-	}
-
-	return 'Operation failed';
 }
 
 /**

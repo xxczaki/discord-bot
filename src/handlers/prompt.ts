@@ -1,14 +1,8 @@
 import { openai } from '@ai-sdk/openai';
-import {
-	InvalidArgumentError,
-	NoSuchToolError,
-	stepCountIs,
-	streamText,
-} from 'ai';
+import { stepCountIs, streamText } from 'ai';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import logger from '../utils/logger';
 import {
-	generateErrorMessage,
 	generateSuccessMessage,
 	generateSystemPrompt,
 	getAvailableTools,
@@ -98,26 +92,10 @@ export default async function promptCommandHandler(
 				const toolName = pendingTools.get(part.toolCallId);
 				if (!toolName) continue;
 
-				const isSuccess = result?.success !== false;
-				let completedMessage: string;
-
-				if (!isSuccess) {
-					/* v8 ignore start */
-					const safeResult = result ?? {};
-					/* v8 ignore stop */
-					const errorMsg = generateErrorMessage(toolName, safeResult);
-					completedMessage = `❌ ${errorMsg}`;
-					logger.error({ toolName, result }, '[Prompt] Tool execution failed');
-				} else {
-					const successMsg = generateSuccessMessage(toolName, result ?? {});
-					completedMessage = `✅ ${successMsg}`;
-				}
-
-				// Add completed message to history (keep pending message too)
-				completedActions.push(completedMessage);
+				const successMsg = generateSuccessMessage(toolName, result ?? {});
+				completedActions.push(`✅ ${successMsg}`);
 				pendingTools.delete(part.toolCallId);
 
-				// Update immediately when a tool completes
 				await interaction.editReply(formatOutput());
 			} else if (part.type === 'error') {
 				/* v8 ignore start */
@@ -133,21 +111,9 @@ export default async function promptCommandHandler(
 			);
 		}
 	} catch (error) {
-		if (NoSuchToolError.isInstance(error)) {
-			await interaction.editReply({
-				content: `Tool not found: ${error.message}`,
-			});
-		} else if (InvalidArgumentError.isInstance(error)) {
-			await interaction.editReply({
-				content: `Invalid arguments: ${error.message}`,
-			});
-		} else {
-			await interaction.editReply({
-				content:
-					error instanceof Error
-						? error.message
-						: 'An error occurred while processing your request.',
-			});
-		}
+		logger.error({ error }, '[Prompt] Command failed');
+		await interaction.editReply(
+			'Something went wrong while processing your request. Please try again.',
+		);
 	}
 }

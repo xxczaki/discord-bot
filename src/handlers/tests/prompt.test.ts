@@ -1,5 +1,5 @@
 import { openai } from '@ai-sdk/openai';
-import { InvalidArgumentError, NoSuchToolError, streamText } from 'ai';
+import { streamText } from 'ai';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import type { GuildQueue, Track } from 'discord-player';
 import { useQueue } from 'discord-player';
@@ -17,12 +17,6 @@ vi.mock('ai', () => ({
 	streamText: vi.fn(),
 	tool: vi.fn((config) => config),
 	stepCountIs: vi.fn((n) => ({ type: 'step-count', count: n })),
-	NoSuchToolError: {
-		isInstance: vi.fn(() => false),
-	},
-	InvalidArgumentError: {
-		isInstance: vi.fn(() => false),
-	},
 }));
 
 vi.mock('@ai-sdk/openai', () => ({
@@ -199,9 +193,9 @@ describe('/prompt command', () => {
 
 			await promptCommandHandler(interaction);
 
-			expect(interaction.editReply).toHaveBeenCalledWith({
-				content: 'AI service error',
-			});
+			expect(interaction.editReply).toHaveBeenCalledWith(
+				'Something went wrong while processing your request. Please try again.',
+			);
 		});
 
 		it('should handle unknown errors', async () => {
@@ -219,9 +213,9 @@ describe('/prompt command', () => {
 
 			await promptCommandHandler(interaction);
 
-			expect(interaction.editReply).toHaveBeenCalledWith({
-				content: 'An error occurred while processing your request.',
-			});
+			expect(interaction.editReply).toHaveBeenCalledWith(
+				'Something went wrong while processing your request. Please try again.',
+			);
 		});
 
 		it('should handle tool-result with undefined output', async () => {
@@ -310,54 +304,6 @@ describe('/prompt command', () => {
 			await promptCommandHandler(interaction);
 
 			expect(interaction.editReply).toHaveBeenCalled();
-		});
-
-		it('should handle NoSuchToolError', async () => {
-			const tracks = [createMockTrack()];
-			const mockQueue = createMockQueue(tracks);
-			const interaction = createMockInteraction('test');
-
-			mockedUseQueue.mockReturnValue(mockQueue);
-
-			const mockError = new Error('Tool not found: unknownTool');
-			vi.mocked(NoSuchToolError.isInstance).mockReturnValueOnce(true);
-
-			mockedStreamText.mockReturnValue({
-				fullStream: (async function* () {
-					yield { type: 'text-delta' as const, textDelta: '' };
-					throw mockError;
-				})(),
-			} as never);
-
-			await promptCommandHandler(interaction);
-
-			expect(interaction.editReply).toHaveBeenCalledWith({
-				content: expect.stringContaining('Tool not found'),
-			});
-		});
-
-		it('should handle InvalidArgumentError', async () => {
-			const tracks = [createMockTrack()];
-			const mockQueue = createMockQueue(tracks);
-			const interaction = createMockInteraction('test');
-
-			mockedUseQueue.mockReturnValue(mockQueue);
-
-			const mockError = new Error('Invalid arguments for tool');
-			vi.mocked(InvalidArgumentError.isInstance).mockReturnValueOnce(true);
-
-			mockedStreamText.mockReturnValue({
-				fullStream: (async function* () {
-					yield { type: 'text-delta' as const, textDelta: '' };
-					throw mockError;
-				})(),
-			} as never);
-
-			await promptCommandHandler(interaction);
-
-			expect(interaction.editReply).toHaveBeenCalledWith({
-				content: expect.stringContaining('Invalid arguments'),
-			});
 		});
 	});
 
@@ -481,35 +427,6 @@ describe('/prompt command', () => {
 			const lastCall = vi.mocked(interaction.editReply).mock.calls.at(-1);
 			expect(lastCall?.[0]).toContain('✅');
 			expect(lastCall?.[0]).toContain('Moved 2 tracks to front');
-		});
-
-		it('should display error messages clearly', async () => {
-			const tracks = [createMockTrack()];
-			const mockQueue = createMockQueue(tracks);
-			const interaction = createMockInteraction('test');
-
-			mockedUseQueue.mockReturnValue(mockQueue);
-			mockedStreamText.mockReturnValue(
-				createMockStream([
-					{
-						toolName: 'removeTracksByPattern',
-						input: {
-							artistPattern: 'test',
-						},
-						output: {
-							success: false,
-							error: 'No tracks found matching the criteria',
-						},
-					},
-				]) as never,
-			);
-
-			await promptCommandHandler(interaction);
-
-			const lastCall = vi.mocked(interaction.editReply).mock.calls.at(-1);
-			const callArg = lastCall?.[0] as string;
-			expect(callArg).toContain('❌');
-			expect(callArg).toContain('Failed');
 		});
 
 		it('should display multiple operations in history format', async () => {
