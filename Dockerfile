@@ -1,9 +1,4 @@
-FROM node:24.14.0-alpine AS base
-
-RUN apk add --no-cache build-base python3 make g++ cairo-dev pango-dev && \
-		corepack enable
-
-FROM base AS build
+FROM ghcr.io/xxczaki/discord-bot-base:latest AS build
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/discord-player-googlevideo/package.json ./packages/discord-player-googlevideo/

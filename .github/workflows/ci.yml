@@ -1,25 +1,57 @@
-name: Deploy
+name: CI
 
-on:
-  workflow_run:
-    workflows: ["Lint", "Test"]
-    branches: [main]
-    types:
-      - completed
+on: push
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  docker:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+  lint:
+    name: Lint with Biome CLI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: biomejs/setup-biome@v2
+      - run: biome ci ./src
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Run tests with coverage
+        run: pnpm test:coverage
+
+      - name: Upload coverage to Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          file: coverage/lcov.info
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: [lint, test]
     permissions:
       id-token: write
       contents: read
       attestations: write
       packages: write
-    name: Build image and push it to Docker Hub
+    name: Build and deploy
     runs-on: ubuntu-24.04-arm
     steps:
       - name: Checkout
@@ -64,41 +96,37 @@ jobs:
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
           build-args: |
             GIT_COMMIT_SHA=${{ github.sha }}
-
-  helm:
-    name: Update Helm chart in xxczaki/charts
-    runs-on: ubuntu-latest
-    needs: docker
-    steps:
-      - name: Checkout
+      - name: Checkout charts repo
         uses: actions/checkout@v6
         with:
           repository: xxczaki/charts
           token: ${{ secrets.GH_PAT }}
-          fetch-depth: 0
+          fetch-depth: 1
+          fetch-tags: true
+          path: charts-repo
       - name: Update image tag and appVersion
         uses: mikefarah/yq@master
         with:
           cmd: |
-            yq -i '.image.tag = "${{ github.sha }}"' 'charts/discord-bot/values.yaml'
-            yq -i '.appVersion = "${{ github.sha }}"' 'charts/discord-bot/Chart.yaml'
+            yq -i '.image.tag = "${{ github.sha }}"' 'charts-repo/charts/discord-bot/values.yaml'
+            yq -i '.appVersion = "${{ github.sha }}"' 'charts-repo/charts/discord-bot/Chart.yaml'
       - name: Get current version
         id: currentVersion
         uses: mikefarah/yq@master
         with:
-          cmd: yq '.version' charts/discord-bot/Chart.yaml
+          cmd: yq '.version' charts-repo/charts/discord-bot/Chart.yaml
       - name: Get previous tag
         id: previousTag
-        uses: WyriHaximus/github-action-get-previous-tag@v2
-        with:
-          fallback: "discord-bot-${{ steps.currentVersion.outputs.result }}"
+        run: |
+          TAG=$(git -C charts-repo tag --sort=-version:refname | head -1)
+          echo "tag=${TAG:-discord-bot-${{ steps.currentVersion.outputs.result }}}" >> "$GITHUB_OUTPUT"
       - name: Update chart version
         uses: mikefarah/yq@master
-        if: steps.previousTag.outputs.tag == "discord-bot-${{ steps.currentVersion.outputs.result }}"
+        if: steps.previousTag.outputs.tag == format('discord-bot-{0}', steps.currentVersion.outputs.result)
         env:
           PREVIOUS_VERSION: ${{ steps.currentVersion.outputs.result }}
         with:
-          cmd: NEXT_VERSION=${PREVIOUS_VERSION%.*}.$((${PREVIOUS_VERSION##*.} + 1)) yq -i '.version = strenv(NEXT_VERSION)' 'charts/discord-bot/Chart.yaml'
+          cmd: NEXT_VERSION=${PREVIOUS_VERSION%.*}.$((${PREVIOUS_VERSION##*.} + 1)) yq -i '.version = strenv(NEXT_VERSION)' 'charts-repo/charts/discord-bot/Chart.yaml'
       - name: Import GPG key
         id: import-gpg
         uses: crazy-max/ghaction-import-gpg@v7
@@ -107,9 +135,12 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           git_user_signingkey: true
           git_commit_gpgsign: true
-      - uses: stefanzweifel/git-auto-commit-action@v7
+          workdir: charts-repo
+      - name: Commit chart update
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: Update Helm chart
           commit_author: "${{ steps.import-gpg.outputs.name }} <${{ steps.import-gpg.outputs.email }}>"
           commit_user_name: ${{ steps.import-gpg.outputs.name }}
           commit_user_email: ${{ steps.import-gpg.outputs.email }}
+          repository: charts-repo
