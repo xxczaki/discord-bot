@@ -1,4 +1,7 @@
-import { openai } from '@ai-sdk/openai';
+import {
+	type OpenAILanguageModelResponsesOptions,
+	openai,
+} from '@ai-sdk/openai';
 import { stepCountIs, streamText } from 'ai';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import logger from '../utils/logger';
@@ -6,6 +9,7 @@ import {
 	generateSuccessMessage,
 	generateSystemPrompt,
 	getAvailableTools,
+	OPENAI_PROVIDER_OPTIONS,
 	type ToolContext,
 	type ToolResult,
 } from '../utils/promptTools';
@@ -63,13 +67,18 @@ export default async function promptCommandHandler(
 		}));
 
 		const result = streamText({
-			model: openai('gpt-4o-mini'),
+			model: openai('gpt-5-nano'),
 			system: generateSystemPrompt(toolContext),
 			prompt: `User request: "${prompt}"\n\nQueue data: ${JSON.stringify(queueData)}`,
 			tools: getAvailableTools(toolContext),
 			stopWhen: stepCountIs(5),
 			maxRetries: 2,
-			temperature: 0.1,
+			providerOptions: {
+				openai: {
+					...OPENAI_PROVIDER_OPTIONS,
+					reasoningEffort: 'low',
+				} satisfies OpenAILanguageModelResponsesOptions,
+			},
 		});
 
 		rateLimiter.incrementCall();

@@ -13,7 +13,8 @@
 		"test:coverage": "vitest run --coverage",
 		"changeset": "changeset",
 		"version-packages": "changeset version",
-		"release": "pnpm recursive run build && changeset publish"
+		"release": "pnpm recursive run build && changeset publish",
+		"prompt-benchmark": "tsx --env-file=.env src/benchmarks/promptBenchmark.ts"
 	},
 	"packageManager": "pnpm@10.31.0",
 	"dependencies": {

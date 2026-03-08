@@ -1,3 +1,4 @@
+import type { OpenAILanguageModelResponsesOptions } from '@ai-sdk/openai';
 import { type Tool, tool } from 'ai';
 import type { GuildQueue } from 'discord-player';
 import { z } from 'zod';
@@ -11,6 +12,11 @@ import {
 	setVolume,
 	skipCurrentTrack,
 } from './queueOperations';
+
+export const OPENAI_PROVIDER_OPTIONS = {
+	parallelToolCalls: true,
+	promptCacheKey: 'prompt-command',
+} satisfies OpenAILanguageModelResponsesOptions;
 
 const pluralizeTracks = pluralize('track', 'tracks');
 const pluralizeDuplicates = pluralize('duplicate', 'duplicates');

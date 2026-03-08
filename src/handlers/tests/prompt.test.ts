@@ -525,7 +525,7 @@ describe('/prompt command', () => {
 			);
 		});
 
-		it('should use gpt-4o-mini model with low temperature and multi-step execution', async () => {
+		it('should use gpt-5-mini model with low temperature, multi-step execution, and provider options', async () => {
 			const tracks = [createMockTrack()];
 			const mockQueue = createMockQueue(tracks);
 			const interaction = createMockInteraction('test');
@@ -535,11 +535,17 @@ describe('/prompt command', () => {
 
 			await promptCommandHandler(interaction);
 
-			expect(mockedOpenai).toHaveBeenCalledWith('gpt-4o-mini');
+			expect(mockedOpenai).toHaveBeenCalledWith('gpt-5-nano');
 			expect(mockedStreamText).toHaveBeenCalledWith(
 				expect.objectContaining({
 					stopWhen: expect.anything(),
-					temperature: 0.1,
+					providerOptions: {
+						openai: expect.objectContaining({
+							parallelToolCalls: true,
+							promptCacheKey: 'prompt-command',
+							reasoningEffort: 'low',
+						}),
+					},
 				}),
 			);
 		});

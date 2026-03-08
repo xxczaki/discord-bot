@@ -43,6 +43,7 @@ export default defineConfig({
 				'src/utils/logger.ts',
 				'packages/discord-player-googlevideo/src/index.ts',
 				'src/utils/testing/**',
+				'src/benchmarks/**',
 				'**/tests/**',
 				'**/dist/**',
 				'**/node_modules/**',
