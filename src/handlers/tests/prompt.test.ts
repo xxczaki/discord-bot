@@ -4,6 +4,7 @@ import type { ChatInputCommandInteraction } from 'discord.js';
 import type { GuildQueue, Track } from 'discord-player';
 import { useQueue } from 'discord-player';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { PROMPT_MODEL_ID } from '../../utils/promptTools';
 import promptCommandHandler from '../prompt';
 
 const EXAMPLE_TRACK_TITLE = 'Like a Rolling Stone';
@@ -69,11 +70,13 @@ function createMockStream(
 						type: 'tool-result' as const,
 						toolCallId: callId,
 						toolName: call.toolName,
+						input: call.input,
 						output: call.output,
 					};
 				}
 			}
 		})(),
+		totalUsage: Promise.resolve({ inputTokens: 500, outputTokens: 100 }),
 	};
 }
 
@@ -130,6 +133,20 @@ function createMockQueue(
 			skip: vi.fn(),
 		},
 	} as unknown as GuildQueue;
+}
+
+function getEmbedFromCall(
+	interaction: ChatInputCommandInteraction,
+	method: 'reply' | 'editReply',
+	callIndex = -1,
+) {
+	const mock = vi.mocked(interaction[method]);
+	const calls = mock.mock.calls;
+	const call = callIndex === -1 ? calls.at(-1) : calls[callIndex];
+	const arg = call?.[0] as {
+		embeds?: Array<{ data: Record<string, unknown> }>;
+	};
+	return arg?.embeds?.[0]?.data;
 }
 
 describe('/prompt command', () => {
@@ -189,13 +206,14 @@ describe('/prompt command', () => {
 					yield { type: 'text-delta' as const, textDelta: '' };
 					throw new Error('AI service error');
 				})(),
+				totalUsage: Promise.resolve({ inputTokens: 0, outputTokens: 0 }),
 			} as never);
 
 			await promptCommandHandler(interaction);
 
-			expect(interaction.editReply).toHaveBeenCalledWith(
-				'Something went wrong while processing your request. Please try again.',
-			);
+			const embed = getEmbedFromCall(interaction, 'editReply');
+			expect(embed?.color).toBe(0xed4245); // Red
+			expect(embed?.description).toContain('Something went wrong');
 		});
 
 		it('should handle unknown errors', async () => {
@@ -209,13 +227,14 @@ describe('/prompt command', () => {
 					yield { type: 'text-delta' as const, textDelta: '' };
 					throw 'Unknown error';
 				})(),
+				totalUsage: Promise.resolve({ inputTokens: 0, outputTokens: 0 }),
 			} as never);
 
 			await promptCommandHandler(interaction);
 
-			expect(interaction.editReply).toHaveBeenCalledWith(
-				'Something went wrong while processing your request. Please try again.',
-			);
+			const embed = getEmbedFromCall(interaction, 'editReply');
+			expect(embed?.color).toBe(0xed4245); // Red
+			expect(embed?.description).toContain('Something went wrong');
 		});
 
 		it('should handle tool-result with undefined output', async () => {
@@ -239,13 +258,13 @@ describe('/prompt command', () => {
 						toolName: 'skipCurrentTrack',
 					};
 				})(),
+				totalUsage: Promise.resolve({ inputTokens: 100, outputTokens: 50 }),
 			} as never);
 
 			await promptCommandHandler(interaction);
 
-			const lastCall = vi.mocked(interaction.editReply).mock.calls.at(-1);
-			const output = lastCall?.[0] as string;
-			expect(output).toContain('✅');
+			const embed = getEmbedFromCall(interaction, 'editReply');
+			expect(embed?.description).toContain('✅');
 		});
 
 		it('should skip tool-result with unknown toolCallId', async () => {
@@ -260,16 +279,18 @@ describe('/prompt command', () => {
 						type: 'tool-result' as const,
 						toolCallId: 'unknown-call-id',
 						toolName: 'removeTracksByPattern',
+						input: { artistPattern: 'test' },
 						output: { success: true, removedCount: 1 },
 					};
 				})(),
+				totalUsage: Promise.resolve({ inputTokens: 100, outputTokens: 50 }),
 			} as never);
 
 			await promptCommandHandler(interaction);
 
-			expect(interaction.editReply).toHaveBeenCalledWith(
-				expect.stringContaining('No actions were performed'),
-			);
+			const embed = getEmbedFromCall(interaction, 'editReply');
+			expect(embed?.description).toContain('No actions were performed');
+			expect(embed?.color).toBe(0xed4245); // Red
 		});
 
 		it('should handle stream error events', async () => {
@@ -296,9 +317,11 @@ describe('/prompt command', () => {
 						type: 'tool-result' as const,
 						toolCallId: 'call-123',
 						toolName: 'removeTracksByPattern',
+						input: { artistPattern: 'test' },
 						output: { success: true, removedCount: 1 },
 					};
 				})(),
+				totalUsage: Promise.resolve({ inputTokens: 200, outputTokens: 100 }),
 			} as never);
 
 			await promptCommandHandler(interaction);
@@ -308,7 +331,7 @@ describe('/prompt command', () => {
 	});
 
 	describe('basic functionality', () => {
-		it('should reply with initial processing message', async () => {
+		it('should reply with initial embed', async () => {
 			const tracks = [
 				createMockTrack(),
 				createMockTrack({ title: 'Blowin in the Wind' }),
@@ -321,7 +344,10 @@ describe('/prompt command', () => {
 
 			await promptCommandHandler(interaction);
 
-			expect(interaction.reply).toHaveBeenCalledWith('Analyzing queue…');
+			const replyArg = vi.mocked(interaction.reply).mock.calls[0][0] as {
+				embeds?: unknown[];
+			};
+			expect(replyArg.embeds).toHaveLength(1);
 		});
 
 		it('should use fallback values when currentTrack is null', async () => {
@@ -352,7 +378,7 @@ describe('/prompt command', () => {
 			expect(mockRateLimiter.incrementCall).toHaveBeenCalled();
 		});
 
-		it('should display message when no actions performed', async () => {
+		it('should display embed with red color when no actions performed', async () => {
 			const tracks = [createMockTrack()];
 			const mockQueue = createMockQueue(tracks);
 			const interaction = createMockInteraction('test');
@@ -362,9 +388,26 @@ describe('/prompt command', () => {
 
 			await promptCommandHandler(interaction);
 
-			expect(interaction.editReply).toHaveBeenCalledWith(
-				expect.stringContaining('No actions were performed'),
-			);
+			const embed = getEmbedFromCall(interaction, 'editReply');
+			expect(embed?.title).toBe('❌ Prompt');
+			expect(embed?.color).toBe(0xed4245); // Red
+			expect(embed?.description).toContain('No actions were performed');
+		});
+
+		it('should include token usage in footer', async () => {
+			const tracks = [createMockTrack()];
+			const mockQueue = createMockQueue(tracks);
+			const interaction = createMockInteraction('test');
+
+			mockedUseQueue.mockReturnValue(mockQueue);
+			mockedStreamText.mockReturnValue(createMockStream() as never);
+
+			await promptCommandHandler(interaction);
+
+			const embed = getEmbedFromCall(interaction, 'editReply');
+			const footerText = (embed?.footer as { text?: string })?.text;
+			expect(footerText).toContain(PROMPT_MODEL_ID);
+			expect(footerText).toContain('600 tokens');
 		});
 	});
 
@@ -394,10 +437,12 @@ describe('/prompt command', () => {
 
 			await promptCommandHandler(interaction);
 
-			const lastCall = vi.mocked(interaction.editReply).mock.calls.at(-1);
-			const output = lastCall?.[0] as string;
-			expect(output).toContain('✅');
-			expect(output).toContain('Removed 3 tracks');
+			const embed = getEmbedFromCall(interaction, 'editReply');
+			expect(embed?.title).toBe('✅ Prompt');
+			expect(embed?.color).toBe(0x57f287); // Green
+			expect(embed?.description).toContain('✅');
+			expect(embed?.description).toContain('Removed 3 tracks');
+			expect(embed?.description).toContain('artistPattern: "bob dylan"');
 		});
 
 		it('should display user-friendly messages for move operations', async () => {
@@ -424,9 +469,10 @@ describe('/prompt command', () => {
 
 			await promptCommandHandler(interaction);
 
-			const lastCall = vi.mocked(interaction.editReply).mock.calls.at(-1);
-			expect(lastCall?.[0]).toContain('✅');
-			expect(lastCall?.[0]).toContain('Moved 2 tracks to front');
+			const embed = getEmbedFromCall(interaction, 'editReply');
+			expect(embed?.description).toContain('✅');
+			expect(embed?.description).toContain('Moved 2 tracks to front');
+			expect(embed?.description).toContain('artistPattern: "artist 1"');
 		});
 
 		it('should display multiple operations in history format', async () => {
@@ -460,17 +506,40 @@ describe('/prompt command', () => {
 
 			await promptCommandHandler(interaction);
 
-			const lastCall = vi.mocked(interaction.editReply).mock.calls.at(-1);
-			const output = lastCall?.[0] as string;
+			const embed = getEmbedFromCall(interaction, 'editReply');
+			const description = embed?.description as string;
 
 			// Both actions should appear in the output
-			expect(output).toContain('✅');
-			expect(output).toContain('Moved 1 track');
-			expect(output).toContain('Skipped current track');
+			expect(description).toContain('✅');
+			expect(description).toContain('Moved 1 track');
+			expect(description).toContain('Skipped current track');
 
 			// They should appear on separate lines (history format)
-			const lines = output.split('\n');
+			const lines = description.split('\n');
 			expect(lines.length).toBeGreaterThanOrEqual(2);
+		});
+
+		it('should not include args for tools with no meaningful input', async () => {
+			const tracks = [createMockTrack()];
+			const mockQueue = createMockQueue(tracks);
+			const interaction = createMockInteraction('skip');
+
+			mockedUseQueue.mockReturnValue(mockQueue);
+			mockedStreamText.mockReturnValue(
+				createMockStream([
+					{
+						toolName: 'skipCurrentTrack',
+						input: {},
+						output: { success: true },
+					},
+				]) as never,
+			);
+
+			await promptCommandHandler(interaction);
+
+			const embed = getEmbedFromCall(interaction, 'editReply');
+			// Should just be "✅ Skipped current track" without parenthesized args
+			expect(embed?.description).toBe('✅ Skipped current track');
 		});
 	});
 
@@ -535,7 +604,7 @@ describe('/prompt command', () => {
 
 			await promptCommandHandler(interaction);
 
-			expect(mockedOpenai).toHaveBeenCalledWith('gpt-5-nano');
+			expect(mockedOpenai).toHaveBeenCalledWith(PROMPT_MODEL_ID);
 			expect(mockedStreamText).toHaveBeenCalledWith(
 				expect.objectContaining({
 					stopWhen: expect.anything(),

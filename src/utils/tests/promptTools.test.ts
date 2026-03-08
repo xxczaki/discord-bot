@@ -2,6 +2,7 @@ import type { Tool } from 'ai';
 import type { GuildQueue } from 'discord-player';
 import { expect, it, vi } from 'vitest';
 import {
+	formatToolArgs,
 	generatePendingMessage,
 	generateSuccessMessage,
 	generateSystemPrompt,
@@ -215,4 +216,30 @@ it('should execute `deduplicateQueue` tool', async () => {
 
 	expect(deduplicateQueue).toHaveBeenCalledWith(mockQueue);
 	expect(result).toEqual({ success: true, removedCount: 1 });
+});
+
+it('should format tool args with a single string value', () => {
+	expect(formatToolArgs({ artistPattern: 'kendrick lamar' })).toBe(
+		'artistPattern: "kendrick lamar"',
+	);
+});
+
+it('should format tool args with multiple string values', () => {
+	expect(
+		formatToolArgs({ artistPattern: 'kendrick lamar', titlePattern: 'humble' }),
+	).toBe('artistPattern: "kendrick lamar", titlePattern: "humble"');
+});
+
+it('should format tool args with a number value', () => {
+	expect(formatToolArgs({ volume: 75 })).toBe('volume: 75');
+});
+
+it('should filter out nullish values from tool args', () => {
+	expect(formatToolArgs({ artistPattern: null, titlePattern: 'test' })).toBe(
+		'titlePattern: "test"',
+	);
+});
+
+it('should return `undefined` for empty tool args', () => {
+	expect(formatToolArgs({})).toBeUndefined();
 });

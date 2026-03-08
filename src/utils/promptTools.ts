@@ -13,6 +13,8 @@ import {
 	skipCurrentTrack,
 } from './queueOperations';
 
+export const PROMPT_MODEL_ID = 'gpt-5-nano';
+
 export const OPENAI_PROVIDER_OPTIONS = {
 	parallelToolCalls: true,
 	promptCacheKey: 'prompt-command',
@@ -250,6 +252,24 @@ export function generateSuccessMessage(
 ): string {
 	const messages = getToolMessages(toolName);
 	return messages?.success(result) ?? `${toolName} completed`;
+}
+
+/**
+ * Format tool input args into a compact display string like `artistPattern: "kendrick lamar"`
+ */
+export function formatToolArgs(
+	input: Record<string, unknown>,
+): string | undefined {
+	const parts: string[] = [];
+
+	for (const [key, value] of Object.entries(input)) {
+		if (value == null) continue;
+		parts.push(
+			typeof value === 'string' ? `${key}: "${value}"` : `${key}: ${value}`,
+		);
+	}
+
+	return parts.length > 0 ? parts.join(', ') : undefined;
 }
 
 /**

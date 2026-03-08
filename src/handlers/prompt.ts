@@ -4,12 +4,15 @@ import {
 } from '@ai-sdk/openai';
 import { stepCountIs, streamText } from 'ai';
 import type { ChatInputCommandInteraction } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import logger from '../utils/logger';
 import {
+	formatToolArgs,
 	generateSuccessMessage,
 	generateSystemPrompt,
 	getAvailableTools,
 	OPENAI_PROVIDER_OPTIONS,
+	PROMPT_MODEL_ID,
 	type ToolContext,
 	type ToolResult,
 } from '../utils/promptTools';
@@ -46,7 +49,11 @@ export default async function promptCommandHandler(
 
 	const prompt = interaction.options.getString('prompt', true);
 
-	await interaction.reply('Analyzing queue…');
+	const embed = new EmbedBuilder()
+		.setTitle('Prompt')
+		.setColor('Blue')
+		.setDescription('Analyzing queue…');
+	await interaction.reply({ embeds: [embed] });
 
 	try {
 		const tracks = queue.tracks.toArray();
@@ -67,7 +74,7 @@ export default async function promptCommandHandler(
 		}));
 
 		const result = streamText({
-			model: openai('gpt-5-nano'),
+			model: openai(PROMPT_MODEL_ID),
 			system: generateSystemPrompt(toolContext),
 			prompt: `User request: "${prompt}"\n\nQueue data: ${JSON.stringify(queueData)}`,
 			tools: getAvailableTools(toolContext),
@@ -85,10 +92,6 @@ export default async function promptCommandHandler(
 
 		const completedActions: string[] = [];
 
-		const formatOutput = () => {
-			return completedActions.join('\n');
-		};
-
 		const pendingTools = new Map<string, string>();
 
 		for await (const part of result.fullStream) {
@@ -96,16 +99,24 @@ export default async function promptCommandHandler(
 				pendingTools.set(part.toolCallId, part.toolName);
 			} else if (part.type === 'tool-result') {
 				const output = 'output' in part ? part.output : undefined;
-				const result = output as ToolResult | undefined;
+				const toolResult = output as ToolResult | undefined;
+				const input = ('input' in part ? part.input : undefined) as
+					| Record<string, unknown>
+					| undefined;
 
 				const toolName = pendingTools.get(part.toolCallId);
 				if (!toolName) continue;
 
-				const successMsg = generateSuccessMessage(toolName, result ?? {});
-				completedActions.push(`✅ ${successMsg}`);
+				const successMsg = generateSuccessMessage(toolName, toolResult ?? {});
+				const formattedArgs = input ? formatToolArgs(input) : undefined;
+				const line = formattedArgs
+					? `✅ ${successMsg} (${formattedArgs})`
+					: `✅ ${successMsg}`;
+				completedActions.push(line);
 				pendingTools.delete(part.toolCallId);
 
-				await interaction.editReply(formatOutput());
+				embed.setDescription(completedActions.join('\n'));
+				await interaction.editReply({ embeds: [embed] });
 			} else if (part.type === 'error') {
 				/* v8 ignore start */
 				const streamError = 'error' in part ? part.error : 'Unknown error';
@@ -114,15 +125,37 @@ export default async function promptCommandHandler(
 			}
 		}
 
+		const { inputTokens, outputTokens } = await result.totalUsage;
+		const totalTokens = (inputTokens ?? 0) + (outputTokens ?? 0);
+
 		if (completedActions.length === 0) {
-			return interaction.editReply(
-				'❌ No actions were performed. The request might not match any tracks in the queue.',
-			);
+			embed
+				.setTitle('❌ Prompt')
+				.setColor('Red')
+				.setDescription(
+					'No actions were performed. The request might not match any tracks in the queue.',
+				)
+				.setFooter({
+					text: `${PROMPT_MODEL_ID} · ${totalTokens.toLocaleString()} tokens`,
+				});
+		} else {
+			embed
+				.setTitle('✅ Prompt')
+				.setColor('Green')
+				.setFooter({
+					text: `${PROMPT_MODEL_ID} · ${totalTokens.toLocaleString()} tokens`,
+				});
 		}
+
+		await interaction.editReply({ embeds: [embed] });
 	} catch (error) {
 		logger.error({ error }, '[Prompt] Command failed');
-		await interaction.editReply(
-			'Something went wrong while processing your request. Please try again.',
-		);
+		embed
+			.setTitle('Prompt')
+			.setColor('Red')
+			.setDescription(
+				'Something went wrong while processing your request. Please try again.',
+			);
+		await interaction.editReply({ embeds: [embed] });
 	}
 }
