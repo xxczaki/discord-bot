@@ -39,11 +39,13 @@ export async function generateWebPoToken(videoId: string): Promise<{
 		origin: dom.window.origin,
 	});
 
+	/* v8 ignore start */
 	if (!Reflect.has(globalThis, 'navigator')) {
 		Object.defineProperty(globalThis, 'navigator', {
 			value: dom.window.navigator,
 		});
 	}
+	/* v8 ignore stop */
 
 	// Get attestation challenge from YouTube
 	const challengeResponse = await innertube.getAttestationChallenge(

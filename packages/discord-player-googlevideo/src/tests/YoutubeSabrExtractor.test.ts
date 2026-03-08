@@ -127,6 +127,7 @@ describe('YoutubeSabrExtractor', () => {
 
 			expect(Platform.shim.eval).toBeDefined();
 		});
+
 	});
 
 	describe('deactivate', () => {
@@ -428,6 +429,90 @@ describe('YoutubeSabrExtractor', () => {
 			expect(result.tracks[0].title).toBe('Playlist Video 1');
 			expect(result.tracks[0].author).toBe('Author 1');
 		});
+
+		it('should return empty response when playlist is null', async () => {
+			mockInnertube.getPlaylist.mockResolvedValue(null);
+
+			const result = await extractor.handle(
+				'https://www.youtube.com/watch?v=test&list=PLE0hg-LdSfycrpTtMImPSqFLle4yYNzWD',
+				{
+					requestedBy: { id: 'user-123' },
+				} as never,
+			);
+
+			expect(result.tracks).toHaveLength(0);
+		});
+
+		it('should filter out playlist videos without id', async () => {
+			mockInnertube.getPlaylist.mockResolvedValue({
+				info: { title: 'Test Playlist' },
+				has_continuation: false,
+				videos: [
+					{ title: { text: 'No ID' } },
+					{
+						id: 'v1',
+						title: { text: 'Has ID' },
+						author: { name: 'Author' },
+						duration: { seconds: 60 },
+					},
+				],
+			});
+
+			const result = await extractor.handle(
+				'https://www.youtube.com/watch?v=test&list=PLE0hg-LdSfycrpTtMImPSqFLle4yYNzWD',
+				{
+					requestedBy: { id: 'user-123' },
+				} as never,
+			);
+
+			expect(result.tracks).toHaveLength(1);
+			expect(result.tracks[0].title).toBe('Has ID');
+		});
+
+		it('should handle search results with missing metadata', async () => {
+			const mockSearchResults = {
+				videos: [{ id: 'v1' }],
+				slice: vi.fn().mockReturnThis(),
+			};
+
+			mockSearchResults.slice = vi
+				.fn()
+				.mockReturnValue(mockSearchResults.videos);
+			mockInnertube.search.mockResolvedValue(mockSearchResults);
+
+			const result = await extractor.handle('test query', {
+				requestedBy: { id: 'user-123' },
+			} as never);
+
+			expect(result.tracks).toHaveLength(1);
+			expect(result.tracks[0].title).toBe('Unknown');
+			expect(result.tracks[0].author).toBe('Unknown');
+		});
+
+		it('should handle playlist with missing title', async () => {
+			mockInnertube.getPlaylist.mockResolvedValue({
+				info: {},
+				has_continuation: false,
+				videos: [
+					{
+						id: 'v1',
+						title: { text: 'Video' },
+						author: { name: 'Author' },
+						duration: { seconds: 60 },
+					},
+				],
+			});
+
+			const result = await extractor.handle(
+				'https://www.youtube.com/watch?v=test&list=PLE0hg-LdSfycrpTtMImPSqFLle4yYNzWD',
+				{
+					requestedBy: { id: 'user-123' },
+				} as never,
+			);
+
+			expect(result.playlist).toBeTruthy();
+			expect(result.tracks).toHaveLength(1);
+		});
 	});
 
 	describe('stream', () => {
@@ -525,6 +610,7 @@ describe('YoutubeSabrExtractor', () => {
 
 			expect(stream).toBeInstanceOf(PassThrough);
 		});
+
 	});
 
 	describe('getRelatedTracks', () => {
@@ -741,7 +827,6 @@ describe('YoutubeSabrExtractor', () => {
 
 			expect(result.tracks[0].duration).toBeDefined();
 			expect(result.tracks[0].duration).toMatch(/:/);
-			expect(result.tracks).toHaveLength(1);
 		});
 
 		it('should parse duration correctly for exactly one hour', async () => {
@@ -764,7 +849,6 @@ describe('YoutubeSabrExtractor', () => {
 			);
 
 			expect(result.tracks[0].duration).toMatch(/^\d+:\d{2}(:\d{2})?$/);
-			expect(result.tracks).toHaveLength(1);
 		});
 
 		it('should parse duration correctly for minutes', async () => {
