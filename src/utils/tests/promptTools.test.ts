@@ -1,4 +1,8 @@
 import type { Tool } from 'ai';
+import type {
+	ChatInputCommandInteraction,
+	VoiceBasedChannel,
+} from 'discord.js';
 import type { GuildQueue } from 'discord-player';
 import { expect, it, vi } from 'vitest';
 import {
@@ -8,6 +12,7 @@ import {
 	generateSystemPrompt,
 	getAvailableTools,
 	getToolMessages,
+	isReadOnlyTool,
 	type ToolContext,
 } from '../promptTools';
 import {
@@ -40,14 +45,24 @@ vi.mock('../queueOperations', () => ({
 }));
 
 const mockQueue = {
-	node: { skip: vi.fn() },
+	node: { skip: vi.fn(), isPaused: vi.fn().mockReturnValue(false), volume: 50 },
+	tracks: {
+		toArray: vi.fn().mockReturnValue([]),
+		size: 0,
+	},
+	currentTrack: null,
 } as unknown as GuildQueue;
+
+const mockInteraction = {} as ChatInputCommandInteraction;
+const mockVoiceChannel = {} as VoiceBasedChannel;
 
 const mockContext: ToolContext = {
 	queue: mockQueue,
 	currentTrackTitle: 'Test Song',
 	currentTrackAuthor: 'Test Artist',
 	trackCount: 5,
+	interaction: mockInteraction,
+	voiceChannel: mockVoiceChannel,
 };
 
 function executeTool(tool: Tool, input: Record<string, unknown>) {
@@ -59,10 +74,12 @@ function executeTool(tool: Tool, input: Record<string, unknown>) {
 	});
 }
 
-it('should return all available tools', () => {
+it('should return all available tools including read and enqueue tools', () => {
 	const tools = getAvailableTools(mockContext);
 
 	expect(Object.keys(tools)).toEqual([
+		'getQueueStatus',
+		'listTracks',
 		'removeTracksByPattern',
 		'moveTracksByPattern',
 		'skipCurrentTrack',
@@ -70,12 +87,42 @@ it('should return all available tools', () => {
 		'resumePlayback',
 		'setVolume',
 		'deduplicateQueue',
+		'searchAndPlay',
+		'listAvailablePlaylists',
+		'enqueuePlaylist',
+	]);
+});
+
+it('should exclude queue tools when queue is null', () => {
+	const contextWithoutQueue: ToolContext = {
+		...mockContext,
+		queue: null,
+	};
+
+	const tools = getAvailableTools(contextWithoutQueue);
+
+	expect(Object.keys(tools)).toEqual([
+		'searchAndPlay',
+		'listAvailablePlaylists',
+		'enqueuePlaylist',
 	]);
 });
 
 it('should return tool messages for known tools', () => {
 	expect(getToolMessages('removeTracksByPattern')).toBeDefined();
+	expect(getToolMessages('searchAndPlay')).toBeDefined();
+	expect(getToolMessages('enqueuePlaylist')).toBeDefined();
 	expect(getToolMessages('unknown')).toBeUndefined();
+});
+
+it('should identify read-only tools', () => {
+	expect(isReadOnlyTool('getQueueStatus')).toBe(true);
+	expect(isReadOnlyTool('listTracks')).toBe(true);
+	expect(isReadOnlyTool('listAvailablePlaylists')).toBe(true);
+	expect(isReadOnlyTool('removeTracksByPattern')).toBe(false);
+	expect(isReadOnlyTool('searchAndPlay')).toBe(false);
+	expect(isReadOnlyTool('enqueuePlaylist')).toBe(false);
+	expect(isReadOnlyTool('unknownTool')).toBe(false);
 });
 
 it('should generate pending messages', () => {
@@ -83,6 +130,19 @@ it('should generate pending messages', () => {
 		'Removing tracks…',
 	);
 	expect(generatePendingMessage('skipCurrentTrack')).toBe('Skipping track…');
+	expect(generatePendingMessage('searchAndPlay')).toBe(
+		'Searching and adding to queue…',
+	);
+	expect(generatePendingMessage('enqueuePlaylist')).toBe(
+		'Enqueueing playlist…',
+	);
+	expect(generatePendingMessage('getQueueStatus')).toBe(
+		'Reading queue status…',
+	);
+	expect(generatePendingMessage('listTracks')).toBe('Listing tracks…');
+	expect(generatePendingMessage('listAvailablePlaylists')).toBe(
+		'Listing available playlists…',
+	);
 	expect(generatePendingMessage('unknownTool')).toBe('unknownTool…');
 });
 
@@ -138,12 +198,71 @@ it('should generate success messages', () => {
 	);
 });
 
-it('should generate system prompt with context', () => {
+it('should generate success messages for searchAndPlay', () => {
+	expect(
+		generateSuccessMessage('searchAndPlay', {
+			success: true,
+			trackTitle: 'Bohemian Rhapsody',
+			trackAuthor: 'Queen',
+		}),
+	).toBe('Added "Bohemian Rhapsody" by Queen');
+
+	expect(
+		generateSuccessMessage('searchAndPlay', {
+			success: false,
+			error: 'No results found for the query',
+		}),
+	).toBe('No results found for the query');
+});
+
+it('should generate success messages for enqueuePlaylist', () => {
+	expect(
+		generateSuccessMessage('enqueuePlaylist', {
+			success: true,
+			enqueuedCount: 10,
+			totalCount: 10,
+		}),
+	).toBe('Enqueued 10 tracks from playlist');
+
+	expect(
+		generateSuccessMessage('enqueuePlaylist', {
+			success: true,
+			enqueuedCount: 8,
+			totalCount: 10,
+		}),
+	).toBe('Enqueued 8/10 tracks from playlist');
+
+	expect(
+		generateSuccessMessage('enqueuePlaylist', {
+			success: false,
+			error: 'Playlist "unknown" not found',
+		}),
+	).toBe('Playlist "unknown" not found');
+});
+
+it('should generate system prompt with queue context', () => {
 	const prompt = generateSystemPrompt(mockContext);
 
 	expect(prompt).toContain('5 tracks');
 	expect(prompt).toContain('"Test Song"');
 	expect(prompt).toContain('Test Artist');
+	expect(prompt).toContain('listTracks');
+	expect(prompt).toContain('listAvailablePlaylists');
+});
+
+it('should generate system prompt for empty queue', () => {
+	const emptyContext: ToolContext = {
+		...mockContext,
+		queue: null,
+		trackCount: 0,
+	};
+
+	const prompt = generateSystemPrompt(emptyContext);
+
+	expect(prompt).toContain('empty');
+	expect(prompt).toContain('searchAndPlay');
+	expect(prompt).toContain('enqueuePlaylist');
+	expect(prompt).not.toContain('getQueueStatus');
 });
 
 it('should execute `removeTracksByPattern` tool', async () => {
@@ -216,6 +335,31 @@ it('should execute `deduplicateQueue` tool', async () => {
 
 	expect(deduplicateQueue).toHaveBeenCalledWith(mockQueue);
 	expect(result).toEqual({ success: true, removedCount: 1 });
+});
+
+it('should execute `getQueueStatus` tool', async () => {
+	const tools = getAvailableTools(mockContext);
+	const result = await executeTool(tools.getQueueStatus, {});
+
+	expect(result).toEqual({
+		success: true,
+		currentTrack: null,
+		trackCount: 0,
+		isPaused: false,
+		volume: 50,
+	});
+});
+
+it('should execute `listTracks` tool with defaults', async () => {
+	const tools = getAvailableTools(mockContext);
+	const result = await executeTool(tools.listTracks, {});
+
+	expect(result).toEqual({
+		success: true,
+		tracks: [],
+		total: 0,
+		hasMore: false,
+	});
 });
 
 it('should format tool args with a single string value', () => {

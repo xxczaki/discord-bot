@@ -1,3 +1,7 @@
+import type {
+	ChatInputCommandInteraction,
+	VoiceBasedChannel,
+} from 'discord.js';
 import type { GuildQueue } from 'discord-player';
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
@@ -6,9 +10,22 @@ import {
 	generateSystemPrompt,
 	getAvailableTools,
 	getToolMessages,
+	isReadOnlyTool,
 	type ToolContext,
 	type ToolResult,
 } from '../promptTools';
+
+function createMockContext(overrides: Partial<ToolContext> = {}): ToolContext {
+	return {
+		queue: {} as GuildQueue,
+		currentTrackTitle: 'Test Track',
+		currentTrackAuthor: 'Test Artist',
+		trackCount: 5,
+		interaction: {} as ChatInputCommandInteraction,
+		voiceChannel: {} as VoiceBasedChannel,
+		...overrides,
+	};
+}
 
 describe('promptToolMessages', () => {
 	describe('generatePendingMessage', () => {
@@ -47,6 +64,34 @@ describe('promptToolMessages', () => {
 		it('should return pending message for deduplicateQueue', () => {
 			expect(generatePendingMessage('deduplicateQueue')).toBe(
 				'Removing duplicates…',
+			);
+		});
+
+		it('should return pending message for searchAndPlay', () => {
+			expect(generatePendingMessage('searchAndPlay')).toBe(
+				'Searching and adding to queue…',
+			);
+		});
+
+		it('should return pending message for enqueuePlaylist', () => {
+			expect(generatePendingMessage('enqueuePlaylist')).toBe(
+				'Enqueueing playlist…',
+			);
+		});
+
+		it('should return pending message for getQueueStatus', () => {
+			expect(generatePendingMessage('getQueueStatus')).toBe(
+				'Reading queue status…',
+			);
+		});
+
+		it('should return pending message for listTracks', () => {
+			expect(generatePendingMessage('listTracks')).toBe('Listing tracks…');
+		});
+
+		it('should return pending message for listAvailablePlaylists', () => {
+			expect(generatePendingMessage('listAvailablePlaylists')).toBe(
+				'Listing available playlists…',
 			);
 		});
 
@@ -241,6 +286,100 @@ describe('promptToolMessages', () => {
 		});
 	});
 
+	describe('generateSuccessMessage - searchAndPlay', () => {
+		it('should generate message for successful search', () => {
+			const result: ToolResult = {
+				success: true,
+				trackTitle: 'Bohemian Rhapsody',
+				trackAuthor: 'Queen',
+			};
+
+			expect(generateSuccessMessage('searchAndPlay', result)).toBe(
+				'Added "Bohemian Rhapsody" by Queen',
+			);
+		});
+
+		it('should generate message for failed search', () => {
+			const result: ToolResult = {
+				success: false,
+				error: 'No results found for the query',
+			};
+
+			expect(generateSuccessMessage('searchAndPlay', result)).toBe(
+				'No results found for the query',
+			);
+		});
+	});
+
+	describe('generateSuccessMessage - enqueuePlaylist', () => {
+		it('should generate message when all tracks enqueued', () => {
+			const result: ToolResult = {
+				success: true,
+				enqueuedCount: 10,
+				totalCount: 10,
+			};
+
+			expect(generateSuccessMessage('enqueuePlaylist', result)).toBe(
+				'Enqueued 10 tracks from playlist',
+			);
+		});
+
+		it('should generate message when some tracks failed', () => {
+			const result: ToolResult = {
+				success: true,
+				enqueuedCount: 8,
+				totalCount: 10,
+			};
+
+			expect(generateSuccessMessage('enqueuePlaylist', result)).toBe(
+				'Enqueued 8/10 tracks from playlist',
+			);
+		});
+
+		it('should generate message for single track', () => {
+			const result: ToolResult = {
+				success: true,
+				enqueuedCount: 1,
+				totalCount: 1,
+			};
+
+			expect(generateSuccessMessage('enqueuePlaylist', result)).toBe(
+				'Enqueued 1 track from playlist',
+			);
+		});
+
+		it('should generate message for playlist not found', () => {
+			const result: ToolResult = {
+				success: false,
+				error: 'Playlist "unknown" not found',
+			};
+
+			expect(generateSuccessMessage('enqueuePlaylist', result)).toBe(
+				'Playlist "unknown" not found',
+			);
+		});
+	});
+
+	describe('generateSuccessMessage - read-only tools', () => {
+		it('should generate message for getQueueStatus', () => {
+			expect(generateSuccessMessage('getQueueStatus', { success: true })).toBe(
+				'Read queue status',
+			);
+		});
+
+		it('should generate message for listTracks', () => {
+			expect(generateSuccessMessage('listTracks', { success: true })).toBe(
+				'Listed tracks',
+			);
+		});
+
+		it('should generate message for listAvailablePlaylists', () => {
+			expect(
+				generateSuccessMessage('listAvailablePlaylists', { success: true }),
+			).toBe('Listed available playlists');
+		});
+	});
+
 	describe('generateSuccessMessage - unknown tool', () => {
 		it('should return default success message', () => {
 			const result: ToolResult = {
@@ -303,6 +442,41 @@ describe('promptToolMessages', () => {
 			expect(messages?.pending()).toBe('Removing duplicates…');
 		});
 
+		it('should return messages for searchAndPlay', () => {
+			const messages = getToolMessages('searchAndPlay');
+
+			expect(messages).toBeDefined();
+			expect(messages?.pending()).toBe('Searching and adding to queue…');
+		});
+
+		it('should return messages for enqueuePlaylist', () => {
+			const messages = getToolMessages('enqueuePlaylist');
+
+			expect(messages).toBeDefined();
+			expect(messages?.pending()).toBe('Enqueueing playlist…');
+		});
+
+		it('should return messages for getQueueStatus', () => {
+			const messages = getToolMessages('getQueueStatus');
+
+			expect(messages).toBeDefined();
+			expect(messages?.pending()).toBe('Reading queue status…');
+		});
+
+		it('should return messages for listTracks', () => {
+			const messages = getToolMessages('listTracks');
+
+			expect(messages).toBeDefined();
+			expect(messages?.pending()).toBe('Listing tracks…');
+		});
+
+		it('should return messages for listAvailablePlaylists', () => {
+			const messages = getToolMessages('listAvailablePlaylists');
+
+			expect(messages).toBeDefined();
+			expect(messages?.pending()).toBe('Listing available playlists…');
+		});
+
 		it('should return undefined for unknown tool', () => {
 			const messages = getToolMessages('unknownTool');
 
@@ -310,21 +484,42 @@ describe('promptToolMessages', () => {
 		});
 	});
 
+	describe('isReadOnlyTool', () => {
+		it('should return true for read-only tools', () => {
+			expect(isReadOnlyTool('getQueueStatus')).toBe(true);
+			expect(isReadOnlyTool('listTracks')).toBe(true);
+			expect(isReadOnlyTool('listAvailablePlaylists')).toBe(true);
+		});
+
+		it('should return false for action tools', () => {
+			expect(isReadOnlyTool('removeTracksByPattern')).toBe(false);
+			expect(isReadOnlyTool('moveTracksByPattern')).toBe(false);
+			expect(isReadOnlyTool('skipCurrentTrack')).toBe(false);
+			expect(isReadOnlyTool('pausePlayback')).toBe(false);
+			expect(isReadOnlyTool('resumePlayback')).toBe(false);
+			expect(isReadOnlyTool('setVolume')).toBe(false);
+			expect(isReadOnlyTool('deduplicateQueue')).toBe(false);
+			expect(isReadOnlyTool('searchAndPlay')).toBe(false);
+			expect(isReadOnlyTool('enqueuePlaylist')).toBe(false);
+		});
+
+		it('should return false for unknown tools', () => {
+			expect(isReadOnlyTool('unknownTool')).toBe(false);
+		});
+	});
+
 	describe('getAvailableTools', () => {
 		let mockContext: ToolContext;
 
 		beforeEach(() => {
-			mockContext = {
-				queue: {} as GuildQueue,
-				currentTrackTitle: 'Test Track',
-				currentTrackAuthor: 'Test Artist',
-				trackCount: 5,
-			};
+			mockContext = createMockContext();
 		});
 
-		it('should return all available tools', () => {
+		it('should return all available tools when queue exists', () => {
 			const tools = getAvailableTools(mockContext);
 
+			expect(tools).toHaveProperty('getQueueStatus');
+			expect(tools).toHaveProperty('listTracks');
 			expect(tools).toHaveProperty('removeTracksByPattern');
 			expect(tools).toHaveProperty('moveTracksByPattern');
 			expect(tools).toHaveProperty('skipCurrentTrack');
@@ -332,6 +527,26 @@ describe('promptToolMessages', () => {
 			expect(tools).toHaveProperty('resumePlayback');
 			expect(tools).toHaveProperty('setVolume');
 			expect(tools).toHaveProperty('deduplicateQueue');
+			expect(tools).toHaveProperty('searchAndPlay');
+			expect(tools).toHaveProperty('listAvailablePlaylists');
+			expect(tools).toHaveProperty('enqueuePlaylist');
+		});
+
+		it('should only return non-queue tools when queue is null', () => {
+			const tools = getAvailableTools(createMockContext({ queue: null }));
+
+			expect(tools).not.toHaveProperty('getQueueStatus');
+			expect(tools).not.toHaveProperty('listTracks');
+			expect(tools).not.toHaveProperty('removeTracksByPattern');
+			expect(tools).not.toHaveProperty('moveTracksByPattern');
+			expect(tools).not.toHaveProperty('skipCurrentTrack');
+			expect(tools).not.toHaveProperty('pausePlayback');
+			expect(tools).not.toHaveProperty('resumePlayback');
+			expect(tools).not.toHaveProperty('setVolume');
+			expect(tools).not.toHaveProperty('deduplicateQueue');
+			expect(tools).toHaveProperty('searchAndPlay');
+			expect(tools).toHaveProperty('listAvailablePlaylists');
+			expect(tools).toHaveProperty('enqueuePlaylist');
 		});
 
 		it('should return tools with correct schema for removeTracksByPattern', () => {
@@ -389,67 +604,90 @@ describe('promptToolMessages', () => {
 			expect(tool).toBeDefined();
 			expect(tool.description).toBe('Remove duplicate tracks from the queue');
 		});
+
+		it('should return tools with correct schema for searchAndPlay', () => {
+			const tools = getAvailableTools(mockContext);
+			const tool = tools.searchAndPlay;
+
+			expect(tool).toBeDefined();
+			expect(tool.description).toContain('Search for a song');
+		});
+
+		it('should return tools with correct schema for enqueuePlaylist', () => {
+			const tools = getAvailableTools(mockContext);
+			const tool = tools.enqueuePlaylist;
+
+			expect(tool).toBeDefined();
+			expect(tool.description).toContain('Enqueue all songs');
+		});
+
+		it('should return tools with correct schema for getQueueStatus', () => {
+			const tools = getAvailableTools(mockContext);
+			const tool = tools.getQueueStatus;
+
+			expect(tool).toBeDefined();
+			expect(tool.description).toContain('current queue status');
+		});
+
+		it('should return tools with correct schema for listTracks', () => {
+			const tools = getAvailableTools(mockContext);
+			const tool = tools.listTracks;
+
+			expect(tool).toBeDefined();
+			expect(tool.description).toContain('List tracks in the queue');
+		});
+
+		it('should return tools with correct schema for listAvailablePlaylists', () => {
+			const tools = getAvailableTools(mockContext);
+			const tool = tools.listAvailablePlaylists;
+
+			expect(tool).toBeDefined();
+			expect(tool.description).toContain('available internal playlists');
+		});
 	});
 
 	describe('generateSystemPrompt', () => {
 		it('should include track count in prompt', () => {
-			const context: ToolContext = {
-				queue: {} as GuildQueue,
-				currentTrackTitle: 'Test Track',
-				currentTrackAuthor: 'Test Artist',
-				trackCount: 10,
-			};
-
-			const prompt = generateSystemPrompt(context);
+			const prompt = generateSystemPrompt(
+				createMockContext({ trackCount: 10 }),
+			);
 
 			expect(prompt).toContain('10 tracks');
 		});
 
 		it('should include current track information', () => {
-			const context: ToolContext = {
-				queue: {} as GuildQueue,
-				currentTrackTitle: 'Never Gonna Give You Up',
-				currentTrackAuthor: 'Rick Astley',
-				trackCount: 5,
-			};
-
-			const prompt = generateSystemPrompt(context);
+			const prompt = generateSystemPrompt(
+				createMockContext({
+					currentTrackTitle: 'Never Gonna Give You Up',
+					currentTrackAuthor: 'Rick Astley',
+				}),
+			);
 
 			expect(prompt).toContain('Never Gonna Give You Up');
 			expect(prompt).toContain('Rick Astley');
 		});
 
-		it('should mention available actions', () => {
-			const context: ToolContext = {
-				queue: {} as GuildQueue,
-				currentTrackTitle: 'Test',
-				currentTrackAuthor: 'Artist',
-				trackCount: 1,
-			};
+		it('should mention agentic read tools', () => {
+			const prompt = generateSystemPrompt(createMockContext());
 
-			const prompt = generateSystemPrompt(context);
-
-			expect(prompt).toContain('Remove tracks');
-			expect(prompt).toContain('Move tracks');
-			expect(prompt).toContain('Skip the current track');
-			expect(prompt).toContain('Pause playback');
-			expect(prompt).toContain('Resume playback');
-			expect(prompt).toContain('Set volume');
-			expect(prompt).toContain('Remove duplicate tracks');
+			expect(prompt).toContain('listTracks');
+			expect(prompt).toContain('listAvailablePlaylists');
 		});
 
-		it('should emphasize queue-only functionality', () => {
-			const context: ToolContext = {
-				queue: {} as GuildQueue,
-				currentTrackTitle: 'Test',
-				currentTrackAuthor: 'Artist',
-				trackCount: 1,
-			};
+		it('should describe empty queue state when queue is null', () => {
+			const prompt = generateSystemPrompt(createMockContext({ queue: null }));
 
-			const prompt = generateSystemPrompt(context);
+			expect(prompt).toContain('empty');
+			expect(prompt).toContain('searchAndPlay');
+			expect(prompt).toContain('enqueuePlaylist');
+			expect(prompt).not.toContain('getQueueStatus');
+		});
 
-			expect(prompt).toContain('ONLY perform actions on the queue');
-			expect(prompt).toContain('cannot answer general questions');
+		it('should emphasize music-only functionality', () => {
+			const prompt = generateSystemPrompt(createMockContext());
+
+			expect(prompt).toContain('unrelated to music');
+			expect(prompt).toContain('error');
 		});
 	});
 
@@ -457,17 +695,14 @@ describe('promptToolMessages', () => {
 		let mockContext: ToolContext;
 
 		beforeEach(() => {
-			mockContext = {
-				queue: {} as GuildQueue,
-				currentTrackTitle: 'Test Track',
-				currentTrackAuthor: 'Test Artist',
-				trackCount: 5,
-			};
+			mockContext = createMockContext();
 		});
 
 		it('should create tools with correct input schemas', () => {
 			const tools = getAvailableTools(mockContext);
 
+			expect(tools.getQueueStatus.inputSchema).toBeDefined();
+			expect(tools.listTracks.inputSchema).toBeDefined();
 			expect(tools.removeTracksByPattern.inputSchema).toBeDefined();
 			expect(tools.moveTracksByPattern.inputSchema).toBeDefined();
 			expect(tools.skipCurrentTrack.inputSchema).toBeDefined();
@@ -475,6 +710,9 @@ describe('promptToolMessages', () => {
 			expect(tools.resumePlayback.inputSchema).toBeDefined();
 			expect(tools.setVolume.inputSchema).toBeDefined();
 			expect(tools.deduplicateQueue.inputSchema).toBeDefined();
+			expect(tools.searchAndPlay.inputSchema).toBeDefined();
+			expect(tools.listAvailablePlaylists.inputSchema).toBeDefined();
+			expect(tools.enqueuePlaylist.inputSchema).toBeDefined();
 		});
 
 		it('should create removeTracksByPattern tool with artist and title pattern parameters', () => {

@@ -316,7 +316,7 @@ export const RAW_COMMANDS: CategorizedCommand[] = [
 	},
 	{
 		name: 'prompt',
-		description: 'Control the queue with natural language',
+		description: 'Control the bot with natural language',
 		options: [
 			{
 				name: 'prompt',

@@ -3,6 +3,10 @@ import {
 	openai,
 } from '@ai-sdk/openai';
 import { stepCountIs, streamText, type Tool, tool } from 'ai';
+import type {
+	ChatInputCommandInteraction,
+	VoiceBasedChannel,
+} from 'discord.js';
 import type { GuildQueue } from 'discord-player';
 import PQueue from 'p-queue';
 import { z } from 'zod';
@@ -120,6 +124,13 @@ const QUEUE_TRACKS: QueueTrack[] = [
 
 const CURRENT_TRACK = { title: 'bad guy', author: 'Billie Eilish' };
 
+const AVAILABLE_PLAYLISTS = [
+	'chill-vibes',
+	'jazz-classics',
+	'rock-anthems',
+	'workout',
+];
+
 interface RecordedToolCall {
 	name: string;
 	args: Record<string, unknown>;
@@ -139,8 +150,66 @@ interface ModelResult {
 	results: PromptResult[];
 }
 
+const READ_ONLY_TOOLS = new Set([
+	'getQueueStatus',
+	'listTracks',
+	'listAvailablePlaylists',
+]);
+
+function filterActionCalls(calls: RecordedToolCall[]): RecordedToolCall[] {
+	return calls.filter((call) => !READ_ONLY_TOOLS.has(call.name));
+}
+
 function createMockTools(recorder: RecordedToolCall[]): Record<string, Tool> {
 	return {
+		getQueueStatus: tool({
+			description:
+				'Get the current queue status including now playing track, total track count, and playback state (paused, volume)',
+			inputSchema: z.object({}),
+			execute: async () => {
+				recorder.push({ name: 'getQueueStatus', args: {} });
+				return {
+					success: true,
+					currentTrack: {
+						title: CURRENT_TRACK.title,
+						author: CURRENT_TRACK.author,
+						duration: '3:14',
+					},
+					trackCount: QUEUE_TRACKS.length,
+					isPaused: false,
+					volume: 50,
+				};
+			},
+		}),
+		listTracks: tool({
+			description:
+				'List tracks in the queue with their index, title, author, and duration. Supports pagination for large queues.',
+			inputSchema: z.object({
+				offset: z
+					.number()
+					.min(0)
+					.optional()
+					.describe('Starting index (default 0)'),
+				limit: z
+					.number()
+					.min(1)
+					.max(50)
+					.optional()
+					.describe('Number of tracks to return (default 25, max 50)'),
+			}),
+			execute: async (args) => {
+				recorder.push({ name: 'listTracks', args });
+				const offset = (args.offset as number | undefined) ?? 0;
+				const limit = (args.limit as number | undefined) ?? 25;
+				const slice = QUEUE_TRACKS.slice(offset, offset + limit);
+				return {
+					success: true,
+					tracks: slice,
+					total: QUEUE_TRACKS.length,
+					hasMore: offset + limit < QUEUE_TRACKS.length,
+				};
+			},
+		}),
 		removeTracksByPattern: tool({
 			description:
 				'Remove all tracks from the queue that match a pattern (artist name, title, or both)',
@@ -224,6 +293,50 @@ function createMockTools(recorder: RecordedToolCall[]): Record<string, Tool> {
 				return { success: true, removedCount: 1 } satisfies ToolResult;
 			},
 		}),
+		searchAndPlay: tool({
+			description:
+				'Search for a song and add it to the queue. Supports song names, artist names, YouTube URLs, and Spotify URLs.',
+			inputSchema: z.object({
+				query: z
+					.string()
+					.describe(
+						'Search query - can be a song name, artist name, YouTube URL, or Spotify URL',
+					),
+			}),
+			execute: async (args) => {
+				recorder.push({ name: 'searchAndPlay', args });
+				return {
+					success: true,
+					trackTitle: 'Mock Track',
+					trackAuthor: 'Mock Artist',
+				} satisfies ToolResult;
+			},
+		}),
+		listAvailablePlaylists: tool({
+			description: 'List all available internal playlists that can be enqueued',
+			inputSchema: z.object({}),
+			execute: async () => {
+				recorder.push({ name: 'listAvailablePlaylists', args: {} });
+				return { success: true, playlists: AVAILABLE_PLAYLISTS };
+			},
+		}),
+		enqueuePlaylist: tool({
+			description:
+				'Enqueue all songs from an internal playlist by its ID. Use listAvailablePlaylists first to discover available playlist IDs.',
+			inputSchema: z.object({
+				playlistId: z
+					.string()
+					.describe('The ID of the internal playlist to enqueue'),
+			}),
+			execute: async (args) => {
+				recorder.push({ name: 'enqueuePlaylist', args });
+				return {
+					success: true,
+					enqueuedCount: 12,
+					totalCount: 12,
+				} satisfies ToolResult;
+			},
+		}),
 	};
 }
 
@@ -263,24 +376,33 @@ interface TestCase {
 const TEST_CASES: TestCase[] = [
 	{
 		prompt: 'skip this song',
-		score: (calls) => {
+		score: (rawCalls) => {
+			const calls = filterActionCalls(rawCalls);
 			if (calls.length !== 1 || calls[0].name !== 'skipCurrentTrack') return 0;
 			return 1;
 		},
 	},
 	{
 		prompt: 'remove all Drake songs',
-		score: (calls) => {
-			if (calls.length !== 1 || calls[0].name !== 'removeTracksByPattern')
+		score: (rawCalls) => {
+			const calls = filterActionCalls(rawCalls);
+			const removeCalls = calls.filter(
+				(call) => call.name === 'removeTracksByPattern',
+			);
+			if (removeCalls.length === 0 || calls.length !== removeCalls.length)
 				return 0;
-			if (matchesPattern(calls[0].args.artistPattern as string, 'drake'))
-				return 1;
+			const hasDrake = removeCalls.some((call) =>
+				matchesPattern(call.args.artistPattern as string, 'drake'),
+			);
+			if (!hasDrake) return 0;
+			if (removeCalls.length === 1) return 1;
 			return 0.5;
 		},
 	},
 	{
 		prompt: 'set volume to 30',
-		score: (calls) => {
+		score: (rawCalls) => {
+			const calls = filterActionCalls(rawCalls);
 			if (calls.length !== 1 || calls[0].name !== 'setVolume') return 0;
 			if (calls[0].args.volume === 30) return 1;
 			return 0.5;
@@ -288,7 +410,8 @@ const TEST_CASES: TestCase[] = [
 	},
 	{
 		prompt: 'make it quieter',
-		score: (calls) => {
+		score: (rawCalls) => {
+			const calls = filterActionCalls(rawCalls);
 			if (calls.length !== 1 || calls[0].name !== 'setVolume') return 0;
 			const volume = calls[0].args.volume as number;
 			if (typeof volume === 'number' && volume < 100) return 1;
@@ -297,7 +420,8 @@ const TEST_CASES: TestCase[] = [
 	},
 	{
 		prompt: 'remove all ed sheeran songs and move weeknd to the front',
-		score: (calls) => {
+		score: (rawCalls) => {
+			const calls = filterActionCalls(rawCalls);
 			const hasRemove = hasToolCall(calls, 'removeTracksByPattern', {
 				artistPattern: 'ed sheeran',
 			});
@@ -318,23 +442,29 @@ const TEST_CASES: TestCase[] = [
 	},
 	{
 		prompt: 'remove the song called Blinding Lights',
-		score: (calls) => {
-			if (calls.length !== 1 || calls[0].name !== 'removeTracksByPattern')
+		score: (rawCalls) => {
+			const calls = filterActionCalls(rawCalls);
+			const removeCalls = calls.filter(
+				(call) => call.name === 'removeTracksByPattern',
+			);
+			if (removeCalls.length === 0 || calls.length !== removeCalls.length)
 				return 0;
-			if (
-				matchesPattern(calls[0].args.titlePattern as string, 'blinding lights')
-			)
-				return 1;
-			if (
-				matchesPattern(calls[0].args.artistPattern as string, 'blinding lights')
-			)
-				return 0.5;
-			return 0.5;
+			const hasTitle = removeCalls.some((call) =>
+				matchesPattern(call.args.titlePattern as string, 'blinding lights'),
+			);
+			const hasArtist = removeCalls.some((call) =>
+				matchesPattern(call.args.artistPattern as string, 'blinding lights'),
+			);
+			if (hasTitle && removeCalls.length === 1) return 1;
+			if (hasTitle) return 0.5;
+			if (hasArtist) return 0.5;
+			return 0;
 		},
 	},
 	{
 		prompt: 'move everything by Daft Punk to the end of the queue',
-		score: (calls) => {
+		score: (rawCalls) => {
+			const calls = filterActionCalls(rawCalls);
 			if (calls.length !== 1 || calls[0].name !== 'moveTracksByPattern')
 				return 0;
 			const correctArtist = matchesPattern(
@@ -349,7 +479,8 @@ const TEST_CASES: TestCase[] = [
 	},
 	{
 		prompt: 'remove all songs by both Drake and Taylor Swift',
-		score: (calls) => {
+		score: (rawCalls) => {
+			const calls = filterActionCalls(rawCalls);
 			const removeCalls = calls.filter(
 				(call) => call.name === 'removeTracksByPattern',
 			);
@@ -368,7 +499,8 @@ const TEST_CASES: TestCase[] = [
 	},
 	{
 		prompt: 'I want to hear Arctic Monkeys next',
-		score: (calls) => {
+		score: (rawCalls) => {
+			const calls = filterActionCalls(rawCalls);
 			const hasMove = hasToolCall(calls, 'moveTracksByPattern', {
 				artistPattern: 'arctic monkeys',
 				position: 0,
@@ -382,7 +514,8 @@ const TEST_CASES: TestCase[] = [
 	},
 	{
 		prompt: 'remove Drake, move Kendrick to front, and skip the current track',
-		score: (calls) => {
+		score: (rawCalls) => {
+			const calls = filterActionCalls(rawCalls);
 			const hasRemove = hasToolCall(calls, 'removeTracksByPattern', {
 				artistPattern: 'drake',
 			});
@@ -400,7 +533,8 @@ const TEST_CASES: TestCase[] = [
 	},
 	{
 		prompt: 'clean up the queue and lower the volume to 20',
-		score: (calls) => {
+		score: (rawCalls) => {
+			const calls = filterActionCalls(rawCalls);
 			const hasDedup = hasToolCall(calls, 'deduplicateQueue');
 			const hasVolume = hasToolCall(calls, 'setVolume', { volume: 20 });
 			if (hasDedup && hasVolume && calls.length === 2) return 1;
@@ -413,7 +547,8 @@ const TEST_CASES: TestCase[] = [
 	},
 	{
 		prompt: 'remove everything except Tame Impala',
-		score: (calls) => {
+		score: (rawCalls) => {
+			const calls = filterActionCalls(rawCalls);
 			const otherArtists = [
 				'drake',
 				'taylor swift',
@@ -448,7 +583,8 @@ const TEST_CASES: TestCase[] = [
 	},
 	{
 		prompt: 'remove all songs longer than 5 minutes',
-		score: (calls) => {
+		score: (rawCalls) => {
+			const calls = filterActionCalls(rawCalls);
 			const longSongs = ['let it happen', 'get lucky', 'around the world'];
 			const removeCalls = calls.filter(
 				(call) => call.name === 'removeTracksByPattern',
@@ -467,11 +603,91 @@ const TEST_CASES: TestCase[] = [
 	},
 	{
 		prompt: 'sort the queue by song length',
-		score: (calls) => (calls.length === 0 ? 1 : 0),
+		score: (rawCalls) => {
+			const calls = filterActionCalls(rawCalls);
+			return calls.length === 0 ? 1 : 0;
+		},
+	},
+	{
+		prompt: 'play some Radiohead',
+		score: (rawCalls) => {
+			const calls = filterActionCalls(rawCalls);
+			const searchCalls = calls.filter((call) => call.name === 'searchAndPlay');
+			if (searchCalls.length !== 1 || calls.length !== 1) return 0;
+			if (matchesPattern(searchCalls[0].args.query as string, 'radiohead'))
+				return 1;
+			return 0.5;
+		},
+	},
+	{
+		prompt: 'add Bohemian Rhapsody by Queen to the queue',
+		score: (rawCalls) => {
+			const calls = filterActionCalls(rawCalls);
+			const searchCalls = calls.filter((call) => call.name === 'searchAndPlay');
+			if (searchCalls.length === 0 || calls.length !== searchCalls.length)
+				return 0;
+			const hasCorrectQuery = searchCalls.some((call) => {
+				const query = (call.args.query as string) ?? '';
+				return matchesPattern(query, 'bohemian rhapsody');
+			});
+			if (!hasCorrectQuery) return 0.5;
+			if (searchCalls.length === 1) return 1;
+			return 0.5;
+		},
+	},
+	{
+		prompt: 'play the workout playlist',
+		score: (rawCalls) => {
+			const calls = filterActionCalls(rawCalls);
+			const enqueueCalls = calls.filter(
+				(call) => call.name === 'enqueuePlaylist',
+			);
+			if (enqueueCalls.length !== 1 || calls.length !== 1) return 0;
+			if (matchesPattern(enqueueCalls[0].args.playlistId as string, 'workout'))
+				return 1;
+			return 0.5;
+		},
+	},
+	{
+		prompt: 'enqueue the jazz playlist and skip the current song',
+		score: (rawCalls) => {
+			const calls = filterActionCalls(rawCalls);
+			const hasEnqueue = hasToolCall(calls, 'enqueuePlaylist', {
+				playlistId: 'jazz',
+			});
+			const hasSkip = hasToolCall(calls, 'skipCurrentTrack');
+			if (hasEnqueue && hasSkip && calls.length === 2) return 1;
+			if (hasEnqueue && hasSkip) return 0.5;
+			if (calls.some((call) => call.name === 'enqueuePlaylist')) return 0.5;
+			return 0;
+		},
+	},
+	{
+		prompt: 'play the rock playlist and remove all Drake songs',
+		score: (rawCalls) => {
+			const calls = filterActionCalls(rawCalls);
+			const hasEnqueue = hasToolCall(calls, 'enqueuePlaylist', {
+				playlistId: 'rock',
+			});
+			const hasRemove = hasToolCall(calls, 'removeTracksByPattern', {
+				artistPattern: 'drake',
+			});
+			if (hasEnqueue && hasRemove && calls.length === 2) return 1;
+			if (hasEnqueue && hasRemove) return 0.5;
+			const names = calls.map((call) => call.name);
+			if (
+				names.includes('enqueuePlaylist') &&
+				names.includes('removeTracksByPattern')
+			)
+				return 0.5;
+			return 0;
+		},
 	},
 ];
 
 const TOOL_ABBREVIATIONS: Record<string, string> = {
+	getQueueStatus: 'status',
+	listTracks: 'list',
 	removeTracksByPattern: 'remove',
 	moveTracksByPattern: 'move',
 	skipCurrentTrack: 'skip',
@@ -479,6 +695,9 @@ const TOOL_ABBREVIATIONS: Record<string, string> = {
 	resumePlayback: 'resume',
 	setVolume: 'volume',
 	deduplicateQueue: 'dedup',
+	searchAndPlay: 'search',
+	listAvailablePlaylists: 'playlists',
+	enqueuePlaylist: 'enqueue',
 };
 
 function formatToolCalls(names: string[]): string {
@@ -726,6 +945,8 @@ async function runPrompt(
 		currentTrackTitle: CURRENT_TRACK.title,
 		currentTrackAuthor: CURRENT_TRACK.author,
 		trackCount: QUEUE_TRACKS.length,
+		interaction: {} as ChatInputCommandInteraction,
+		voiceChannel: {} as VoiceBasedChannel,
 	};
 
 	const startTime = performance.now();
@@ -735,7 +956,7 @@ async function runPrompt(
 		const result = streamText({
 			model: openai(config.id),
 			system: generateSystemPrompt(toolContext),
-			prompt: `User request: "${testCase.prompt}"\n\nQueue data: ${JSON.stringify(QUEUE_TRACKS)}`,
+			prompt: `User request: "${testCase.prompt}"`,
 			tools,
 			stopWhen: stepCountIs(5),
 			maxRetries: 2,
