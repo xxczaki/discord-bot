@@ -8,14 +8,18 @@ import useDiscordEventHandlers, {
 import usePlayerEventHandlers from '../../hooks/usePlayerEventHandlers';
 import { createDiscordClient } from '../createDiscordClient';
 import getEnvironmentVariable from '../getEnvironmentVariable';
+import setupGracefulShutdown from '../gracefulShutdown';
 import { initializeBot } from '../initializeBot';
 import initializeCommands from '../initializeCommands';
 import getInitializedPlayer from '../initializePlayer';
+import performStartupRecovery from '../startupRecovery';
 
 vi.mock('../createDiscordClient');
 vi.mock('../getEnvironmentVariable');
 vi.mock('../initializeCommands');
 vi.mock('../initializePlayer');
+vi.mock('../gracefulShutdown');
+vi.mock('../startupRecovery');
 vi.mock('../../hooks/useDebugListeners');
 vi.mock('../../hooks/useDiscordEventHandlers');
 vi.mock('../../hooks/usePlayerEventHandlers');
@@ -32,6 +36,8 @@ const mockedUseDebugListeners = vi.mocked(useDebugListeners);
 const mockedUseDiscordEventHandlers = vi.mocked(useDiscordEventHandlers);
 const mockedUseReadyEventHandler = vi.mocked(useReadyEventHandler);
 const mockedUsePlayerEventHandlers = vi.mocked(usePlayerEventHandlers);
+const mockedSetupGracefulShutdown = vi.mocked(setupGracefulShutdown);
+const mockedPerformStartupRecovery = vi.mocked(performStartupRecovery);
 
 function createMockClient(): Client {
 	return {
@@ -99,6 +105,15 @@ it('should initialize bot components in correct order', async () => {
 		mockPlayer,
 	);
 
+	expect(mockedPerformStartupRecovery).toHaveBeenCalledWith(
+		mockClient,
+		mockPlayer,
+	);
+	expect(mockedSetupGracefulShutdown).toHaveBeenCalledWith(
+		mockClient,
+		expect.anything(),
+	);
+
 	expect(result).toEqual({ client: mockClient, token: mockToken });
 });
 
@@ -120,4 +135,6 @@ it('should handle initialization errors gracefully', async () => {
 	expect(mockedUseDebugListeners).not.toHaveBeenCalled();
 	expect(mockedUseDiscordEventHandlers).not.toHaveBeenCalled();
 	expect(mockedUsePlayerEventHandlers).not.toHaveBeenCalled();
+	expect(mockedPerformStartupRecovery).not.toHaveBeenCalled();
+	expect(mockedSetupGracefulShutdown).not.toHaveBeenCalled();
 });

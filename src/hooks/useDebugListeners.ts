@@ -24,7 +24,7 @@ const FATAL_ERROR_MESSAGE_DEBOUNCE = 1000 * 30; // 30 seconds
 const botDebugChannelId = getEnvironmentVariable('BOT_DEBUG_CHANNEL_ID');
 const pluralizeTracks = pluralize('track', 'tracks');
 
-const server = createServer();
+export const server = createServer();
 
 server.listen(8000);
 

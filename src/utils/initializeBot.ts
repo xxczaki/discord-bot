@@ -1,13 +1,15 @@
 import type { Client } from 'discord.js';
-import useDebugListeners from '../hooks/useDebugListeners';
+import useDebugListeners, { server } from '../hooks/useDebugListeners';
 import useDiscordEventHandlers, {
 	useReadyEventHandler,
 } from '../hooks/useDiscordEventHandlers';
 import usePlayerEventHandlers from '../hooks/usePlayerEventHandlers';
 import { createDiscordClient } from './createDiscordClient';
 import getEnvironmentVariable from './getEnvironmentVariable';
+import setupGracefulShutdown from './gracefulShutdown';
 import initializeCommands from './initializeCommands';
 import getInitializedPlayer from './initializePlayer';
+import performStartupRecovery from './startupRecovery';
 
 export interface BotInitializationResult {
 	client: Client;
@@ -29,6 +31,9 @@ export async function initializeBot(): Promise<BotInitializationResult> {
 	useDebugListeners(client, player);
 	useDiscordEventHandlers(client, player);
 	usePlayerEventHandlers(client, player);
+
+	void performStartupRecovery(client, player);
+	setupGracefulShutdown(client, server);
 
 	return { client, token };
 }
