@@ -1,6 +1,10 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { useQueue } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
+import {
+	createMockInteraction as createBaseMockInteraction,
+	createMockQueue as createBaseMockQueue,
+} from '../../utils/testing';
 import sortCommandHandler from '../sort';
 
 vi.mock('discord-player', () => ({
@@ -14,19 +18,11 @@ beforeEach(() => {
 });
 
 function createMockInteraction(): ChatInputCommandInteraction {
-	return {
-		reply: vi.fn().mockResolvedValue({}),
-		editReply: vi.fn().mockResolvedValue({}),
-	} as unknown as ChatInputCommandInteraction;
+	return createBaseMockInteraction({ editReply: true });
 }
 
 function createMockQueue(tracks: Array<{ title: string }> = []) {
-	return {
-		tracks: {
-			data: tracks,
-			store: tracks,
-		},
-	} as unknown as NonNullable<ReturnType<typeof useQueue>>;
+	return createBaseMockQueue({ tracks: tracks as never[] });
 }
 
 it('should reply with ephemeral message when queue is empty', async () => {

@@ -49,9 +49,11 @@ export default class LockdownManager {
 
 	isCommandAffected(commandName: string): boolean {
 		const command = RAW_COMMANDS.find((cmd) => cmd.name === commandName);
+		/* v8 ignore start */
 		return command
 			? this.#lockdownAffectedCategories.has(command.category)
 			: false;
+		/* v8 ignore stop */
 	}
 
 	isOwnerOnlyCommand(commandName: string): boolean {

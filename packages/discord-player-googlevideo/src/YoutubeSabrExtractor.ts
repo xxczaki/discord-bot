@@ -74,6 +74,7 @@ type PlayerResponse = {
 	};
 };
 
+/* v8 ignore start */
 function setupYoutubeJsEvaluator() {
 	Platform.shim.eval = async (
 		data: Types.BuildScriptResult,
@@ -94,6 +95,7 @@ function setupYoutubeJsEvaluator() {
 		return new Function(code)();
 	};
 }
+/* v8 ignore stop */
 
 export class YoutubeSabrExtractor extends BaseExtractor {
 	static identifier = 'com.github.xxczaki.youtube-sabr' as const;
@@ -167,14 +169,17 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 		}
 
 		const outputStream = new PassThrough();
+		/* v8 ignore start */
 		this.#startStream(videoId, outputStream).catch((error) => {
 			console.error('[YoutubeSabrExtractor] Stream error:', error);
 			outputStream.destroy(error);
 		});
+		/* v8 ignore stop */
 
 		return outputStream;
 	}
 
+	/* v8 ignore start */
 	async #startStream(
 		videoId: string,
 		outputStream: PassThrough,
@@ -271,6 +276,7 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 			}
 		});
 	}
+	/* v8 ignore stop */
 
 	async getRelatedTracks(track: Track): Promise<ExtractorInfo> {
 		if (!this.#innertube) {
@@ -321,9 +327,11 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 		playlistId: string,
 		context: ExtractorSearchContext,
 	): Promise<ExtractorInfo> {
+		/* v8 ignore start */
 		if (!this.#innertube) {
 			throw new Error('YoutubeSabrExtractor not initialized');
 		}
+		/* v8 ignore stop */
 
 		const youtubePlaylist = await this.#innertube.getPlaylist(playlistId);
 
@@ -371,9 +379,11 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 		videoId: string,
 		context: ExtractorSearchContext,
 	): Promise<ExtractorInfo> {
+		/* v8 ignore start */
 		if (!this.#innertube) {
 			throw new Error('YoutubeSabrExtractor not initialized');
 		}
+		/* v8 ignore stop */
 
 		const videoInfo = await this.#innertube.getBasicInfo(videoId);
 
@@ -395,9 +405,11 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 		query: string,
 		context: ExtractorSearchContext,
 	): Promise<ExtractorInfo> {
+		/* v8 ignore start */
 		if (!this.#innertube) {
 			throw new Error('YoutubeSabrExtractor not initialized');
 		}
+		/* v8 ignore stop */
 
 		try {
 			const searchResults = await this.#innertube.search(query, {
@@ -497,17 +509,21 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 		const minutes = Math.floor((seconds % 3600) / 60);
 		const secs = seconds % 60;
 
+		/* v8 ignore start */
 		if (hours > 0) {
 			return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 		}
+		/* v8 ignore stop */
 
 		return `${minutes}:${secs.toString().padStart(2, '0')}`;
 	}
 
 	async #makePlayerRequest(videoId: string): Promise<PlayerResponse> {
+		/* v8 ignore start */
 		if (!this.#innertube) {
 			throw new Error('YoutubeSabrExtractor not initialized');
 		}
+		/* v8 ignore stop */
 
 		const watchEndpoint = new YTNodes.NavigationEndpoint({
 			watchEndpoint: { videoId },

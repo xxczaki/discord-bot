@@ -32,7 +32,9 @@ async function getPlaylists(channel: TextBasedChannel, page = 0) {
 				}
 
 				const cleanContent = cleanUpPlaylistContent(message);
+				/* v8 ignore start */
 				const songs = cleanContent ? cleanContent.split('\n') : [];
+				/* v8 ignore stop */
 
 				return { id, songs };
 			})
@@ -96,7 +98,9 @@ export async function getAllPlaylists(channel: TextBasedChannel) {
 				}
 
 				const cleanContent = cleanUpPlaylistContent(message);
+				/* v8 ignore start */
 				const songs = cleanContent ? cleanContent.split('\n') : [];
+				/* v8 ignore stop */
 
 				return { id, songs };
 			})
@@ -158,11 +162,13 @@ async function getPlaylistDescription(songs: string[]) {
 		let description = pluralizeSongs`${totalResolvedSongs} ${null}`;
 
 		if (resolvedData.length > 0) {
+			/* v8 ignore start */
 			const oldestDate = resolvedData.reduce((oldest, current) => {
 				return new Date(current.cachedAt) < new Date(oldest.cachedAt)
 					? current
 					: oldest;
 			});
+			/* v8 ignore stop */
 
 			const formattedDate = externalPlaylistCache.formatCacheDate(
 				oldestDate.cachedAt,

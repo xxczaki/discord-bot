@@ -119,15 +119,17 @@ function createMockInteraction(prompt: string): ChatInputCommandInteraction {
 
 function createMockQueue(
 	tracks: Track[] = [],
-	currentTrack?: Track,
+	currentTrack?: Track | null,
 ): GuildQueue {
 	return {
 		tracks: {
 			toArray: vi.fn().mockReturnValue(tracks),
 		},
 		currentTrack:
-			currentTrack ??
-			createMockTrack({ title: 'The Times They Are a-Changin' }),
+			currentTrack === null
+				? null
+				: (currentTrack ??
+					createMockTrack({ title: 'The Times They Are a-Changin' })),
 		removeTrack: vi.fn(),
 		moveTrack: vi.fn(),
 		node: {
@@ -220,6 +222,60 @@ describe('/prompt command', () => {
 			expect(interaction.editReply).toHaveBeenCalledWith({
 				content: 'An error occurred while processing your request.',
 			});
+		});
+
+		it('should handle tool-result with undefined output', async () => {
+			const tracks = [createMockTrack()];
+			const mockQueue = createMockQueue(tracks);
+			const interaction = createMockInteraction('test');
+
+			mockedUseQueue.mockReturnValue(mockQueue);
+			mockedStreamText.mockReturnValue({
+				fullStream: (async function* () {
+					yield {
+						type: 'tool-call' as const,
+						toolName: 'skipCurrentTrack',
+						toolCallId: 'call-no-output',
+						input: {},
+					};
+
+					yield {
+						type: 'tool-result' as const,
+						toolCallId: 'call-no-output',
+						toolName: 'skipCurrentTrack',
+					};
+				})(),
+			} as never);
+
+			await promptCommandHandler(interaction);
+
+			const lastCall = vi.mocked(interaction.editReply).mock.calls.at(-1);
+			const output = lastCall?.[0] as string;
+			expect(output).toContain('✅');
+		});
+
+		it('should skip tool-result with unknown toolCallId', async () => {
+			const tracks = [createMockTrack()];
+			const mockQueue = createMockQueue(tracks);
+			const interaction = createMockInteraction('test');
+
+			mockedUseQueue.mockReturnValue(mockQueue);
+			mockedStreamText.mockReturnValue({
+				fullStream: (async function* () {
+					yield {
+						type: 'tool-result' as const,
+						toolCallId: 'unknown-call-id',
+						toolName: 'removeTracksByPattern',
+						output: { success: true, removedCount: 1 },
+					};
+				})(),
+			} as never);
+
+			await promptCommandHandler(interaction);
+
+			expect(interaction.editReply).toHaveBeenCalledWith(
+				expect.stringContaining('No actions were performed'),
+			);
 		});
 
 		it('should handle stream error events', async () => {
@@ -320,6 +376,21 @@ describe('/prompt command', () => {
 			await promptCommandHandler(interaction);
 
 			expect(interaction.reply).toHaveBeenCalledWith('Analyzing queue…');
+		});
+
+		it('should use fallback values when currentTrack is null', async () => {
+			const tracks = [createMockTrack()];
+			const mockQueue = createMockQueue(tracks, null);
+			const interaction = createMockInteraction('test');
+
+			mockedUseQueue.mockReturnValue(mockQueue);
+			mockedStreamText.mockReturnValue(createMockStream() as never);
+
+			await promptCommandHandler(interaction);
+
+			const [[callArg]] = mockedStreamText.mock.calls;
+			expect(callArg.system).toContain('None');
+			expect(callArg.system).toContain('N/A');
 		});
 
 		it('should increment rate limiter after successful call', async () => {

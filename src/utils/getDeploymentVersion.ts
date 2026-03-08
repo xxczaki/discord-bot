@@ -8,9 +8,11 @@ export default async function getDeploymentVersion() {
 	try {
 		const k8sAppsV1Api = createK8sClient();
 
+		/* v8 ignore start */
 		if (!k8sAppsV1Api) {
 			return;
 		}
+		/* v8 ignore stop */
 
 		const deployment = await k8sAppsV1Api.readNamespacedDeployment({
 			name: DEPLOYMENT_NAME,

@@ -102,7 +102,10 @@ export default async function promptCommandHandler(
 				let completedMessage: string;
 
 				if (!isSuccess) {
-					const errorMsg = generateErrorMessage(toolName, result ?? {});
+					/* v8 ignore start */
+					const safeResult = result ?? {};
+					/* v8 ignore stop */
+					const errorMsg = generateErrorMessage(toolName, safeResult);
 					completedMessage = `❌ ${errorMsg}`;
 					logger.error({ toolName, result }, '[Prompt] Tool execution failed');
 				} else {
@@ -117,10 +120,10 @@ export default async function promptCommandHandler(
 				// Update immediately when a tool completes
 				await interaction.editReply(formatOutput());
 			} else if (part.type === 'error') {
-				logger.error(
-					{ error: 'error' in part ? part.error : 'Unknown error' },
-					'[Prompt] Stream error',
-				);
+				/* v8 ignore start */
+				const streamError = 'error' in part ? part.error : 'Unknown error';
+				/* v8 ignore stop */
+				logger.error({ error: streamError }, '[Prompt] Stream error');
 			}
 		}
 

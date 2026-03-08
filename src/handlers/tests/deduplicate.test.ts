@@ -2,13 +2,16 @@ import type { ChatInputCommandInteraction } from 'discord.js';
 import type { Track } from 'discord-player';
 import { useQueue } from 'discord-player';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+	createMockInteraction as createBaseMockInteraction,
+	createMockQueue as createBaseMockQueue,
+	createMockTrack,
+	MOCK_TRACK_URL,
+} from '../../utils/testing';
 import deduplicateCommandHandler from '../deduplicate';
 
-const EXAMPLE_TRACK_URL = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
 const EXAMPLE_TRACK_URL_2 =
 	'https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh';
-const EXAMPLE_TRACK_TITLE = 'Never Gonna Give You Up';
-const EXAMPLE_TRACK_AUTHOR = 'Rick Astley';
 const EXAMPLE_BRIDGE_URL = 'https://youtube.com/watch?v=123';
 
 vi.mock('discord-player', () => ({
@@ -21,39 +24,23 @@ beforeEach(() => {
 	vi.clearAllMocks();
 });
 
-function createMockTrack(overrides: Partial<Track> = {}): Track {
-	return {
-		id: `track-${Math.random()}`,
-		title: EXAMPLE_TRACK_TITLE,
-		author: EXAMPLE_TRACK_AUTHOR,
-		url: EXAMPLE_TRACK_URL,
-		duration: '3:32',
-		metadata: {},
-		...overrides,
-	} as Track;
-}
-
 function createMockInteraction(algorithm: string): ChatInputCommandInteraction {
-	return {
-		options: {
-			getString: vi.fn().mockReturnValue(algorithm),
-		},
-		reply: vi.fn().mockResolvedValue({}),
-		editReply: vi.fn().mockResolvedValue({}),
-	} as unknown as ChatInputCommandInteraction;
+	return createBaseMockInteraction({
+		reply: true,
+		editReply: true,
+		getString: algorithm,
+	});
 }
 
 function createMockQueue(
 	currentTrack: Track | null = null,
 	tracks: Track[] = [],
 ): NonNullable<ReturnType<typeof useQueue>> {
-	return {
+	return createBaseMockQueue({
 		currentTrack,
-		tracks: {
-			store: [...tracks],
-		},
-		removeTrack: vi.fn(),
-	} as unknown as NonNullable<ReturnType<typeof useQueue>>;
+		tracks,
+		removeTrack: true,
+	});
 }
 
 it('should reply with error when queue is empty', async () => {
@@ -83,7 +70,7 @@ it('should reply with error when invalid algorithm is provided', async () => {
 
 describe('`source` algorithm', () => {
 	it('should handle no duplicates', async () => {
-		const track1 = createMockTrack({ url: EXAMPLE_TRACK_URL });
+		const track1 = createMockTrack({ url: MOCK_TRACK_URL });
 		const track2 = createMockTrack({ url: EXAMPLE_TRACK_URL_2 });
 		const interaction = createMockInteraction('source');
 		const mockQueue = createMockQueue(track1, [track2]);
@@ -100,8 +87,8 @@ describe('`source` algorithm', () => {
 	});
 
 	it('should handle duplicates', async () => {
-		const track1 = createMockTrack({ url: EXAMPLE_TRACK_URL });
-		const track2 = createMockTrack({ url: EXAMPLE_TRACK_URL }); // duplicate URL
+		const track1 = createMockTrack({ url: MOCK_TRACK_URL });
+		const track2 = createMockTrack({ url: MOCK_TRACK_URL }); // duplicate URL
 		const track3 = createMockTrack({ url: EXAMPLE_TRACK_URL_2 });
 		const interaction = createMockInteraction('source');
 		const mockQueue = createMockQueue(track1, [track2, track3]);
@@ -117,8 +104,8 @@ describe('`source` algorithm', () => {
 	});
 
 	it('should not remove current track even if it is a duplicate', async () => {
-		const track1 = createMockTrack({ url: EXAMPLE_TRACK_URL });
-		const track2 = createMockTrack({ url: EXAMPLE_TRACK_URL }); // duplicate URL
+		const track1 = createMockTrack({ url: MOCK_TRACK_URL });
+		const track2 = createMockTrack({ url: MOCK_TRACK_URL }); // duplicate URL
 		const interaction = createMockInteraction('source');
 		const mockQueue = createMockQueue(track1, [track2]);
 
@@ -132,9 +119,9 @@ describe('`source` algorithm', () => {
 	});
 
 	it('should handle multiple duplicates', async () => {
-		const track1 = createMockTrack({ url: EXAMPLE_TRACK_URL });
-		const track2 = createMockTrack({ url: EXAMPLE_TRACK_URL }); // duplicate
-		const track3 = createMockTrack({ url: EXAMPLE_TRACK_URL }); // duplicate
+		const track1 = createMockTrack({ url: MOCK_TRACK_URL });
+		const track2 = createMockTrack({ url: MOCK_TRACK_URL }); // duplicate
+		const track3 = createMockTrack({ url: MOCK_TRACK_URL }); // duplicate
 		const track4 = createMockTrack({ url: EXAMPLE_TRACK_URL_2 });
 		const interaction = createMockInteraction('source');
 		const mockQueue = createMockQueue(track1, [track2, track3, track4]);
@@ -150,8 +137,8 @@ describe('`source` algorithm', () => {
 	});
 
 	it('should update queue after each removal for accurate duplicate detection', async () => {
-		const track1 = createMockTrack({ url: EXAMPLE_TRACK_URL });
-		const track2 = createMockTrack({ url: EXAMPLE_TRACK_URL });
+		const track1 = createMockTrack({ url: MOCK_TRACK_URL });
+		const track2 = createMockTrack({ url: MOCK_TRACK_URL });
 		const interaction = createMockInteraction('source');
 
 		let currentTracks = [track2];
@@ -175,8 +162,8 @@ describe('`source` algorithm', () => {
 	});
 
 	it('should handle empty queue after duplicate removal', async () => {
-		const track1 = createMockTrack({ url: EXAMPLE_TRACK_URL });
-		const track2 = createMockTrack({ url: EXAMPLE_TRACK_URL });
+		const track1 = createMockTrack({ url: MOCK_TRACK_URL });
+		const track2 = createMockTrack({ url: MOCK_TRACK_URL });
 		const interaction = createMockInteraction('source');
 
 		let currentTracks = [track2];
@@ -201,8 +188,8 @@ describe('`source` algorithm', () => {
 	});
 
 	it('should handle current track being null', async () => {
-		const track1 = createMockTrack({ url: EXAMPLE_TRACK_URL });
-		const track2 = createMockTrack({ url: EXAMPLE_TRACK_URL });
+		const track1 = createMockTrack({ url: MOCK_TRACK_URL });
+		const track2 = createMockTrack({ url: MOCK_TRACK_URL });
 		const interaction = createMockInteraction('source');
 		const mockQueue = createMockQueue(null, [track1, track2]);
 
@@ -218,7 +205,7 @@ describe('`source` algorithm', () => {
 describe('`bridged` algorithm', () => {
 	it('should handle bridge metadata', async () => {
 		const track1 = createMockTrack({
-			url: EXAMPLE_TRACK_URL,
+			url: MOCK_TRACK_URL,
 			metadata: {
 				bridge: {
 					url: EXAMPLE_BRIDGE_URL,
@@ -245,8 +232,8 @@ describe('`bridged` algorithm', () => {
 	});
 
 	it('should fall back to track URL when bridge metadata is invalid', async () => {
-		const track1 = createMockTrack({ url: EXAMPLE_TRACK_URL });
-		const track2 = createMockTrack({ url: EXAMPLE_TRACK_URL }); // same URL
+		const track1 = createMockTrack({ url: MOCK_TRACK_URL });
+		const track2 = createMockTrack({ url: MOCK_TRACK_URL }); // same URL
 		const interaction = createMockInteraction('bridged');
 		const mockQueue = createMockQueue(track1, [track2]);
 
@@ -260,14 +247,14 @@ describe('`bridged` algorithm', () => {
 
 	it('should handle when bridge URL is not a valid URL', async () => {
 		const track1 = createMockTrack({
-			url: EXAMPLE_TRACK_URL,
+			url: MOCK_TRACK_URL,
 			metadata: {
 				bridge: {
 					url: 'invalid-url',
 				},
 			},
 		});
-		const track2 = createMockTrack({ url: EXAMPLE_TRACK_URL }); // same fallback URL
+		const track2 = createMockTrack({ url: MOCK_TRACK_URL }); // same fallback URL
 		const interaction = createMockInteraction('bridged');
 		const mockQueue = createMockQueue(track1, [track2]);
 

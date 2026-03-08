@@ -1,6 +1,7 @@
 import type { Client, TextChannel } from 'discord.js';
 import type { Player, Track } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
+import type { ProcessingInteraction } from '../../types/ProcessingInteraction';
 import enqueueTracks from '../enqueueTracks';
 import logger from '../logger';
 import { QueueRecoveryService } from '../QueueRecoveryService';
@@ -281,4 +282,33 @@ it('should pass message edit handler as interaction reply and editReply', async 
 	await capturedInteraction?.editReply({ content: 'test', flags: 64 });
 
 	expect(mockMessage.edit).toHaveBeenCalledWith({ content: 'test' });
+});
+
+it('should handle string argument in message handler', async () => {
+	const tracks = createMockTracks(1);
+	const mockClient = createMockClient();
+
+	mockedRedis.get.mockResolvedValue('graceful');
+	mockedRedis.del.mockResolvedValue(1);
+	mockedQueueRecoveryService.getInstance.mockReturnValue({
+		getContents: vi.fn().mockResolvedValue({ tracks, progress: 0 }),
+	} as unknown as QueueRecoveryService);
+
+	let capturedInteraction: ProcessingInteraction | undefined;
+
+	mockedEnqueueTracks.mockImplementation(async ({ interaction }) => {
+		capturedInteraction = interaction;
+	});
+
+	await performStartupRecovery(mockClient, mockPlayer);
+
+	expect(capturedInteraction).toBeDefined();
+
+	await capturedInteraction?.reply(
+		'string message' as unknown as Parameters<
+			ProcessingInteraction['reply']
+		>[0],
+	);
+
+	expect(mockMessage.edit).toHaveBeenCalledWith('string message');
 });

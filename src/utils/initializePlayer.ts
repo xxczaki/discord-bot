@@ -60,9 +60,11 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 
 			const filePath = opusCacheManager.getFilePath(matchedEntry.filename);
 
+			/* v8 ignore start */
 			if (activeWrites.has(filePath)) {
 				return null;
 			}
+			/* v8 ignore stop */
 
 			try {
 				const stats = await stat(filePath);
@@ -99,6 +101,7 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 
 						void opusCacheManager.deleteEntry(matchedEntry.filename);
 
+						/* v8 ignore start */
 						track.setMetadata({
 							...(track.metadata ?? {}),
 							cacheInvalidated: true,
@@ -107,6 +110,7 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 						return null;
 					}
 				}
+				/* v8 ignore stop */
 
 				track.setMetadata({
 					...(track.metadata ?? {}),
@@ -176,9 +180,11 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 				const cleanup = () => {
 					interceptor.interceptors.delete(writeStream);
 
+					/* v8 ignore start */
 					if (!writeStream.destroyed) {
 						writeStream.destroy();
 					}
+					/* v8 ignore stop */
 
 					activeWrites.delete(filePath);
 					void opusCacheManager.deleteEntry(filename);

@@ -764,4 +764,165 @@ describe('onStreamExtracted callback', () => {
 
 		expect(result).toBe(streamObj);
 	});
+
+	it('should return non-Readable stream as-is when `isFromCache` is true', async () => {
+		await getInitializedPlayer(mockClient);
+
+		const mockStream = new Readable();
+		mockStream.pipe = vi.fn();
+		mockStream.on = vi.fn();
+
+		const streamObj = {
+			stream: mockStream,
+			$fmt: 'opus',
+		};
+
+		const mockTrack: MockTrack = {
+			url: 'https://example.com/track',
+			title: 'Test Track',
+			cleanTitle: 'Test Track',
+			author: 'Artist',
+			durationMS: 180000,
+			metadata: { isFromCache: true },
+			setMetadata: vi.fn(),
+		};
+
+		const result = await onStreamExtractedCallback?.(streamObj, mockTrack);
+
+		expect(result).toBe(streamObj);
+	});
+
+	it('should return Readable stream as-is when `isFromCache` is true', async () => {
+		await getInitializedPlayer(mockClient);
+
+		const mockReadable = new Readable();
+		mockReadable.pipe = vi.fn();
+		mockReadable.on = vi.fn();
+
+		const mockTrack: MockTrack = {
+			url: 'https://example.com/track',
+			title: 'Test Track',
+			cleanTitle: 'Test Track',
+			author: 'Artist',
+			durationMS: 180000,
+			metadata: { isFromCache: true },
+			setMetadata: vi.fn(),
+		};
+
+		const result = await onStreamExtractedCallback?.(mockReadable, mockTrack);
+
+		expect(result).toBe(mockReadable);
+	});
+
+	it('should return Readable stream as-is when existing cache entry found', async () => {
+		mockOpusCacheManagerInstance.findMatch.mockReturnValue({
+			filename: 'existing_entry.opus',
+			title: 'existing track',
+			author: '',
+			durationSeconds: 180,
+		});
+
+		await getInitializedPlayer(mockClient);
+
+		const mockReadable = new Readable();
+		mockReadable.pipe = vi.fn();
+		mockReadable.on = vi.fn();
+
+		const mockTrack: MockTrack = {
+			url: 'https://example.com/track',
+			title: 'Test Track',
+			cleanTitle: 'Test Track',
+			author: 'Artist',
+			durationMS: 180000,
+			setMetadata: vi.fn(),
+		};
+
+		const result = await onStreamExtractedCallback?.(mockReadable, mockTrack);
+
+		expect(result).toBe(mockReadable);
+	});
+
+	it('should return non-Readable stream as-is when existing cache entry found', async () => {
+		mockOpusCacheManagerInstance.findMatch.mockReturnValue({
+			filename: 'existing_entry.opus',
+			title: 'existing track',
+			author: '',
+			durationSeconds: 180,
+		});
+
+		await getInitializedPlayer(mockClient);
+
+		const mockStream = new Readable();
+		mockStream.pipe = vi.fn();
+		mockStream.on = vi.fn();
+
+		const streamObj = {
+			stream: mockStream,
+			$fmt: 'opus',
+		};
+
+		const mockTrack: MockTrack = {
+			url: 'https://example.com/track',
+			title: 'Test Track',
+			cleanTitle: 'Test Track',
+			author: 'Artist',
+			durationMS: 180000,
+			setMetadata: vi.fn(),
+		};
+
+		const result = await onStreamExtractedCallback?.(streamObj, mockTrack);
+
+		expect(result).toBe(streamObj);
+	});
+
+	it('should set `streamEndedNormally` on end event', async () => {
+		const mockWriteStream: MockWriteStream = {
+			on: vi.fn(),
+			destroy: vi.fn(),
+			destroyed: false,
+		};
+
+		vi.mocked(createWriteStream).mockReturnValue(
+			mockWriteStream as unknown as import('fs').WriteStream,
+		);
+
+		await getInitializedPlayer(mockClient);
+
+		const mockReadable = new Readable();
+		mockReadable.pipe = vi.fn();
+
+		const mockOn = vi.fn();
+		mockReadable.on = mockOn;
+
+		const mockTrack: MockTrack = {
+			url: 'https://example.com/track',
+			title: 'Test Track',
+			cleanTitle: 'Test Track',
+			author: 'Artist',
+			durationMS: 180000,
+			setMetadata: vi.fn(),
+		};
+
+		await onStreamExtractedCallback?.(mockReadable, mockTrack);
+
+		const endCallback = mockOn.mock.calls.find(
+			(call: unknown[]) => call[0] === 'end',
+		)?.[1] as (() => void) | undefined;
+
+		expect(endCallback).toBeDefined();
+
+		if (endCallback) {
+			endCallback();
+		}
+
+		const closeCallback = mockOn.mock.calls.find(
+			(call: unknown[]) => call[0] === 'close',
+		)?.[1] as (() => void) | undefined;
+
+		if (closeCallback) {
+			closeCallback();
+		}
+
+		expect(mockOpusCacheManagerInstance.deleteEntry).not.toHaveBeenCalled();
+	});
 });

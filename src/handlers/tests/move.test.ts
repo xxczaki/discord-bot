@@ -2,11 +2,12 @@ import type { ChatInputCommandInteraction } from 'discord.js';
 import type { Track } from 'discord-player';
 import { useQueue } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
+import {
+	createMockInteraction as createBaseMockInteraction,
+	createMockQueue as createBaseMockQueue,
+	createMockTrack,
+} from '../../utils/testing';
 import moveCommandHandler from '../move';
-
-const EXAMPLE_TRACK_TITLE = 'Never Gonna Give You Up';
-const EXAMPLE_TRACK_AUTHOR = 'Rick Astley';
-const EXAMPLE_TRACK_ID = 'track-123';
 
 vi.mock('discord-player', () => ({
 	useQueue: vi.fn(),
@@ -18,43 +19,26 @@ beforeEach(() => {
 	vi.clearAllMocks();
 });
 
-function createMockTrack(overrides: Partial<Track> = {}): Track {
-	return {
-		id: EXAMPLE_TRACK_ID,
-		title: EXAMPLE_TRACK_TITLE,
-		author: EXAMPLE_TRACK_AUTHOR,
-		url: 'https://example.com/track',
-		duration: '3:32',
-		metadata: {},
-		...overrides,
-	} as Track;
-}
-
 function createMockInteraction(
 	query: string,
 	to: number,
 ): ChatInputCommandInteraction {
-	return {
-		options: {
-			getString: vi.fn().mockReturnValue(query),
-			getInteger: vi.fn().mockReturnValue(to),
-		},
-		reply: vi.fn().mockResolvedValue({}),
-	} as unknown as ChatInputCommandInteraction;
+	return createBaseMockInteraction({
+		getString: query,
+		getInteger: to,
+	});
 }
 
 function createMockQueue(
 	tracks: (Track | undefined)[] = [],
 ): NonNullable<ReturnType<typeof useQueue>> {
-	return {
-		tracks: {
-			at: vi.fn().mockImplementation((index: number) => tracks[index]),
-		},
-		moveTrack: vi.fn(),
+	return createBaseMockQueue({
+		tracksAt: (index: number) => tracks[index],
+		moveTrack: true,
 		node: {
 			skip: vi.fn(),
 		},
-	} as unknown as NonNullable<ReturnType<typeof useQueue>>;
+	});
 }
 
 it('should reply with error when `query` is not a number', async () => {

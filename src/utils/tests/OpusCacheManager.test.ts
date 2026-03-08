@@ -183,6 +183,46 @@ describe('OpusCacheManager', () => {
 
 			expect(match).toBeNull();
 		});
+
+		it('should not match when title matches but author does not', async () => {
+			mockedReaddir.mockResolvedValue([
+				'awesome_song_artist_one_200.opus',
+			] as unknown as Awaited<ReturnType<typeof readdir>>);
+
+			await opusCacheManager.scan();
+
+			const match = opusCacheManager.findMatch(
+				'awesome song',
+				'different person',
+				200,
+			);
+
+			expect(match).toBeNull();
+		});
+	});
+
+	describe('scan with edge-case filenames', () => {
+		it('should skip files with no underscore separator (single-part name)', async () => {
+			mockedReaddir.mockResolvedValue([
+				'singleword.opus',
+				'song_artist_180.opus',
+			] as unknown as Awaited<ReturnType<typeof readdir>>);
+
+			await opusCacheManager.scan();
+
+			expect(opusCacheManager.entryCount).toBe(1);
+		});
+
+		it('should skip files where text before duration is empty', async () => {
+			mockedReaddir.mockResolvedValue([
+				'_123.opus',
+				'song_artist_180.opus',
+			] as unknown as Awaited<ReturnType<typeof readdir>>);
+
+			await opusCacheManager.scan();
+
+			expect(opusCacheManager.entryCount).toBe(1);
+		});
 	});
 
 	describe('addEntry', () => {

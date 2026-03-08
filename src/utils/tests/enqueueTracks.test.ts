@@ -258,6 +258,49 @@ it('should handle `processTracksWithQueue` errors', async () => {
 	}
 });
 
+it('should handle first track failure with multiple tracks', async () => {
+	const tracks = [
+		createMockTrack(EXAMPLE_TRACK_URL),
+		createMockTrack(EXAMPLE_TRACK_URL_2),
+		createMockTrack(EXAMPLE_TRACK_URL_3),
+	];
+	const mockError = new Error('Play failed');
+	const mockPlayer = {
+		play: vi.fn().mockRejectedValue(mockError),
+	} as Partial<Player>;
+	const mockQueue = createMockQueue([
+		createMockTrack(EXAMPLE_TRACK_URL_2),
+		createMockTrack(EXAMPLE_TRACK_URL_3),
+	]);
+	const mockInteraction = createMockInteraction();
+	const mockVoiceChannel = createMockVoiceChannel();
+
+	mockedUseMainPlayer.mockReturnValue(mockPlayer as Player);
+	mockedUseQueue.mockReturnValue(mockQueue as GuildQueue);
+	mockedProcessTracksWithQueue.mockResolvedValue({ enqueued: 2 });
+
+	await enqueueTracks({
+		tracks,
+		progress: 0,
+		voiceChannel: mockVoiceChannel,
+		interaction: mockInteraction,
+	});
+
+	expect(mockedLogger.error).toHaveBeenCalledWith(
+		mockError,
+		'Queue recovery error (first track)',
+	);
+
+	const mockEditReply = vi.mocked(mockInteraction.editReply);
+	const lastEditCall =
+		mockEditReply.mock.calls[mockEditReply.mock.calls.length - 1];
+	const embed = lastEditCall?.[0]?.embeds?.[0] as EmbedBuilder;
+	expect(embed.data.title).toBe('⚠️ Partial Recovery');
+	expect(embed.data.description).toBe(
+		'Successfully recovered 2 tracks.\n\n1 tracks could not be loaded (may be unavailable, region-locked, or removed).',
+	);
+});
+
 it('should handle queue not existing after processing multiple tracks', async () => {
 	const tracks = [
 		createMockTrack(EXAMPLE_TRACK_URL),

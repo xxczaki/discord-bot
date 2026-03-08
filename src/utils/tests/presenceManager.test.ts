@@ -123,6 +123,23 @@ it('should set lockdown presence when no options provided but lockdown enabled',
 	});
 });
 
+it('should use default name when options provided without name', () => {
+	setPresence(mockClient, {
+		type: ActivityType.Listening,
+	});
+
+	expect(mockSetPresence).toHaveBeenCalledWith({
+		activities: [
+			{
+				name: 'Idle, use /help to get started',
+				type: ActivityType.Listening,
+				url: undefined,
+			},
+		],
+		status: 'online',
+	});
+});
+
 it('should handle client without user gracefully', () => {
 	const clientWithoutUser = { user: null } as Client<boolean>;
 

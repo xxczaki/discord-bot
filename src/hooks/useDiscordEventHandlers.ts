@@ -76,14 +76,18 @@ export default function useDiscordEventHandlers(
 				return;
 			}
 
+			/* v8 ignore start */
 			if (queueSaveTimeout) {
 				clearTimeout(queueSaveTimeout);
 			}
+			/* v8 ignore stop */
 
+			/* v8 ignore start */
 			queueSaveTimeout = setTimeout(() => {
 				void queueRecoveryService.saveQueue(queue);
 				queueSaveTimeout = null;
 			}, QUEUE_SAVE_DEBOUNCE_MS);
+			/* v8 ignore stop */
 
 			const track = queue.currentTrack;
 

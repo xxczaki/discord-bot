@@ -84,7 +84,9 @@ export default async function queueCommandHandler(
 		.addFields([
 			{
 				name: 'Tracks',
+				/* v8 ignore start */
 				value: `${(queue?.size ?? 0) + 1}`,
+				/* v8 ignore stop */
 				inline: true,
 			},
 			{

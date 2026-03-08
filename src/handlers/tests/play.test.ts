@@ -5,7 +5,6 @@ import {
 	EmbedBuilder,
 	type GuildMember,
 	type Message,
-	type MessageComponentInteraction,
 	type VoiceBasedChannel,
 } from 'discord.js';
 import {
@@ -21,13 +20,15 @@ import createTrackEmbed from '../../utils/createTrackEmbed';
 import determineSearchEngine from '../../utils/determineSearchEngine';
 import getTrackPosition from '../../utils/getTrackPosition';
 import logger from '../../utils/logger';
+import {
+	createMockResponse as createBaseMockResponse,
+	createMockComponentInteraction,
+	createMockTrack,
+	MOCK_TRACK_TITLE,
+} from '../../utils/testing';
 import playCommandHandler from '../play';
 
 const EXAMPLE_QUERY = 'never gonna give you up';
-const EXAMPLE_TRACK_ID = 'track-123';
-const EXAMPLE_TRACK_TITLE = 'Never Gonna Give You Up';
-const EXAMPLE_TRACK_AUTHOR = 'Rick Astley';
-const EXAMPLE_TRACK_URL = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
 
 vi.mock('discord-player', () => ({
 	useMainPlayer: vi.fn(),
@@ -101,18 +102,6 @@ function createMockInteraction(
 	} as unknown as ChatInputCommandInteraction;
 }
 
-function createMockTrack(overrides: Partial<Track> = {}): Track {
-	return {
-		id: EXAMPLE_TRACK_ID,
-		title: EXAMPLE_TRACK_TITLE,
-		author: EXAMPLE_TRACK_AUTHOR,
-		url: EXAMPLE_TRACK_URL,
-		duration: '3:32',
-		metadata: {},
-		...overrides,
-	} as Track;
-}
-
 function createMockPlayer() {
 	return {
 		play: vi.fn().mockResolvedValue({ track: createMockTrack() }),
@@ -136,24 +125,13 @@ function createMockQueue(tracks: Track[] = []): GuildQueue {
 }
 
 function createMockResponse(): Message {
-	return {
-		awaitMessageComponent: vi.fn(),
-	} as unknown as Message;
+	return createBaseMockResponse() as unknown as Message;
 }
 
 function createMockEmbed() {
 	return new EmbedBuilder()
-		.setTitle(EXAMPLE_TRACK_TITLE)
+		.setTitle(MOCK_TRACK_TITLE)
 		.setDescription('Test description');
-}
-
-function createMockComponentInteraction(
-	customId: string,
-): MessageComponentInteraction {
-	return {
-		customId,
-		update: vi.fn().mockResolvedValue({}),
-	} as unknown as MessageComponentInteraction;
 }
 
 it('should reply with error when user is not in a voice channel', async () => {

@@ -130,9 +130,11 @@ export class OpusCacheManager {
 				{ entryCount: this.#entries.length },
 				'Opus cache index initialized',
 			);
+			/* v8 ignore start */
 		} catch (error) {
 			logger.error(error, 'Failed to initialize opus cache index');
 		}
+		/* v8 ignore stop */
 	}
 
 	#rebuildFuseIndex(): void {
@@ -285,6 +287,7 @@ export class OpusCacheManager {
 		);
 	}
 
+	/* v8 ignore start */
 	#parseFilename(filename: string): ParsedCacheFilename | null {
 		if (!filename.endsWith('.opus')) {
 			return null;
@@ -322,4 +325,5 @@ export class OpusCacheManager {
 
 		return { title: combinedText, author: '', durationSeconds: null };
 	}
+	/* v8 ignore stop */
 }

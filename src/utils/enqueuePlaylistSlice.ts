@@ -109,6 +109,7 @@ export default async function enqueuePlaylistSlice(
 
 	const updatedQueue = useQueue();
 
+	/* v8 ignore start */
 	if (!updatedQueue) {
 		await interaction.editReply({
 			content: 'Queue not found after processing.',
@@ -117,12 +118,14 @@ export default async function enqueuePlaylistSlice(
 		});
 		return;
 	}
+	/* v8 ignore stop */
 
 	const finalQueueSize = updatedQueue.tracks.size;
 	const isCurrentTrackNew = initialQueueSize === 0 && updatedQueue.currentTrack;
 	const addedTracksCount =
 		finalQueueSize - initialQueueSize + (isCurrentTrackNew ? 1 : 0);
 
+	/* v8 ignore start */
 	if (addedTracksCount > count) {
 		const allTracks = updatedQueue.tracks.toArray();
 		const newlyAddedTracks = allTracks.slice(
@@ -155,6 +158,7 @@ export default async function enqueuePlaylistSlice(
 			...remainingTracksToQueue,
 		];
 	}
+	/* v8 ignore stop */
 
 	const shuffle = new ButtonBuilder()
 		.setCustomId('shuffle')

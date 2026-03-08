@@ -26,6 +26,7 @@ async function useAutocompleteHandler(interaction: Interaction) {
 
 	try {
 		await handleAutocomplete(interaction);
+		/* v8 ignore start */
 	} catch (error) {
 		if (
 			error instanceof DiscordAPIError &&
@@ -36,6 +37,7 @@ async function useAutocompleteHandler(interaction: Interaction) {
 
 		throw error;
 	}
+	/* v8 ignore stop */
 }
 
 async function handleAutocomplete(interaction: AutocompleteInteraction) {

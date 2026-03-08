@@ -421,6 +421,131 @@ it('should handle previous page navigation correctly', async () => {
 	});
 });
 
+it('should show paused indicator during pagination', async () => {
+	const interaction = createMockInteraction();
+
+	const largeTracks = Array.from({ length: 30 }, (_, i) =>
+		createMockTrack({
+			title: `Very Long Track Title That Will Cause Pagination To Trigger Number ${i}`,
+			author: 'Very Long Artist Name That Makes Entry Even Longer',
+			duration: '4:30',
+		}),
+	);
+	const mockQueue = createMockQueue({
+		repeatMode: QueueRepeatMode.TRACK,
+	});
+	const mockResponse = createMockResponse();
+	const mockComponent = createMockComponentInteraction('0');
+
+	mockQueue.node.isPaused = vi.fn().mockReturnValue(true);
+	mockQueue.tracks.toArray = vi.fn().mockReturnValue(largeTracks);
+
+	mockedGetTrackPosition.mockImplementation((_, track) => {
+		return largeTracks.indexOf(track) + 1;
+	});
+
+	mockedUseQueue.mockReturnValue(mockQueue);
+	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
+	mockResponse.awaitMessageComponent = vi.fn().mockResolvedValue(mockComponent);
+
+	const secondMockResponse = createMockResponse();
+	secondMockResponse.awaitMessageComponent = vi
+		.fn()
+		.mockRejectedValue(new Error('timeout'));
+	mockComponent.update = vi.fn().mockResolvedValue(secondMockResponse);
+
+	await queueCommandHandler(interaction);
+
+	expect(mockComponent.update).toHaveBeenCalledWith({
+		embeds: [expect.any(EmbedBuilder)],
+		components: [expect.any(ActionRowBuilder)],
+	});
+});
+
+it('should show repeat enabled footer during pagination when queue repeat mode is active', async () => {
+	const interaction = createMockInteraction();
+
+	const largeTracks = Array.from({ length: 30 }, (_, i) =>
+		createMockTrack({
+			title: `Very Long Track Title That Will Cause Pagination To Trigger Number ${i}`,
+			author: 'Very Long Artist Name That Makes Entry Even Longer',
+			duration: '4:30',
+		}),
+	);
+	const mockQueue = createMockQueue({
+		repeatMode: QueueRepeatMode.QUEUE,
+	});
+	const mockResponse = createMockResponse();
+	const mockComponent = createMockComponentInteraction('1');
+
+	mockQueue.tracks.toArray = vi.fn().mockReturnValue(largeTracks);
+
+	mockedGetTrackPosition.mockImplementation((_, track) => {
+		return largeTracks.indexOf(track) + 1;
+	});
+
+	mockedUseQueue.mockReturnValue(mockQueue);
+	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
+	mockResponse.awaitMessageComponent = vi.fn().mockResolvedValue(mockComponent);
+
+	const secondMockResponse = createMockResponse();
+	secondMockResponse.awaitMessageComponent = vi
+		.fn()
+		.mockRejectedValue(new Error('timeout'));
+	mockComponent.update = vi.fn().mockResolvedValue(secondMockResponse);
+
+	await queueCommandHandler(interaction);
+
+	expect(mockComponent.update).toHaveBeenCalledWith({
+		embeds: [expect.any(EmbedBuilder)],
+		components: [expect.any(ActionRowBuilder)],
+	});
+});
+
+it('should show cached indicator during pagination', async () => {
+	const interaction = createMockInteraction();
+
+	const largeTracks = Array.from({ length: 30 }, (_, i) =>
+		createMockTrack({
+			title: `Very Long Track Title That Will Cause Pagination To Trigger Number ${i}`,
+			author: 'Very Long Artist Name That Makes Entry Even Longer',
+			duration: '4:30',
+		}),
+	);
+	const currentTrack = createMockTrack({
+		metadata: { isFromCache: true },
+	});
+	const mockQueue = createMockQueue({
+		currentTrack,
+		repeatMode: QueueRepeatMode.QUEUE,
+	});
+	const mockResponse = createMockResponse();
+	const mockComponent = createMockComponentInteraction('0');
+
+	mockQueue.tracks.toArray = vi.fn().mockReturnValue(largeTracks);
+
+	mockedGetTrackPosition.mockImplementation((_, track) => {
+		return largeTracks.indexOf(track) + 1;
+	});
+
+	mockedUseQueue.mockReturnValue(mockQueue);
+	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
+	mockResponse.awaitMessageComponent = vi.fn().mockResolvedValue(mockComponent);
+
+	const secondMockResponse = createMockResponse();
+	secondMockResponse.awaitMessageComponent = vi
+		.fn()
+		.mockRejectedValue(new Error('timeout'));
+	mockComponent.update = vi.fn().mockResolvedValue(secondMockResponse);
+
+	await queueCommandHandler(interaction);
+
+	expect(mockComponent.update).toHaveBeenCalledWith({
+		embeds: [expect.any(EmbedBuilder)],
+		components: [expect.any(ActionRowBuilder)],
+	});
+});
+
 it('should show empty footer text when no tracks are queued beyond current track', async () => {
 	const interaction = createMockInteraction();
 	const currentTrack = createMockTrack();

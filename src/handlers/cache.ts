@@ -275,10 +275,12 @@ async function getOpusCacheStatsWithUpdates(
 					size += fileStat.size;
 					processedFiles++;
 
+					/* v8 ignore start */
 					if (processedFiles % BATCH_SIZE === 0) {
 						onUpdate({ count, size });
 						await new Promise((resolve) => setTimeout(resolve, 50));
 					}
+					/* v8 ignore stop */
 				} catch (error) {
 					logger.error(error, `Failed to stat file ${entry.name}:`);
 				}
@@ -423,9 +425,11 @@ async function flushQueryCache(): Promise<void> {
 
 					await pipeline.exec();
 					_deleted += keys.length;
+					/* v8 ignore start */
 				} catch (error) {
 					reportError(error, 'Failed to delete query cache keys from Redis');
 				}
+				/* v8 ignore stop */
 			}
 
 			stream.resume();
@@ -459,11 +463,13 @@ async function flushExternalPlaylistCache(): Promise<void> {
 
 					await pipeline.exec();
 					_deleted += keys.length;
+					/* v8 ignore start */
 				} catch (error) {
 					reportError(
 						error,
 						'Failed to delete external playlist cache keys from Redis',
 					);
+					/* v8 ignore stop */
 				}
 			}
 

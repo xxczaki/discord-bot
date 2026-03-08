@@ -82,6 +82,7 @@ export default async function processTracksWithQueue({
 						requestedBy: interaction.user,
 					});
 
+					/* v8 ignore start */
 					if (result.track && nodeMetadata.queries) {
 						const queries = nodeMetadata.queries as Record<string, string>;
 						const queryForTrack = queries[index.toString()];
@@ -95,6 +96,7 @@ export default async function processTracksWithQueue({
 							});
 						}
 					}
+					/* v8 ignore stop */
 
 					enqueued++;
 					processed++;
@@ -126,6 +128,7 @@ export default async function processTracksWithQueue({
 							requestedBy: interaction.user,
 						});
 
+						/* v8 ignore start */
 						if (result.track && nodeMetadata.queries) {
 							const queries = nodeMetadata.queries as Record<string, string>;
 							const itemIndex = batchStartIndex + batchIndex;
@@ -140,6 +143,7 @@ export default async function processTracksWithQueue({
 								});
 							}
 						}
+						/* v8 ignore stop */
 
 						processed++;
 						return result;

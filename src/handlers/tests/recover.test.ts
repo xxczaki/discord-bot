@@ -213,6 +213,33 @@ it('should show recovery prompt when tracks are found', async () => {
 	});
 });
 
+it('should show `savedAt` field when present', async () => {
+	const interaction = createMockInteraction();
+	const mockPlayer = createMockPlayer();
+	const tracks = [createMockTrack()];
+	const mockResponse = createMockResponse();
+
+	vi.mocked(mockResponse.awaitMessageComponent).mockRejectedValue(
+		new Error('timeout'),
+	);
+	vi.mocked(interaction.editReply).mockResolvedValue(mockResponse);
+
+	mockedUseQueue.mockReturnValue(null);
+	mockedUseMainPlayer.mockReturnValue(mockPlayer);
+	mockedQueueRecoveryService.getContents.mockResolvedValue({
+		tracks,
+		progress: EXAMPLE_PROGRESS,
+		savedAt: Date.now(),
+	});
+
+	await recoverCommandHandler(interaction);
+
+	const editReplyCall = vi
+		.mocked(interaction.editReply)
+		.mock.calls.find((call) => isObject(call[0]) && 'embeds' in call[0]);
+	expect(editReplyCall).toBeDefined();
+});
+
 it('should proceed with recovery when `proceed` button is clicked', async () => {
 	const interaction = createMockInteraction();
 	const mockPlayer = createMockPlayer();

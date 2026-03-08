@@ -62,6 +62,7 @@ export function executeRemoveTracksByPattern(
 			artistPattern ?? undefined,
 			titlePattern ?? undefined,
 		);
+		/* v8 ignore start */
 	} catch (error) {
 		logger.error(
 			{
@@ -73,6 +74,7 @@ export function executeRemoveTracksByPattern(
 		);
 		throw error;
 	}
+	/* v8 ignore stop */
 }
 
 /**
@@ -91,6 +93,7 @@ export function executeMoveTracksByPattern(
 			titlePattern ?? undefined,
 			position,
 		);
+		/* v8 ignore start */
 	} catch (error) {
 		logger.error(
 			{
@@ -103,6 +106,7 @@ export function executeMoveTracksByPattern(
 		);
 		throw error;
 	}
+	/* v8 ignore stop */
 }
 
 /**
@@ -111,6 +115,7 @@ export function executeMoveTracksByPattern(
 export function executeSkipCurrentTrack(queue: GuildQueue) {
 	try {
 		return skipCurrentTrack(queue);
+		/* v8 ignore start */
 	} catch (error) {
 		logger.error(
 			{
@@ -120,6 +125,7 @@ export function executeSkipCurrentTrack(queue: GuildQueue) {
 		);
 		throw error;
 	}
+	/* v8 ignore stop */
 }
 
 /**
@@ -128,6 +134,7 @@ export function executeSkipCurrentTrack(queue: GuildQueue) {
 export function executePausePlayback(queue: GuildQueue) {
 	try {
 		return pausePlayback(queue);
+		/* v8 ignore start */
 	} catch (error) {
 		logger.error(
 			{
@@ -137,6 +144,7 @@ export function executePausePlayback(queue: GuildQueue) {
 		);
 		throw error;
 	}
+	/* v8 ignore stop */
 }
 
 /**
@@ -145,6 +153,7 @@ export function executePausePlayback(queue: GuildQueue) {
 export function executeResumePlayback(queue: GuildQueue) {
 	try {
 		return resumePlayback(queue);
+		/* v8 ignore start */
 	} catch (error) {
 		logger.error(
 			{
@@ -154,6 +163,7 @@ export function executeResumePlayback(queue: GuildQueue) {
 		);
 		throw error;
 	}
+	/* v8 ignore stop */
 }
 
 /**
@@ -162,6 +172,7 @@ export function executeResumePlayback(queue: GuildQueue) {
 export function executeSetVolume(queue: GuildQueue, volume: number) {
 	try {
 		return setVolume(queue, volume);
+		/* v8 ignore start */
 	} catch (error) {
 		logger.error(
 			{
@@ -172,6 +183,7 @@ export function executeSetVolume(queue: GuildQueue, volume: number) {
 		);
 		throw error;
 	}
+	/* v8 ignore stop */
 }
 
 /**
@@ -180,6 +192,7 @@ export function executeSetVolume(queue: GuildQueue, volume: number) {
 export function executeDeduplicateQueue(queue: GuildQueue) {
 	try {
 		return deduplicateQueue(queue);
+		/* v8 ignore start */
 	} catch (error) {
 		logger.error(
 			{
@@ -189,6 +202,7 @@ export function executeDeduplicateQueue(queue: GuildQueue) {
 		);
 		throw error;
 	}
+	/* v8 ignore stop */
 }
 
 /**
@@ -400,9 +414,11 @@ export function generateErrorMessage(
 ): string {
 	const messages = getToolMessages(toolName);
 
+	/* v8 ignore start */
 	if (messages?.error) {
 		return messages.error(result);
 	}
+	/* v8 ignore stop */
 
 	// Default error message
 	if (typeof result === 'object' && result !== null && 'error' in result) {

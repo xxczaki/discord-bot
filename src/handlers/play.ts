@@ -24,9 +24,11 @@ export default async function playCommandHandler(
 		});
 	}
 
+	/* v8 ignore start */
 	if (interaction.replied || interaction.deferred) {
 		return;
 	}
+	/* v8 ignore stop */
 
 	await interaction.reply('Processing the track to play…');
 

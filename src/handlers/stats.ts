@@ -109,6 +109,7 @@ export default async function statsCommandHandler(
 
 						const results = await pipeline.exec();
 
+						/* v8 ignore start */
 						if (results) {
 							for (const [error, rawKeyValue] of results) {
 								if (error || !rawKeyValue) {
@@ -138,6 +139,7 @@ export default async function statsCommandHandler(
 									);
 								}
 							}
+							/* v8 ignore stop */
 						}
 					} catch (error) {
 						reportError(

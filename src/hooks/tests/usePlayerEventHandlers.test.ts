@@ -1,3 +1,4 @@
+import { stat } from 'node:fs/promises';
 import {
 	ActivityType,
 	ButtonStyle,
@@ -16,6 +17,14 @@ import { resetPresence, setPresence } from '../../utils/presenceManager';
 import { QueueRecoveryService } from '../../utils/QueueRecoveryService';
 import { StatsHandler } from '../../utils/StatsHandler';
 import usePlayerEventHandlers from '../usePlayerEventHandlers';
+
+vi.mock('node:fs/promises', () => ({
+	stat: vi.fn(),
+}));
+
+vi.mock('pretty-bytes', () => ({
+	default: vi.fn().mockReturnValue('1.5 MB'),
+}));
 
 const MOCK_TRACK_TITLE = 'Test Song';
 const MOCK_TRACK_AUTHOR = 'Test Artist';
@@ -47,6 +56,9 @@ vi.mock('../../utils/OpusCacheManager', () => ({
 	OpusCacheManager: {
 		getInstance: vi.fn().mockReturnValue({
 			generateFilename: vi.fn().mockReturnValue('mock_filename.opus'),
+			getFilePath: vi
+				.fn()
+				.mockReturnValue('/mock/cache/path/mock_filename.opus'),
 			deleteEntry: vi.fn().mockResolvedValue(undefined),
 		}),
 	},
@@ -537,4 +549,365 @@ it('should handle unknown button interaction by falling through to catch block',
 		author: MOCK_TRACK_AUTHOR,
 		requestedById: MOCK_USER_ID,
 	});
+});
+
+it('should register `playerFinish` event handler', () => {
+	const mockClient = createMockClient();
+	const mockPlayer = createMockPlayer();
+
+	usePlayerEventHandlers(mockClient, mockPlayer);
+
+	expect(mockPlayer.events.on).toHaveBeenCalledWith(
+		'playerFinish',
+		expect.any(Function),
+	);
+});
+
+it('should return early from `playerFinish` when guild ID is missing', async () => {
+	const mockClient = createMockClient();
+	const mockPlayer = createMockPlayer();
+	const mockQueue = createMockQueue();
+	const mockTrack = createMockTrack();
+
+	(mockQueue as unknown as Record<string, unknown>).guild = {};
+
+	usePlayerEventHandlers(mockClient, mockPlayer);
+
+	const playerFinishHandler = (
+		mockPlayer.events.on as ReturnType<typeof vi.fn>
+	).mock.calls.find((call) => call[0] === 'playerFinish')?.[1];
+
+	await playerFinishHandler(mockQueue, mockTrack);
+
+	expect(mockedCreateTrackEmbed).not.toHaveBeenCalledWith(
+		mockTrack,
+		'✅ Finished playing.',
+	);
+});
+
+it('should return early from `playerFinish` when no matching entry exists', async () => {
+	const mockClient = createMockClient();
+	const mockPlayer = createMockPlayer();
+	const mockQueue = createMockQueue();
+	const mockTrack = createMockTrack({ id: 'track-999' });
+
+	usePlayerEventHandlers(mockClient, mockPlayer);
+
+	const playerFinishHandler = (
+		mockPlayer.events.on as ReturnType<typeof vi.fn>
+	).mock.calls.find((call) => call[0] === 'playerFinish')?.[1];
+
+	await playerFinishHandler(mockQueue, mockTrack);
+
+	expect(mockedCreateTrackEmbed).not.toHaveBeenCalledWith(
+		mockTrack,
+		'✅ Finished playing.',
+	);
+});
+
+it('should handle `playerFinish` for a non-cached track with cache file', async () => {
+	vi.useFakeTimers();
+	const mockClient = createMockClient();
+	const mockPlayer = createMockPlayer();
+	const mockQueue = createMockQueue();
+	const mockTrack = createMockTrack({ id: 'finish-track-1' });
+	const mockChannel = createMockChannel();
+	const mockResponse = {
+		awaitMessageComponent: vi.fn(),
+		edit: vi.fn().mockResolvedValue(undefined),
+	};
+
+	(mockQueue.metadata.interaction.channel as TextChannel) = mockChannel;
+	(mockChannel.send as ReturnType<typeof vi.fn>).mockResolvedValue(
+		mockResponse,
+	);
+	mockResponse.awaitMessageComponent.mockRejectedValue(new Error('timeout'));
+
+	const mockFinishedEmbed = {
+		title: 'Finished Embed',
+		setFooter: vi.fn(),
+	};
+	mockedCreateTrackEmbed
+		.mockResolvedValueOnce({ title: 'Mock Embed' } as never)
+		.mockResolvedValueOnce(mockFinishedEmbed as never);
+
+	vi.mocked(stat).mockResolvedValue({ size: 1500000 } as never);
+
+	usePlayerEventHandlers(mockClient, mockPlayer);
+
+	const playerStartHandler = (
+		mockPlayer.events.on as ReturnType<typeof vi.fn>
+	).mock.calls.find((call) => call[0] === 'playerStart')?.[1];
+	const playerFinishHandler = (
+		mockPlayer.events.on as ReturnType<typeof vi.fn>
+	).mock.calls.find((call) => call[0] === 'playerFinish')?.[1];
+
+	await playerStartHandler(mockQueue, mockTrack);
+
+	const finishPromise = playerFinishHandler(mockQueue, mockTrack);
+	await vi.advanceTimersByTimeAsync(1000);
+	await finishPromise;
+
+	expect(mockFinishedEmbed.setFooter).toHaveBeenCalledWith({
+		text: expect.stringContaining('💾 Saved to the offline cache'),
+	});
+	expect(mockResponse.edit).toHaveBeenCalledWith({
+		embeds: [mockFinishedEmbed],
+		components: [],
+	});
+
+	vi.useRealTimers();
+});
+
+it('should handle `playerFinish` for a cached track (`isFromCache`)', async () => {
+	vi.useFakeTimers();
+	const mockClient = createMockClient();
+	const mockPlayer = createMockPlayer();
+	const mockQueue = createMockQueue();
+	const mockTrack = createMockTrack({
+		id: 'finish-track-2',
+		metadata: { isFromCache: true, cacheFilename: 'cached_file.opus' },
+	});
+	const mockChannel = createMockChannel();
+	const mockResponse = {
+		awaitMessageComponent: vi.fn(),
+		edit: vi.fn().mockResolvedValue(undefined),
+	};
+
+	(mockQueue.metadata.interaction.channel as TextChannel) = mockChannel;
+	(mockChannel.send as ReturnType<typeof vi.fn>).mockResolvedValue(
+		mockResponse,
+	);
+	mockResponse.awaitMessageComponent.mockRejectedValue(new Error('timeout'));
+
+	const mockFinishedEmbed = {
+		title: 'Finished Embed',
+		setFooter: vi.fn(),
+	};
+	mockedCreateTrackEmbed
+		.mockResolvedValueOnce({ title: 'Mock Embed' } as never)
+		.mockResolvedValueOnce(mockFinishedEmbed as never);
+
+	vi.mocked(stat).mockResolvedValue({ size: 2000000 } as never);
+
+	usePlayerEventHandlers(mockClient, mockPlayer);
+
+	const playerStartHandler = (
+		mockPlayer.events.on as ReturnType<typeof vi.fn>
+	).mock.calls.find((call) => call[0] === 'playerStart')?.[1];
+	const playerFinishHandler = (
+		mockPlayer.events.on as ReturnType<typeof vi.fn>
+	).mock.calls.find((call) => call[0] === 'playerFinish')?.[1];
+
+	await playerStartHandler(mockQueue, mockTrack);
+
+	const finishPromise = playerFinishHandler(mockQueue, mockTrack);
+	await vi.advanceTimersByTimeAsync(1000);
+	await finishPromise;
+
+	expect(mockFinishedEmbed.setFooter).toHaveBeenCalledWith({
+		text: expect.stringContaining('♻️ Was streamed from the offline cache'),
+	});
+
+	vi.useRealTimers();
+});
+
+it('should handle `playerFinish` when stat fails (empty catch)', async () => {
+	vi.useFakeTimers();
+	const mockClient = createMockClient();
+	const mockPlayer = createMockPlayer();
+	const mockQueue = createMockQueue();
+	const mockTrack = createMockTrack({ id: 'finish-track-3' });
+	const mockChannel = createMockChannel();
+	const mockResponse = {
+		awaitMessageComponent: vi.fn(),
+		edit: vi.fn().mockResolvedValue(undefined),
+	};
+
+	(mockQueue.metadata.interaction.channel as TextChannel) = mockChannel;
+	(mockChannel.send as ReturnType<typeof vi.fn>).mockResolvedValue(
+		mockResponse,
+	);
+	mockResponse.awaitMessageComponent.mockRejectedValue(new Error('timeout'));
+
+	const mockFinishedEmbed = {
+		title: 'Finished Embed',
+		setFooter: vi.fn(),
+	};
+	mockedCreateTrackEmbed
+		.mockResolvedValueOnce({ title: 'Mock Embed' } as never)
+		.mockResolvedValueOnce(mockFinishedEmbed as never);
+
+	vi.mocked(stat).mockRejectedValue(new Error('ENOENT'));
+
+	usePlayerEventHandlers(mockClient, mockPlayer);
+
+	const playerStartHandler = (
+		mockPlayer.events.on as ReturnType<typeof vi.fn>
+	).mock.calls.find((call) => call[0] === 'playerStart')?.[1];
+	const playerFinishHandler = (
+		mockPlayer.events.on as ReturnType<typeof vi.fn>
+	).mock.calls.find((call) => call[0] === 'playerFinish')?.[1];
+
+	await playerStartHandler(mockQueue, mockTrack);
+
+	const finishPromise = playerFinishHandler(mockQueue, mockTrack);
+	await vi.advanceTimersByTimeAsync(1000);
+	await finishPromise;
+
+	expect(mockFinishedEmbed.setFooter).not.toHaveBeenCalled();
+	expect(mockResponse.edit).toHaveBeenCalledWith({
+		embeds: [mockFinishedEmbed],
+		components: [],
+	});
+
+	vi.useRealTimers();
+});
+
+it('should handle `playerFinish` when response.edit fails (empty catch)', async () => {
+	vi.useFakeTimers();
+	const mockClient = createMockClient();
+	const mockPlayer = createMockPlayer();
+	const mockQueue = createMockQueue();
+	const mockTrack = createMockTrack({ id: 'finish-track-4' });
+	const mockChannel = createMockChannel();
+	const mockResponse = {
+		awaitMessageComponent: vi.fn(),
+		edit: vi.fn().mockRejectedValue(new Error('Unknown message')),
+	};
+
+	(mockQueue.metadata.interaction.channel as TextChannel) = mockChannel;
+	(mockChannel.send as ReturnType<typeof vi.fn>).mockResolvedValue(
+		mockResponse,
+	);
+	mockResponse.awaitMessageComponent.mockRejectedValue(new Error('timeout'));
+
+	mockedCreateTrackEmbed
+		.mockResolvedValueOnce({ title: 'Mock Embed' } as never)
+		.mockResolvedValueOnce({ title: 'Finished', setFooter: vi.fn() } as never);
+
+	vi.mocked(stat).mockRejectedValue(new Error('ENOENT'));
+
+	usePlayerEventHandlers(mockClient, mockPlayer);
+
+	const playerStartHandler = (
+		mockPlayer.events.on as ReturnType<typeof vi.fn>
+	).mock.calls.find((call) => call[0] === 'playerStart')?.[1];
+	const playerFinishHandler = (
+		mockPlayer.events.on as ReturnType<typeof vi.fn>
+	).mock.calls.find((call) => call[0] === 'playerFinish')?.[1];
+
+	await playerStartHandler(mockQueue, mockTrack);
+
+	const finishPromise = playerFinishHandler(mockQueue, mockTrack);
+	await vi.advanceTimersByTimeAsync(1000);
+	await finishPromise;
+
+	expect(mockResponse.edit).toHaveBeenCalled();
+
+	vi.useRealTimers();
+});
+
+it('should handle `playerFinish` for cached track without `cacheFilename`', async () => {
+	vi.useFakeTimers();
+	const mockClient = createMockClient();
+	const mockPlayer = createMockPlayer();
+	const mockQueue = createMockQueue();
+	const mockTrack = createMockTrack({
+		id: 'finish-track-5',
+		metadata: { isFromCache: true },
+	});
+	const mockChannel = createMockChannel();
+	const mockResponse = {
+		awaitMessageComponent: vi.fn(),
+		edit: vi.fn().mockResolvedValue(undefined),
+	};
+
+	(mockQueue.metadata.interaction.channel as TextChannel) = mockChannel;
+	(mockChannel.send as ReturnType<typeof vi.fn>).mockResolvedValue(
+		mockResponse,
+	);
+	mockResponse.awaitMessageComponent.mockRejectedValue(new Error('timeout'));
+
+	const mockFinishedEmbed = {
+		title: 'Finished Embed',
+		setFooter: vi.fn(),
+	};
+	mockedCreateTrackEmbed
+		.mockResolvedValueOnce({ title: 'Mock Embed' } as never)
+		.mockResolvedValueOnce(mockFinishedEmbed as never);
+
+	vi.mocked(stat).mockResolvedValue({ size: 500000 } as never);
+
+	usePlayerEventHandlers(mockClient, mockPlayer);
+
+	const playerStartHandler = (
+		mockPlayer.events.on as ReturnType<typeof vi.fn>
+	).mock.calls.find((call) => call[0] === 'playerStart')?.[1];
+	const playerFinishHandler = (
+		mockPlayer.events.on as ReturnType<typeof vi.fn>
+	).mock.calls.find((call) => call[0] === 'playerFinish')?.[1];
+
+	await playerStartHandler(mockQueue, mockTrack);
+
+	const finishPromise = playerFinishHandler(mockQueue, mockTrack);
+	await vi.advanceTimersByTimeAsync(1000);
+	await finishPromise;
+
+	expect(
+		mockedOpusCacheManager.getInstance().generateFilename,
+	).toHaveBeenCalled();
+	expect(mockFinishedEmbed.setFooter).toHaveBeenCalledWith({
+		text: expect.stringContaining('♻️ Was streamed from the offline cache'),
+	});
+
+	vi.useRealTimers();
+});
+
+it('should not set footer for non-cached track when cache file has zero size', async () => {
+	vi.useFakeTimers();
+	const mockClient = createMockClient();
+	const mockPlayer = createMockPlayer();
+	const mockQueue = createMockQueue();
+	const mockTrack = createMockTrack({ id: 'finish-track-6' });
+	const mockChannel = createMockChannel();
+	const mockResponse = {
+		awaitMessageComponent: vi.fn(),
+		edit: vi.fn().mockResolvedValue(undefined),
+	};
+
+	(mockQueue.metadata.interaction.channel as TextChannel) = mockChannel;
+	(mockChannel.send as ReturnType<typeof vi.fn>).mockResolvedValue(
+		mockResponse,
+	);
+	mockResponse.awaitMessageComponent.mockRejectedValue(new Error('timeout'));
+
+	const mockFinishedEmbed = {
+		title: 'Finished Embed',
+		setFooter: vi.fn(),
+	};
+	mockedCreateTrackEmbed
+		.mockResolvedValueOnce({ title: 'Mock Embed' } as never)
+		.mockResolvedValueOnce(mockFinishedEmbed as never);
+
+	vi.mocked(stat).mockResolvedValue({ size: 0 } as never);
+
+	usePlayerEventHandlers(mockClient, mockPlayer);
+
+	const playerStartHandler = (
+		mockPlayer.events.on as ReturnType<typeof vi.fn>
+	).mock.calls.find((call) => call[0] === 'playerStart')?.[1];
+	const playerFinishHandler = (
+		mockPlayer.events.on as ReturnType<typeof vi.fn>
+	).mock.calls.find((call) => call[0] === 'playerFinish')?.[1];
+
+	await playerStartHandler(mockQueue, mockTrack);
+
+	const finishPromise = playerFinishHandler(mockQueue, mockTrack);
+	await vi.advanceTimersByTimeAsync(1000);
+	await finishPromise;
+
+	expect(mockFinishedEmbed.setFooter).not.toHaveBeenCalled();
+
+	vi.useRealTimers();
 });

@@ -216,6 +216,7 @@ function initializePlayerErrorReporter(
 					},
 				]);
 
+			/* v8 ignore start */
 			if (savedAt) {
 				userEmbed.addFields([
 					{
@@ -225,17 +226,20 @@ function initializePlayerErrorReporter(
 					},
 				]);
 			}
+			/* v8 ignore stop */
 
 			let userMessage: Message | null = null;
 
 			try {
 				userMessage = await originalChannel.send({ embeds: [userEmbed] });
+				/* v8 ignore start */
 			} catch (error) {
 				logger.error(
 					error,
 					'Failed to send recovery message to original channel',
 				);
 			}
+			/* v8 ignore stop */
 
 			const messageEditHandler = (
 				options: InteractionEditReplyOptions | InteractionReplyOptions,

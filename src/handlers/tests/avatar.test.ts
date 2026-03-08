@@ -1,6 +1,7 @@
 import type { ChatInputCommandInteraction, User } from 'discord.js';
 import { EmbedBuilder } from 'discord.js';
 import { beforeEach, expect, it, vi } from 'vitest';
+import { createMockInteraction as createBaseMockInteraction } from '../../utils/testing';
 import avatarCommandHandler from '../avatar';
 
 const EXAMPLE_USER_ID = '123456789012345678';
@@ -15,12 +16,7 @@ function createMockUser(): User {
 }
 
 function createMockInteraction(user: User): ChatInputCommandInteraction {
-	return {
-		options: {
-			getUser: vi.fn().mockReturnValue(user),
-		},
-		reply: vi.fn().mockResolvedValue({}),
-	} as unknown as ChatInputCommandInteraction;
+	return createBaseMockInteraction({ getUser: user });
 }
 
 beforeEach(() => {

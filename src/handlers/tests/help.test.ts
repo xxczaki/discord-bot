@@ -1,11 +1,10 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { beforeEach, expect, it, vi } from 'vitest';
+import { createMockInteraction as createBaseMockInteraction } from '../../utils/testing';
 import helpCommandHandler from '../help';
 
 function createMockInteraction(): ChatInputCommandInteraction {
-	return {
-		reply: vi.fn().mockResolvedValue({}),
-	} as unknown as ChatInputCommandInteraction;
+	return createBaseMockInteraction();
 }
 
 function getContentFromReply(

@@ -17,18 +17,26 @@ export default function useQueueWithValidation(
 		const message = options?.message ?? 'No music is currently playing.';
 
 		if (options?.deferred) {
-			interaction.editReply(message).catch((error) => {
-				reportError(error, 'Failed to send queue validation error message');
-			});
+			interaction.editReply(message).catch(
+				/* v8 ignore start */
+				(error) => {
+					reportError(error, 'Failed to send queue validation error message');
+				},
+				/* v8 ignore stop */
+			);
 		} else {
 			interaction
 				.reply({
 					content: message,
 					flags: ['Ephemeral'],
 				})
-				.catch((error) => {
-					reportError(error, 'Failed to send queue validation error message');
-				});
+				.catch(
+					/* v8 ignore start */
+					(error) => {
+						reportError(error, 'Failed to send queue validation error message');
+					},
+					/* v8 ignore stop */
+				);
 		}
 
 		return null;

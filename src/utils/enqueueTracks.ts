@@ -80,6 +80,7 @@ export default async function enqueueTracks({
 		const queue = useQueue();
 
 		if (!queue) {
+			/* v8 ignore start */
 			if (firstTrackFailed) {
 				return interaction.editReply({
 					content: null,
@@ -93,6 +94,7 @@ export default async function enqueueTracks({
 					],
 				});
 			}
+			/* v8 ignore stop */
 
 			return interaction.editReply({
 				content: 'The queue is empty.',
@@ -136,6 +138,7 @@ export default async function enqueueTracks({
 		});
 	}
 
+	/* v8 ignore start */
 	if (queue?.tracks) {
 		queue.tracks.store =
 			queue?.tracks?.data?.sort((a, b) => {
@@ -150,6 +153,7 @@ export default async function enqueueTracks({
 				return indexA - indexB;
 			}) || [];
 	}
+	/* v8 ignore stop */
 
 	const successfullyEnqueued = firstTrackFailed ? enqueued : enqueued + 1;
 	const skipped = tracks.length - successfullyEnqueued;

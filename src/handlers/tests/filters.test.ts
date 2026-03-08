@@ -1,6 +1,13 @@
 import { ActionRowBuilder, type ChatInputCommandInteraction } from 'discord.js';
 import { useMainPlayer, useQueue } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
+import {
+	createMockInteraction as createBaseMockInteraction,
+	createMockQueue as createBaseMockQueue,
+	createMockResponse as createBaseMockResponse,
+	createMockButtonComponent,
+	createMockSelectMenuComponent,
+} from '../../utils/testing';
 import filtersCommandHandler from '../filters';
 
 vi.mock('discord-player', () => ({
@@ -23,42 +30,19 @@ beforeEach(() => {
 });
 
 function createMockInteraction() {
-	return {
-		reply: vi.fn(),
-	} as unknown as ChatInputCommandInteraction;
+	return createBaseMockInteraction() as unknown as ChatInputCommandInteraction;
 }
 
 function createMockResponse() {
-	return {
-		awaitMessageComponent: vi.fn(),
-		delete: vi.fn().mockResolvedValue(undefined),
-	};
+	return createBaseMockResponse();
 }
 
-function createMockQueue(
-	activeFilters: string[] = [],
-): NonNullable<ReturnType<typeof useQueue>> {
-	return {
+function createMockQueue(activeFilters: string[] = []) {
+	return createBaseMockQueue({
 		filters: {
-			ffmpeg: {
-				filters: [...activeFilters, '_normalizer'], // include custom filter to test exclusion
-				toggle: vi.fn().mockResolvedValue(undefined),
-			},
+			activeFilters: [...activeFilters, '_normalizer'],
 		},
-	} as unknown as NonNullable<ReturnType<typeof useQueue>>;
-}
-
-function createMockComponent(
-	componentType: 'button' | 'selectMenu',
-	values: string[] = [],
-) {
-	return {
-		isButton: () => componentType === 'button',
-		isStringSelectMenu: () => componentType === 'selectMenu',
-		values,
-		reply: vi.fn().mockResolvedValue(undefined),
-		editReply: vi.fn().mockResolvedValue(undefined),
-	};
+	});
 }
 
 it('should create correct select menu and cancel button', async () => {
@@ -69,7 +53,9 @@ it('should create correct select menu and cancel button', async () => {
 	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
-	mockResponse.awaitMessageComponent.mockRejectedValue(new Error('timeout'));
+	mockResponse.awaitMessageComponent = vi
+		.fn()
+		.mockRejectedValue(new Error('timeout'));
 
 	await filtersCommandHandler(interaction);
 
@@ -92,7 +78,9 @@ it('should exclude custom filters from active filters list', async () => {
 	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
-	mockResponse.awaitMessageComponent.mockRejectedValue(new Error('timeout'));
+	mockResponse.awaitMessageComponent = vi
+		.fn()
+		.mockRejectedValue(new Error('timeout'));
 
 	await filtersCommandHandler(interaction);
 
@@ -107,8 +95,8 @@ it('should handle cancel button press', async () => {
 	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
-	const mockComponent = createMockComponent('button');
-	mockResponse.awaitMessageComponent.mockResolvedValue(mockComponent);
+	const mockComponent = createMockButtonComponent();
+	mockResponse.awaitMessageComponent = vi.fn().mockResolvedValue(mockComponent);
 
 	await filtersCommandHandler(interaction);
 
@@ -124,8 +112,8 @@ it('should toggle new filters and disable unselected active ones', async () => {
 	mockedUseQueue.mockReturnValue(mockQueue);
 
 	const selectedValues = ['nightcore', 'lofi'];
-	const mockComponent = createMockComponent('selectMenu', selectedValues);
-	mockResponse.awaitMessageComponent.mockResolvedValue(mockComponent);
+	const mockComponent = createMockSelectMenuComponent(selectedValues);
+	mockResponse.awaitMessageComponent = vi.fn().mockResolvedValue(mockComponent);
 
 	await filtersCommandHandler(interaction);
 
@@ -157,8 +145,8 @@ it('should disable only unselected active filters', async () => {
 	mockedUseQueue.mockReturnValue(mockQueue);
 
 	const selectedValues = ['bassboost'];
-	const mockComponent = createMockComponent('selectMenu', selectedValues);
-	mockResponse.awaitMessageComponent.mockResolvedValue(mockComponent);
+	const mockComponent = createMockSelectMenuComponent(selectedValues);
+	mockResponse.awaitMessageComponent = vi.fn().mockResolvedValue(mockComponent);
 
 	await filtersCommandHandler(interaction);
 
@@ -174,8 +162,8 @@ it('should handle no filters selected by disabling all active ones', async () =>
 	mockedUseQueue.mockReturnValue(mockQueue);
 
 	const selectedValues: string[] = []; // No filters selected
-	const mockComponent = createMockComponent('selectMenu', selectedValues);
-	mockResponse.awaitMessageComponent.mockResolvedValue(mockComponent);
+	const mockComponent = createMockSelectMenuComponent(selectedValues);
+	mockResponse.awaitMessageComponent = vi.fn().mockResolvedValue(mockComponent);
 
 	await filtersCommandHandler(interaction);
 
@@ -190,7 +178,9 @@ it('should handle timeout gracefully', async () => {
 	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
-	mockResponse.awaitMessageComponent.mockRejectedValue(new Error('timeout'));
+	mockResponse.awaitMessageComponent = vi
+		.fn()
+		.mockRejectedValue(new Error('timeout'));
 
 	await filtersCommandHandler(interaction);
 });
@@ -235,8 +225,8 @@ it('should handle complex multi-filter toggle scenario', async () => {
 	mockedUseQueue.mockReturnValue(mockQueue);
 
 	const selectedValues = ['bassboost', 'nightcore', '8D'];
-	const mockComponent = createMockComponent('selectMenu', selectedValues);
-	mockResponse.awaitMessageComponent.mockResolvedValue(mockComponent);
+	const mockComponent = createMockSelectMenuComponent(selectedValues);
+	mockResponse.awaitMessageComponent = vi.fn().mockResolvedValue(mockComponent);
 
 	await filtersCommandHandler(interaction);
 
@@ -260,7 +250,7 @@ it('should handle unknown component type gracefully', async () => {
 		editReply: vi.fn().mockResolvedValue(undefined),
 	};
 
-	mockResponse.awaitMessageComponent.mockResolvedValue(mockComponent);
+	mockResponse.awaitMessageComponent = vi.fn().mockResolvedValue(mockComponent);
 
 	await filtersCommandHandler(interaction);
 

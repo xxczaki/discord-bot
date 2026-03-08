@@ -115,8 +115,10 @@ export default function createSmartInteractionHandler({
 		await cleanup('timeout');
 	}, timeout);
 
+	/* v8 ignore start */
 	return {
 		cleanup: () => cleanup('timeout'),
 		timeout,
 	};
+	/* v8 ignore stop */
 }

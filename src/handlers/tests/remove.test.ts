@@ -1,12 +1,13 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
-import type { Track } from 'discord-player';
 import { useQueue } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
+import {
+	createMockInteraction as createBaseMockInteraction,
+	createMockQueue as createBaseMockQueue,
+	createMockTrack,
+	MOCK_TRACK_TITLE,
+} from '../../utils/testing';
 import removeCommandHandler from '../remove';
-
-const EXAMPLE_TRACK_TITLE = 'Never Gonna Give You Up';
-const EXAMPLE_TRACK_AUTHOR = 'Rick Astley';
-const EXAMPLE_TRACK_ID = 'track-123';
 
 vi.mock('discord-player', () => ({
 	useQueue: vi.fn(),
@@ -18,37 +19,18 @@ beforeEach(() => {
 	vi.clearAllMocks();
 });
 
-function createMockTrack(overrides: Partial<Track> = {}): Track {
-	return {
-		id: EXAMPLE_TRACK_ID,
-		title: EXAMPLE_TRACK_TITLE,
-		author: EXAMPLE_TRACK_AUTHOR,
-		url: 'https://example.com/track',
-		duration: '3:32',
-		metadata: {},
-		...overrides,
-	} as Track;
-}
-
 function createMockInteraction(query: string): ChatInputCommandInteraction {
-	return {
-		options: {
-			getString: vi.fn().mockReturnValue(query),
-		},
-		reply: vi.fn().mockResolvedValue({}),
-	} as unknown as ChatInputCommandInteraction;
+	return createBaseMockInteraction({ getString: query });
 }
 
 function createMockQueue(): NonNullable<ReturnType<typeof useQueue>> {
-	return {
-		tracks: {
-			at: vi.fn().mockReturnValue(undefined), // Default to undefined
-		},
-		removeTrack: vi.fn(),
+	return createBaseMockQueue({
+		tracksAt: () => undefined,
+		removeTrack: true,
 		node: {
 			skip: vi.fn(),
 		},
-	} as unknown as NonNullable<ReturnType<typeof useQueue>>;
+	});
 }
 
 it('should reply with error when `query` is not a number', async () => {
@@ -101,7 +83,7 @@ it('should remove track at specified position', async () => {
 
 	expect(mockQueue.removeTrack).toHaveBeenCalledWith(2);
 	expect(interaction.reply).toHaveBeenCalledWith(
-		`Track "${EXAMPLE_TRACK_TITLE}" removed.`,
+		`Track "${MOCK_TRACK_TITLE}" removed.`,
 	);
 	expect(mockQueue.node.skip).not.toHaveBeenCalled();
 });
@@ -183,7 +165,7 @@ it('should handle edge case with track number 2 (index 0)', async () => {
 
 	expect(mockQueue.removeTrack).toHaveBeenCalledWith(0);
 	expect(interaction.reply).toHaveBeenCalledWith(
-		`Track "${EXAMPLE_TRACK_TITLE}" removed.`,
+		`Track "${MOCK_TRACK_TITLE}" removed.`,
 	);
 });
 

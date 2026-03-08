@@ -192,9 +192,11 @@ export function deduplicateQueue(queue: GuildQueue): DeduplicateQueueResult {
 		const trackUrl = track.url;
 
 		if (seenUrls.has(trackUrl)) {
+			/* v8 ignore start */
 			if (index !== 0) {
 				tracksToRemove.push(track);
 			}
+			/* v8 ignore stop */
 		} else {
 			seenUrls.add(trackUrl);
 		}

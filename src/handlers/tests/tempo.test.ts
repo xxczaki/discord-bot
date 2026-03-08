@@ -2,6 +2,12 @@ import type { ChatInputCommandInteraction } from 'discord.js';
 import type { QueueFilters } from 'discord-player';
 import { useMainPlayer, useQueue } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
+import {
+	createMockInteraction as createBaseMockInteraction,
+	createMockQueue as createBaseMockQueue,
+	createMockResponse as createBaseMockResponse,
+	createMockSelectMenuComponent,
+} from '../../utils/testing';
 import tempoCommandHandler from '../tempo';
 
 vi.mock('discord-player', () => ({
@@ -24,39 +30,19 @@ beforeEach(() => {
 });
 
 function createMockInteraction() {
-	return {
-		reply: vi.fn(),
-		editReply: vi.fn(),
-	} as unknown as ChatInputCommandInteraction;
+	return createBaseMockInteraction({
+		editReply: true,
+	}) as unknown as ChatInputCommandInteraction;
 }
 
 function createMockResponse() {
-	return {
-		awaitMessageComponent: vi.fn(),
-		delete: vi.fn().mockResolvedValue(undefined),
-	};
+	return createBaseMockResponse();
 }
 
-function createMockQueue(
-	activeFilters: string[] = [],
-): NonNullable<ReturnType<typeof useQueue>> {
-	return {
-		filters: {
-			ffmpeg: {
-				filters: activeFilters,
-				toggle: vi.fn().mockResolvedValue(undefined),
-			},
-		},
-	} as unknown as NonNullable<ReturnType<typeof useQueue>>;
-}
-
-function createMockComponent(values: string[] = []) {
-	return {
-		isStringSelectMenu: () => true,
-		values,
-		reply: vi.fn().mockResolvedValue(undefined),
-		editReply: vi.fn().mockResolvedValue(undefined),
-	};
+function createMockQueue(activeFilters: string[] = []) {
+	return createBaseMockQueue({
+		filters: { activeFilters },
+	});
 }
 
 it('should create correct select menu with tempo options', async () => {
@@ -67,7 +53,9 @@ it('should create correct select menu with tempo options', async () => {
 	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
-	mockResponse.awaitMessageComponent.mockRejectedValue(new Error('timeout'));
+	mockResponse.awaitMessageComponent = vi
+		.fn()
+		.mockRejectedValue(new Error('timeout'));
 
 	await tempoCommandHandler(interaction);
 
@@ -84,8 +72,8 @@ it('should toggle new tempo filter when no active tempo', async () => {
 	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
-	const mockComponent = createMockComponent(['_tempo15']);
-	mockResponse.awaitMessageComponent.mockResolvedValue(mockComponent);
+	const mockComponent = createMockSelectMenuComponent(['_tempo15']);
+	mockResponse.awaitMessageComponent = vi.fn().mockResolvedValue(mockComponent);
 
 	await tempoCommandHandler(interaction);
 
@@ -107,8 +95,8 @@ it('should remove active tempo filter when `normal` is selected', async () => {
 	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
-	const mockComponent = createMockComponent(['normal']);
-	mockResponse.awaitMessageComponent.mockResolvedValue(mockComponent);
+	const mockComponent = createMockSelectMenuComponent(['normal']);
+	mockResponse.awaitMessageComponent = vi.fn().mockResolvedValue(mockComponent);
 
 	await tempoCommandHandler(interaction);
 
@@ -130,8 +118,8 @@ it('should replace active tempo with new tempo when different tempo selected', a
 	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
-	const mockComponent = createMockComponent(['_tempo2']);
-	mockResponse.awaitMessageComponent.mockResolvedValue(mockComponent);
+	const mockComponent = createMockSelectMenuComponent(['_tempo2']);
+	mockResponse.awaitMessageComponent = vi.fn().mockResolvedValue(mockComponent);
 
 	await tempoCommandHandler(interaction);
 
@@ -160,7 +148,7 @@ it('should handle non-string-select-menu component', async () => {
 		isStringSelectMenu: () => false,
 		editReply: vi.fn().mockResolvedValue(undefined),
 	};
-	mockResponse.awaitMessageComponent.mockResolvedValue(mockComponent);
+	mockResponse.awaitMessageComponent = vi.fn().mockResolvedValue(mockComponent);
 
 	await tempoCommandHandler(interaction);
 
@@ -178,7 +166,9 @@ it('should handle timeout gracefully', async () => {
 	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
-	mockResponse.awaitMessageComponent.mockRejectedValue(new Error('timeout'));
+	mockResponse.awaitMessageComponent = vi
+		.fn()
+		.mockRejectedValue(new Error('timeout'));
 
 	await tempoCommandHandler(interaction);
 });
@@ -207,8 +197,8 @@ it('should detect active tempo filter correctly', async () => {
 	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
-	const mockComponent = createMockComponent(['normal']);
-	mockResponse.awaitMessageComponent.mockResolvedValue(mockComponent);
+	const mockComponent = createMockSelectMenuComponent(['normal']);
+	mockResponse.awaitMessageComponent = vi.fn().mockResolvedValue(mockComponent);
 
 	await tempoCommandHandler(interaction);
 
@@ -224,8 +214,8 @@ it('should handle multiple tempo filters by using the first one found', async ()
 	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
-	const mockComponent = createMockComponent(['normal']);
-	mockResponse.awaitMessageComponent.mockResolvedValue(mockComponent);
+	const mockComponent = createMockSelectMenuComponent(['normal']);
+	mockResponse.awaitMessageComponent = vi.fn().mockResolvedValue(mockComponent);
 
 	await tempoCommandHandler(interaction);
 
@@ -240,9 +230,9 @@ it('should handle error during component await', async () => {
 	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
-	mockResponse.awaitMessageComponent.mockRejectedValue(
-		new Error('Component collection timed out'),
-	);
+	mockResponse.awaitMessageComponent = vi
+		.fn()
+		.mockRejectedValue(new Error('Component collection timed out'));
 
 	await tempoCommandHandler(interaction);
 });

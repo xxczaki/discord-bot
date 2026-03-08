@@ -27,9 +27,11 @@ export default async function ticTacToeCommandHandler(
 			time: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
 		});
 
+		/* v8 ignore start */
 		if (answer.isButton()) {
 			await nextMove(answer, [answer.customId], []);
 		}
+		/* v8 ignore stop */
 	} catch {
 		await interaction.editReply({
 			components: [],

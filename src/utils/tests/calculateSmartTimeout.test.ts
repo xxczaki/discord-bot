@@ -169,6 +169,101 @@ it('should use progressive timeout for tracks far back in queue', () => {
 	expect(timeout).toBe(expectedTimeout);
 });
 
+it('should fall through to default when currently playing track does not match in empty queue', () => {
+	const track = createMockTrack({ id: 'different-track' });
+	const queue = createMockQueue({
+		size: 0,
+		currentTrack: null,
+	});
+
+	const timeout = calculateSmartTimeout({
+		queue,
+		track,
+		trackPosition: 0,
+		isCurrentlyPlaying: true,
+	});
+
+	expect(timeout).toBe(DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS);
+});
+
+it('should use full track duration when `getTimestamp` returns null for currently playing track', () => {
+	const track = createMockTrack({ id: 'current-track' });
+	const queue = createMockQueue({
+		size: 0,
+		currentTrack: { id: 'current-track', durationMS: 240000 } as Track<unknown>,
+		node: {
+			getTimestamp: vi.fn().mockReturnValue(null),
+		},
+	} as unknown as Partial<GuildQueue<unknown>>);
+
+	const timeout = calculateSmartTimeout({
+		queue,
+		track,
+		trackPosition: 0,
+		isCurrentlyPlaying: true,
+	});
+
+	// getTimestamp returns null, so currentPosition defaults to 0 via ?? operator
+	// remainingDuration = max(240000 - 0, 30000) = 240000
+	expect(timeout).toBe(240000);
+});
+
+it('should estimate play time without current track for tracks early in queue', () => {
+	const track = createMockTrack();
+	const mockTracks = [
+		{ durationMS: 240000 } as Track<unknown>,
+		{ durationMS: 200000 } as Track<unknown>,
+	];
+
+	const queue = createMockQueue({
+		size: 2,
+		currentTrack: null,
+		tracks: {
+			toArray: vi.fn().mockReturnValue(mockTracks),
+		} as unknown as GuildQueue<unknown>['tracks'],
+	});
+
+	const timeout = calculateSmartTimeout({
+		queue,
+		track,
+		trackPosition: 2,
+		isCurrentlyPlaying: false,
+	});
+
+	// No current track contribution, only queued tracks before position 2:
+	// Track at position 0: 240000 + Track at position 1: 200000 = 440000
+	expect(timeout).toBe(440000);
+});
+
+it('should use full current track duration when `getTimestamp` returns null in queue estimation', () => {
+	const track = createMockTrack();
+	const mockTracks = [{ durationMS: 200000 } as Track<unknown>];
+
+	const queue = createMockQueue({
+		size: 1,
+		currentTrack: { id: 'current-track', durationMS: 180000 } as Track<unknown>,
+		tracks: {
+			toArray: vi.fn().mockReturnValue(mockTracks),
+		} as unknown as GuildQueue<unknown>['tracks'],
+		node: {
+			getTimestamp: vi.fn().mockReturnValue(null),
+		},
+	} as unknown as Partial<GuildQueue<unknown>>);
+
+	const timeout = calculateSmartTimeout({
+		queue,
+		track,
+		trackPosition: 1,
+		isCurrentlyPlaying: false,
+	});
+
+	// getTimestamp returns null, so currentPosition defaults to 0 via ?? operator
+	// Current track remaining: max(180000 - 0, 0) = 180000
+	// Track at position 0: 200000
+	// Total: 180000 + 200000 = 380000
+	expect(timeout).toBe(380000);
+});
+
 it('should use default timeout as fallback', () => {
 	const track = createMockTrack();
 	const queue = createMockQueue();
