@@ -1,8 +1,4 @@
-import {
-	addMilliseconds,
-	differenceInCalendarDays,
-	formatDistance,
-} from 'date-fns';
+import { addMilliseconds, formatDistance } from 'date-fns';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -14,6 +10,7 @@ import {
 } from 'discord.js';
 import { type GuildQueue, QueueRepeatMode, type Track } from 'discord-player';
 import createQueueAwareComponentHandler from '../utils/createQueueAwareComponentHandler';
+import formatEndingTime from '../utils/formatEndingTime';
 import getTrackPosition from '../utils/getTrackPosition';
 import getTrackThumbnail from '../utils/getTrackThumbnail';
 import isObject from '../utils/isObject';
@@ -64,15 +61,8 @@ export default async function queueCommandHandler(
 
 	const now = new Date();
 	const afterQueueEnds = addMilliseconds(new Date(), queue.estimatedDuration);
-	const dayDifference = differenceInCalendarDays(afterQueueEnds, now);
 
-	const trackEndsAt = afterQueueEnds.toLocaleTimeString('pl', {
-		hour: '2-digit',
-		minute: '2-digit',
-	});
-
-	const endingTime =
-		dayDifference === 0 ? trackEndsAt : `${trackEndsAt} (+${dayDifference})`;
+	const endingTime = formatEndingTime(afterQueueEnds);
 
 	const isCached =
 		isObject(currentTrack.metadata) &&
