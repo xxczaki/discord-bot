@@ -10,6 +10,7 @@ import {
 	useMainPlayer,
 } from 'discord-player';
 import { z } from 'zod';
+import type { QueueMetadata } from '../types/QueueMetadata';
 import cleanUpPlaylistContent from './cleanUpPlaylistContent';
 import determineSearchEngine from './determineSearchEngine';
 import getEnvironmentVariable from './getEnvironmentVariable';
@@ -336,7 +337,9 @@ const TOOL_REGISTRY: Record<string, ToolDefinition> = {
 						const { track } = await player.play(context.voiceChannel, query, {
 							searchEngine: determineSearchEngine(query),
 							nodeOptions: {
-								metadata: { interaction: context.interaction },
+								metadata: {
+									interaction: context.interaction,
+								} satisfies QueueMetadata,
 								defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
 							},
 							requestedBy: context.interaction.user,
@@ -484,7 +487,7 @@ const TOOL_REGISTRY: Record<string, ToolDefinition> = {
 									nodeOptions: {
 										metadata: {
 											interaction: context.interaction,
-										},
+										} satisfies QueueMetadata,
 										defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
 									},
 									requestedBy: context.interaction.user,

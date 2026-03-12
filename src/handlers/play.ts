@@ -6,6 +6,7 @@ import {
 	type GuildMember,
 } from 'discord.js';
 import { type QueueFilters, useMainPlayer, useQueue } from 'discord-player';
+import type { QueueMetadata } from '../types/QueueMetadata';
 import createSmartInteractionHandler from '../utils/createSmartInteractionHandler';
 import createTrackEmbed from '../utils/createTrackEmbed';
 import determineSearchEngine from '../utils/determineSearchEngine';
@@ -40,7 +41,7 @@ export default async function playCommandHandler(
 		const { track } = await player.play(channel, query, {
 			searchEngine: determineSearchEngine(query),
 			nodeOptions: {
-				metadata: { interaction },
+				metadata: { interaction } satisfies QueueMetadata,
 				defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
 			},
 			requestedBy: interaction.user,

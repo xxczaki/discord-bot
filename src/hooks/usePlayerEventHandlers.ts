@@ -11,6 +11,7 @@ import {
 } from 'discord.js';
 import { type Player, type Track, TrackSkipReason } from 'discord-player';
 import prettyBytes from 'pretty-bytes';
+import type { QueueMetadata } from '../types/QueueMetadata';
 import createSmartInteractionHandler from '../utils/createSmartInteractionHandler';
 import createTrackEmbed from '../utils/createTrackEmbed';
 import isObject from '../utils/isObject';
@@ -36,6 +37,13 @@ export default function usePlayerEventHandlers(
 	const nowPlayingMessages = new Map<string, NowPlayingEntry>();
 
 	player.events.on('playerStart', async (queue, track) => {
+		const { interaction } = queue.metadata as QueueMetadata;
+		const channel = interaction.channel;
+
+		if (!channel?.isSendable()) {
+			return;
+		}
+
 		const embed = await createTrackEmbed(track, 'Playing it now.');
 
 		const skip = new ButtonBuilder()
@@ -46,7 +54,7 @@ export default function usePlayerEventHandlers(
 		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(skip);
 
 		const guildId = queue.guild?.id;
-		const response = await queue.metadata.interaction.channel.send({
+		const response = await channel.send({
 			embeds: [embed],
 			components: [row],
 		});
@@ -96,7 +104,7 @@ export default function usePlayerEventHandlers(
 				});
 
 				try {
-					await queue.metadata.interaction.channel.sendTyping();
+					await channel.sendTyping();
 				} catch {}
 
 				return;
@@ -185,7 +193,11 @@ export default function usePlayerEventHandlers(
 	});
 
 	player.events.on('emptyQueue', async (queue) => {
-		await queue.metadata.interaction.channel.send('Queue finished, leaving…');
+		const { interaction } = queue.metadata as QueueMetadata;
+
+		if (interaction.channel?.isSendable()) {
+			await interaction.channel.send('Queue finished, leaving…');
+		}
 
 		void queueRecoveryService.deleteQueue();
 
@@ -198,6 +210,8 @@ export default function usePlayerEventHandlers(
 
 	player.events.on('playerSkip', async (queue, track, reason) => {
 		if (reason === TrackSkipReason.NoStream) {
+			const { interaction } = queue.metadata as QueueMetadata;
+
 			const embed = new EmbedBuilder()
 				.setTitle('Track Skipped')
 				.setDescription(
@@ -206,7 +220,9 @@ export default function usePlayerEventHandlers(
 				.setColor('Orange');
 
 			try {
-				await queue.metadata.interaction.channel.send({ embeds: [embed] });
+				if (interaction.channel?.isSendable()) {
+					await interaction.channel.send({ embeds: [embed] });
+				}
 			} catch {}
 		}
 

@@ -121,6 +121,8 @@ function createMockChannel(): TextChannel {
 			awaitMessageComponent: vi.fn(),
 			edit: vi.fn(),
 		}),
+		sendTyping: vi.fn().mockResolvedValue(undefined),
+		isSendable: vi.fn().mockReturnValue(true),
 	} as unknown as TextChannel;
 }
 

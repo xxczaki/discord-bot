@@ -1,5 +1,6 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
-import { useQueue } from 'discord-player';
+import { type GuildQueue, useQueue } from 'discord-player';
+import type { QueueMetadata } from '../types/QueueMetadata';
 import reportError from './reportError';
 
 type Options = {
@@ -42,5 +43,5 @@ export default function useQueueWithValidation(
 		return null;
 	}
 
-	return queue;
+	return queue as GuildQueue<QueueMetadata>;
 }

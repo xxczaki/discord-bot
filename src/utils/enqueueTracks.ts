@@ -6,6 +6,7 @@ import {
 	useQueue,
 } from 'discord-player';
 import type { ProcessingInteraction } from '../types/ProcessingInteraction';
+import type { QueueMetadata } from '../types/QueueMetadata';
 import determineSearchEngine from './determineSearchEngine';
 import pluralize from './pluralize';
 import processTracksWithQueue from './processTracksWithQueue';
@@ -44,7 +45,7 @@ export default async function enqueueTracks({
 		await player.play(voiceChannel, firstTrackUrl, {
 			searchEngine: determineSearchEngine(firstTrackUrl),
 			nodeOptions: {
-				metadata: { interaction },
+				metadata: { interaction } satisfies QueueMetadata,
 				defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
 			},
 			audioPlayerOptions: {

@@ -1,5 +1,4 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
-import type { ProcessingInteraction } from '../types/ProcessingInteraction';
 import isObject from '../utils/isObject';
 import useQueueWithValidation from '../utils/useQueueWithValidation';
 
@@ -27,8 +26,7 @@ export default async function relocateCommandHandler(
 		});
 	}
 
-	const originalInteraction = queue.metadata
-		.interaction as unknown as ProcessingInteraction;
+	const originalInteraction = queue.metadata.interaction;
 
 	queue.metadata.interaction = {
 		user: originalInteraction.user,

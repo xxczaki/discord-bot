@@ -3,6 +3,7 @@ import type { EmbedBuilder, VoiceBasedChannel } from 'discord.js';
 import { type QueueFilters, useMainPlayer } from 'discord-player';
 import Queue from 'p-queue';
 import type { ProcessingInteraction } from '../types/ProcessingInteraction';
+import type { QueueMetadata } from '../types/QueueMetadata';
 import determineSearchEngine from './determineSearchEngine';
 import isObject from './isObject';
 import logger from './logger';
@@ -76,7 +77,10 @@ export default async function processTracksWithQueue({
 						searchEngine: determineSearchEngine(item),
 						fallbackSearchEngine: 'youtubeSearch',
 						nodeOptions: {
-							metadata: { interaction, ...nodeMetadata },
+							metadata: {
+								interaction,
+								...nodeMetadata,
+							} satisfies QueueMetadata,
 							defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
 						},
 						requestedBy: interaction.user,
@@ -122,7 +126,10 @@ export default async function processTracksWithQueue({
 							searchEngine: determineSearchEngine(item),
 							fallbackSearchEngine: 'youtubeSearch',
 							nodeOptions: {
-								metadata: { interaction, ...nodeMetadata },
+								metadata: {
+									interaction,
+									...nodeMetadata,
+								} satisfies QueueMetadata,
 								defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
 							},
 							requestedBy: interaction.user,
