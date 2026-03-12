@@ -1,5 +1,11 @@
 # discord-player-googlevideo
 
+## 0.2.4
+
+### Patch Changes
+
+- f187a62: Use `outputStream.end()` instead of `outputStream.destroy(error)` on stream failures to give FFmpeg a clean EOF, allowing discord-player to advance the queue instead of silently stalling
+
 ## 0.2.3
 
 ### Patch Changes
