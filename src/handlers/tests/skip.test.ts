@@ -40,6 +40,20 @@ it('should skip the track and reply with success message', async () => {
 	expect(interaction.editReply).toHaveBeenCalledWith('Track skipped.');
 });
 
+it('should call `sendTyping` when channel is sendable', async () => {
+	const sendTyping = vi.fn().mockResolvedValue(undefined);
+	const interaction = {
+		...createMockInteraction(),
+		channel: { isSendable: () => true, sendTyping },
+	} as unknown as ChatInputCommandInteraction;
+	const mockQueue = createMockQueue();
+	mockedUseQueue.mockReturnValue(mockQueue);
+
+	await skipCommandHandler(interaction);
+
+	expect(sendTyping).toHaveBeenCalled();
+});
+
 it('should handle when queue is null', async () => {
 	const interaction = createMockInteraction();
 	mockedUseQueue.mockReturnValue(null);

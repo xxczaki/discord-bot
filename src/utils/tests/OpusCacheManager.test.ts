@@ -269,6 +269,35 @@ describe('OpusCacheManager', () => {
 
 			expect(opusCacheManager.entryCount).toBe(1);
 		});
+
+		it('should add entry without prior scan (no fuse index)', () => {
+			opusCacheManager.addEntry({
+				filename: 'song_artist_200.opus',
+				title: 'song artist',
+				author: '',
+				durationSeconds: 200,
+			});
+
+			expect(opusCacheManager.entryCount).toBe(1);
+		});
+
+		it('should update existing entry without prior scan (no fuse index)', () => {
+			opusCacheManager.addEntry({
+				filename: 'song_artist_200.opus',
+				title: 'song artist',
+				author: '',
+				durationSeconds: 200,
+			});
+
+			opusCacheManager.addEntry({
+				filename: 'song_artist_200.opus',
+				title: 'updated song',
+				author: '',
+				durationSeconds: 200,
+			});
+
+			expect(opusCacheManager.entryCount).toBe(1);
+		});
 	});
 
 	describe('removeEntry', () => {
@@ -282,6 +311,27 @@ describe('OpusCacheManager', () => {
 			expect(opusCacheManager.entryCount).toBe(1);
 
 			opusCacheManager.removeEntry('song_artist_180.opus');
+
+			expect(opusCacheManager.entryCount).toBe(0);
+		});
+
+		it('should remove entry without prior scan (no fuse index)', () => {
+			opusCacheManager.addEntry({
+				filename: 'song_artist_200.opus',
+				title: 'song artist',
+				author: '',
+				durationSeconds: 200,
+			});
+
+			expect(opusCacheManager.entryCount).toBe(1);
+
+			opusCacheManager.removeEntry('song_artist_200.opus');
+
+			expect(opusCacheManager.entryCount).toBe(0);
+		});
+
+		it('should do nothing when removing non-existent entry without fuse', () => {
+			opusCacheManager.removeEntry('nonexistent.opus');
 
 			expect(opusCacheManager.entryCount).toBe(0);
 		});

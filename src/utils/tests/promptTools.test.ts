@@ -4,7 +4,8 @@ import type {
 	VoiceBasedChannel,
 } from 'discord.js';
 import type { GuildQueue } from 'discord-player';
-import { expect, it, vi } from 'vitest';
+import { useMainPlayer } from 'discord-player';
+import { beforeEach, expect, it, vi } from 'vitest';
 import {
 	formatToolArgs,
 	generatePendingMessage,
@@ -43,6 +44,40 @@ vi.mock('../queueOperations', () => ({
 		removedCount: 1,
 	}),
 }));
+
+vi.mock('discord-player', () => ({
+	useMainPlayer: vi.fn(),
+}));
+
+vi.mock('../determineSearchEngine', () => ({
+	default: vi.fn().mockReturnValue('youtubeSearch'),
+}));
+
+vi.mock('../getEnvironmentVariable', () => ({
+	default: vi.fn().mockReturnValue('playlists-channel-id'),
+}));
+
+vi.mock('../StatsHandler', () => ({
+	StatsHandler: {
+		getInstance: vi.fn().mockReturnValue({
+			saveStat: vi.fn(),
+		}),
+	},
+}));
+
+import cleanUpPlaylistContent from '../cleanUpPlaylistContent';
+
+vi.mock('../cleanUpPlaylistContent', () => ({
+	default: vi.fn().mockReturnValue('song one\nsong two'),
+}));
+
+const mockedCleanUpPlaylistContent = vi.mocked(cleanUpPlaylistContent);
+
+const mockedUseMainPlayer = vi.mocked(useMainPlayer);
+
+beforeEach(() => {
+	vi.clearAllMocks();
+});
 
 const mockQueue = {
 	node: { skip: vi.fn(), isPaused: vi.fn().mockReturnValue(false), volume: 50 },
@@ -386,4 +421,430 @@ it('should filter out nullish values from tool args', () => {
 
 it('should return `undefined` for empty tool args', () => {
 	expect(formatToolArgs({})).toBeUndefined();
+});
+
+it('should return queue status with current track info', async () => {
+	const queueWithTrack = {
+		...mockQueue,
+		currentTrack: {
+			title: 'Current Song',
+			author: 'Current Artist',
+			duration: '3:30',
+		},
+	} as unknown as GuildQueue;
+	const contextWithTrack: ToolContext = {
+		...mockContext,
+		queue: queueWithTrack,
+	};
+	const tools = getAvailableTools(contextWithTrack);
+	const result = await executeTool(tools.getQueueStatus, {});
+
+	expect(result).toEqual({
+		success: true,
+		currentTrack: {
+			title: 'Current Song',
+			author: 'Current Artist',
+			duration: '3:30',
+		},
+		trackCount: 0,
+		isPaused: false,
+		volume: 50,
+	});
+});
+
+it('should list tracks with pagination', async () => {
+	const tracks = [
+		{ title: 'Song A', author: 'Artist A', duration: '3:00' },
+		{ title: 'Song B', author: 'Artist B', duration: '4:00' },
+		{ title: 'Song C', author: 'Artist C', duration: '5:00' },
+	];
+	const queueWithTracks = {
+		...mockQueue,
+		tracks: {
+			toArray: vi.fn().mockReturnValue(tracks),
+			size: 3,
+		},
+	} as unknown as GuildQueue;
+	const contextWithTracks: ToolContext = {
+		...mockContext,
+		queue: queueWithTracks,
+	};
+	const tools = getAvailableTools(contextWithTracks);
+	const result = await executeTool(tools.listTracks, {
+		offset: 0,
+		limit: 2,
+	});
+
+	expect(result).toEqual({
+		success: true,
+		tracks: [
+			{ index: 0, title: 'Song A', author: 'Artist A', duration: '3:00' },
+			{ index: 1, title: 'Song B', author: 'Artist B', duration: '4:00' },
+		],
+		total: 3,
+		hasMore: true,
+	});
+});
+
+it('should execute `searchAndPlay` tool successfully', async () => {
+	const mockPlay = vi.fn().mockResolvedValue({
+		track: { title: 'Found Song', author: 'Found Artist' },
+	});
+	mockedUseMainPlayer.mockReturnValue({ play: mockPlay } as unknown as ReturnType<
+		typeof useMainPlayer
+	>);
+
+	const tools = getAvailableTools(mockContext);
+	const result = await executeTool(tools.searchAndPlay, {
+		query: 'test query',
+	});
+
+	expect(result).toEqual({
+		success: true,
+		trackTitle: 'Found Song',
+		trackAuthor: 'Found Artist',
+	});
+	expect(mockPlay).toHaveBeenCalledWith(
+		mockVoiceChannel,
+		'test query',
+		expect.objectContaining({ searchEngine: 'youtubeSearch' }),
+	);
+});
+
+it('should handle `searchAndPlay` failure', async () => {
+	const mockPlay = vi.fn().mockRejectedValue(new Error('Not found'));
+	mockedUseMainPlayer.mockReturnValue({ play: mockPlay } as unknown as ReturnType<
+		typeof useMainPlayer
+	>);
+
+	const tools = getAvailableTools(mockContext);
+	const result = await executeTool(tools.searchAndPlay, {
+		query: 'nonexistent',
+	});
+
+	expect(result).toEqual({
+		success: false,
+		error: 'No results found for the query',
+	});
+});
+
+it('should list available playlists', async () => {
+	const messages = [
+		{ content: 'id="rock"\n```\nsong1\n```' },
+		{ content: 'id="jazz"\n```\nsong2\n```' },
+		{ content: 'no playlist here' },
+	];
+
+	const mockFetchResult = {
+		map: vi
+			.fn()
+			.mockImplementation(
+				(fn: (message: { content: string }) => string | undefined) =>
+					messages.map(fn),
+			),
+	};
+
+	const mockChannel = {
+		isTextBased: () => true,
+		messages: {
+			fetch: vi.fn().mockResolvedValue(mockFetchResult),
+		},
+	};
+
+	const contextWithChannel: ToolContext = {
+		...mockContext,
+		queue: null,
+		interaction: {
+			client: {
+				channels: {
+					cache: { get: vi.fn().mockReturnValue(mockChannel) },
+				},
+			},
+			user: { id: '123' },
+		} as unknown as ChatInputCommandInteraction,
+	};
+
+	const tools = getAvailableTools(contextWithChannel);
+	const result = await executeTool(tools.listAvailablePlaylists, {});
+
+	expect(result).toEqual({
+		success: true,
+		playlists: ['jazz', 'rock'],
+	});
+});
+
+it('should handle error in `listAvailablePlaylists`', async () => {
+	const mockChannel = {
+		isTextBased: () => true,
+		messages: {
+			fetch: vi.fn().mockRejectedValue(new Error('Fetch failed')),
+		},
+	};
+
+	const contextWithChannel: ToolContext = {
+		...mockContext,
+		queue: null,
+		interaction: {
+			client: {
+				channels: {
+					cache: { get: vi.fn().mockReturnValue(mockChannel) },
+				},
+			},
+		} as unknown as ChatInputCommandInteraction,
+	};
+
+	const tools = getAvailableTools(contextWithChannel);
+	const result = await executeTool(tools.listAvailablePlaylists, {});
+
+	expect(result).toEqual({
+		success: false,
+		playlists: [],
+		error: 'Failed to fetch playlists',
+	});
+});
+
+it('should handle missing playlists channel in `listAvailablePlaylists`', async () => {
+	const contextWithNoChannel: ToolContext = {
+		...mockContext,
+		queue: null,
+		interaction: {
+			client: {
+				channels: {
+					cache: { get: vi.fn().mockReturnValue(null) },
+				},
+			},
+		} as unknown as ChatInputCommandInteraction,
+	};
+
+	const tools = getAvailableTools(contextWithNoChannel);
+	const result = await executeTool(tools.listAvailablePlaylists, {});
+
+	expect(result).toEqual({
+		success: false,
+		playlists: [],
+		error: 'Playlists channel not found',
+	});
+});
+
+it('should handle missing playlists channel in `enqueuePlaylist`', async () => {
+	const contextWithNoChannel: ToolContext = {
+		...mockContext,
+		queue: null,
+		interaction: {
+			client: {
+				channels: {
+					cache: { get: vi.fn().mockReturnValue(null) },
+				},
+			},
+		} as unknown as ChatInputCommandInteraction,
+	};
+
+	const tools = getAvailableTools(contextWithNoChannel);
+	const result = await executeTool(tools.enqueuePlaylist, {
+		playlistId: 'test',
+	});
+
+	expect(result).toEqual({
+		success: false,
+		enqueuedCount: 0,
+		totalCount: 0,
+		error: 'Playlists channel not found',
+	});
+});
+
+it('should handle playlist not found in `enqueuePlaylist`', async () => {
+	const mockChannel = {
+		isTextBased: () => true,
+		messages: {
+			fetch: vi.fn().mockResolvedValue({
+				find: vi.fn().mockReturnValue(undefined),
+			}),
+		},
+	};
+
+	const contextWithChannel: ToolContext = {
+		...mockContext,
+		queue: null,
+		interaction: {
+			client: {
+				channels: {
+					cache: { get: vi.fn().mockReturnValue(mockChannel) },
+				},
+			},
+			user: { id: '123' },
+		} as unknown as ChatInputCommandInteraction,
+	};
+
+	const tools = getAvailableTools(contextWithChannel);
+	const result = await executeTool(tools.enqueuePlaylist, {
+		playlistId: 'nonexistent',
+	});
+
+	expect(result).toEqual({
+		success: false,
+		enqueuedCount: 0,
+		totalCount: 0,
+		error: 'Playlist "nonexistent" not found',
+	});
+});
+
+it('should enqueue playlist songs successfully', async () => {
+	const mockPlay = vi.fn().mockResolvedValue({ track: {} });
+	mockedUseMainPlayer.mockReturnValue({ play: mockPlay } as unknown as ReturnType<
+		typeof useMainPlayer
+	>);
+
+	const mockChannel = {
+		isTextBased: () => true,
+		messages: {
+			fetch: vi.fn().mockResolvedValue({
+				find: vi.fn().mockReturnValue({
+					content: 'id="myplaylist"\nsong one\nsong two',
+				}),
+			}),
+		},
+	};
+
+	const contextWithChannel: ToolContext = {
+		...mockContext,
+		queue: null,
+		interaction: {
+			client: {
+				channels: {
+					cache: { get: vi.fn().mockReturnValue(mockChannel) },
+				},
+			},
+			user: { id: '123' },
+		} as unknown as ChatInputCommandInteraction,
+	};
+
+	const tools = getAvailableTools(contextWithChannel);
+	const result = await executeTool(tools.enqueuePlaylist, {
+		playlistId: 'myplaylist',
+	});
+
+	expect(result).toEqual({
+		success: true,
+		enqueuedCount: 2,
+		totalCount: 2,
+	});
+	expect(mockPlay).toHaveBeenCalledTimes(2);
+});
+
+it('should handle empty playlist in `enqueuePlaylist`', async () => {
+	mockedCleanUpPlaylistContent.mockReturnValueOnce('');
+
+	const mockChannel = {
+		isTextBased: () => true,
+		messages: {
+			fetch: vi.fn().mockResolvedValue({
+				find: vi.fn().mockReturnValue({
+					content: 'id="empty"',
+				}),
+			}),
+		},
+	};
+
+	const contextWithChannel: ToolContext = {
+		...mockContext,
+		queue: null,
+		interaction: {
+			client: {
+				channels: {
+					cache: { get: vi.fn().mockReturnValue(mockChannel) },
+				},
+			},
+			user: { id: '123' },
+		} as unknown as ChatInputCommandInteraction,
+	};
+
+	const tools = getAvailableTools(contextWithChannel);
+	const result = await executeTool(tools.enqueuePlaylist, {
+		playlistId: 'empty',
+	});
+
+	expect(result).toEqual({
+		success: false,
+		enqueuedCount: 0,
+		totalCount: 0,
+		error: 'Playlist is empty',
+	});
+});
+
+it('should handle partial enqueue failures in `enqueuePlaylist`', async () => {
+	const mockPlay = vi
+		.fn()
+		.mockResolvedValueOnce({ track: {} })
+		.mockRejectedValueOnce(new Error('Failed'));
+	mockedUseMainPlayer.mockReturnValue({ play: mockPlay } as unknown as ReturnType<
+		typeof useMainPlayer
+	>);
+
+	const mockChannel = {
+		isTextBased: () => true,
+		messages: {
+			fetch: vi.fn().mockResolvedValue({
+				find: vi.fn().mockReturnValue({
+					content: 'id="partial"\nsong one\nsong two',
+				}),
+			}),
+		},
+	};
+
+	const contextWithChannel: ToolContext = {
+		...mockContext,
+		queue: null,
+		interaction: {
+			client: {
+				channels: {
+					cache: { get: vi.fn().mockReturnValue(mockChannel) },
+				},
+			},
+			user: { id: '123' },
+		} as unknown as ChatInputCommandInteraction,
+	};
+
+	const tools = getAvailableTools(contextWithChannel);
+	const result = await executeTool(tools.enqueuePlaylist, {
+		playlistId: 'partial',
+	});
+
+	expect(result).toEqual({
+		success: true,
+		enqueuedCount: 1,
+		totalCount: 2,
+	});
+});
+
+it('should handle outer error in `enqueuePlaylist`', async () => {
+	const mockChannel = {
+		isTextBased: () => true,
+		messages: {
+			fetch: vi.fn().mockRejectedValue(new Error('Connection failed')),
+		},
+	};
+
+	const contextWithChannel: ToolContext = {
+		...mockContext,
+		queue: null,
+		interaction: {
+			client: {
+				channels: {
+					cache: { get: vi.fn().mockReturnValue(mockChannel) },
+				},
+			},
+		} as unknown as ChatInputCommandInteraction,
+	};
+
+	const tools = getAvailableTools(contextWithChannel);
+	const result = await executeTool(tools.enqueuePlaylist, {
+		playlistId: 'test',
+	});
+
+	expect(result).toEqual({
+		success: false,
+		enqueuedCount: 0,
+		totalCount: 0,
+		error: 'Failed to enqueue playlist',
+	});
 });
