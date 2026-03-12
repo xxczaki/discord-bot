@@ -13,4 +13,10 @@ export default async function skipCommandHandler(
 	queue.node.skip();
 
 	await interaction.editReply('Track skipped.');
+
+	try {
+		if (interaction.channel?.isSendable()) {
+			await interaction.channel.sendTyping();
+		}
+	} catch {}
 }

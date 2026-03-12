@@ -89,11 +89,17 @@ export default function usePlayerEventHandlers(
 					'⏭️ Track was skipped.',
 				);
 
-				return await answer.update({
+				await answer.update({
 					content: null,
 					embeds: [skippedEmbed],
 					components: [],
 				});
+
+				try {
+					await queue.metadata.interaction.channel.sendTyping();
+				} catch {}
+
+				return;
 			}
 
 			throw 'fallthrough to catch block';
