@@ -65,6 +65,7 @@ describe('RedisQueryCache', () => {
 			keys: vi.fn(),
 			mget: vi.fn(),
 			get: vi.fn(),
+			scanStream: vi.fn(),
 		} as unknown as Redis;
 
 		mockPlayer = { id: 'test-player' } as Player;
@@ -181,6 +182,25 @@ describe('RedisQueryCache', () => {
 	});
 
 	describe('getData', () => {
+		function createMockScanStream(keys: string[]) {
+			const handlers: Record<string, (...args: unknown[]) => void> = {};
+			const stream = {
+				on(event: string, handler: (...args: unknown[]) => void) {
+					handlers[event] = handler;
+					if (event === 'end') {
+						queueMicrotask(() => {
+							handlers.data(keys);
+							queueMicrotask(() => handlers.end());
+						});
+					}
+					return stream;
+				},
+				pause: vi.fn(),
+				resume: vi.fn(),
+			};
+			return stream;
+		}
+
 		it('should return cached tracks', async () => {
 			const mockTrack = { title: 'Test Song' };
 			const mockCacheItem = {
@@ -189,7 +209,8 @@ describe('RedisQueryCache', () => {
 				hasExpired: false,
 			};
 
-			vi.mocked(mockRedis.keys).mockResolvedValue([EXAMPLE_CACHE_KEY]);
+			const mockStream = createMockScanStream([EXAMPLE_CACHE_KEY]);
+			vi.mocked(mockRedis.scanStream).mockReturnValue(mockStream as never);
 			vi.mocked(mockRedis.mget).mockResolvedValue(['{"title":"Test Song"}']);
 			vi.mocked(deserialize).mockReturnValue(mockTrack as never);
 			vi.mocked(DiscordPlayerQueryResultCache).mockImplementation(function () {
@@ -198,9 +219,10 @@ describe('RedisQueryCache', () => {
 
 			const result = await redisQueryCache.getData();
 
-			expect(mockRedis.keys).toHaveBeenCalledWith(
-				'discord-player:query-cache:*',
-			);
+			expect(mockRedis.scanStream).toHaveBeenCalledWith({
+				match: 'discord-player:query-cache:*',
+				count: 200,
+			});
 			expect(mockRedis.mget).toHaveBeenCalledWith([EXAMPLE_CACHE_KEY]);
 			expect(vi.mocked(deserialize)).toHaveBeenCalledWith(mockPlayer, {
 				title: 'Test Song',
@@ -216,7 +238,8 @@ describe('RedisQueryCache', () => {
 				hasExpired: false,
 			};
 
-			vi.mocked(mockRedis.keys).mockResolvedValue(['key1', 'key2']);
+			const mockStream = createMockScanStream(['key1', 'key2']);
+			vi.mocked(mockRedis.scanStream).mockReturnValue(mockStream as never);
 			vi.mocked(mockRedis.mget).mockResolvedValue(['{"title":"Test"}', null]);
 			vi.mocked(deserialize).mockReturnValue(mockTrack as never);
 			vi.mocked(DiscordPlayerQueryResultCache).mockImplementation(function () {

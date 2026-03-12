@@ -103,9 +103,12 @@ function createMockInteraction(isChatInput = true): Interaction {
 	} as unknown as Interaction;
 }
 
-function createMockVoiceState(): VoiceState {
+function createMockVoiceState(
+	channelId: string | null = 'channel-1',
+): VoiceState {
 	return {
 		guild: { id: MOCK_GUILD_ID },
+		channelId,
 	} as VoiceState;
 }
 
@@ -245,7 +248,8 @@ it('should throw error when `guild` is not defined in interaction', async () => 
 it('should handle `voiceStateUpdate` and save queue', async () => {
 	const mockClient = createMockClient();
 	const mockPlayer = createMockPlayer();
-	const mockVoiceState = createMockVoiceState();
+	const mockOldState = createMockVoiceState('channel-1');
+	const mockNewState = createMockVoiceState('channel-1');
 	const mockQueue = {
 		currentTrack: null,
 	};
@@ -268,20 +272,21 @@ it('should handle `voiceStateUpdate` and save queue', async () => {
 	const voiceStateHandler = voiceStateCall?.[1];
 
 	if (voiceStateHandler) {
-		await voiceStateHandler(mockVoiceState);
+		await voiceStateHandler(mockOldState, mockNewState);
 	}
 
 	expect(mockPlayer.context.provide).toHaveBeenCalledWith(
-		{ guild: mockVoiceState.guild },
+		{ guild: mockOldState.guild },
 		expect.any(Function),
 	);
 	expect(useQueue).toHaveBeenCalledWith(MOCK_GUILD_ID);
 });
 
-it('should delete opus cache when track is not from cache', async () => {
+it('should delete opus cache when track is not from cache and channel changed', async () => {
 	const mockClient = createMockClient();
 	const mockPlayer = createMockPlayer();
-	const mockVoiceState = createMockVoiceState();
+	const mockOldState = createMockVoiceState('channel-1');
+	const mockNewState = createMockVoiceState('channel-2');
 	const mockTrack = {
 		url: 'https://example.com/track.mp3',
 		cleanTitle: 'Test Track',
@@ -311,7 +316,7 @@ it('should delete opus cache when track is not from cache', async () => {
 	const voiceStateHandler = voiceStateCall?.[1];
 
 	if (voiceStateHandler) {
-		await voiceStateHandler(mockVoiceState);
+		await voiceStateHandler(mockOldState, mockNewState);
 	}
 
 	expect(mockedOpusCacheManager.getInstance().deleteEntry).toHaveBeenCalledWith(
@@ -322,7 +327,8 @@ it('should delete opus cache when track is not from cache', async () => {
 it('should not delete opus cache when track is from cache', async () => {
 	const mockClient = createMockClient();
 	const mockPlayer = createMockPlayer();
-	const mockVoiceState = createMockVoiceState();
+	const mockOldState = createMockVoiceState('channel-1');
+	const mockNewState = createMockVoiceState('channel-2');
 
 	const mockTrack = {
 		url: 'https://example.com/track.mp3',
@@ -351,7 +357,51 @@ it('should not delete opus cache when track is from cache', async () => {
 	const voiceStateHandler = voiceStateCall?.[1];
 
 	if (voiceStateHandler) {
-		await voiceStateHandler(mockVoiceState);
+		await voiceStateHandler(mockOldState, mockNewState);
+	}
+
+	expect(
+		mockedOpusCacheManager.getInstance().deleteEntry,
+	).not.toHaveBeenCalled();
+});
+
+it('should not delete opus cache when channel did not change (mute/deafen)', async () => {
+	const mockClient = createMockClient();
+	const mockPlayer = createMockPlayer();
+	const mockOldState = createMockVoiceState('channel-1');
+	const mockNewState = createMockVoiceState('channel-1');
+
+	const mockTrack = {
+		url: 'https://example.com/track.mp3',
+		cleanTitle: 'Test Track',
+		author: 'Test Artist',
+		durationMS: 180000,
+		metadata: { isFromCache: false },
+	} as Track;
+
+	const mockQueue = {
+		currentTrack: mockTrack,
+	};
+
+	mockedUseQueue.mockReturnValue(mockQueue as ReturnType<typeof useQueue>);
+
+	(mockPlayer.context.provide as ReturnType<typeof vi.fn>).mockImplementation(
+		async (_, callback) => {
+			await callback();
+		},
+	);
+
+	useDiscordEventHandlers(mockClient, mockPlayer);
+
+	const mockOnCalls = (mockClient.on as ReturnType<typeof vi.fn>).mock
+		.calls as Array<[string, (...args: unknown[]) => void | Promise<void>]>;
+	const voiceStateCall = mockOnCalls.find(
+		(call) => call[0] === 'voiceStateUpdate',
+	);
+	const voiceStateHandler = voiceStateCall?.[1];
+
+	if (voiceStateHandler) {
+		await voiceStateHandler(mockOldState, mockNewState);
 	}
 
 	expect(

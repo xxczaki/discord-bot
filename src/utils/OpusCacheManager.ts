@@ -190,13 +190,20 @@ export class OpusCacheManager {
 			(existing) => existing.filename === entry.filename,
 		);
 
-		if (existingIndex !== -1) {
-			this.#entries[existingIndex] = entry;
-		} else {
-			this.#entries.push(entry);
+		if (!this.#fuse) {
+			if (existingIndex !== -1) {
+				this.#entries[existingIndex] = entry;
+			} else {
+				this.#entries.push(entry);
+			}
+			this.#rebuildFuseIndex();
+			return;
 		}
 
-		this.#rebuildFuseIndex();
+		if (existingIndex !== -1) {
+			this.#fuse.removeAt(existingIndex);
+		}
+		this.#fuse.add(entry);
 	}
 
 	removeEntry(filename: string): void {
@@ -205,8 +212,11 @@ export class OpusCacheManager {
 		);
 
 		if (index !== -1) {
-			this.#entries.splice(index, 1);
-			this.#rebuildFuseIndex();
+			if (this.#fuse) {
+				this.#fuse.removeAt(index);
+			} else {
+				this.#entries.splice(index, 1);
+			}
 		}
 	}
 

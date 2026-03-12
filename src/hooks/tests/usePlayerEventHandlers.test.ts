@@ -662,7 +662,6 @@ it('should return early from `playerFinish` when no matching entry exists', asyn
 });
 
 it('should handle `playerFinish` for a non-cached track with cache file', async () => {
-	vi.useFakeTimers();
 	const mockClient = createMockClient();
 	const mockPlayer = createMockPlayer();
 	const mockQueue = createMockQueue();
@@ -699,10 +698,7 @@ it('should handle `playerFinish` for a non-cached track with cache file', async 
 	).mock.calls.find((call) => call[0] === 'playerFinish')?.[1];
 
 	await playerStartHandler(mockQueue, mockTrack);
-
-	const finishPromise = playerFinishHandler(mockQueue, mockTrack);
-	await vi.advanceTimersByTimeAsync(1000);
-	await finishPromise;
+	await playerFinishHandler(mockQueue, mockTrack);
 
 	expect(mockFinishedEmbed.setFooter).toHaveBeenCalledWith({
 		text: expect.stringContaining('💾 Saved to the offline cache'),
@@ -711,12 +707,9 @@ it('should handle `playerFinish` for a non-cached track with cache file', async 
 		embeds: [mockFinishedEmbed],
 		components: [],
 	});
-
-	vi.useRealTimers();
 });
 
 it('should handle `playerFinish` for a cached track (`isFromCache`)', async () => {
-	vi.useFakeTimers();
 	const mockClient = createMockClient();
 	const mockPlayer = createMockPlayer();
 	const mockQueue = createMockQueue();
@@ -756,20 +749,14 @@ it('should handle `playerFinish` for a cached track (`isFromCache`)', async () =
 	).mock.calls.find((call) => call[0] === 'playerFinish')?.[1];
 
 	await playerStartHandler(mockQueue, mockTrack);
-
-	const finishPromise = playerFinishHandler(mockQueue, mockTrack);
-	await vi.advanceTimersByTimeAsync(1000);
-	await finishPromise;
+	await playerFinishHandler(mockQueue, mockTrack);
 
 	expect(mockFinishedEmbed.setFooter).toHaveBeenCalledWith({
 		text: expect.stringContaining('♻️ Was streamed from the offline cache'),
 	});
-
-	vi.useRealTimers();
 });
 
 it('should handle `playerFinish` when stat fails (empty catch)', async () => {
-	vi.useFakeTimers();
 	const mockClient = createMockClient();
 	const mockPlayer = createMockPlayer();
 	const mockQueue = createMockQueue();
@@ -806,22 +793,16 @@ it('should handle `playerFinish` when stat fails (empty catch)', async () => {
 	).mock.calls.find((call) => call[0] === 'playerFinish')?.[1];
 
 	await playerStartHandler(mockQueue, mockTrack);
-
-	const finishPromise = playerFinishHandler(mockQueue, mockTrack);
-	await vi.advanceTimersByTimeAsync(1000);
-	await finishPromise;
+	await playerFinishHandler(mockQueue, mockTrack);
 
 	expect(mockFinishedEmbed.setFooter).not.toHaveBeenCalled();
 	expect(mockResponse.edit).toHaveBeenCalledWith({
 		embeds: [mockFinishedEmbed],
 		components: [],
 	});
-
-	vi.useRealTimers();
 });
 
 it('should handle `playerFinish` when response.edit fails (empty catch)', async () => {
-	vi.useFakeTimers();
 	const mockClient = createMockClient();
 	const mockPlayer = createMockPlayer();
 	const mockQueue = createMockQueue();
@@ -854,18 +835,12 @@ it('should handle `playerFinish` when response.edit fails (empty catch)', async 
 	).mock.calls.find((call) => call[0] === 'playerFinish')?.[1];
 
 	await playerStartHandler(mockQueue, mockTrack);
-
-	const finishPromise = playerFinishHandler(mockQueue, mockTrack);
-	await vi.advanceTimersByTimeAsync(1000);
-	await finishPromise;
+	await playerFinishHandler(mockQueue, mockTrack);
 
 	expect(mockResponse.edit).toHaveBeenCalled();
-
-	vi.useRealTimers();
 });
 
 it('should handle `playerFinish` for cached track without `cacheFilename`', async () => {
-	vi.useFakeTimers();
 	const mockClient = createMockClient();
 	const mockPlayer = createMockPlayer();
 	const mockQueue = createMockQueue();
@@ -905,10 +880,7 @@ it('should handle `playerFinish` for cached track without `cacheFilename`', asyn
 	).mock.calls.find((call) => call[0] === 'playerFinish')?.[1];
 
 	await playerStartHandler(mockQueue, mockTrack);
-
-	const finishPromise = playerFinishHandler(mockQueue, mockTrack);
-	await vi.advanceTimersByTimeAsync(1000);
-	await finishPromise;
+	await playerFinishHandler(mockQueue, mockTrack);
 
 	expect(
 		mockedOpusCacheManager.getInstance().generateFilename,
@@ -916,12 +888,9 @@ it('should handle `playerFinish` for cached track without `cacheFilename`', asyn
 	expect(mockFinishedEmbed.setFooter).toHaveBeenCalledWith({
 		text: expect.stringContaining('♻️ Was streamed from the offline cache'),
 	});
-
-	vi.useRealTimers();
 });
 
 it('should show stream error message in `playerFinish` when track has `streamError` metadata', async () => {
-	vi.useFakeTimers();
 	const mockClient = createMockClient();
 	const mockPlayer = createMockPlayer();
 	const mockQueue = createMockQueue();
@@ -962,22 +931,16 @@ it('should show stream error message in `playerFinish` when track has `streamErr
 	).mock.calls.find((call) => call[0] === 'playerFinish')?.[1];
 
 	await playerStartHandler(mockQueue, mockTrack);
-
-	const finishPromise = playerFinishHandler(mockQueue, mockTrack);
-	await vi.advanceTimersByTimeAsync(1000);
-	await finishPromise;
+	await playerFinishHandler(mockQueue, mockTrack);
 
 	expect(mockedCreateTrackEmbed).toHaveBeenLastCalledWith(
 		mockTrack,
 		'Could not stream this track.',
 	);
 	expect(mockFinishedEmbed.setColor).toHaveBeenCalledWith('Orange');
-
-	vi.useRealTimers();
 });
 
 it('should not set footer for non-cached track when cache file has zero size', async () => {
-	vi.useFakeTimers();
 	const mockClient = createMockClient();
 	const mockPlayer = createMockPlayer();
 	const mockQueue = createMockQueue();
@@ -1014,12 +977,7 @@ it('should not set footer for non-cached track when cache file has zero size', a
 	).mock.calls.find((call) => call[0] === 'playerFinish')?.[1];
 
 	await playerStartHandler(mockQueue, mockTrack);
-
-	const finishPromise = playerFinishHandler(mockQueue, mockTrack);
-	await vi.advanceTimersByTimeAsync(1000);
-	await finishPromise;
+	await playerFinishHandler(mockQueue, mockTrack);
 
 	expect(mockFinishedEmbed.setFooter).not.toHaveBeenCalled();
-
-	vi.useRealTimers();
 });

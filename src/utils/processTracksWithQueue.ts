@@ -11,7 +11,6 @@ import pluralize from './pluralize';
 
 const MAX_CONCURRENCY = 3;
 const PROGRESS_UPDATE_INTERVAL_MS = 2000;
-const BATCH_SIZE = 10;
 
 type ProcessTrackOptions = {
 	items: string[];
@@ -67,40 +66,78 @@ export default async function processTracksWithQueue({
 		} catch {}
 	};
 
-	if (items.length <= 10) {
+	const playOptions = {
+		fallbackSearchEngine: 'youtubeSearch' as const,
+		nodeOptions: {
+			metadata: {
+				interaction,
+				...nodeMetadata,
+			} satisfies QueueMetadata,
+			defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
+		},
+		requestedBy: interaction.user,
+	};
+
+	const applyQueryMetadata = (
+		track: { metadata: unknown; setMetadata: (metadata: unknown) => void },
+		itemIndex: number,
+	) => {
+		/* v8 ignore start */
+		if (nodeMetadata.queries) {
+			const queries = nodeMetadata.queries as Record<string, string>;
+			const queryForTrack = queries[itemIndex.toString()];
+
+			if (queryForTrack) {
+				track.setMetadata({
+					...(isObject(track.metadata) ? track.metadata : {}),
+					originalQuery: queryForTrack,
+				});
+			}
+		}
+		/* v8 ignore stop */
+	};
+
+	const [firstItem, ...remainingItems] = items;
+
+	if (interaction.channel?.isSendable()) {
+		try {
+			await interaction.channel.sendTyping();
+		} catch {}
+	}
+
+	try {
+		const result = await player.play(voiceChannel, firstItem, {
+			searchEngine: determineSearchEngine(firstItem),
+			...playOptions,
+		});
+
+		if (result.track) {
+			applyQueryMetadata(result.track, 0);
+		}
+
+		enqueued++;
+		processed++;
+	} catch (error) {
+		processed++;
+		onError(error, 'Queue processing error');
+	}
+
+	if (remainingItems.length > 0) {
 		tracksQueue.on('completed', () => updateProgress());
 
 		await tracksQueue.addAll(
-			items.map((item, index) => async () => {
+			remainingItems.map((item, index) => async () => {
+				const itemIndex = index + 1;
+
 				try {
 					const result = await player.play(voiceChannel, item, {
 						searchEngine: determineSearchEngine(item),
-						fallbackSearchEngine: 'youtubeSearch',
-						nodeOptions: {
-							metadata: {
-								interaction,
-								...nodeMetadata,
-							} satisfies QueueMetadata,
-							defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
-						},
-						requestedBy: interaction.user,
+						...playOptions,
 					});
 
-					/* v8 ignore start */
-					if (result.track && nodeMetadata.queries) {
-						const queries = nodeMetadata.queries as Record<string, string>;
-						const queryForTrack = queries[index.toString()];
-
-						if (queryForTrack) {
-							result.track.setMetadata({
-								...(isObject(result.track.metadata)
-									? result.track.metadata
-									: {}),
-								originalQuery: queryForTrack,
-							});
-						}
+					if (result.track) {
+						applyQueryMetadata(result.track, itemIndex);
 					}
-					/* v8 ignore stop */
 
 					enqueued++;
 					processed++;
@@ -113,77 +150,6 @@ export default async function processTracksWithQueue({
 					return null;
 				}
 			}),
-		);
-	} else {
-		const searchAndAddBatch = async (
-			batch: string[],
-			batchStartIndex: number,
-		) => {
-			const results = await Promise.allSettled(
-				batch.map(async (item, batchIndex) => {
-					try {
-						const result = await player.play(voiceChannel, item, {
-							searchEngine: determineSearchEngine(item),
-							fallbackSearchEngine: 'youtubeSearch',
-							nodeOptions: {
-								metadata: {
-									interaction,
-									...nodeMetadata,
-								} satisfies QueueMetadata,
-								defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
-							},
-							requestedBy: interaction.user,
-						});
-
-						/* v8 ignore start */
-						if (result.track && nodeMetadata.queries) {
-							const queries = nodeMetadata.queries as Record<string, string>;
-							const itemIndex = batchStartIndex + batchIndex;
-							const queryForTrack = queries[itemIndex.toString()];
-
-							if (queryForTrack) {
-								result.track.setMetadata({
-									...(isObject(result.track.metadata)
-										? result.track.metadata
-										: {}),
-									originalQuery: queryForTrack,
-								});
-							}
-						}
-						/* v8 ignore stop */
-
-						processed++;
-						return result;
-					} catch (error) {
-						processed++;
-						onError(error, `Batch processing error for item: ${item}`);
-						return null;
-					}
-				}),
-			);
-
-			const batchEnqueued = results.filter(
-				(result) => result.status === 'fulfilled' && result.value,
-			).length;
-			enqueued += batchEnqueued;
-
-			await updateProgress();
-
-			return batchEnqueued;
-		};
-
-		const batches: string[][] = [];
-		const batchIndices: number[] = [];
-
-		for (let i = 0; i < items.length; i += BATCH_SIZE) {
-			batches.push(items.slice(i, i + BATCH_SIZE));
-			batchIndices.push(i);
-		}
-
-		await tracksQueue.addAll(
-			batches.map(
-				(batch, index) => () => searchAndAddBatch(batch, batchIndices[index]),
-			),
 		);
 	}
 

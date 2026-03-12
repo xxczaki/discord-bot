@@ -20,8 +20,6 @@ import { resetPresence, setPresence } from '../utils/presenceManager';
 import { QueueRecoveryService } from '../utils/QueueRecoveryService';
 import { StatsHandler } from '../utils/StatsHandler';
 
-const FINISH_DELAY_MS = 1000;
-
 const statsHandler = StatsHandler.getInstance();
 const queueRecoveryService = QueueRecoveryService.getInstance();
 
@@ -135,8 +133,6 @@ export default function usePlayerEventHandlers(
 
 		nowPlayingMessages.delete(guildId);
 
-		await new Promise((resolve) => setTimeout(resolve, FINISH_DELAY_MS));
-
 		const hadStreamError =
 			isObject(track.metadata) && 'streamError' in track.metadata;
 
@@ -168,11 +164,15 @@ export default function usePlayerEventHandlers(
 					text: `♻️ Was streamed from the offline cache (${prettyBytes(stats.size)})`,
 				});
 			} else {
-				const filename = opusCacheManager.generateFilename({
-					title: track.cleanTitle,
-					author: track.author,
-					durationMS: track.durationMS,
-				});
+				const filename =
+					isObject(track.metadata) &&
+					typeof track.metadata.cacheFilename === 'string'
+						? track.metadata.cacheFilename
+						: opusCacheManager.generateFilename({
+								title: track.cleanTitle,
+								author: track.author,
+								durationMS: track.durationMS,
+							});
 				const filePath = opusCacheManager.getFilePath(filename);
 				const stats = await stat(filePath);
 

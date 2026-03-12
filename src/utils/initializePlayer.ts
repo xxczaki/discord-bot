@@ -145,21 +145,6 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 				return stream;
 			}
 
-			const durationSeconds = Math.round(track.durationMS / 1000);
-			const existingEntry = opusCacheManager.findMatch(
-				track.cleanTitle,
-				track.author,
-				durationSeconds,
-			);
-
-			if (existingEntry) {
-				if (isReadable) {
-					return readable;
-				}
-
-				return stream;
-			}
-
 			const interceptor = new InterceptedStream();
 
 			const trackMetadata = {
@@ -169,6 +154,11 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 			};
 			const filename = opusCacheManager.generateFilename(trackMetadata);
 			const filePath = opusCacheManager.getFilePath(filename);
+
+			track.setMetadata({
+				...(track.metadata ?? {}),
+				cacheFilename: filename,
+			});
 
 			try {
 				activeWrites.add(filePath);

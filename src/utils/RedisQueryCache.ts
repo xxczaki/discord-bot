@@ -60,24 +60,33 @@ export class RedisQueryCache implements QueryCacheProvider<Track> {
 	async getData(): Promise<DiscordPlayerQueryResultCache<Track<unknown>>[]> {
 		const player = useMainPlayer();
 
-		const data = await this.redis.keys(this.#createKey('*'));
+		const results: DiscordPlayerQueryResultCache<Track<unknown>>[] = [];
+		const stream = this.redis.scanStream({
+			match: this.#createKey('*'),
+			count: 200,
+		});
 
-		const serialized = await this.redis.mget(data);
+		return new Promise((resolve, reject) => {
+			stream.on('data', async (keys: string[] = []) => {
+				stream.pause();
 
-		const parsed = serialized
-			.filter(Boolean)
-			.map((item) => {
-				if (!item) return null;
+				if (keys.length > 0) {
+					const serialized = await this.redis.mget(keys);
 
-				return deserialize(player, JSON.parse(item));
-			})
-			.filter(Boolean) as Track[];
+					for (const item of serialized) {
+						if (!item) continue;
 
-		const res = parsed.map(
-			(item) => new DiscordPlayerQueryResultCache(item, 0),
-		);
+						const parsed = deserialize(player, JSON.parse(item)) as Track;
+						results.push(new DiscordPlayerQueryResultCache(parsed, 0));
+					}
+				}
 
-		return res;
+				stream.resume();
+			});
+
+			stream.on('end', () => resolve(results));
+			stream.on('error', reject);
+		});
 	}
 
 	async resolve(context: QueryCacheResolverContext): Promise<SearchResult> {

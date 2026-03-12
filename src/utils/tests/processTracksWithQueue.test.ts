@@ -44,6 +44,8 @@ function createMockInteraction(): ProcessingInteraction {
 		user: { id: 'user123' } as User,
 		channel: {
 			id: 'channel123',
+			isSendable: vi.fn().mockReturnValue(true),
+			sendTyping: vi.fn().mockResolvedValue(undefined),
 		} as unknown as ProcessingInteraction['channel'],
 		reply: vi.fn().mockResolvedValue(undefined),
 	} as ProcessingInteraction;
@@ -109,7 +111,7 @@ it('should use conservative concurrency limits', async () => {
 	expect(mockedQueue).toHaveBeenCalledWith({ concurrency: 3 });
 });
 
-it('should return enqueued count for small track lists', async () => {
+it('should return enqueued count for track lists', async () => {
 	const mockPlayer = createMockPlayer();
 	const mockGuildQueue = createMockGuildQueue();
 	const mockQueueInstance = {
@@ -137,6 +139,39 @@ it('should return enqueued count for small track lists', async () => {
 	});
 
 	expect(result).toEqual({ enqueued: 3 });
+});
+
+it('should play first track directly and queue remaining items', async () => {
+	const mockPlayer = createMockPlayer();
+	const mockGuildQueue = createMockGuildQueue();
+	const mockQueueInstance = {
+		on: vi.fn(),
+		addAll: vi
+			.fn()
+			.mockImplementation(async (tasks: (() => Promise<unknown>)[]) => {
+				await Promise.all(tasks.map((task) => task()));
+			}),
+		onIdle: vi.fn().mockResolvedValue(undefined),
+		pending: 0,
+	} as Partial<Queue>;
+
+	mockedUseMainPlayer.mockReturnValue(mockPlayer as Player);
+	mockedUseQueue.mockReturnValue(mockGuildQueue as unknown as GuildQueue);
+	mockedQueue.mockImplementation(function () {
+		return mockQueueInstance as Queue;
+	});
+
+	await processTracksWithQueue({
+		items: EXAMPLE_TRACKS,
+		voiceChannel: {} as VoiceBasedChannel,
+		interaction: createMockInteraction(),
+		embed: createMockEmbed(),
+	});
+
+	expect(mockPlayer.play).toHaveBeenCalledTimes(3);
+	expect(mockQueueInstance.addAll).toHaveBeenCalledWith(
+		expect.arrayContaining([expect.any(Function), expect.any(Function)]),
+	);
 });
 
 it('should handle errors gracefully with custom `onError` handler', async () => {
@@ -177,7 +212,7 @@ it('should handle errors gracefully with custom `onError` handler', async () => 
 	expect(result).toEqual({ enqueued: 0 });
 });
 
-it('should use batch processing for large track lists', async () => {
+it('should handle large track lists with per-item concurrency', async () => {
 	const largeTrackList = Array.from({ length: 15 }, (_, i) => `track-${i}`);
 	const mockPlayer = createMockPlayer();
 	const mockGuildQueue = createMockGuildQueue();
@@ -205,11 +240,16 @@ it('should use batch processing for large track lists', async () => {
 		embed: createMockEmbed(),
 	});
 
-	expect(mockPlayer.play).toHaveBeenCalled();
+	expect(mockPlayer.play).toHaveBeenCalledTimes(15);
+	expect(mockQueueInstance.addAll).toHaveBeenCalledWith(
+		expect.arrayContaining(
+			Array.from({ length: 14 }, () => expect.any(Function)),
+		),
+	);
 	expect(result).toEqual({ enqueued: 15 });
 });
 
-it('should handle failed play attempts for large batches', async () => {
+it('should handle failed play attempts for large lists', async () => {
 	const largeTrackList = Array.from({ length: 15 }, (_, i) => `track-${i}`);
 	const mockPlayer = {
 		play: vi.fn().mockRejectedValue(new Error('Play failed')),
@@ -256,11 +296,7 @@ it('should store queries in track metadata when provided', async () => {
 	const mockGuildQueue = createMockGuildQueue();
 	const mockQueueInstance = {
 		on: vi.fn(),
-		addAll: vi
-			.fn()
-			.mockImplementation(async (tasks: (() => Promise<unknown>)[]) => {
-				await Promise.all(tasks.map((task) => task()));
-			}),
+		addAll: vi.fn().mockResolvedValue(undefined),
 		onIdle: vi.fn().mockResolvedValue(undefined),
 		pending: 0,
 	} as Partial<Queue>;
@@ -299,11 +335,7 @@ it('should handle tracks with non-object metadata when storing queries', async (
 	const mockGuildQueue = createMockGuildQueue();
 	const mockQueueInstance = {
 		on: vi.fn(),
-		addAll: vi
-			.fn()
-			.mockImplementation(async (tasks: (() => Promise<unknown>)[]) => {
-				await Promise.all(tasks.map((task) => task()));
-			}),
+		addAll: vi.fn().mockResolvedValue(undefined),
 		onIdle: vi.fn().mockResolvedValue(undefined),
 		pending: 0,
 	} as Partial<Queue>;
@@ -327,7 +359,7 @@ it('should handle tracks with non-object metadata when storing queries', async (
 	});
 });
 
-it('should handle metadata assignment in large batch processing', async () => {
+it('should handle metadata assignment in large list processing', async () => {
 	const largeTrackList = Array.from({ length: 15 }, (_, i) => `track-${i}`);
 	const mockSetMetadata = vi.fn();
 	const mockTrack = {

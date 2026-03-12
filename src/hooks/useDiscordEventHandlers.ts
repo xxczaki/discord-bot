@@ -64,7 +64,7 @@ export default function useDiscordEventHandlers(
 		});
 	});
 
-	client.on('voiceStateUpdate', async (oldState) => {
+	client.on('voiceStateUpdate', async (oldState, newState) => {
 		const context = {
 			guild: oldState.guild,
 		};
@@ -88,6 +88,10 @@ export default function useDiscordEventHandlers(
 				queueSaveTimeout = null;
 			}, QUEUE_SAVE_DEBOUNCE_MS);
 			/* v8 ignore stop */
+
+			if (oldState.channelId === newState.channelId) {
+				return;
+			}
 
 			const track = queue.currentTrack;
 
