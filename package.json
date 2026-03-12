@@ -59,6 +59,9 @@
 	"pnpm": {
 		"overrides": {
 			"libsodium-wrappers": "-"
+		},
+		"patchedDependencies": {
+			"youtubei.js@16.0.1": "patches/youtubei.js@16.0.1.patch"
 		}
 	}
 }

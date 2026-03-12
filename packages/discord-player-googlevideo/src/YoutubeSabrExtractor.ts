@@ -107,8 +107,6 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 
 		this.#innertube = await Innertube.create({
 			cache: new UniversalCache(true, '/tmp/.cache'),
-			// Workaround for https://github.com/LuanRT/YouTube.js/issues/1146
-			player_id: '4eecba16',
 		});
 
 		this.protocols = ['ytsearch', 'youtube'];
@@ -172,7 +170,13 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 		/* v8 ignore start */
 		this.#startStream(videoId, outputStream).catch((error) => {
 			console.error('[YoutubeSabrExtractor] Stream error:', error);
-			outputStream.destroy(error);
+			if (track.metadata && typeof track.metadata === 'object') {
+				(track.metadata as Record<string, unknown>).streamError = error;
+			}
+
+			if (!outputStream.destroyed) {
+				outputStream.end();
+			}
 		});
 		/* v8 ignore stop */
 
@@ -272,7 +276,7 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 			console.error('[YoutubeSabrExtractor] Stream error:', error);
 			serverAbrStream.removeAllListeners();
 			if (!outputStream.destroyed) {
-				outputStream.destroy(error);
+				outputStream.end();
 			}
 		});
 	}

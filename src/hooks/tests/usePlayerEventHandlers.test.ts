@@ -7,7 +7,12 @@ import {
 	type MessageComponentInteraction,
 	type TextChannel,
 } from 'discord.js';
-import type { GuildQueue, Player, Track } from 'discord-player';
+import {
+	type GuildQueue,
+	type Player,
+	type Track,
+	TrackSkipReason,
+} from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
 import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../../constants/miscellaneous';
 import createSmartInteractionHandler from '../../utils/createSmartInteractionHandler';
@@ -464,7 +469,7 @@ it('should handle `playerSkip` event and delete opus cache entry for non-cached 
 		mockPlayer.events.on as ReturnType<typeof vi.fn>
 	).mock.calls.find((call) => call[0] === 'playerSkip')?.[1];
 
-	await playerSkipHandler(mockQueue, mockTrack);
+	await playerSkipHandler(mockQueue, mockTrack, TrackSkipReason.Manual);
 
 	expect(mockedOpusCacheManager.getInstance().deleteEntry).toHaveBeenCalledWith(
 		'mock_filename.opus',
@@ -485,7 +490,7 @@ it('should not delete opus cache entry for cached tracks on `playerSkip`', async
 		mockPlayer.events.on as ReturnType<typeof vi.fn>
 	).mock.calls.find((call) => call[0] === 'playerSkip')?.[1];
 
-	await playerSkipHandler(mockQueue, mockTrack);
+	await playerSkipHandler(mockQueue, mockTrack, TrackSkipReason.Manual);
 
 	expect(
 		mockedOpusCacheManager.getInstance().deleteEntry,
@@ -506,11 +511,60 @@ it('should not delete opus cache entry when track metadata is not an object', as
 		mockPlayer.events.on as ReturnType<typeof vi.fn>
 	).mock.calls.find((call) => call[0] === 'playerSkip')?.[1];
 
-	await playerSkipHandler(mockQueue, mockTrack);
+	await playerSkipHandler(mockQueue, mockTrack, TrackSkipReason.Manual);
 
 	expect(mockedOpusCacheManager.getInstance().deleteEntry).toHaveBeenCalledWith(
 		'mock_filename.opus',
 	);
+});
+
+it('should send warning embed when `playerSkip` reason is `NoStream`', async () => {
+	const mockClient = createMockClient();
+	const mockPlayer = createMockPlayer();
+	const mockQueue = createMockQueue();
+	const mockChannel = createMockChannel();
+	const mockTrack = createMockTrack();
+
+	(mockQueue.metadata.interaction.channel as TextChannel) = mockChannel;
+
+	usePlayerEventHandlers(mockClient, mockPlayer);
+
+	const playerSkipHandler = (
+		mockPlayer.events.on as ReturnType<typeof vi.fn>
+	).mock.calls.find((call) => call[0] === 'playerSkip')?.[1];
+
+	await playerSkipHandler(mockQueue, mockTrack, TrackSkipReason.NoStream);
+
+	expect(mockChannel.send).toHaveBeenCalledWith({
+		embeds: [
+			expect.objectContaining({
+				data: expect.objectContaining({
+					title: 'Track Skipped',
+					color: expect.any(Number),
+				}),
+			}),
+		],
+	});
+});
+
+it('should not send warning embed when `playerSkip` reason is not `NoStream`', async () => {
+	const mockClient = createMockClient();
+	const mockPlayer = createMockPlayer();
+	const mockQueue = createMockQueue();
+	const mockChannel = createMockChannel();
+	const mockTrack = createMockTrack();
+
+	(mockQueue.metadata.interaction.channel as TextChannel) = mockChannel;
+
+	usePlayerEventHandlers(mockClient, mockPlayer);
+
+	const playerSkipHandler = (
+		mockPlayer.events.on as ReturnType<typeof vi.fn>
+	).mock.calls.find((call) => call[0] === 'playerSkip')?.[1];
+
+	await playerSkipHandler(mockQueue, mockTrack, TrackSkipReason.Manual);
+
+	expect(mockChannel.send).not.toHaveBeenCalled();
 });
 
 it('should handle unknown button interaction by falling through to catch block', async () => {
@@ -860,6 +914,62 @@ it('should handle `playerFinish` for cached track without `cacheFilename`', asyn
 	expect(mockFinishedEmbed.setFooter).toHaveBeenCalledWith({
 		text: expect.stringContaining('♻️ Was streamed from the offline cache'),
 	});
+
+	vi.useRealTimers();
+});
+
+it('should show stream error message in `playerFinish` when track has `streamError` metadata', async () => {
+	vi.useFakeTimers();
+	const mockClient = createMockClient();
+	const mockPlayer = createMockPlayer();
+	const mockQueue = createMockQueue();
+	const mockTrack = createMockTrack({
+		id: 'finish-track-error',
+		metadata: { streamError: new Error('Stream failed') },
+	});
+	const mockChannel = createMockChannel();
+	const mockResponse = {
+		awaitMessageComponent: vi.fn(),
+		edit: vi.fn().mockResolvedValue(undefined),
+	};
+
+	(mockQueue.metadata.interaction.channel as TextChannel) = mockChannel;
+	(mockChannel.send as ReturnType<typeof vi.fn>).mockResolvedValue(
+		mockResponse,
+	);
+	mockResponse.awaitMessageComponent.mockRejectedValue(new Error('timeout'));
+
+	const mockFinishedEmbed = {
+		title: 'Finished Embed',
+		setFooter: vi.fn(),
+		setColor: vi.fn(),
+	};
+	mockedCreateTrackEmbed
+		.mockResolvedValueOnce({ title: 'Mock Embed' } as never)
+		.mockResolvedValueOnce(mockFinishedEmbed as never);
+
+	vi.mocked(stat).mockRejectedValue(new Error('ENOENT'));
+
+	usePlayerEventHandlers(mockClient, mockPlayer);
+
+	const playerStartHandler = (
+		mockPlayer.events.on as ReturnType<typeof vi.fn>
+	).mock.calls.find((call) => call[0] === 'playerStart')?.[1];
+	const playerFinishHandler = (
+		mockPlayer.events.on as ReturnType<typeof vi.fn>
+	).mock.calls.find((call) => call[0] === 'playerFinish')?.[1];
+
+	await playerStartHandler(mockQueue, mockTrack);
+
+	const finishPromise = playerFinishHandler(mockQueue, mockTrack);
+	await vi.advanceTimersByTimeAsync(1000);
+	await finishPromise;
+
+	expect(mockedCreateTrackEmbed).toHaveBeenLastCalledWith(
+		mockTrack,
+		'Could not stream this track.',
+	);
+	expect(mockFinishedEmbed.setColor).toHaveBeenCalledWith('Orange');
 
 	vi.useRealTimers();
 });

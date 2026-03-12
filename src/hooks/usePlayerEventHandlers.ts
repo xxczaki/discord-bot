@@ -5,10 +5,11 @@ import {
 	ButtonBuilder,
 	ButtonStyle,
 	type Client,
+	EmbedBuilder,
 	type InteractionResponse,
 	type Message,
 } from 'discord.js';
-import type { Player, Track } from 'discord-player';
+import { type Player, type Track, TrackSkipReason } from 'discord-player';
 import prettyBytes from 'pretty-bytes';
 import createSmartInteractionHandler from '../utils/createSmartInteractionHandler';
 import createTrackEmbed from '../utils/createTrackEmbed';
@@ -122,7 +123,17 @@ export default function usePlayerEventHandlers(
 
 		await new Promise((resolve) => setTimeout(resolve, FINISH_DELAY_MS));
 
-		const finishedEmbed = await createTrackEmbed(track, '✅ Finished playing.');
+		const hadStreamError =
+			isObject(track.metadata) && 'streamError' in track.metadata;
+
+		const finishedEmbed = await createTrackEmbed(
+			track,
+			hadStreamError ? 'Could not stream this track.' : '✅ Finished playing.',
+		);
+
+		if (hadStreamError) {
+			finishedEmbed.setColor('Orange');
+		}
 
 		try {
 			const opusCacheManager = OpusCacheManager.getInstance();
@@ -179,7 +190,20 @@ export default function usePlayerEventHandlers(
 		resetPresence(client);
 	});
 
-	player.events.on('playerSkip', async (_queue, track) => {
+	player.events.on('playerSkip', async (queue, track, reason) => {
+		if (reason === TrackSkipReason.NoStream) {
+			const embed = new EmbedBuilder()
+				.setTitle('Track Skipped')
+				.setDescription(
+					`Could not stream **${track.title}** by ${track.author}. Skipping to the next track.`,
+				)
+				.setColor('Orange');
+
+			try {
+				await queue.metadata.interaction.channel.send({ embeds: [embed] });
+			} catch {}
+		}
+
 		if (isObject(track.metadata) && track.metadata.isFromCache) {
 			return;
 		}

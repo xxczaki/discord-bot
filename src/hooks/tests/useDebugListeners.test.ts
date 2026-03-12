@@ -5,10 +5,8 @@ import type { Client, TextChannel } from 'discord.js';
 import { EmbedBuilder } from 'discord.js';
 import type { GuildQueue, Player } from 'discord-player';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import enqueueTracks from '../../utils/enqueueTracks';
 import getEnvironmentVariable from '../../utils/getEnvironmentVariable';
 import logger from '../../utils/logger';
-import { QueueRecoveryService } from '../../utils/QueueRecoveryService';
 import useDebugListeners from '../useDebugListeners';
 
 const TEST_DEBUG_CHANNEL_ID = 'test-debug-channel-id';
@@ -33,10 +31,6 @@ vi.mock('../../utils/OpusCacheManager', () => ({
 	OpusCacheManager: {
 		getInstance: vi.fn(() => mockOpusCacheManagerInstance),
 	},
-}));
-
-vi.mock('../../utils/enqueueTracks', () => ({
-	default: vi.fn(),
 }));
 
 vi.mock('../../utils/getEnvironmentVariable', () => ({
@@ -64,8 +58,6 @@ const mockedCaptureException = vi.mocked(captureException);
 const mockedGetEnvironmentVariable = vi.mocked(getEnvironmentVariable);
 const mockedLogger = vi.mocked(logger);
 const mockedCreateServer = vi.mocked(createServer);
-const mockedEnqueueTracks = vi.mocked(enqueueTracks);
-const mockedQueueRecoveryService = vi.mocked(QueueRecoveryService);
 
 let mockClient: Client<boolean>;
 let mockPlayer: Player;
@@ -101,10 +93,6 @@ beforeEach(() => {
 
 	mockedCaptureException.mockReturnValue(TEST_SENTRY_ID);
 
-	mockedQueueRecoveryService.getInstance.mockReturnValue(
-		null as unknown as QueueRecoveryService,
-	);
-
 	mockServer = {
 		listen: vi.fn(),
 		close: vi.fn(),
@@ -120,11 +108,7 @@ beforeEach(() => {
 
 	mockChannel = {
 		isSendable: vi.fn().mockReturnValue(true),
-		send: vi.fn().mockResolvedValue({
-			edit: vi.fn().mockResolvedValue(undefined),
-			author: { id: 'test-user' },
-			channel: mockChannel,
-		}),
+		send: vi.fn().mockResolvedValue(undefined),
 	} as unknown as TextChannel;
 
 	mockClient = {
@@ -180,67 +164,28 @@ const getPlayerEventsErrorHandler = () => {
 	) => Promise<void>;
 };
 
-const expectBasicErrorHandling = (testError: Error) => {
-	expect(mockedLogger.error).toHaveBeenCalledWith(testError, 'Player error');
-	expect(mockedCaptureException).toHaveBeenCalledWith(testError);
-};
-
-const createMockQueueRecoveryInstance = (
-	overrides: Partial<{
-		tracks: { url: string; title?: string; author?: string }[];
-		progress: number;
-		savedAt: number | null;
-	}> = {},
-) => {
-	const defaults = {
-		tracks: [
-			{ url: 'test-track-1', title: 'Test Track 1', author: 'Test Artist' },
-		],
-		progress: 0,
-		savedAt: null,
-	};
-	const contents = { ...defaults, ...overrides };
-
-	return {
-		getContents: vi.fn().mockResolvedValue(contents),
-		saveQueue: vi.fn(),
-		deleteQueue: vi.fn(),
-		getGuildId: vi.fn(),
-		getChannelId: vi.fn(),
-	};
-};
-
 const createMockQueue = (
 	overrides: Partial<{
 		channel: unknown;
 		currentTrack: unknown;
 		metadata: unknown;
+		node: unknown;
 	}> = {},
 ) => {
 	const defaults = {
 		channel: { id: 'test-voice-channel' },
 		currentTrack: {
 			url: 'test-current-track',
+			title: 'Test Track',
 			cleanTitle: 'Test Track',
 			author: 'Test Artist',
 			durationMS: 180000,
 			metadata: { someProperty: 'value' },
 		},
-		delete: vi.fn(),
+		node: { skip: vi.fn() },
 	};
 
 	return { ...defaults, ...overrides } as unknown as GuildQueue;
-};
-
-const setupMockMessage = () => {
-	const mockMessageEdit = vi.fn().mockResolvedValue(undefined);
-	const mockMessage = {
-		edit: mockMessageEdit,
-		author: { id: 'test-user' },
-		channel: mockChannel,
-	};
-	mockChannel.send = vi.fn().mockResolvedValue(mockMessage);
-	return { mockMessage, mockMessageEdit };
 };
 
 describe('Basic Setup', () => {
@@ -379,30 +324,65 @@ describe('Client Error Handling', () => {
 });
 
 describe('Player Error Handling', () => {
-	it('should handle player error when Sentry returns null', async () => {
+	it('should report error to Sentry and send embed to debug channel', async () => {
+		const testError = new Error('Test player error');
+		const mockQueue = createMockQueue();
+
+		useDebugListeners(mockClient, mockPlayer);
+		const errorHandler = getPlayerEventsErrorHandler();
+		await errorHandler(mockQueue, testError);
+
+		expect(mockedLogger.error).toHaveBeenCalledWith(testError, 'Player error');
+		expect(mockedCaptureException).toHaveBeenCalledWith(testError);
+		expect(mockChannel.send).toHaveBeenCalledWith({ embeds: [mockEmbed] });
+		expect(mockEmbed.setTitle).toHaveBeenCalledWith('Player Error');
+		expect(mockEmbed.setDescription).toHaveBeenCalledWith(
+			'Could not stream **Test Track** by Test Artist. Skipping to the next track.',
+		);
+		expect(mockEmbed.setColor).toHaveBeenCalledWith('Red');
+		expect(mockEmbed.setFields).toHaveBeenCalledWith([
+			{
+				name: 'Sentry Issue ID',
+				value: `\`${TEST_SENTRY_ID}\``,
+			},
+		]);
+	});
+
+	it('should show "Unavailable" when Sentry returns null', async () => {
 		mockedCaptureException.mockReturnValue(null as unknown as string);
 
 		const testError = new Error('Test player error');
 		const mockQueue = createMockQueue();
-		const { mockMessageEdit } = setupMockMessage();
 
 		useDebugListeners(mockClient, mockPlayer);
-
 		const errorHandler = getPlayerEventsErrorHandler();
-
 		await errorHandler(mockQueue, testError);
 
-		expectBasicErrorHandling(testError);
+		expect(mockedCaptureException).toHaveBeenCalledWith(testError);
 		expect(mockEmbed.setFields).toHaveBeenCalledWith([
 			{
 				name: 'Sentry Issue ID',
 				value: 'Unavailable',
 			},
 		]);
-		expect(mockMessageEdit).toHaveBeenCalledWith({ embeds: [mockEmbed] });
 	});
 
-	it('should handle NoResultError without Sentry reporting or recovery', async () => {
+	it('should handle player error with no queue (unknown track)', async () => {
+		const testError = new Error('Test player error');
+
+		useDebugListeners(mockClient, mockPlayer);
+		const errorHandler = getPlayerErrorHandler();
+		await errorHandler(testError);
+
+		expect(mockedLogger.error).toHaveBeenCalledWith(testError, 'Player error');
+		expect(mockedCaptureException).toHaveBeenCalledWith(testError);
+		expect(mockChannel.send).toHaveBeenCalledWith({ embeds: [mockEmbed] });
+		expect(mockEmbed.setDescription).toHaveBeenCalledWith(
+			'Could not stream Unknown track. Skipping to the next track.',
+		);
+	});
+
+	it('should handle NoResultError without Sentry reporting', async () => {
 		const testError = new Error('Test NoResult error');
 		testError.name = 'NoResultError';
 		const mockQueue = createMockQueue({
@@ -468,346 +448,12 @@ describe('Player Error Handling', () => {
 			'Could not play Unknown track.\n\nThis track appears to be unplayable (possibly region-locked, removed, or restricted). The queue will continue with the next track.',
 		);
 	});
-
-	it('should handle player error with no queue', async () => {
-		const testError = new Error('Test player error');
-
-		useDebugListeners(mockClient, mockPlayer);
-		const errorHandler = getPlayerErrorHandler();
-		await errorHandler(testError);
-
-		expectBasicErrorHandling(testError);
-		expect(mockChannel.send).toHaveBeenCalledWith({ embeds: [mockEmbed] });
-		expect(mockEmbed.setDescription).toHaveBeenCalledWith(
-			'🛑 Unable to recover – no queue found.',
-		);
-	});
-
-	it('should handle player error with queue but no voice channel', async () => {
-		const testError = new Error('Test player error');
-		const mockQueue = createMockQueue({ channel: null, currentTrack: null });
-
-		useDebugListeners(mockClient, mockPlayer);
-		const errorHandler = getPlayerEventsErrorHandler();
-		await errorHandler(mockQueue, testError);
-
-		expectBasicErrorHandling(testError);
-		expect(mockChannel.send).toHaveBeenCalledWith({ embeds: [mockEmbed] });
-		expect(mockEmbed.setDescription).toHaveBeenLastCalledWith(
-			'Unable to recover. The queue has no voice channel associated with it.\n\nTip: Try using the `/recover` command directly.',
-		);
-	});
-});
-
-describe('Queue Recovery', () => {
-	it('should handle player error with successful recovery', async () => {
-		const mockOriginalChannel = {
-			...mockChannel,
-			isSendable: vi.fn().mockReturnValue(true),
-			send: vi.fn().mockResolvedValue({
-				edit: vi.fn().mockResolvedValue(undefined),
-			}),
-		};
-
-		const mockQueueRecoveryInstance = createMockQueueRecoveryInstance({
-			tracks: [
-				{ url: 'test-track-1', title: 'Track 1', author: 'Artist 1' },
-				{ url: 'test-track-2', title: 'Track 2', author: 'Artist 2' },
-			],
-			progress: 5000,
-			savedAt: null,
-		});
-		mockedQueueRecoveryService.getInstance.mockReturnValue(
-			mockQueueRecoveryInstance as unknown as QueueRecoveryService,
-		);
-
-		const mockQueue = createMockQueue({
-			metadata: { interaction: { channel: mockOriginalChannel } },
-		});
-		const { mockMessageEdit } = setupMockMessage();
-		const testError = new Error('Test player error');
-
-		mockedEnqueueTracks.mockResolvedValue(undefined);
-
-		useDebugListeners(mockClient, mockPlayer);
-		const errorHandler = getPlayerEventsErrorHandler();
-		await errorHandler(mockQueue, testError);
-
-		expectBasicErrorHandling(testError);
-		expect(mockQueueRecoveryInstance.getContents).toHaveBeenCalledWith(
-			mockPlayer,
-		);
-		expect(mockOriginalChannel.send).toHaveBeenCalled();
-		expect(mockedEnqueueTracks).toHaveBeenCalledWith({
-			tracks: [
-				{ url: 'test-track-1', title: 'Track 1', author: 'Artist 1' },
-				{ url: 'test-track-2', title: 'Track 2', author: 'Artist 2' },
-			],
-			progress: 5000,
-			voiceChannel: mockQueue.channel,
-			interaction: expect.objectContaining({
-				editReply: expect.any(Function),
-				reply: expect.any(Function),
-				user: expect.any(Object),
-				channel: mockOriginalChannel,
-			}),
-		});
-		expect(mockMessageEdit).toHaveBeenCalled();
-	});
-
-	it('should handle messageEditHandler with flags in options', async () => {
-		const mockOriginalChannel = {
-			...mockChannel,
-			isSendable: vi.fn().mockReturnValue(true),
-			send: vi.fn().mockResolvedValue({
-				edit: vi.fn().mockResolvedValue(undefined),
-			}),
-		};
-
-		const mockQueueRecoveryInstance = createMockQueueRecoveryInstance({
-			tracks: [{ url: 'test-track-1', title: 'Track 1', author: 'Artist 1' }],
-			progress: 0,
-			savedAt: null,
-		});
-
-		mockedQueueRecoveryService.getInstance.mockReturnValue(
-			mockQueueRecoveryInstance as unknown as QueueRecoveryService,
-		);
-
-		const mockQueue = createMockQueue({
-			metadata: { interaction: { channel: mockOriginalChannel } },
-		});
-		const { mockMessageEdit } = setupMockMessage();
-		const testError = new Error('Test player error');
-
-		let capturedEditHandler:
-			| ((options: unknown) => Promise<unknown>)
-			| undefined;
-
-		mockedEnqueueTracks.mockImplementation(async ({ interaction }) => {
-			capturedEditHandler = interaction.editReply as (
-				options: unknown,
-			) => Promise<unknown>;
-		});
-
-		useDebugListeners(mockClient, mockPlayer);
-
-		const errorHandler = getPlayerEventsErrorHandler();
-
-		await errorHandler(mockQueue, testError);
-
-		expect(capturedEditHandler).toBeDefined();
-
-		const optionsWithFlags = {
-			content: 'Test message',
-			flags: 64,
-			embeds: [mockEmbed],
-		};
-
-		if (capturedEditHandler) {
-			await capturedEditHandler(optionsWithFlags);
-		}
-
-		expect(mockMessageEdit).toHaveBeenCalledWith({
-			content: 'Test message',
-			embeds: [mockEmbed],
-		});
-	});
-
-	it('should handle recovery when no tracks are found', async () => {
-		const mockQueueRecoveryInstance = createMockQueueRecoveryInstance({
-			tracks: [],
-		});
-		mockedQueueRecoveryService.getInstance.mockReturnValue(
-			mockQueueRecoveryInstance as unknown as QueueRecoveryService,
-		);
-
-		const mockQueue = createMockQueue();
-		const { mockMessageEdit } = setupMockMessage();
-		const testError = new Error('Test player error');
-
-		useDebugListeners(mockClient, mockPlayer);
-		const errorHandler = getPlayerEventsErrorHandler();
-		await errorHandler(mockQueue, testError);
-
-		expect(mockQueue.delete).toHaveBeenCalled();
-		expect(mockEmbed.setDescription).toHaveBeenLastCalledWith(
-			'Found nothing to recover.',
-		);
-		expect(mockMessageEdit).toHaveBeenCalledWith({ embeds: [mockEmbed] });
-		expect(mockedEnqueueTracks).not.toHaveBeenCalled();
-	});
-
-	it('should handle recovery when original channel is not found', async () => {
-		const mockQueueRecoveryInstance = createMockQueueRecoveryInstance({
-			tracks: [{ url: 'test-track-1' }],
-			progress: 5000,
-		});
-		mockedQueueRecoveryService.getInstance.mockReturnValue(
-			mockQueueRecoveryInstance as unknown as QueueRecoveryService,
-		);
-
-		const mockQueue = createMockQueue({
-			metadata: { interaction: {} },
-		});
-		const { mockMessageEdit } = setupMockMessage();
-		const testError = new Error('Test player error');
-
-		useDebugListeners(mockClient, mockPlayer);
-		const errorHandler = getPlayerEventsErrorHandler();
-		await errorHandler(mockQueue, testError);
-
-		expectBasicErrorHandling(testError);
-		expect(mockQueueRecoveryInstance.getContents).toHaveBeenCalledWith(
-			mockPlayer,
-		);
-		expect(mockEmbed.setDescription).toHaveBeenLastCalledWith(
-			'Unable to recover. Original channel not found.\n\nTip: Try using the `/recover` command directly.',
-		);
-		expect(mockMessageEdit).toHaveBeenCalledWith({ embeds: [mockEmbed] });
-		expect(mockedEnqueueTracks).not.toHaveBeenCalled();
-	});
-
-	it('should handle queue recovery service unavailable', async () => {
-		mockedQueueRecoveryService.getInstance.mockReturnValue(
-			null as unknown as QueueRecoveryService,
-		);
-
-		const testError = new Error('Test player error');
-		const mockQueue = createMockQueue();
-		const { mockMessageEdit } = setupMockMessage();
-
-		useDebugListeners(mockClient, mockPlayer);
-		const errorHandler = getPlayerEventsErrorHandler();
-		await errorHandler(mockQueue, testError);
-
-		expect(mockEmbed.setDescription).toHaveBeenLastCalledWith(
-			'Unable to recover. Queue recovery service unavailable.',
-		);
-		expect(mockMessageEdit).toHaveBeenCalledWith({ embeds: [mockEmbed] });
-	});
-
-	it('should handle enqueueTracks failure', async () => {
-		const mockOriginalChannel = {
-			...mockChannel,
-			isSendable: vi.fn().mockReturnValue(true),
-			send: vi.fn().mockResolvedValue({
-				edit: vi.fn().mockResolvedValue(undefined),
-			}),
-		};
-
-		const mockQueueRecoveryInstance = createMockQueueRecoveryInstance({
-			tracks: [
-				{ url: 'test-track-1', title: 'Track 1', author: 'Artist 1' },
-				{ url: 'test-track-2', title: 'Track 2', author: 'Artist 2' },
-			],
-			progress: 5000,
-			savedAt: null,
-		});
-		mockedQueueRecoveryService.getInstance.mockReturnValue(
-			mockQueueRecoveryInstance as unknown as QueueRecoveryService,
-		);
-
-		const mockQueue = createMockQueue({
-			metadata: { interaction: { channel: mockOriginalChannel } },
-		});
-		const { mockMessageEdit } = setupMockMessage();
-		const testError = new Error('Test player error');
-		const enqueueError = new Error('Failed to enqueue tracks');
-
-		mockedEnqueueTracks.mockRejectedValue(enqueueError);
-
-		useDebugListeners(mockClient, mockPlayer);
-		const errorHandler = getPlayerEventsErrorHandler();
-		await errorHandler(mockQueue, testError).catch(() => {});
-
-		expectBasicErrorHandling(testError);
-		expect(mockQueueRecoveryInstance.getContents).toHaveBeenCalledWith(
-			mockPlayer,
-		);
-		expect(mockedEnqueueTracks).toHaveBeenCalled();
-		expect(mockMessageEdit).toHaveBeenCalled();
-	});
-
-	it('should handle queue recovery service error', async () => {
-		const mockQueueRecoveryInstance = createMockQueueRecoveryInstance();
-		mockedQueueRecoveryService.getInstance.mockReturnValue(
-			mockQueueRecoveryInstance as unknown as QueueRecoveryService,
-		);
-
-		const mockQueue = createMockQueue();
-		const { mockMessageEdit } = setupMockMessage();
-		const testError = new Error('Test player error');
-
-		mockQueueRecoveryInstance.getContents.mockRejectedValue(
-			new Error('Failed to get queue contents'),
-		);
-
-		useDebugListeners(mockClient, mockPlayer);
-		const errorHandler = getPlayerEventsErrorHandler();
-		await errorHandler(mockQueue, testError).catch(() => {});
-
-		expectBasicErrorHandling(testError);
-		expect(mockQueueRecoveryInstance.getContents).toHaveBeenCalledWith(
-			mockPlayer,
-		);
-		expect(mockEmbed.setDescription).toHaveBeenLastCalledWith(
-			'Recovery failed: Failed to get queue contents',
-		);
-		expect(mockMessageEdit).toHaveBeenLastCalledWith({ embeds: [mockEmbed] });
-	});
-
-	it('should handle non-Error objects in catch block', async () => {
-		const mockOriginalChannel = {
-			...mockChannel,
-			isSendable: vi.fn().mockReturnValue(true),
-			send: vi.fn().mockResolvedValue({
-				edit: vi.fn().mockResolvedValue(undefined),
-			}),
-		};
-
-		const mockQueueRecoveryInstance = createMockQueueRecoveryInstance();
-		mockedQueueRecoveryService.getInstance.mockReturnValue(
-			mockQueueRecoveryInstance as unknown as QueueRecoveryService,
-		);
-
-		const mockQueue = createMockQueue({
-			metadata: { interaction: { channel: mockOriginalChannel } },
-		});
-		const { mockMessageEdit } = setupMockMessage();
-		const testError = new Error('Test player error');
-
-		mockedEnqueueTracks.mockRejectedValue('string error');
-
-		useDebugListeners(mockClient, mockPlayer);
-		const errorHandler = getPlayerEventsErrorHandler();
-		await errorHandler(mockQueue, testError).catch(() => {});
-
-		expectBasicErrorHandling(testError);
-		expect(mockQueueRecoveryInstance.getContents).toHaveBeenCalledWith(
-			mockPlayer,
-		);
-		expect(mockedEnqueueTracks).toHaveBeenCalled();
-
-		expect(mockEmbed.setDescription).not.toHaveBeenCalledWith(
-			expect.stringContaining('❌ Recovery failed'),
-		);
-		expect(mockMessageEdit).not.toHaveBeenCalled();
-	});
 });
 
 describe('Opus Cache Management', () => {
 	it('should delete opus cache entry for tracks without `isFromCache`', async () => {
-		const mockQueueRecoveryInstance = createMockQueueRecoveryInstance();
-		mockedQueueRecoveryService.getInstance.mockReturnValue(
-			mockQueueRecoveryInstance as unknown as QueueRecoveryService,
-		);
-
 		const mockQueue = createMockQueue();
-		setupMockMessage();
 		const testError = new Error('Test player error');
-
-		mockedEnqueueTracks.mockResolvedValue(undefined);
 
 		useDebugListeners(mockClient, mockPlayer);
 		const errorHandler = getPlayerEventsErrorHandler();
@@ -819,21 +465,25 @@ describe('Opus Cache Management', () => {
 	});
 
 	it('should not delete opus cache entry for tracks with `isFromCache`', async () => {
-		const mockQueueRecoveryInstance = createMockQueueRecoveryInstance();
-		mockedQueueRecoveryService.getInstance.mockReturnValue(
-			mockQueueRecoveryInstance as unknown as QueueRecoveryService,
-		);
-
 		const mockQueue = createMockQueue({
 			currentTrack: {
 				url: 'test-current-track',
 				metadata: { isFromCache: true },
 			},
 		});
-		setupMockMessage();
 		const testError = new Error('Test player error');
 
-		mockedEnqueueTracks.mockResolvedValue(undefined);
+		useDebugListeners(mockClient, mockPlayer);
+		const errorHandler = getPlayerEventsErrorHandler();
+		await errorHandler(mockQueue, testError);
+
+		expect(mockOpusCacheManagerInstance.deleteEntry).not.toHaveBeenCalled();
+	});
+
+	it('should not delete opus cache entry when there is no current track', async () => {
+		const mockQueue = createMockQueue({ currentTrack: null });
+		const testError = new Error('Test NoResult error');
+		testError.name = 'NoResultError';
 
 		useDebugListeners(mockClient, mockPlayer);
 		const errorHandler = getPlayerEventsErrorHandler();
@@ -862,7 +512,6 @@ describe('Debug Channel Validation', () => {
 		expect(mockedLogger.error).toHaveBeenCalledWith(testError, 'Player error');
 		expect(nonSendableChannel.send).not.toHaveBeenCalled();
 		expect(mockedCaptureException).not.toHaveBeenCalled();
-		expect(mockedEnqueueTracks).not.toHaveBeenCalled();
 	});
 
 	it('should return early when debug channel is undefined', async () => {
@@ -878,6 +527,5 @@ describe('Debug Channel Validation', () => {
 		expect(mockedLogger.error).toHaveBeenCalledWith(testError, 'Player error');
 		expect(mockChannel.send).not.toHaveBeenCalled();
 		expect(mockedCaptureException).not.toHaveBeenCalled();
-		expect(mockedEnqueueTracks).not.toHaveBeenCalled();
 	});
 });
