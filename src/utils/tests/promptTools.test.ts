@@ -490,9 +490,9 @@ it('should execute `searchAndPlay` tool successfully', async () => {
 	const mockPlay = vi.fn().mockResolvedValue({
 		track: { title: 'Found Song', author: 'Found Artist' },
 	});
-	mockedUseMainPlayer.mockReturnValue({ play: mockPlay } as unknown as ReturnType<
-		typeof useMainPlayer
-	>);
+	mockedUseMainPlayer.mockReturnValue({
+		play: mockPlay,
+	} as unknown as ReturnType<typeof useMainPlayer>);
 
 	const tools = getAvailableTools(mockContext);
 	const result = await executeTool(tools.searchAndPlay, {
@@ -513,9 +513,9 @@ it('should execute `searchAndPlay` tool successfully', async () => {
 
 it('should handle `searchAndPlay` failure', async () => {
 	const mockPlay = vi.fn().mockRejectedValue(new Error('Not found'));
-	mockedUseMainPlayer.mockReturnValue({ play: mockPlay } as unknown as ReturnType<
-		typeof useMainPlayer
-	>);
+	mockedUseMainPlayer.mockReturnValue({
+		play: mockPlay,
+	} as unknown as ReturnType<typeof useMainPlayer>);
 
 	const tools = getAvailableTools(mockContext);
 	const result = await executeTool(tools.searchAndPlay, {
@@ -690,9 +690,9 @@ it('should handle playlist not found in `enqueuePlaylist`', async () => {
 
 it('should enqueue playlist songs successfully', async () => {
 	const mockPlay = vi.fn().mockResolvedValue({ track: {} });
-	mockedUseMainPlayer.mockReturnValue({ play: mockPlay } as unknown as ReturnType<
-		typeof useMainPlayer
-	>);
+	mockedUseMainPlayer.mockReturnValue({
+		play: mockPlay,
+	} as unknown as ReturnType<typeof useMainPlayer>);
 
 	const mockChannel = {
 		isTextBased: () => true,
@@ -776,9 +776,9 @@ it('should handle partial enqueue failures in `enqueuePlaylist`', async () => {
 		.fn()
 		.mockResolvedValueOnce({ track: {} })
 		.mockRejectedValueOnce(new Error('Failed'));
-	mockedUseMainPlayer.mockReturnValue({ play: mockPlay } as unknown as ReturnType<
-		typeof useMainPlayer
-	>);
+	mockedUseMainPlayer.mockReturnValue({
+		play: mockPlay,
+	} as unknown as ReturnType<typeof useMainPlayer>);
 
 	const mockChannel = {
 		isTextBased: () => true,
