@@ -139,10 +139,9 @@ it('should reply with error when user is not in a voice channel', async () => {
 
 	await playCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'You are not connected to a voice channel!',
-		flags: ['Ephemeral'],
-	});
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'You are not connected to a voice channel!',
+	);
 });
 
 it('should process track and display embed with buttons', async () => {
@@ -162,7 +161,7 @@ it('should process track and display embed with buttons', async () => {
 
 	await playCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith(
+	expect(interaction.editReply).toHaveBeenCalledWith(
 		'Processing the track to play…',
 	);
 

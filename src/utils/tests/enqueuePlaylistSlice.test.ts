@@ -309,7 +309,7 @@ it('should handle invalid playlists channel type', async () => {
 		3,
 	);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
+	expect(interaction.editReply).toHaveBeenCalledWith({
 		content: 'Invalid playlists channel type!',
 		components: [],
 	});
@@ -329,7 +329,7 @@ it('should handle missing playlists channel', async () => {
 		3,
 	);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
+	expect(interaction.editReply).toHaveBeenCalledWith({
 		content: 'Invalid playlists channel type!',
 		components: [],
 	});
@@ -545,7 +545,7 @@ it('should display correct description for head operation with plural', async ()
 		3,
 	);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
+	expect(interaction.editReply).toHaveBeenCalledWith({
 		components: [],
 		embeds: [
 			expect.objectContaining({
@@ -582,7 +582,7 @@ it('should display correct description for head operation with singular', async 
 		1,
 	);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
+	expect(interaction.editReply).toHaveBeenCalledWith({
 		components: [],
 		embeds: [
 			expect.objectContaining({
@@ -620,7 +620,7 @@ it('should display correct description for tail operation with plural', async ()
 		3,
 	);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
+	expect(interaction.editReply).toHaveBeenCalledWith({
 		components: [],
 		embeds: [
 			expect.objectContaining({
@@ -657,7 +657,7 @@ it('should display correct description for tail operation with singular', async 
 		1,
 	);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
+	expect(interaction.editReply).toHaveBeenCalledWith({
 		components: [],
 		embeds: [
 			expect.objectContaining({

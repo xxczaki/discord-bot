@@ -19,19 +19,10 @@ export default async function playCommandHandler(
 	const channel = (interaction.member as GuildMember).voice.channel;
 
 	if (!channel) {
-		return interaction.reply({
-			content: 'You are not connected to a voice channel!',
-			flags: ['Ephemeral'],
-		});
+		return interaction.editReply('You are not connected to a voice channel!');
 	}
 
-	/* v8 ignore start */
-	if (interaction.replied || interaction.deferred) {
-		return;
-	}
-	/* v8 ignore stop */
-
-	await interaction.reply('Processing the track to play…');
+	await interaction.editReply('Processing the track to play…');
 
 	const query = interaction.options.getString('query', true);
 

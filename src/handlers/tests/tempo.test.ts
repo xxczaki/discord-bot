@@ -50,7 +50,7 @@ it('should create correct select menu with tempo options', async () => {
 	const mockResponse = createMockResponse();
 	const mockQueue = createMockQueue([]);
 
-	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
+	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
 	mockResponse.awaitMessageComponent = vi
@@ -59,7 +59,7 @@ it('should create correct select menu with tempo options', async () => {
 
 	await tempoCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
+	expect(interaction.editReply).toHaveBeenCalledWith({
 		components: expect.any(Array),
 	});
 });
@@ -69,7 +69,7 @@ it('should toggle new tempo filter when no active tempo', async () => {
 	const mockResponse = createMockResponse();
 	const mockQueue = createMockQueue(['bassboost']);
 
-	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
+	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
 	const mockComponent = createMockSelectMenuComponent(['_tempo15']);
@@ -92,7 +92,7 @@ it('should remove active tempo filter when `normal` is selected', async () => {
 	const mockResponse = createMockResponse();
 	const mockQueue = createMockQueue(['_tempo075', 'bassboost']);
 
-	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
+	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
 	const mockComponent = createMockSelectMenuComponent(['normal']);
@@ -115,7 +115,7 @@ it('should replace active tempo with new tempo when different tempo selected', a
 	const mockResponse = createMockResponse();
 	const mockQueue = createMockQueue(['_tempo05', 'bassboost']);
 
-	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
+	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
 	const mockComponent = createMockSelectMenuComponent(['_tempo2']);
@@ -141,7 +141,7 @@ it('should handle non-string-select-menu component', async () => {
 	const mockResponse = createMockResponse();
 	const mockQueue = createMockQueue([]);
 
-	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
+	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
 	const mockComponent = {
@@ -163,7 +163,7 @@ it('should handle timeout gracefully', async () => {
 	const mockResponse = createMockResponse();
 	const mockQueue = createMockQueue([]);
 
-	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
+	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
 	mockResponse.awaitMessageComponent = vi
@@ -177,16 +177,15 @@ it('should work when no queue is available', async () => {
 	const interaction = createMockInteraction();
 	const mockResponse = createMockResponse();
 
-	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
+	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(null);
 
 	await tempoCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'No music is currently playing.',
-		flags: ['Ephemeral'],
-	});
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'No music is currently playing.',
+	);
 });
 
 it('should detect active tempo filter correctly', async () => {
@@ -194,7 +193,7 @@ it('should detect active tempo filter correctly', async () => {
 	const mockResponse = createMockResponse();
 	const mockQueue = createMockQueue(['_tempo125', 'bassboost']);
 
-	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
+	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
 	const mockComponent = createMockSelectMenuComponent(['normal']);
@@ -211,7 +210,7 @@ it('should handle multiple tempo filters by using the first one found', async ()
 
 	const mockQueue = createMockQueue(['_tempo05', '_tempo125', 'bassboost']);
 
-	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
+	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
 	const mockComponent = createMockSelectMenuComponent(['normal']);
@@ -227,7 +226,7 @@ it('should handle error during component await', async () => {
 	const mockResponse = createMockResponse();
 	const mockQueue = createMockQueue([]);
 
-	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
+	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
 	mockResponse.awaitMessageComponent = vi

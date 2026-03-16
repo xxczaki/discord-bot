@@ -178,10 +178,9 @@ describe('/prompt command', () => {
 
 			await promptCommandHandler(interaction);
 
-			expect(interaction.reply).toHaveBeenCalledWith({
-				content: 'The `/prompt` command is not available.',
-				flags: ['Ephemeral'],
-			});
+			expect(interaction.editReply).toHaveBeenCalledWith(
+				'The `/prompt` command is not available.',
+			);
 
 			process.env.OPENAI_API_KEY = 'test-api-key';
 		});
@@ -196,10 +195,9 @@ describe('/prompt command', () => {
 
 			await promptCommandHandler(interaction);
 
-			expect(interaction.reply).toHaveBeenCalledWith({
-				content: 'You are not connected to a voice channel!',
-				flags: ['Ephemeral'],
-			});
+			expect(interaction.editReply).toHaveBeenCalledWith(
+				'You are not connected to a voice channel!',
+			);
 		});
 
 		it('should handle rate limit exceeded', async () => {
@@ -209,11 +207,9 @@ describe('/prompt command', () => {
 
 			await promptCommandHandler(interaction);
 
-			expect(interaction.reply).toHaveBeenCalledWith({
-				content:
-					'Daily rate limit reached (100 calls per day). Try again tomorrow.',
-				flags: ['Ephemeral'],
-			});
+			expect(interaction.editReply).toHaveBeenCalledWith(
+				'Daily rate limit reached (100 calls per day). Try again tomorrow.',
+			);
 		});
 
 		it('should handle AI errors gracefully', async () => {
@@ -365,7 +361,7 @@ describe('/prompt command', () => {
 
 			await promptCommandHandler(interaction);
 
-			const replyArg = vi.mocked(interaction.reply).mock.calls[0][0] as {
+			const replyArg = vi.mocked(interaction.editReply).mock.calls[0][0] as {
 				embeds?: unknown[];
 			};
 			expect(replyArg.embeds).toHaveLength(1);

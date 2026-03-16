@@ -66,7 +66,8 @@ interface MockEditReplyCall {
 function getEditReplyCall(
 	interaction: ChatInputCommandInteraction,
 ): MockEditReplyCall {
-	const call = vi.mocked(interaction.editReply).mock.calls[0][0];
+	const calls = vi.mocked(interaction.editReply).mock.calls;
+	const call = calls[calls.length - 1][0];
 	return call as MockEditReplyCall;
 }
 
@@ -139,7 +140,7 @@ describe('cache command handler', () => {
 
 		await cacheCommandHandler(mockInteraction);
 
-		expect(mockInteraction.reply).toHaveBeenCalledWith(
+		expect(mockInteraction.editReply).toHaveBeenCalledWith(
 			'Loading cache statistics…',
 		);
 	});

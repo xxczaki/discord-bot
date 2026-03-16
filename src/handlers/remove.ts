@@ -12,10 +12,7 @@ export default async function removeCommandHandler(
 	const trackNumber = Number.parseInt(query, 10) - 2;
 
 	if (Number.isNaN(trackNumber)) {
-		return interaction.reply({
-			content: 'Please provide a number.',
-			flags: ['Ephemeral'],
-		});
+		return interaction.editReply('Please provide a number.');
 	}
 
 	try {
@@ -28,16 +25,15 @@ export default async function removeCommandHandler(
 		if (trackNumber < 0) {
 			queue.node.skip();
 
-			await interaction.reply('Skipping the current track.');
+			await interaction.editReply('Skipping the current track.');
 		} else {
 			queue.removeTrack(trackNumber);
 
-			await interaction.reply(`Track "${trackToRemove.title}" removed.`);
+			await interaction.editReply(`Track "${trackToRemove.title}" removed.`);
 		}
 	} catch {
-		await interaction.reply({
-			content: 'Could not remove the track, is the specified id correct?',
-			flags: ['Ephemeral'],
-		});
+		await interaction.editReply(
+			'Could not remove the track, is the specified id correct?',
+		);
 	}
 }

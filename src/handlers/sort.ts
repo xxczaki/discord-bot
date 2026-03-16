@@ -10,7 +10,7 @@ export default async function sortCommandHandler(
 
 	if (!queue) return;
 
-	await interaction.reply('Sorting the queue…');
+	await interaction.editReply('Sorting the queue…');
 
 	queue.tracks.store = queue.tracks.data.sort((a, b) => {
 		const titleA = a.title.toLowerCase();

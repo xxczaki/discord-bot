@@ -20,13 +20,12 @@ export default async function deduplicateCommandHandler(
 	const algorithm = interaction.options.getString('algorithm', true);
 
 	if (!ALGORITHMS.includes(algorithm as (typeof ALGORITHMS)[number])) {
-		return interaction.reply({
-			content: 'Incorrect deduplication algorithm specified, aborting…',
-			flags: ['Ephemeral'],
-		});
+		return interaction.editReply(
+			'Incorrect deduplication algorithm specified, aborting…',
+		);
 	}
 
-	await interaction.reply('Searching for duplicates…');
+	await interaction.editReply('Searching for duplicates…');
 
 	const fullQueue = [queue.currentTrack ?? [], ...queue.tracks.store].flat();
 

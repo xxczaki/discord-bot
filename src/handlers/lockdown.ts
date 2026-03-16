@@ -23,18 +23,18 @@ export default async function lockdownCommandHandler(
 	}
 
 	if (newState) {
-		await interaction.reply({
+		await interaction.editReply({
 			content: `🔒 **Lockdown mode enabled!**
-			
+
 Certain commands are now restricted to the bot owner only.
 **Affected Categories:** ${affectedCategories.join(', ')}
 
 Use \`/lockdown\` again to disable lockdown mode.`,
 		});
 	} else {
-		await interaction.reply({
+		await interaction.editReply({
 			content: `🔓 **Lockdown mode disabled!**
-			
+
 Users can now use the commands again.
 **Affected Categories:** ${affectedCategories.join(', ')}`,
 		});

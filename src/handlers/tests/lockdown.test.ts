@@ -31,6 +31,7 @@ function createMockInteraction(
 		},
 		client: mockClient,
 		reply: vi.fn().mockResolvedValue({}),
+		editReply: vi.fn().mockResolvedValue({}),
 	} as unknown as ChatInputCommandInteraction;
 }
 
@@ -45,7 +46,7 @@ it('should enable lockdown when currently disabled', async () => {
 
 	await lockdownCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
+	expect(interaction.editReply).toHaveBeenCalledWith({
 		content: expect.stringContaining('🔒 **Lockdown mode enabled!**'),
 	});
 });
@@ -57,7 +58,7 @@ it('should disable lockdown when currently enabled', async () => {
 
 	await lockdownCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
+	expect(interaction.editReply).toHaveBeenCalledWith({
 		content: expect.stringContaining('🔓 **Lockdown mode disabled!**'),
 	});
 });
@@ -67,7 +68,7 @@ it('should include affected categories in response', async () => {
 
 	await lockdownCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
+	expect(interaction.editReply).toHaveBeenCalledWith({
 		content: expect.stringContaining('**Affected Categories:** Music'),
 	});
 });
@@ -79,7 +80,7 @@ it('should toggle from enabled to disabled', async () => {
 
 	await lockdownCommandHandler(interaction);
 
-	const replyCall = vi.mocked(interaction.reply).mock.calls[0][0];
+	const replyCall = vi.mocked(interaction.editReply).mock.calls[0][0];
 	const replyContent =
 		typeof replyCall === 'string'
 			? replyCall
@@ -93,7 +94,7 @@ it('should toggle from disabled to enabled', async () => {
 
 	await lockdownCommandHandler(interaction);
 
-	const replyCall = vi.mocked(interaction.reply).mock.calls[0][0];
+	const replyCall = vi.mocked(interaction.editReply).mock.calls[0][0];
 	const replyContent =
 		typeof replyCall === 'string'
 			? replyCall
@@ -119,6 +120,7 @@ it('should handle missing user ID', async () => {
 	const interaction = {
 		member: null,
 		reply: vi.fn().mockResolvedValue({}),
+		editReply: vi.fn().mockResolvedValue({}),
 	} as unknown as ChatInputCommandInteraction;
 
 	await lockdownCommandHandler(interaction);

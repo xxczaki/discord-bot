@@ -6,6 +6,8 @@ import logger from '../utils/logger';
 import reportError from '../utils/reportError';
 import snakeToCamelCase from '../utils/snakeToCamelCase';
 
+const EPHEMERAL_COMMANDS = new Set(['debug', 'help', 'tic_tac_toe', 'filters']);
+
 export default async function useCommandHandlers(
 	interaction: ChatInputCommandInteraction,
 ) {
@@ -22,6 +24,18 @@ export default async function useCommandHandlers(
 		return lockdown.sendPermissionDeniedMessage(interaction);
 	}
 
+	try {
+		await interaction.deferReply({
+			flags: EPHEMERAL_COMMANDS.has(commandName) ? ['Ephemeral'] : [],
+		});
+	} catch (deferError) {
+		logger.error(
+			deferError,
+			`Failed to defer reply for command "${commandName}"`,
+		);
+		return;
+	}
+
 	const fileName = snakeToCamelCase(interaction.commandName);
 
 	try {
@@ -33,13 +47,11 @@ export default async function useCommandHandlers(
 	} catch (error) {
 		reportError(error, `Failed to handle command "${commandName}"`);
 
-		if (!interaction.replied && !interaction.deferred) {
+		if (!interaction.replied) {
 			try {
-				await interaction.reply({
-					content:
-						'Sorry, an error occurred while processing your command. Please try again.',
-					flags: ['Ephemeral'],
-				});
+				await interaction.editReply(
+					'Sorry, an error occurred while processing your command. Please try again.',
+				);
 			} catch (replyError) {
 				logger.error(replyError, 'Failed to send error reply to interaction');
 			}

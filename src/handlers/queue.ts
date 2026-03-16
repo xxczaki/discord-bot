@@ -19,11 +19,8 @@ import useQueueWithValidation from '../utils/useQueueWithValidation';
 export default async function queueCommandHandler(
 	interaction: ChatInputCommandInteraction,
 ) {
-	await interaction.deferReply();
-
 	const queue = useQueueWithValidation(interaction, {
 		message: 'The queue is empty and nothing is being played.',
-		deferred: true,
 	});
 
 	if (!queue) return;

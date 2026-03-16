@@ -31,11 +31,7 @@ it('should reply with ephemeral message when queue is empty', async () => {
 
 	await sortCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'The queue is empty.',
-		flags: ['Ephemeral'],
-	});
-	expect(interaction.editReply).not.toHaveBeenCalled();
+	expect(interaction.editReply).toHaveBeenCalledWith('The queue is empty.');
 });
 
 it('should sort tracks alphabetically by title', async () => {
@@ -51,7 +47,7 @@ it('should sort tracks alphabetically by title', async () => {
 
 	await sortCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith('Sorting the queue…');
+	expect(interaction.editReply).toHaveBeenCalledWith('Sorting the queue…');
 	expect(interaction.editReply).toHaveBeenCalledWith(
 		'Queue sorted alphabetically.',
 	);
@@ -73,7 +69,7 @@ it('should handle queue with single track', async () => {
 
 	await sortCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith('Sorting the queue…');
+	expect(interaction.editReply).toHaveBeenCalledWith('Sorting the queue…');
 	expect(interaction.editReply).toHaveBeenCalledWith(
 		'Queue sorted alphabetically.',
 	);
@@ -92,7 +88,7 @@ it('should handle queue with tracks having identical titles', async () => {
 
 	await sortCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith('Sorting the queue…');
+	expect(interaction.editReply).toHaveBeenCalledWith('Sorting the queue…');
 	expect(interaction.editReply).toHaveBeenCalledWith(
 		'Queue sorted alphabetically.',
 	);
@@ -117,7 +113,7 @@ it('should handle queue with empty track titles', async () => {
 
 	await sortCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith('Sorting the queue…');
+	expect(interaction.editReply).toHaveBeenCalledWith('Sorting the queue…');
 	expect(interaction.editReply).toHaveBeenCalledWith(
 		'Queue sorted alphabetically.',
 	);

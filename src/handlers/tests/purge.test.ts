@@ -40,6 +40,7 @@ beforeEach(() => {
 function createMockInteraction(): ChatInputCommandInteraction {
 	return {
 		reply: vi.fn().mockResolvedValue({}),
+		editReply: vi.fn().mockResolvedValue({}),
 	} as unknown as ChatInputCommandInteraction;
 }
 
@@ -73,10 +74,9 @@ it('should handle null queue', async () => {
 
 	expect(mockedOpusCacheManager.deleteEntry).not.toHaveBeenCalled();
 	expect(mockedQueueRecoveryService.saveQueue).not.toHaveBeenCalled();
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'No music is currently playing.',
-		flags: ['Ephemeral'],
-	});
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'No music is currently playing.',
+	);
 });
 
 it('should delete opus cache entry when track has non-cache metadata', async () => {
@@ -174,7 +174,7 @@ it('should reply with purge confirmation message', async () => {
 
 	await purgeCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith(
+	expect(interaction.editReply).toHaveBeenCalledWith(
 		'Queue purged.\n\nUse `/recover` to listen to the same queue again.',
 	);
 });
@@ -192,7 +192,7 @@ it('should handle full purge workflow with track deletion and queue saving', asy
 	);
 	expect(mockedQueueRecoveryService.saveQueue).toHaveBeenCalledWith(mockQueue);
 	expect(mockQueue.delete).toHaveBeenCalledOnce();
-	expect(interaction.reply).toHaveBeenCalledWith(
+	expect(interaction.editReply).toHaveBeenCalledWith(
 		'Queue purged.\n\nUse `/recover` to listen to the same queue again.',
 	);
 });
@@ -213,7 +213,7 @@ it('should save queue when only currentTrack exists (single playing song scenari
 
 	expect(mockedQueueRecoveryService.saveQueue).toHaveBeenCalledWith(mockQueue);
 	expect(mockQueue.delete).toHaveBeenCalledOnce();
-	expect(interaction.reply).toHaveBeenCalledWith(
+	expect(interaction.editReply).toHaveBeenCalledWith(
 		'Queue purged.\n\nUse `/recover` to listen to the same queue again.',
 	);
 });

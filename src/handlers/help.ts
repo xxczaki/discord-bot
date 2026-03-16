@@ -19,10 +19,7 @@ const helpMessageContent = `
 export default async function helpCommandHandler(
 	interaction: ChatInputCommandInteraction,
 ) {
-	await interaction.reply({
-		content: helpMessageContent,
-		flags: ['Ephemeral'],
-	});
+	await interaction.editReply(helpMessageContent);
 }
 
 function processCategories() {

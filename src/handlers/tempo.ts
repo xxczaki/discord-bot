@@ -57,7 +57,7 @@ export default async function tempoCommandHandler(
 		select,
 	);
 
-	const response = await interaction.reply({
+	const response = await interaction.editReply({
 		components: [row],
 	});
 

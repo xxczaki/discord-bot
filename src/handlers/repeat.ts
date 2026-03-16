@@ -15,11 +15,13 @@ export default async function repeatCommandHandler(
 
 	switch (mode) {
 		case QueueRepeatMode.OFF:
-			return interaction.reply('Repeat mode disabled.');
+			return interaction.editReply('Repeat mode disabled.');
 		case QueueRepeatMode.TRACK:
-			return interaction.reply('The current track will repeat indefinitely.');
+			return interaction.editReply(
+				'The current track will repeat indefinitely.',
+			);
 		case QueueRepeatMode.QUEUE:
-			return interaction.reply('The queue will repeat indefinitely.');
+			return interaction.editReply('The queue will repeat indefinitely.');
 		default:
 			throw new TypeError('Unknown or illegal repeat mode.');
 	}

@@ -41,6 +41,8 @@ function createMockInteraction(
 			},
 		},
 		reply: vi.fn().mockResolvedValue({}),
+		editReply: vi.fn().mockResolvedValue({}),
+		deferReply: vi.fn().mockResolvedValue({}),
 		replied: false,
 		deferred: false,
 		...overrides,
@@ -154,19 +156,17 @@ it('should handle module import failures', async () => {
 		expect.any(Object),
 		'Failed to handle command "play"',
 	);
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content:
-			'Sorry, an error occurred while processing your command. Please try again.',
-		flags: ['Ephemeral'],
-	});
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'Sorry, an error occurred while processing your command. Please try again.',
+	);
 });
 
-it('should handle interaction reply failures', async () => {
+it('should handle interaction editReply failures', async () => {
 	mockJoin.mockReturnValue('/invalid/path/nonexistent.js');
 
 	const replyError = new Error('Reply failed');
 	const interaction = createMockInteraction('play', {
-		reply: vi.fn().mockRejectedValue(replyError),
+		editReply: vi.fn().mockRejectedValue(replyError),
 	});
 
 	await useCommandHandlers(interaction);
@@ -177,7 +177,7 @@ it('should handle interaction reply failures', async () => {
 	);
 });
 
-it('should not attempt reply if interaction already replied', async () => {
+it('should not attempt editReply if interaction already replied', async () => {
 	mockJoin.mockReturnValue('/invalid/path/nonexistent.js');
 
 	const interaction = createMockInteraction('play', {
@@ -186,17 +186,19 @@ it('should not attempt reply if interaction already replied', async () => {
 
 	await useCommandHandlers(interaction);
 
-	expect(interaction.reply).not.toHaveBeenCalled();
+	expect(interaction.editReply).toHaveBeenCalledTimes(0);
 });
 
-it('should not attempt reply if interaction already deferred', async () => {
-	mockJoin.mockReturnValue('/invalid/path/nonexistent.js');
-
+it('should return early if deferReply fails', async () => {
 	const interaction = createMockInteraction('play', {
-		deferred: true,
+		deferReply: vi.fn().mockRejectedValue(new Error('Defer failed')),
 	});
 
 	await useCommandHandlers(interaction);
 
-	expect(interaction.reply).not.toHaveBeenCalled();
+	expect(mockedLogger.error).toHaveBeenCalledWith(
+		expect.any(Error),
+		'Failed to defer reply for command "play"',
+	);
+	expect(interaction.editReply).not.toHaveBeenCalled();
 });

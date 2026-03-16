@@ -53,7 +53,7 @@ beforeEach(() => {
 	vi.clearAllMocks();
 
 	mockInteraction.reply = vi.fn().mockResolvedValue(mockResponse);
-	mockInteraction.editReply = vi.fn();
+	mockInteraction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockInteraction.options.getString = vi.fn();
 
 	mockResponse.awaitMessageComponent = vi.fn();
@@ -73,7 +73,7 @@ describe('when lateness is already locked', () => {
 	it('should show action buttons when measurement is in progress', async () => {
 		await latenessCommandHandler(mockInteraction);
 
-		expect(mockInteraction.reply).toHaveBeenCalledWith({
+		expect(mockInteraction.editReply).toHaveBeenCalledWith({
 			content: 'Lateness measurement is already in progress.',
 			components: expect.arrayContaining([
 				expect.objectContaining({
@@ -177,7 +177,7 @@ describe('when starting new measurement', () => {
 	it('should reply with confirmation message', async () => {
 		await latenessCommandHandler(mockInteraction);
 
-		expect(mockInteraction.reply).toHaveBeenCalledWith(
+		expect(mockInteraction.editReply).toHaveBeenCalledWith(
 			expect.stringContaining('Measuring lateness, expected today at:'),
 		);
 	});
@@ -203,7 +203,7 @@ describe('when showing stats without expected hour', () => {
 
 		await promise;
 
-		expect(mockInteraction.reply).toHaveBeenCalledWith(
+		expect(mockInteraction.editReply).toHaveBeenCalledWith(
 			'Loading lateness data…',
 		);
 	});

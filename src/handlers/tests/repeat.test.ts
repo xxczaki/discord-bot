@@ -25,7 +25,7 @@ function createMockInteraction(
 		options: {
 			getInteger: vi.fn().mockReturnValue(repeatMode),
 		},
-		reply: vi.fn().mockResolvedValue({}),
+		editReply: vi.fn().mockResolvedValue({}),
 	} as unknown as ChatInputCommandInteraction;
 }
 
@@ -43,7 +43,7 @@ it('should disable repeat mode when `repeat_mode` is OFF', async () => {
 	await repeatCommandHandler(interaction);
 
 	expect(mockQueue.setRepeatMode).toHaveBeenCalledWith(QueueRepeatMode.OFF);
-	expect(interaction.reply).toHaveBeenCalledWith('Repeat mode disabled.');
+	expect(interaction.editReply).toHaveBeenCalledWith('Repeat mode disabled.');
 });
 
 it('should enable track repeat mode when `repeat_mode` is TRACK', async () => {
@@ -54,7 +54,7 @@ it('should enable track repeat mode when `repeat_mode` is TRACK', async () => {
 	await repeatCommandHandler(interaction);
 
 	expect(mockQueue.setRepeatMode).toHaveBeenCalledWith(QueueRepeatMode.TRACK);
-	expect(interaction.reply).toHaveBeenCalledWith(
+	expect(interaction.editReply).toHaveBeenCalledWith(
 		'The current track will repeat indefinitely.',
 	);
 });
@@ -67,7 +67,7 @@ it('should enable queue repeat mode when `repeat_mode` is QUEUE', async () => {
 	await repeatCommandHandler(interaction);
 
 	expect(mockQueue.setRepeatMode).toHaveBeenCalledWith(QueueRepeatMode.QUEUE);
-	expect(interaction.reply).toHaveBeenCalledWith(
+	expect(interaction.editReply).toHaveBeenCalledWith(
 		'The queue will repeat indefinitely.',
 	);
 });
@@ -83,7 +83,7 @@ it('should throw TypeError for unknown repeat mode', async () => {
 	);
 
 	expect(mockQueue.setRepeatMode).toHaveBeenCalledWith(UNKNOWN_MODE);
-	expect(interaction.reply).not.toHaveBeenCalled();
+	expect(interaction.editReply).not.toHaveBeenCalled();
 });
 
 it('should handle when queue is null', async () => {
@@ -92,8 +92,7 @@ it('should handle when queue is null', async () => {
 
 	await repeatCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'No music is currently playing.',
-		flags: ['Ephemeral'],
-	});
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'No music is currently playing.',
+	);
 });

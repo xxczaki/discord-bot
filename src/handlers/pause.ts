@@ -9,12 +9,12 @@ export default async function pauseCommandHandler(
 	if (!queue) return;
 
 	if (queue.node.isPaused()) {
-		return interaction.reply(
+		return interaction.editReply(
 			'The track is already paused. Maybe you want to `/resume` it instead?',
 		);
 	}
 
 	queue.node.setPaused(true);
 
-	await interaction.reply('Track paused.');
+	await interaction.editReply('Track paused.');
 }

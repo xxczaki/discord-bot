@@ -23,6 +23,7 @@ function createMockInteraction(
 			getInteger: vi.fn().mockReturnValue(volume),
 		},
 		reply: vi.fn().mockResolvedValue({}),
+		editReply: vi.fn().mockResolvedValue({}),
 	} as unknown as ChatInputCommandInteraction;
 }
 
@@ -43,7 +44,7 @@ it('should set volume and reply with confirmation message', async () => {
 
 	expect(interaction.options.getInteger).toHaveBeenCalledWith('value', true);
 	expect(mockQueue.node.setVolume).toHaveBeenCalledWith(50);
-	expect(interaction.reply).toHaveBeenCalledWith('Volume changed to `50`.');
+	expect(interaction.editReply).toHaveBeenCalledWith('Volume changed to `50`.');
 });
 
 it('should handle when queue is null', async () => {
@@ -52,8 +53,7 @@ it('should handle when queue is null', async () => {
 
 	await volumeCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'No music is currently playing.',
-		flags: ['Ephemeral'],
-	});
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'No music is currently playing.',
+	);
 });

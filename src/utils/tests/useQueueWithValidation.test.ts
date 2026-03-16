@@ -27,23 +27,22 @@ it('should return queue when useQueue returns a valid queue', () => {
 	const result = useQueueWithValidation(mockInteraction);
 
 	expect(result).toBe(MOCK_QUEUE);
-	expect(mockInteraction.reply).not.toHaveBeenCalled();
+	expect(mockInteraction.editReply).not.toHaveBeenCalled();
 });
 
-it('should return null and reply with default message when queue is null', () => {
+it('should return null and send default message when queue is null', () => {
 	vi.mocked(useQueue).mockReturnValue(null);
 	const mockInteraction = createMockInteraction();
 
 	const result = useQueueWithValidation(mockInteraction);
 
 	expect(result).toBeNull();
-	expect(mockInteraction.reply).toHaveBeenCalledWith({
-		content: 'No music is currently playing.',
-		flags: ['Ephemeral'],
-	});
+	expect(mockInteraction.editReply).toHaveBeenCalledWith(
+		'No music is currently playing.',
+	);
 });
 
-it('should return null and reply with custom message when queue is null', () => {
+it('should return null and send custom message when queue is null', () => {
 	vi.mocked(useQueue).mockReturnValue(null);
 	const mockInteraction = createMockInteraction();
 
@@ -52,23 +51,7 @@ it('should return null and reply with custom message when queue is null', () => 
 	});
 
 	expect(result).toBeNull();
-	expect(mockInteraction.reply).toHaveBeenCalledWith({
-		content: 'Custom error message',
-		flags: ['Ephemeral'],
-	});
-});
-
-it('should use `editReply` when `deferred` option is true', () => {
-	vi.mocked(useQueue).mockReturnValue(null);
-	const mockInteraction = createMockInteraction();
-
-	const result = useQueueWithValidation(mockInteraction, {
-		deferred: true,
-	});
-
-	expect(result).toBeNull();
 	expect(mockInteraction.editReply).toHaveBeenCalledWith(
-		'No music is currently playing.',
+		'Custom error message',
 	);
-	expect(mockInteraction.reply).not.toHaveBeenCalled();
 });

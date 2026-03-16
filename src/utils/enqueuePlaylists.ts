@@ -42,7 +42,9 @@ export default async function enqueuePlaylists(
 		getEnvironmentVariable('PLAYLISTS_CHANNEL_ID'),
 	);
 
-	await interaction.deferReply();
+	if (!interaction.deferred) {
+		await interaction.deferReply();
+	}
 
 	if (!playlistsChannel?.isTextBased()) {
 		await interaction.editReply({

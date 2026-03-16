@@ -133,7 +133,7 @@ it('should reply with loading message and process stats successfully', async () 
 
 	await promise;
 
-	expect(interaction.reply).toHaveBeenCalledWith('Loading latest stats…');
+	expect(interaction.editReply).toHaveBeenCalledWith('Loading latest stats…');
 	expect(mockStatsHandlerInstance.getStats).toHaveBeenCalledWith('play');
 	expect(mockStatsHandlerInstance.getStats).toHaveBeenCalledWith('playlist');
 

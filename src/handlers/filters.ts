@@ -54,10 +54,9 @@ export default async function filtersCommandHandler(
 	);
 	const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents(cancel);
 
-	const response = await interaction.reply({
+	const response = await interaction.editReply({
 		content: 'Choose which filters you want to toggle:',
 		components: [selects, buttons],
-		flags: ['Ephemeral'],
 	});
 
 	const handler = createQueueAwareComponentHandler({

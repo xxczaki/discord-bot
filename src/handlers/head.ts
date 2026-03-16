@@ -7,10 +7,7 @@ export default async function headCommandHandler(
 	const voiceChannel = (interaction.member as GuildMember).voice.channel;
 
 	if (!voiceChannel) {
-		return interaction.reply({
-			content: 'You are not connected to a voice channel!',
-			flags: ['Ephemeral'],
-		});
+		return interaction.editReply('You are not connected to a voice channel!');
 	}
 
 	const playlist = interaction.options.getString('playlist', true);

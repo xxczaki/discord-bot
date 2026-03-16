@@ -12,18 +12,15 @@ export default async function relocateCommandHandler(
 	const { channel } = interaction;
 
 	if (!channel?.isSendable()) {
-		return interaction.reply({
-			content: 'Unable to relocate. Current channel is not accessible.',
-			ephemeral: true,
-		});
+		return interaction.editReply(
+			'Unable to relocate. Current channel is not accessible.',
+		);
 	}
 
 	if (!isObject(queue.metadata) || !isObject(queue.metadata.interaction)) {
-		return interaction.reply({
-			content:
-				'Unable to relocate. Queue metadata is not properly initialized.',
-			ephemeral: true,
-		});
+		return interaction.editReply(
+			'Unable to relocate. Queue metadata is not properly initialized.',
+		);
 	}
 
 	const originalInteraction = queue.metadata.interaction;
@@ -35,5 +32,7 @@ export default async function relocateCommandHandler(
 		editReply: originalInteraction.editReply.bind(originalInteraction),
 	};
 
-	await interaction.reply('Queue updates will now be sent to this channel.');
+	await interaction.editReply(
+		'Queue updates will now be sent to this channel.',
+	);
 }

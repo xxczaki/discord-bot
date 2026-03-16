@@ -10,5 +10,5 @@ export default async function shuffleCommandHandler(
 
 	queue.tracks.shuffle();
 
-	await interaction.reply('Queue shuffled.');
+	await interaction.editReply('Queue shuffled.');
 }

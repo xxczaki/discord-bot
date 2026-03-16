@@ -391,23 +391,21 @@ describe('ticTacToeCommandHandler integration', () => {
 		const mockAwaitMessageComponent = vi
 			.fn()
 			.mockRejectedValue(new Error('timeout'));
-		const mockReply = vi.fn().mockResolvedValue({
+		const mockEditReply = vi.fn().mockResolvedValue({
 			awaitMessageComponent: mockAwaitMessageComponent,
 		});
-		const mockEditReply = vi.fn();
 
 		const mockInteraction = {
-			reply: mockReply,
+			reply: vi.fn(),
 			editReply: mockEditReply,
 		} as unknown as ChatInputCommandInteraction;
 
 		await ticTacToeCommandHandler(mockInteraction);
 
-		expect(mockReply).toHaveBeenCalledWith({
+		expect(mockEditReply).toHaveBeenCalledWith({
 			content:
 				"The game begins and it's your turn. Choose where to place your symbol:",
 			components: expect.any(Array),
-			flags: ['Ephemeral'],
 		});
 
 		expect(mockEditReply).toHaveBeenCalledWith({

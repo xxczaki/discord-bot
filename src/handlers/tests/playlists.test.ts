@@ -23,6 +23,7 @@ it('should return early when user is not in a voice channel', async () => {
 			},
 		} as GuildMember,
 		reply: vi.fn(),
+		editReply: vi.fn(),
 		options: {
 			getString: vi.fn(),
 		},
@@ -30,10 +31,9 @@ it('should return early when user is not in a voice channel', async () => {
 
 	await playlistsCommandHandler(mockInteraction);
 
-	expect(mockInteraction.reply).toHaveBeenCalledWith({
-		content: 'You are not connected to a voice channel!',
-		flags: ['Ephemeral'],
-	});
+	expect(mockInteraction.editReply).toHaveBeenCalledWith(
+		'You are not connected to a voice channel!',
+	);
 });
 
 it('should return early when no playlists are selected', async () => {
@@ -45,6 +45,7 @@ it('should return early when no playlists are selected', async () => {
 			},
 		} as GuildMember,
 		reply: vi.fn(),
+		editReply: vi.fn(),
 		options: {
 			getString: vi.fn().mockReturnValue(null),
 		},
@@ -52,10 +53,9 @@ it('should return early when no playlists are selected', async () => {
 
 	await playlistsCommandHandler(mockInteraction);
 
-	expect(mockInteraction.reply).toHaveBeenCalledWith({
-		content: 'No playlists selected!',
-		flags: ['Ephemeral'],
-	});
+	expect(mockInteraction.editReply).toHaveBeenCalledWith(
+		'No playlists selected!',
+	);
 });
 
 it('should call enqueuePlaylists with selected playlists', async () => {
@@ -67,6 +67,7 @@ it('should call enqueuePlaylists with selected playlists', async () => {
 			},
 		} as GuildMember,
 		reply: vi.fn(),
+		editReply: vi.fn(),
 		options: {
 			getString: vi
 				.fn()
@@ -104,6 +105,7 @@ it('should handle single playlist selection', async () => {
 			},
 		} as GuildMember,
 		reply: vi.fn(),
+		editReply: vi.fn(),
 		options: {
 			getString: vi
 				.fn()
@@ -132,6 +134,7 @@ it('should handle all five playlists selected', async () => {
 			},
 		} as GuildMember,
 		reply: vi.fn(),
+		editReply: vi.fn(),
 		options: {
 			getString: vi
 				.fn()
@@ -163,6 +166,7 @@ it('should handle mixed null and valid playlists', async () => {
 			},
 		} as GuildMember,
 		reply: vi.fn(),
+		editReply: vi.fn(),
 		options: {
 			getString: vi
 				.fn()
@@ -195,6 +199,7 @@ it('should handle enqueuePlaylists throwing an error', async () => {
 			},
 		} as GuildMember,
 		reply: vi.fn(),
+		editReply: vi.fn(),
 		options: {
 			getString: vi.fn().mockReturnValueOnce('playlist1').mockReturnValue(null),
 		},

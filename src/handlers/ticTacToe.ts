@@ -15,11 +15,10 @@ export default async function ticTacToeCommandHandler(
 	interaction: ChatInputCommandInteraction,
 ) {
 	const rows = await getRows([], []);
-	const response = await interaction.reply({
+	const response = await interaction.editReply({
 		content:
 			"The game begins and it's your turn. Choose where to place your symbol:",
 		components: rows,
-		flags: ['Ephemeral'],
 	});
 
 	try {

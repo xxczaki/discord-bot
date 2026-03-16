@@ -128,11 +128,9 @@ it('should reply with error when user is not in a voice channel', async () => {
 
 	await recoverCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'You are not connected to a voice channel!',
-		components: [],
-		flags: ['Ephemeral'],
-	});
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'You are not connected to a voice channel!',
+	);
 });
 
 it('should reply with error when a queue already exists', async () => {
@@ -143,7 +141,7 @@ it('should reply with error when a queue already exists', async () => {
 
 	await recoverCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith(
+	expect(interaction.editReply).toHaveBeenCalledWith(
 		'Recovery not possible when a queue already exists. Please purge it first.',
 	);
 });
@@ -162,7 +160,7 @@ it('should reply with "Nothing to recover" when no tracks are found', async () =
 
 	await recoverCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith(
+	expect(interaction.editReply).toHaveBeenCalledWith(
 		'Looking up what can be recovered…',
 	);
 	expect(mockedQueueRecoveryService.getContents).toHaveBeenCalledWith(
@@ -192,7 +190,7 @@ it('should show recovery prompt when tracks are found', async () => {
 
 	await recoverCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith(
+	expect(interaction.editReply).toHaveBeenCalledWith(
 		'Looking up what can be recovered…',
 	);
 	expect(mockedQueueRecoveryService.getContents).toHaveBeenCalledWith(

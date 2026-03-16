@@ -31,7 +31,7 @@ export default async function enqueuePlaylistSlice(
 	);
 
 	if (!playlistsChannel?.isTextBased()) {
-		await interaction.reply({
+		await interaction.editReply({
 			content: 'Invalid playlists channel type!',
 			components: [],
 		});
@@ -44,7 +44,7 @@ export default async function enqueuePlaylistSlice(
 			pluralizeSongs`Fetching ${sliceType === 'head' ? 'first' : 'last'} ${count} ${null}…`,
 		);
 
-	await interaction.reply({
+	await interaction.editReply({
 		components: [],
 		embeds: [embed],
 	});

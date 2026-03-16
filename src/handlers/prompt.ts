@@ -28,27 +28,19 @@ export default async function promptCommandHandler(
 	const apiKey = process.env.OPENAI_API_KEY;
 
 	if (!apiKey) {
-		return interaction.reply({
-			content: 'The `/prompt` command is not available.',
-			flags: ['Ephemeral'],
-		});
+		return interaction.editReply('The `/prompt` command is not available.');
 	}
 
 	const voiceChannel = (interaction.member as GuildMember).voice.channel;
 
 	if (!voiceChannel) {
-		return interaction.reply({
-			content: 'You are not connected to a voice channel!',
-			flags: ['Ephemeral'],
-		});
+		return interaction.editReply('You are not connected to a voice channel!');
 	}
 
 	if (!rateLimiter.canMakeCall()) {
-		return interaction.reply({
-			content:
-				'Daily rate limit reached (100 calls per day). Try again tomorrow.',
-			flags: ['Ephemeral'],
-		});
+		return interaction.editReply(
+			'Daily rate limit reached (100 calls per day). Try again tomorrow.',
+		);
 	}
 
 	const prompt = interaction.options.getString('prompt', true);
@@ -57,7 +49,7 @@ export default async function promptCommandHandler(
 		.setTitle('Prompt')
 		.setColor('Blue')
 		.setDescription('Processing…');
-	await interaction.reply({ embeds: [embed] });
+	await interaction.editReply({ embeds: [embed] });
 
 	try {
 		const queue = useQueue();

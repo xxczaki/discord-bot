@@ -38,6 +38,7 @@ function createMockInteraction(
 			getInteger: vi.fn().mockReturnValue(count),
 		},
 		reply: vi.fn(),
+		editReply: vi.fn(),
 	} as unknown as ChatInputCommandInteraction;
 }
 
@@ -46,10 +47,9 @@ it('should return early when user is not in a voice channel', async () => {
 
 	await tailCommandHandler(mockInteraction);
 
-	expect(mockInteraction.reply).toHaveBeenCalledWith({
-		content: 'You are not connected to a voice channel!',
-		flags: ['Ephemeral'],
-	});
+	expect(mockInteraction.editReply).toHaveBeenCalledWith(
+		'You are not connected to a voice channel!',
+	);
 
 	expect(mockEnqueuePlaylistSlice).not.toHaveBeenCalled();
 });
@@ -79,7 +79,7 @@ it('should call enqueuePlaylistSlice with correct parameters', async () => {
 		8,
 	);
 
-	expect(mockInteraction.reply).not.toHaveBeenCalled();
+	expect(mockInteraction.editReply).not.toHaveBeenCalled();
 });
 
 it('should handle minimum count value', async () => {
@@ -163,6 +163,7 @@ it('should work with different voice channel types', async () => {
 			getInteger: vi.fn().mockReturnValue(6),
 		},
 		reply: vi.fn(),
+		editReply: vi.fn(),
 	} as unknown as ChatInputCommandInteraction;
 
 	mockEnqueuePlaylistSlice.mockResolvedValue(undefined);

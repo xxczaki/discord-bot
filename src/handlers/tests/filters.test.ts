@@ -50,7 +50,7 @@ it('should create correct select menu and cancel button', async () => {
 	const mockResponse = createMockResponse();
 	const mockQueue = createMockQueue([]);
 
-	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
+	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
 	mockResponse.awaitMessageComponent = vi
@@ -59,13 +59,12 @@ it('should create correct select menu and cancel button', async () => {
 
 	await filtersCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
+	expect(interaction.editReply).toHaveBeenCalledWith({
 		content: 'Choose which filters you want to toggle:',
 		components: expect.arrayContaining([
 			expect.any(ActionRowBuilder),
 			expect.any(ActionRowBuilder),
 		]),
-		flags: ['Ephemeral'],
 	});
 });
 
@@ -75,7 +74,7 @@ it('should exclude custom filters from active filters list', async () => {
 
 	const mockQueue = createMockQueue(['bassboost', '_normalizer', '_tempo125']);
 
-	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
+	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
 	mockResponse.awaitMessageComponent = vi
@@ -84,7 +83,7 @@ it('should exclude custom filters from active filters list', async () => {
 
 	await filtersCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalled();
+	expect(interaction.editReply).toHaveBeenCalled();
 });
 
 it('should handle cancel button press', async () => {
@@ -92,7 +91,7 @@ it('should handle cancel button press', async () => {
 	const mockResponse = createMockResponse();
 	const mockQueue = createMockQueue([]);
 
-	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
+	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
 	const mockComponent = createMockButtonComponent();
@@ -108,7 +107,7 @@ it('should toggle new filters and disable unselected active ones', async () => {
 	const mockResponse = createMockResponse();
 	const mockQueue = createMockQueue(['bassboost']);
 
-	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
+	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
 	const selectedValues = ['nightcore', 'lofi'];
@@ -141,7 +140,7 @@ it('should disable only unselected active filters', async () => {
 	const mockResponse = createMockResponse();
 	const mockQueue = createMockQueue(['bassboost', 'lofi']);
 
-	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
+	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
 	const selectedValues = ['bassboost'];
@@ -158,7 +157,7 @@ it('should handle no filters selected by disabling all active ones', async () =>
 	const mockResponse = createMockResponse();
 	const mockQueue = createMockQueue(['bassboost']);
 
-	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
+	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
 	const selectedValues: string[] = []; // No filters selected
@@ -175,7 +174,7 @@ it('should handle timeout gracefully', async () => {
 	const mockResponse = createMockResponse();
 	const mockQueue = createMockQueue([]);
 
-	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
+	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
 	mockResponse.awaitMessageComponent = vi
@@ -189,30 +188,28 @@ it('should work when no queue is available', async () => {
 	const interaction = createMockInteraction();
 	const mockResponse = createMockResponse();
 
-	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
+	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(null);
 
 	await filtersCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'No music is currently playing.',
-		flags: ['Ephemeral'],
-	});
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'No music is currently playing.',
+	);
 });
 
 it('should handle filters when queue is null', async () => {
 	const interaction = createMockInteraction();
 	const mockResponse = createMockResponse();
 
-	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
+	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(null);
 
 	await filtersCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'No music is currently playing.',
-		flags: ['Ephemeral'],
-	});
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'No music is currently playing.',
+	);
 });
 
 it('should handle complex multi-filter toggle scenario', async () => {
@@ -221,7 +218,7 @@ it('should handle complex multi-filter toggle scenario', async () => {
 	const activeFilters = ['bassboost', 'lofi', 'tremolo'];
 	const mockQueue = createMockQueue(activeFilters);
 
-	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
+	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
 	const selectedValues = ['bassboost', 'nightcore', '8D'];
@@ -241,7 +238,7 @@ it('should handle unknown component type gracefully', async () => {
 	const mockResponse = createMockResponse();
 	const mockQueue = createMockQueue([]);
 
-	interaction.reply = vi.fn().mockResolvedValue(mockResponse);
+	interaction.editReply = vi.fn().mockResolvedValue(mockResponse);
 	mockedUseQueue.mockReturnValue(mockQueue);
 
 	const mockComponent = {

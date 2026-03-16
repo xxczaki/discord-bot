@@ -16,6 +16,7 @@ beforeEach(() => {
 function createMockInteraction(): ChatInputCommandInteraction {
 	return {
 		reply: vi.fn().mockResolvedValue({}),
+		editReply: vi.fn().mockResolvedValue({}),
 	} as unknown as ChatInputCommandInteraction;
 }
 
@@ -37,7 +38,7 @@ it('should reply early when track is already paused', async () => {
 
 	await pauseCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith(
+	expect(interaction.editReply).toHaveBeenCalledWith(
 		'The track is already paused. Maybe you want to `/resume` it instead?',
 	);
 	expect(mockQueue.node.setPaused).not.toHaveBeenCalled();
@@ -51,7 +52,7 @@ it('should pause the track when not already paused', async () => {
 	await pauseCommandHandler(interaction);
 
 	expect(mockQueue.node.setPaused).toHaveBeenCalledWith(true);
-	expect(interaction.reply).toHaveBeenCalledWith('Track paused.');
+	expect(interaction.editReply).toHaveBeenCalledWith('Track paused.');
 });
 
 it('should handle when queue is null', async () => {
@@ -60,8 +61,7 @@ it('should handle when queue is null', async () => {
 
 	await pauseCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'No music is currently playing.',
-		flags: ['Ephemeral'],
-	});
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'No music is currently playing.',
+	);
 });

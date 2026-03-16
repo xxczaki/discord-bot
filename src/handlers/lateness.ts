@@ -39,7 +39,7 @@ export default async function latenessCommandHandler(
 			cancel,
 		);
 
-		const response = await interaction.reply({
+		const response = await interaction.editReply({
 			content: 'Lateness measurement is already in progress.',
 			components: [row],
 		});
@@ -84,7 +84,7 @@ export default async function latenessCommandHandler(
 		const stats: Record<number, string> = {};
 		const delays: number[] = [];
 
-		await interaction.reply('Loading lateness data…');
+		await interaction.editReply('Loading lateness data…');
 
 		return new Promise((resolve) => {
 			statsStream.on('data', async (keys = []) => {
@@ -179,7 +179,7 @@ export default async function latenessCommandHandler(
 
 	await lateness.start(today);
 
-	await interaction.reply(
+	await interaction.editReply(
 		`Measuring lateness, expected today at: \`${today.toLocaleTimeString(
 			'pl',
 		)}\``,

@@ -29,7 +29,7 @@ function createMockInteraction(
 ): ChatInputCommandInteraction {
 	return {
 		channel,
-		reply: vi.fn().mockResolvedValue({}),
+		editReply: vi.fn().mockResolvedValue({}),
 	} as unknown as ChatInputCommandInteraction;
 }
 
@@ -55,10 +55,9 @@ it('should handle null queue', async () => {
 
 	await relocateCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'No music is currently playing.',
-		flags: ['Ephemeral'],
-	});
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'No music is currently playing.',
+	);
 });
 
 it('should handle channel that is not sendable', async () => {
@@ -70,10 +69,9 @@ it('should handle channel that is not sendable', async () => {
 
 	await relocateCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'Unable to relocate. Current channel is not accessible.',
-		ephemeral: true,
-	});
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'Unable to relocate. Current channel is not accessible.',
+	);
 });
 
 it('should handle null channel', async () => {
@@ -84,10 +82,9 @@ it('should handle null channel', async () => {
 
 	await relocateCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'Unable to relocate. Current channel is not accessible.',
-		ephemeral: true,
-	});
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'Unable to relocate. Current channel is not accessible.',
+	);
 });
 
 it('should handle queue with null metadata', async () => {
@@ -98,10 +95,9 @@ it('should handle queue with null metadata', async () => {
 
 	await relocateCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'Unable to relocate. Queue metadata is not properly initialized.',
-		ephemeral: true,
-	});
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'Unable to relocate. Queue metadata is not properly initialized.',
+	);
 });
 
 it('should handle queue with non-object metadata', async () => {
@@ -112,10 +108,9 @@ it('should handle queue with non-object metadata', async () => {
 
 	await relocateCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'Unable to relocate. Queue metadata is not properly initialized.',
-		ephemeral: true,
-	});
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'Unable to relocate. Queue metadata is not properly initialized.',
+	);
 });
 
 it('should handle queue with metadata missing interaction', async () => {
@@ -126,10 +121,9 @@ it('should handle queue with metadata missing interaction', async () => {
 
 	await relocateCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'Unable to relocate. Queue metadata is not properly initialized.',
-		ephemeral: true,
-	});
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'Unable to relocate. Queue metadata is not properly initialized.',
+	);
 });
 
 it('should handle queue with non-object interaction in metadata', async () => {
@@ -140,10 +134,9 @@ it('should handle queue with non-object interaction in metadata', async () => {
 
 	await relocateCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'Unable to relocate. Queue metadata is not properly initialized.',
-		ephemeral: true,
-	});
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'Unable to relocate. Queue metadata is not properly initialized.',
+	);
 });
 
 it('should successfully relocate queue to new channel', async () => {
@@ -166,7 +159,7 @@ it('should successfully relocate queue to new channel', async () => {
 
 	await relocateCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith(
+	expect(interaction.editReply).toHaveBeenCalledWith(
 		'Queue updates will now be sent to this channel.',
 	);
 

@@ -15,7 +15,7 @@ beforeEach(() => {
 
 function createMockInteraction(): ChatInputCommandInteraction {
 	return {
-		reply: vi.fn().mockResolvedValue({}),
+		editReply: vi.fn().mockResolvedValue({}),
 	} as unknown as ChatInputCommandInteraction;
 }
 
@@ -35,7 +35,7 @@ it('should resume the track and reply with success message', async () => {
 	await resumeCommandHandler(interaction);
 
 	expect(mockQueue.node.setPaused).toHaveBeenCalledWith(false);
-	expect(interaction.reply).toHaveBeenCalledWith('Track resumed.');
+	expect(interaction.editReply).toHaveBeenCalledWith('Track resumed.');
 });
 
 it('should handle when queue is null', async () => {
@@ -44,8 +44,7 @@ it('should handle when queue is null', async () => {
 
 	await resumeCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'No music is currently playing.',
-		flags: ['Ephemeral'],
-	});
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'No music is currently playing.',
+	);
 });

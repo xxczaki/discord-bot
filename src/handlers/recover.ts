@@ -23,22 +23,18 @@ export default async function recoverCommandHandler(
 	const voiceChannel = (interaction.member as GuildMember).voice.channel;
 
 	if (!voiceChannel) {
-		return interaction.reply({
-			content: 'You are not connected to a voice channel!',
-			components: [],
-			flags: ['Ephemeral'],
-		});
+		return interaction.editReply('You are not connected to a voice channel!');
 	}
 
 	const queue = useQueue();
 
 	if (queue) {
-		return interaction.reply(
+		return interaction.editReply(
 			'Recovery not possible when a queue already exists. Please purge it first.',
 		);
 	}
 
-	await interaction.reply('Looking up what can be recovered…');
+	await interaction.editReply('Looking up what can be recovered…');
 
 	const player = useMainPlayer();
 	const { tracks, progress, savedAt } =

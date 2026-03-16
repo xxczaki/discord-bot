@@ -17,7 +17,7 @@ export default async function statsCommandHandler(
 
 	const botId = interaction.client.user.id;
 
-	await interaction.reply('Loading latest stats…');
+	await interaction.editReply('Loading latest stats…');
 
 	const pendingPromises: Promise<void>[] = [];
 

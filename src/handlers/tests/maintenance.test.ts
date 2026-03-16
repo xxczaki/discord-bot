@@ -58,19 +58,19 @@ it('should successfully delete deployment', async () => {
 
 	await maintenanceCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith(
-		'🔧 Activating maintenance mode...',
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'🔧 Activating maintenance mode…',
 	);
 	expect(mocks.mockApi.deleteNamespacedDeployment).toHaveBeenCalledWith({
 		name: DEPLOYMENT_NAME,
 		namespace: DEPLOYMENT_NAMESPACE,
 	});
 	expect(interaction.editReply).toHaveBeenCalledWith(
-		'✅ Maintenance mode activated! Bot will shut down in a few seconds...',
+		'✅ Maintenance mode activated! Bot will shut down in a few seconds…',
 	);
 	expect(mockedLogger.info).toHaveBeenCalledWith(
 		{},
-		'Maintenance mode activated, deleting deployment...',
+		'Maintenance mode activated, deleting deployment…',
 	);
 });
 
@@ -82,8 +82,8 @@ it('should handle Kubernetes API errors gracefully', async () => {
 
 	await maintenanceCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith(
-		'🔧 Activating maintenance mode...',
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'🔧 Activating maintenance mode…',
 	);
 	expect(mockedLogger.error).toHaveBeenCalledWith(
 		apiError,
@@ -115,8 +115,8 @@ it('should handle case when k8sClient returns null', async () => {
 
 	await maintenanceCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith(
-		'🔧 Activating maintenance mode...',
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'🔧 Activating maintenance mode…',
 	);
 	expect(interaction.editReply).toHaveBeenCalledWith(
 		'❌ Maintenance mode is not available – running outside of cluster environment.',

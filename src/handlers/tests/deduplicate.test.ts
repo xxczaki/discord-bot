@@ -49,10 +49,7 @@ it('should reply with error when queue is empty', async () => {
 
 	await deduplicateCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'The queue is empty.',
-		flags: ['Ephemeral'],
-	});
+	expect(interaction.editReply).toHaveBeenCalledWith('The queue is empty.');
 });
 
 it('should reply with error when invalid algorithm is provided', async () => {
@@ -62,10 +59,9 @@ it('should reply with error when invalid algorithm is provided', async () => {
 
 	await deduplicateCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'Incorrect deduplication algorithm specified, aborting…',
-		flags: ['Ephemeral'],
-	});
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'Incorrect deduplication algorithm specified, aborting…',
+	);
 });
 
 describe('`source` algorithm', () => {
@@ -79,7 +75,9 @@ describe('`source` algorithm', () => {
 
 		await deduplicateCommandHandler(interaction);
 
-		expect(interaction.reply).toHaveBeenCalledWith('Searching for duplicates…');
+		expect(interaction.editReply).toHaveBeenCalledWith(
+			'Searching for duplicates…',
+		);
 		expect(interaction.editReply).toHaveBeenCalledWith(
 			'No duplicates were found.',
 		);
@@ -97,7 +95,9 @@ describe('`source` algorithm', () => {
 
 		await deduplicateCommandHandler(interaction);
 
-		expect(interaction.reply).toHaveBeenCalledWith('Searching for duplicates…');
+		expect(interaction.editReply).toHaveBeenCalledWith(
+			'Searching for duplicates…',
+		);
 		expect(mockQueue.removeTrack).toHaveBeenCalledWith(track2);
 		expect(mockQueue.removeTrack).toHaveBeenCalledTimes(1);
 		expect(interaction.editReply).toHaveBeenCalledWith('Removed 1 duplicate.');

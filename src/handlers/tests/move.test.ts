@@ -26,6 +26,7 @@ function createMockInteraction(
 	return createBaseMockInteraction({
 		getString: query,
 		getInteger: to,
+		editReply: true,
 	});
 }
 
@@ -48,10 +49,9 @@ it('should reply with error when `query` is not a number', async () => {
 
 	await moveCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'Please provide a number.',
-		flags: ['Ephemeral'],
-	});
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'Please provide a number.',
+	);
 });
 
 it('should reply with error when `from` and `to` positions are the same', async () => {
@@ -61,10 +61,7 @@ it('should reply with error when `from` and `to` positions are the same', async 
 
 	await moveCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'Nothing to move.',
-		flags: ['Ephemeral'],
-	});
+	expect(interaction.editReply).toHaveBeenCalledWith('Nothing to move.');
 });
 
 it('should move track to position 0 and skip when `to` is less than 0', async () => {
@@ -78,7 +75,9 @@ it('should move track to position 0 and skip when `to` is less than 0', async ()
 
 	expect(mockQueue.moveTrack).toHaveBeenCalledWith(mockTrack, 0);
 	expect(mockQueue.node.skip).toHaveBeenCalled();
-	expect(interaction.reply).toHaveBeenCalledWith('Skipping the current track.');
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'Skipping the current track.',
+	);
 });
 
 it('should move track to specified position', async () => {
@@ -91,7 +90,7 @@ it('should move track to specified position', async () => {
 	await moveCommandHandler(interaction);
 
 	expect(mockQueue.moveTrack).toHaveBeenCalledWith(1, 3);
-	expect(interaction.reply).toHaveBeenCalledWith(
+	expect(interaction.editReply).toHaveBeenCalledWith(
 		`Moved "${mockTrack.title}" to position \`5\`.`,
 	);
 });
@@ -104,10 +103,9 @@ it('should handle when track to move is not found', async () => {
 
 	await moveCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'Could not move the track, are the specified positions correct?',
-		flags: ['Ephemeral'],
-	});
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'Could not move the track, are the specified positions correct?',
+	);
 });
 
 it('should handle when `moveTrack` throws an error', async () => {
@@ -123,10 +121,9 @@ it('should handle when `moveTrack` throws an error', async () => {
 
 	await moveCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'Could not move the track, are the specified positions correct?',
-		flags: ['Ephemeral'],
-	});
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'Could not move the track, are the specified positions correct?',
+	);
 });
 
 it('should handle when queue is null', async () => {
@@ -135,10 +132,9 @@ it('should handle when queue is null', async () => {
 
 	await moveCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'No music is currently playing.',
-		flags: ['Ephemeral'],
-	});
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'No music is currently playing.',
+	);
 });
 
 it('should handle edge case where `to` is exactly -2 (becomes -4 after subtraction)', async () => {
@@ -152,7 +148,9 @@ it('should handle edge case where `to` is exactly -2 (becomes -4 after subtracti
 
 	expect(mockQueue.moveTrack).toHaveBeenCalledWith(mockTrack, 0);
 	expect(mockQueue.node.skip).toHaveBeenCalled();
-	expect(interaction.reply).toHaveBeenCalledWith('Skipping the current track.');
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'Skipping the current track.',
+	);
 });
 
 it('should handle when `node.skip` throws an error during skip operation', async () => {
@@ -168,8 +166,7 @@ it('should handle when `node.skip` throws an error during skip operation', async
 
 	await moveCommandHandler(interaction);
 
-	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'Could not move the track, are the specified positions correct?',
-		flags: ['Ephemeral'],
-	});
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'Could not move the track, are the specified positions correct?',
+	);
 });

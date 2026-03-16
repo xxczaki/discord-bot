@@ -79,8 +79,6 @@ function createMockTrack(overrides: Partial<Track> = {}): Track {
 
 function createMockInteraction(): ChatInputCommandInteraction {
 	return {
-		deferReply: vi.fn(),
-		reply: vi.fn().mockResolvedValue({}),
 		editReply: vi.fn().mockResolvedValue(createMockResponse()),
 	} as unknown as ChatInputCommandInteraction;
 }
@@ -133,7 +131,6 @@ it('should reply early when queue is empty', async () => {
 
 	await queueCommandHandler(interaction);
 
-	expect(interaction.deferReply).toHaveBeenCalled();
 	expect(interaction.editReply).toHaveBeenCalledWith(
 		'The queue is empty and nothing is being played.',
 	);
@@ -146,7 +143,6 @@ it('should editReply early when no current track', async () => {
 
 	await queueCommandHandler(interaction);
 
-	expect(interaction.deferReply).toHaveBeenCalled();
 	expect(interaction.editReply).toHaveBeenCalledWith(
 		'The queue is empty and nothing is being played.',
 	);
@@ -169,7 +165,6 @@ it('should display queue with current track and pagination', async () => {
 
 	await queueCommandHandler(interaction);
 
-	expect(interaction.deferReply).toHaveBeenCalled();
 	expect(interaction.editReply).toHaveBeenCalledWith({
 		embeds: [expect.any(EmbedBuilder)],
 		components: [expect.any(ActionRowBuilder)],

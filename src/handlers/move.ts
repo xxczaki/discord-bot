@@ -12,19 +12,13 @@ export default async function moveCommandHandler(
 	const from = Number.parseInt(query, 10) - 2;
 
 	if (Number.isNaN(from)) {
-		return interaction.reply({
-			content: 'Please provide a number.',
-			flags: ['Ephemeral'],
-		});
+		return interaction.editReply('Please provide a number.');
 	}
 
 	const to = interaction.options.getInteger('to', true) - 2;
 
 	if (from === to) {
-		return interaction.reply({
-			content: 'Nothing to move.',
-			flags: ['Ephemeral'],
-		});
+		return interaction.editReply('Nothing to move.');
 	}
 
 	try {
@@ -38,18 +32,17 @@ export default async function moveCommandHandler(
 			queue.moveTrack(trackToMove, 0);
 			queue.node.skip();
 
-			return await interaction.reply('Skipping the current track.');
+			return await interaction.editReply('Skipping the current track.');
 		}
 
 		queue.moveTrack(from, to);
 
-		await interaction.reply(
+		await interaction.editReply(
 			`Moved "${trackToMove.title}" to position \`${to + 2}\`.`,
 		);
 	} catch {
-		await interaction.reply({
-			content: 'Could not move the track, are the specified positions correct?',
-			flags: ['Ephemeral'],
-		});
+		await interaction.editReply(
+			'Could not move the track, are the specified positions correct?',
+		);
 	}
 }

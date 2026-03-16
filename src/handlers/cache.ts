@@ -39,7 +39,7 @@ interface CacheStats {
 export default async function cacheCommandHandler(
 	interaction: ChatInputCommandInteraction,
 ) {
-	await interaction.reply('Loading cache statistics…');
+	await interaction.editReply('Loading cache statistics…');
 
 	try {
 		const usedButtons = new Set<string>();

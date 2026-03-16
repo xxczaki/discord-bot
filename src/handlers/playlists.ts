@@ -7,10 +7,7 @@ export default async function playlistsCommandHandler(
 	const voiceChannel = (interaction.member as GuildMember).voice.channel;
 
 	if (!voiceChannel) {
-		return interaction.reply({
-			content: 'You are not connected to a voice channel!',
-			flags: ['Ephemeral'],
-		});
+		return interaction.editReply('You are not connected to a voice channel!');
 	}
 
 	// Get selected playlists from the command options
@@ -23,10 +20,7 @@ export default async function playlistsCommandHandler(
 	].filter((playlist): playlist is string => playlist !== null);
 
 	if (selectedPlaylists.length === 0) {
-		return interaction.reply({
-			content: 'No playlists selected!',
-			flags: ['Ephemeral'],
-		});
+		return interaction.editReply('No playlists selected!');
 	}
 
 	await enqueuePlaylists(interaction, voiceChannel, selectedPlaylists);

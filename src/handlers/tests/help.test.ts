@@ -4,13 +4,13 @@ import { createMockInteraction as createBaseMockInteraction } from '../../utils/
 import helpCommandHandler from '../help';
 
 function createMockInteraction(): ChatInputCommandInteraction {
-	return createBaseMockInteraction();
+	return createBaseMockInteraction({ editReply: true });
 }
 
 function getContentFromReply(
 	mockInteraction: ChatInputCommandInteraction,
 ): string {
-	const [[callArgs]] = vi.mocked(mockInteraction.reply).mock.calls;
+	const [[callArgs]] = vi.mocked(mockInteraction.editReply).mock.calls;
 	return typeof callArgs === 'string'
 		? callArgs
 		: (callArgs as { content: string }).content;
@@ -25,11 +25,10 @@ it('should reply with help message content and ephemeral flag', async () => {
 
 	await helpCommandHandler(mockInteraction);
 
-	expect(mockInteraction.reply).toHaveBeenCalledOnce();
-	expect(mockInteraction.reply).toHaveBeenCalledWith({
-		content: expect.stringContaining('### Music'),
-		flags: ['Ephemeral'],
-	});
+	expect(mockInteraction.editReply).toHaveBeenCalledOnce();
+	expect(mockInteraction.editReply).toHaveBeenCalledWith(
+		expect.stringContaining('### Music'),
+	);
 });
 
 it('should include all command categories in response', async () => {

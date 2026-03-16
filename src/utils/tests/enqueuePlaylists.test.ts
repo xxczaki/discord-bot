@@ -103,6 +103,7 @@ beforeEach(() => {
 				},
 			},
 		},
+		deferred: false,
 		deferReply: vi.fn(),
 		reply: vi.fn(),
 		editReply: vi.fn().mockResolvedValue(mockResponse),
@@ -150,6 +151,18 @@ it('should defer reply and send processing embed initially', async () => {
 	await enqueuePlaylists(mockInteraction, mockVoiceChannel);
 
 	expect(mockInteraction.deferReply).toHaveBeenCalled();
+	expect(mockInteraction.editReply).toHaveBeenCalledWith({
+		components: [],
+		embeds: [expect.any(EmbedBuilder)],
+	});
+});
+
+it('should skip `deferReply` when the interaction is already deferred', async () => {
+	(mockInteraction as unknown as { deferred: boolean }).deferred = true;
+
+	await enqueuePlaylists(mockInteraction, mockVoiceChannel);
+
+	expect(mockInteraction.deferReply).not.toHaveBeenCalled();
 	expect(mockInteraction.editReply).toHaveBeenCalledWith({
 		components: [],
 		embeds: [expect.any(EmbedBuilder)],
@@ -387,6 +400,7 @@ describe('enqueuePlaylists with ChatInputCommandInteraction and playlist IDs', (
 					},
 				},
 			},
+			deferred: false,
 			deferReply: vi.fn(),
 			reply: vi.fn(),
 			editReply: vi.fn().mockResolvedValue(mockResponse),

@@ -48,6 +48,7 @@ beforeEach(() => {
 			} as WebSocketManager,
 		},
 		reply: vi.fn(),
+		editReply: vi.fn(),
 	} as unknown as ChatInputCommandInteraction;
 });
 
@@ -62,12 +63,11 @@ it('should reply with debug information embed when commit hash is available', as
 
 	await debugCommandHandler(mockInteraction);
 
-	expect(mockInteraction.reply).toHaveBeenCalledWith({
+	expect(mockInteraction.editReply).toHaveBeenCalledWith({
 		embeds: [expect.any(EmbedBuilder)],
-		flags: ['Ephemeral'],
 	});
 
-	const embedCall = vi.mocked(mockInteraction.reply).mock
+	const embedCall = vi.mocked(mockInteraction.editReply).mock
 		.calls[0][0] as InteractionReplyOptions;
 	const embed = embedCall.embeds?.[0] as EmbedBuilder;
 	const embedData = embed.toJSON();
@@ -105,12 +105,11 @@ it('should show N/A for release when deployment was manual', async () => {
 
 	await debugCommandHandler(mockInteraction);
 
-	expect(mockInteraction.reply).toHaveBeenCalledWith({
+	expect(mockInteraction.editReply).toHaveBeenCalledWith({
 		embeds: [expect.any(EmbedBuilder)],
-		flags: ['Ephemeral'],
 	});
 
-	const embedCall = vi.mocked(mockInteraction.reply).mock
+	const embedCall = vi.mocked(mockInteraction.editReply).mock
 		.calls[0][0] as InteractionReplyOptions;
 	const embed = embedCall.embeds?.[0] as EmbedBuilder;
 	const embedData = embed.toJSON();
@@ -140,7 +139,7 @@ it('should format client latency without decimal places', async () => {
 
 	await debugCommandHandler(mockInteraction);
 
-	const embedCall = vi.mocked(mockInteraction.reply).mock
+	const embedCall = vi.mocked(mockInteraction.editReply).mock
 		.calls[0][0] as InteractionReplyOptions;
 	const embed = embedCall.embeds?.[0] as EmbedBuilder;
 	const embedData = embed.toJSON();
@@ -157,7 +156,7 @@ it('should include player scan dependencies in description', async () => {
 
 	await debugCommandHandler(mockInteraction);
 
-	const embedCall = vi.mocked(mockInteraction.reply).mock
+	const embedCall = vi.mocked(mockInteraction.editReply).mock
 		.calls[0][0] as InteractionReplyOptions;
 	const embed = embedCall.embeds?.[0] as EmbedBuilder;
 	const embedData = embed.toJSON();

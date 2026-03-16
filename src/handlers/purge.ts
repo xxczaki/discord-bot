@@ -31,7 +31,7 @@ export default async function purgeCommandHandler(
 
 	queue.delete();
 
-	await interaction.reply(
+	await interaction.editReply(
 		'Queue purged.\n\nUse `/recover` to listen to the same queue again.',
 	);
 }

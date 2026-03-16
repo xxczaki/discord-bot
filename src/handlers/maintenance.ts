@@ -9,7 +9,7 @@ import reportError from '../utils/reportError';
 export default async function maintenanceCommandHandler(
 	interaction: ChatInputCommandInteraction,
 ) {
-	await interaction.reply('🔧 Activating maintenance mode...');
+	await interaction.editReply('🔧 Activating maintenance mode…');
 
 	try {
 		const k8sAppsV1Api = createK8sClient();
@@ -22,10 +22,10 @@ export default async function maintenanceCommandHandler(
 		}
 
 		await interaction.editReply(
-			'✅ Maintenance mode activated! Bot will shut down in a few seconds...',
+			'✅ Maintenance mode activated! Bot will shut down in a few seconds…',
 		);
 
-		logger.info({}, 'Maintenance mode activated, deleting deployment...');
+		logger.info({}, 'Maintenance mode activated, deleting deployment…');
 
 		await k8sAppsV1Api.deleteNamespacedDeployment({
 			name: DEPLOYMENT_NAME,

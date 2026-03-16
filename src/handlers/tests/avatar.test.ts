@@ -16,7 +16,7 @@ function createMockUser(): User {
 }
 
 function createMockInteraction(user: User): ChatInputCommandInteraction {
-	return createBaseMockInteraction({ getUser: user });
+	return createBaseMockInteraction({ getUser: user, editReply: true });
 }
 
 beforeEach(() => {
@@ -31,9 +31,9 @@ it('should create embed with user avatar and reply with it', async () => {
 
 	expect(mockInteraction.options.getUser).toHaveBeenCalledWith('user', true);
 	expect(mockUser.avatarURL).toHaveBeenCalledWith({ size: 512 });
-	expect(mockInteraction.reply).toHaveBeenCalledOnce();
+	expect(mockInteraction.editReply).toHaveBeenCalledOnce();
 
-	const [[callArgs]] = vi.mocked(mockInteraction.reply).mock.calls;
+	const [[callArgs]] = vi.mocked(mockInteraction.editReply).mock.calls;
 	const { embeds } = callArgs as { embeds: EmbedBuilder[] };
 
 	expect(embeds).toHaveLength(1);
@@ -51,9 +51,9 @@ it('should handle user with null avatar URL', async () => {
 
 	await avatarCommandHandler(mockInteraction);
 
-	expect(mockInteraction.reply).toHaveBeenCalledOnce();
+	expect(mockInteraction.editReply).toHaveBeenCalledOnce();
 
-	const [[callArgs]] = vi.mocked(mockInteraction.reply).mock.calls;
+	const [[callArgs]] = vi.mocked(mockInteraction.editReply).mock.calls;
 	const { embeds } = callArgs as { embeds: EmbedBuilder[] };
 
 	expect(embeds[0].data.image?.url).toBeUndefined();
