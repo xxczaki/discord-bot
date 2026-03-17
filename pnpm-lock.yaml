@@ -25,11 +25,6 @@ catalogs:
 overrides:
   libsodium-wrappers: '-'
 
-patchedDependencies:
-  youtubei.js@16.0.1:
-    hash: d4220a1662950bad3e9f893e88f8c8d196f2f33124da40fee786a6ee4fb967fd
-    path: patches/youtubei.js@16.0.1.patch
-
 importers:
 
   .:
@@ -153,8 +148,8 @@ importers:
         specifier: ^28.1.0
         version: 28.1.0(@noble/hashes@1.8.0)
       youtubei.js:
-        specifier: ^16.0.1
-        version: 16.0.1(patch_hash=d4220a1662950bad3e9f893e88f8c8d196f2f33124da40fee786a6ee4fb967fd)
+        specifier: ^17.0.1
+        version: 17.0.1
     devDependencies:
       '@biomejs/biome':
         specifier: 'catalog:'
@@ -3149,8 +3144,8 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  youtubei.js@16.0.1:
-    resolution: {integrity: sha512-3802bCAGkBc2/G5WUTc0l/bO5mPYJbQAHL04d9hE9PnrDHoBUT8MN721Yqt4RCNncAXdHcfee9VdJy3Fhq1r5g==}
+  youtubei.js@17.0.1:
+    resolution: {integrity: sha512-1lO4b8UqMDzE0oh2qEGzbBOd4UYRdxn/4PdpRM7BGTHxM6ddsEsKZTu90jp8V9FHVgC2h1UirQyqoqLiKwl+Zg==}
 
   zlib-sync@0.1.10:
     resolution: {integrity: sha512-t7/pYg5tLBznL1RuhmbAt8rNp5tbhr+TSrJFnMkRtrGIaPJZ6Dc0uR4u3OoQI2d6cGlVI62E3Gy6gwkxyIqr/w==}
@@ -6135,7 +6130,7 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  youtubei.js@16.0.1(patch_hash=d4220a1662950bad3e9f893e88f8c8d196f2f33124da40fee786a6ee4fb967fd):
+  youtubei.js@17.0.1:
     dependencies:
       '@bufbuild/protobuf': 2.11.0
       meriyah: 6.1.4
