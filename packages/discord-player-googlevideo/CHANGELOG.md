@@ -1,5 +1,11 @@
 # discord-player-googlevideo
 
+## 0.2.5
+
+### Patch Changes
+
+- cdb1702: Update youtubei.js to v17
+
 ## 0.2.4
 
 ### Patch Changes
