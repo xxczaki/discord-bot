@@ -1,7 +1,6 @@
 FROM ghcr.io/xxczaki/discord-bot-base:latest AS build
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY patches ./patches/
 COPY packages/discord-player-googlevideo/package.json ./packages/discord-player-googlevideo/
 
 RUN pnpm fetch && pnpm install --offline --frozen-lockfile
