@@ -39,7 +39,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "catalog:",
 		"@changesets/cli": "^2.30.0",
-		"@discordjs/rest": "^2.6.0",
+		"@discordjs/rest": "^2.6.1",
 		"@sentry/esbuild-plugin": "^5.1.1",
 		"@types/node": "catalog:",
 		"@vitest/coverage-v8": "catalog:",
