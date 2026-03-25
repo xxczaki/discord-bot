@@ -1,6 +1,7 @@
 import { stat } from 'node:fs/promises';
 import {
 	ActivityType,
+	type ButtonInteraction,
 	ButtonStyle,
 	type Client,
 	type Interaction,
@@ -278,7 +279,7 @@ it('should save queue to recovery service when track starts', async () => {
 	expect(mockedQueueRecoveryService.saveQueue).toHaveBeenCalledWith(mockQueue);
 });
 
-it('should handle skip button interaction and skip track', async () => {
+it('should handle skip button interaction and show undo button', async () => {
 	const mockClient = createMockClient();
 	const mockPlayer = createMockPlayer();
 	const mockQueue = createMockQueue();
@@ -294,9 +295,9 @@ it('should handle skip button interaction and skip track', async () => {
 	(mockChannel.send as ReturnType<typeof vi.fn>).mockResolvedValue(
 		mockResponse,
 	);
-	mockResponse.awaitMessageComponent.mockResolvedValue(
-		mockComponentInteraction,
-	);
+	mockResponse.awaitMessageComponent
+		.mockResolvedValueOnce(mockComponentInteraction)
+		.mockRejectedValueOnce(new Error('timeout'));
 
 	usePlayerEventHandlers(mockClient, mockPlayer);
 
@@ -306,15 +307,79 @@ it('should handle skip button interaction and skip track', async () => {
 
 	await playerStartHandler(mockQueue, mockTrack);
 
-	expect(mockResponse.awaitMessageComponent).toHaveBeenCalledWith({
-		time: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
-	});
 	expect(mockQueue.node.skip).toHaveBeenCalled();
 	expect(mockedCreateTrackEmbed).toHaveBeenCalledWith(
 		mockTrack,
 		'⏭️ Track was skipped.',
 	);
 	expect(mockComponentInteraction.update).toHaveBeenCalledWith({
+		content: null,
+		embeds: [{ title: 'Mock Embed' }],
+		components: [
+			expect.objectContaining({
+				components: expect.arrayContaining([
+					expect.objectContaining({
+						data: expect.objectContaining({
+							custom_id: 'undo-skip',
+							label: 'Undo',
+							style: ButtonStyle.Secondary,
+						}),
+					}),
+				]),
+			}),
+		],
+	});
+});
+
+it('should undo skip when undo button is clicked', async () => {
+	const mockClient = createMockClient();
+	const mockPlayer = createMockPlayer();
+	const mockQueue = createMockQueue();
+	const mockTrack = createMockTrack();
+	const mockChannel = createMockChannel();
+	const mockUndoInteraction = {
+		customId: 'undo-skip',
+		update: vi.fn(),
+	} as unknown as ButtonInteraction;
+	const mockResponse = {
+		awaitMessageComponent: vi.fn(),
+		edit: vi.fn(),
+	};
+	const mockComponentInteraction = createMockMessageComponentInteraction();
+
+	(mockQueue as unknown as Record<string, unknown>).history = {
+		previous: vi.fn().mockResolvedValue(undefined),
+	};
+
+	(mockQueue.metadata.interaction.channel as TextChannel) = mockChannel;
+	(mockChannel.send as ReturnType<typeof vi.fn>).mockResolvedValue(
+		mockResponse,
+	);
+	mockResponse.awaitMessageComponent
+		.mockResolvedValueOnce(mockComponentInteraction)
+		.mockResolvedValueOnce(mockUndoInteraction);
+
+	usePlayerEventHandlers(mockClient, mockPlayer);
+
+	const playerStartHandler = (
+		mockPlayer.events.on as ReturnType<typeof vi.fn>
+	).mock.calls.find((call) => call[0] === 'playerStart')?.[1];
+
+	await playerStartHandler(mockQueue, mockTrack);
+
+	expect(
+		(
+			mockQueue as unknown as Record<
+				string,
+				{ previous: ReturnType<typeof vi.fn> }
+			>
+		).history.previous,
+	).toHaveBeenCalledWith(true);
+	expect(mockedCreateTrackEmbed).toHaveBeenCalledWith(
+		mockTrack,
+		'↩️ Skip was undone.',
+	);
+	expect(mockUndoInteraction.update).toHaveBeenCalledWith({
 		content: null,
 		embeds: [{ title: 'Mock Embed' }],
 		components: [],

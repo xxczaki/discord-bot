@@ -11,6 +11,7 @@ import {
 } from 'discord.js';
 import { type Player, type Track, TrackSkipReason } from 'discord-player';
 import prettyBytes from 'pretty-bytes';
+import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
 import type { QueueMetadata } from '../types/QueueMetadata';
 import createSmartInteractionHandler from '../utils/createSmartInteractionHandler';
 import createTrackEmbed from '../utils/createTrackEmbed';
@@ -95,15 +96,53 @@ export default function usePlayerEventHandlers(
 					'⏭️ Track was skipped.',
 				);
 
+				const undoSkip = new ButtonBuilder()
+					.setCustomId('undo-skip')
+					.setLabel('Undo')
+					.setStyle(ButtonStyle.Secondary);
+
+				const undoRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+					undoSkip,
+				);
+
 				await answer.update({
 					content: null,
 					embeds: [skippedEmbed],
-					components: [],
+					components: [undoRow],
 				});
 
 				try {
 					await channel.sendTyping();
 				} catch {}
+
+				try {
+					const undoAnswer = await response.awaitMessageComponent({
+						time: DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS,
+					});
+
+					if (undoAnswer.customId === 'undo-skip') {
+						await queue.history.previous(true);
+
+						const undoneEmbed = await createTrackEmbed(
+							track,
+							'↩️ Skip was undone.',
+						);
+
+						await undoAnswer.update({
+							content: null,
+							embeds: [undoneEmbed],
+							components: [],
+						});
+
+						try {
+							await channel.sendTyping();
+						} catch {}
+					}
+				} catch {
+					try {
+						await response.edit({ components: [] });
+					} catch {}
+				}
 
 				return;
 			}
