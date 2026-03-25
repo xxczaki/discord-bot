@@ -28,6 +28,7 @@ const mockedEnqueueTracks = vi.mocked(enqueueTracks);
 const mockedLogger = vi.mocked(logger);
 
 let mockChannel: TextChannel;
+let mockPreviousChannel: TextChannel;
 let mockMessage: { edit: ReturnType<typeof vi.fn> };
 let mockPlayer: Player;
 
@@ -78,6 +79,13 @@ function createMockClient(
 		send: vi.fn().mockResolvedValue(mockMessage),
 	} as unknown as TextChannel;
 
+	mockPreviousChannel = {
+		id: 'previous-channel-id',
+		isSendable: vi.fn().mockReturnValue(true),
+		isTextBased: vi.fn().mockReturnValue(true),
+		send: vi.fn().mockResolvedValue(mockMessage),
+	} as unknown as TextChannel;
+
 	return {
 		user,
 		guilds: {
@@ -87,7 +95,10 @@ function createMockClient(
 		},
 		channels: {
 			cache: {
-				get: vi.fn().mockReturnValue(mockChannel),
+				get: vi.fn().mockImplementation((id: string) => {
+					if (id === 'previous-channel-id') return mockPreviousChannel;
+					return mockChannel;
+				}),
 			},
 		},
 	} as unknown as Client;
@@ -114,14 +125,20 @@ it('should auto-recover queue after graceful shutdown', async () => {
 	mockedRedis.get.mockResolvedValue('graceful');
 	mockedRedis.del.mockResolvedValue(1);
 	mockedQueueRecoveryService.getInstance.mockReturnValue({
-		getContents: vi.fn().mockResolvedValue({ tracks, progress: 5000 }),
+		getContents: vi.fn().mockResolvedValue({
+			tracks,
+			progress: 5000,
+			channelId: 'previous-channel-id',
+		}),
 	} as unknown as QueueRecoveryService);
 	mockedEnqueueTracks.mockResolvedValue(undefined);
 
 	await performStartupRecovery(mockClient, mockPlayer);
 
 	expect(mockedRedis.del).toHaveBeenCalledWith('discord-bot:shutdown-reason');
-	expect(mockChannel.send).toHaveBeenCalledWith('Starting auto-recovery…');
+	expect(mockPreviousChannel.send).toHaveBeenCalledWith(
+		'Starting auto-recovery…',
+	);
 	expect(mockedEnqueueTracks).toHaveBeenCalledWith(
 		expect.objectContaining({
 			tracks,
@@ -129,7 +146,7 @@ it('should auto-recover queue after graceful shutdown', async () => {
 			voiceChannel: expect.objectContaining({ id: 'test-voice-channel' }),
 			interaction: expect.objectContaining({
 				user: { id: 'bot-user' },
-				channel: mockChannel,
+				channel: mockPreviousChannel,
 			}),
 		}),
 	);

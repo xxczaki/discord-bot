@@ -89,6 +89,11 @@ const createMockQueue = (
 		currentTrack: mockTrack,
 		tracks: mockTracks,
 		node: mockNode,
+		metadata: {
+			interaction: {
+				channel: { id: 'test-channel-id' },
+			},
+		},
 		...overrides,
 	} as unknown as GuildQueue<unknown>;
 };
@@ -154,6 +159,10 @@ describe('QueueRecoveryService', () => {
 				'queue-recovery:saved-at',
 				expect.any(Number),
 			);
+			expect(mockPipeline.set).toHaveBeenCalledWith(
+				'queue-recovery:channel-id',
+				'test-channel-id',
+			);
 			expect(mockPipeline.exec).toHaveBeenCalledOnce();
 		});
 
@@ -211,6 +220,9 @@ describe('QueueRecoveryService', () => {
 			expect(mockPipeline.del).toHaveBeenCalledWith('queue-recovery:tracks');
 			expect(mockPipeline.del).toHaveBeenCalledWith('queue-recovery:progress');
 			expect(mockPipeline.del).toHaveBeenCalledWith('queue-recovery:saved-at');
+			expect(mockPipeline.del).toHaveBeenCalledWith(
+				'queue-recovery:channel-id',
+			);
 			expect(mockPipeline.exec).toHaveBeenCalledOnce();
 		});
 	});
@@ -226,6 +238,7 @@ describe('QueueRecoveryService', () => {
 				[null, JSON.stringify(serializedTracks)],
 				[null, EXAMPLE_PROGRESS],
 				[null, savedAt.toString()],
+				[null, 'channel-123'],
 			]);
 			mockedDeserialize.mockReturnValue(mockTrack);
 
@@ -234,6 +247,9 @@ describe('QueueRecoveryService', () => {
 			expect(mockPipeline.get).toHaveBeenCalledWith('queue-recovery:tracks');
 			expect(mockPipeline.get).toHaveBeenCalledWith('queue-recovery:progress');
 			expect(mockPipeline.get).toHaveBeenCalledWith('queue-recovery:saved-at');
+			expect(mockPipeline.get).toHaveBeenCalledWith(
+				'queue-recovery:channel-id',
+			);
 			expect(mockedDeserialize).toHaveBeenCalledWith(
 				mockPlayer,
 				EXAMPLE_SERIALIZED_TRACK,
@@ -242,6 +258,7 @@ describe('QueueRecoveryService', () => {
 				tracks: [mockTrack],
 				progress: EXAMPLE_PROGRESS,
 				savedAt,
+				channelId: 'channel-123',
 			});
 		});
 
@@ -256,6 +273,7 @@ describe('QueueRecoveryService', () => {
 				tracks: [],
 				progress: 0,
 				savedAt: null,
+				channelId: null,
 			});
 		});
 
@@ -266,6 +284,7 @@ describe('QueueRecoveryService', () => {
 				[null, null],
 				[null, EXAMPLE_PROGRESS],
 				[null, null],
+				[null, null],
 			]);
 
 			const result = await queueRecoveryService.getContents(mockPlayer);
@@ -274,6 +293,7 @@ describe('QueueRecoveryService', () => {
 				tracks: [],
 				progress: 0,
 				savedAt: null,
+				channelId: null,
 			});
 		});
 
@@ -284,6 +304,7 @@ describe('QueueRecoveryService', () => {
 				[null, 'invalid-json'],
 				[null, EXAMPLE_PROGRESS],
 				[null, null],
+				[null, null],
 			]);
 
 			const result = await queueRecoveryService.getContents(mockPlayer);
@@ -292,6 +313,7 @@ describe('QueueRecoveryService', () => {
 				tracks: [],
 				progress: 0,
 				savedAt: null,
+				channelId: null,
 			});
 		});
 
@@ -302,6 +324,7 @@ describe('QueueRecoveryService', () => {
 				[null, JSON.stringify([])],
 				[null, EXAMPLE_PROGRESS],
 				[null, null],
+				[null, null],
 			]);
 
 			const result = await queueRecoveryService.getContents(mockPlayer);
@@ -310,6 +333,7 @@ describe('QueueRecoveryService', () => {
 				tracks: [],
 				progress: EXAMPLE_PROGRESS,
 				savedAt: null,
+				channelId: null,
 			});
 		});
 
@@ -326,6 +350,7 @@ describe('QueueRecoveryService', () => {
 				[null, JSON.stringify(serializedTracks)],
 				[null, EXAMPLE_PROGRESS],
 				[null, null],
+				[null, null],
 			]);
 			mockedDeserialize
 				.mockReturnValueOnce(mockTrack1)
@@ -338,6 +363,7 @@ describe('QueueRecoveryService', () => {
 				tracks: [mockTrack1, mockTrack2],
 				progress: EXAMPLE_PROGRESS,
 				savedAt: null,
+				channelId: null,
 			});
 		});
 
@@ -351,6 +377,7 @@ describe('QueueRecoveryService', () => {
 				[null, JSON.stringify(serializedTracks)],
 				[null, EXAMPLE_PROGRESS],
 				[null, savedAt.toString()],
+				[null, null],
 			]);
 			mockedDeserialize.mockReturnValue(mockTrack);
 

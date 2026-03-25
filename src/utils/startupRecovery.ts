@@ -23,7 +23,8 @@ export default async function performStartupRecovery(
 
 		const shutdownReason = await redis.get(SHUTDOWN_REASON_KEY);
 		const queueRecoveryService = QueueRecoveryService.getInstance();
-		const { tracks, progress } = await queueRecoveryService.getContents(player);
+		const { tracks, progress, channelId } =
+			await queueRecoveryService.getContents(player);
 
 		if (shutdownReason === 'graceful') {
 			await redis.del(SHUTDOWN_REASON_KEY);
@@ -43,11 +44,22 @@ export default async function performStartupRecovery(
 				return channel.members.filter((member) => !member.user.bot).size > 0;
 			});
 
-			if (!voiceChannel?.isVoiceBased() || !debugChannel?.isSendable()) {
+			if (!voiceChannel?.isVoiceBased()) {
 				return;
 			}
 
-			const message = await debugChannel.send('Starting auto-recovery…');
+			const previousChannel = channelId
+				? client.channels.cache.get(channelId)
+				: null;
+			const recoveryChannel = previousChannel?.isSendable()
+				? previousChannel
+				: debugChannel;
+
+			if (!recoveryChannel?.isSendable()) {
+				return;
+			}
+
+			const message = await recoveryChannel.send('Starting auto-recovery…');
 
 			const messageHandler = (
 				options: InteractionEditReplyOptions | InteractionReplyOptions,
@@ -69,7 +81,7 @@ export default async function performStartupRecovery(
 					editReply: messageHandler,
 					reply: messageHandler,
 					user: client.user,
-					channel: debugChannel,
+					channel: recoveryChannel,
 				},
 			});
 

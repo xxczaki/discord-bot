@@ -156,6 +156,7 @@ it('should reply with "Nothing to recover" when no tracks are found', async () =
 		tracks: [],
 		progress: 0,
 		savedAt: null,
+		channelId: null,
 	});
 
 	await recoverCommandHandler(interaction);
@@ -186,6 +187,7 @@ it('should show recovery prompt when tracks are found', async () => {
 		tracks,
 		progress: EXAMPLE_PROGRESS,
 		savedAt: null,
+		channelId: null,
 	});
 
 	await recoverCommandHandler(interaction);
@@ -228,6 +230,7 @@ it('should show `savedAt` field when present', async () => {
 		tracks,
 		progress: EXAMPLE_PROGRESS,
 		savedAt: Date.now(),
+		channelId: null,
 	});
 
 	await recoverCommandHandler(interaction);
@@ -254,6 +257,7 @@ it('should proceed with recovery when `proceed` button is clicked', async () => 
 		tracks,
 		progress: EXAMPLE_PROGRESS,
 		savedAt: null,
+		channelId: null,
 	});
 	mockedEnqueueTracks.mockResolvedValue(undefined);
 
@@ -288,6 +292,7 @@ it('should cancel recovery when `cancel` button is clicked', async () => {
 		tracks,
 		progress: EXAMPLE_PROGRESS,
 		savedAt: null,
+		channelId: null,
 	});
 
 	await recoverCommandHandler(interaction);
@@ -316,6 +321,7 @@ it('should cancel recovery when button interaction times out', async () => {
 		tracks,
 		progress: EXAMPLE_PROGRESS,
 		savedAt: null,
+		channelId: null,
 	});
 
 	await recoverCommandHandler(interaction);
@@ -343,6 +349,7 @@ it('should handle unknown button `customId` as cancel', async () => {
 		tracks,
 		progress: EXAMPLE_PROGRESS,
 		savedAt: null,
+		channelId: null,
 	});
 
 	await recoverCommandHandler(interaction);
