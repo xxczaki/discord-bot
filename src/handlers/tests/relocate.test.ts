@@ -1,4 +1,8 @@
-import type { ChatInputCommandInteraction, TextBasedChannel } from 'discord.js';
+import type {
+	ChatInputCommandInteraction,
+	TextBasedChannel,
+	TextChannel,
+} from 'discord.js';
 import { useQueue } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
 import type { ProcessingInteraction } from '../../types/ProcessingInteraction';
@@ -21,6 +25,7 @@ beforeEach(() => {
 function createMockChannel(isSendable = true): TextBasedChannel {
 	return {
 		isSendable: vi.fn().mockReturnValue(isSendable),
+		send: vi.fn().mockResolvedValue({}),
 	} as unknown as TextBasedChannel;
 }
 
@@ -159,6 +164,9 @@ it('should successfully relocate queue to new channel', async () => {
 
 	await relocateCommandHandler(interaction);
 
+	expect((originalChannel as TextChannel).send).toHaveBeenCalledWith(
+		`Queue updates have been relocated to ${newChannel}.`,
+	);
 	expect(interaction.editReply).toHaveBeenCalledWith(
 		'Queue updates will now be sent to this channel.',
 	);
@@ -167,6 +175,32 @@ it('should successfully relocate queue to new channel', async () => {
 
 	expect(metadata.interaction.channel).toBe(newChannel);
 	expect(metadata.interaction.user).toEqual({ id: 'user-123' });
+});
+
+it('should not notify old channel if it is not sendable', async () => {
+	const originalChannel = createMockChannel(false);
+	const newChannel = createMockChannel();
+	const mockReply = vi.fn();
+	const mockEditReply = vi.fn();
+
+	const interaction = createMockInteraction(newChannel);
+	const mockQueue = createMockQueue({
+		interaction: {
+			user: { id: 'user-123' },
+			channel: originalChannel,
+			reply: mockReply,
+			editReply: mockEditReply,
+		},
+	});
+
+	mockedUseQueue.mockReturnValue(mockQueue);
+
+	await relocateCommandHandler(interaction);
+
+	expect((originalChannel as TextChannel).send).not.toHaveBeenCalled();
+	expect(interaction.editReply).toHaveBeenCalledWith(
+		'Queue updates will now be sent to this channel.',
+	);
 });
 
 it('should preserve original interaction methods after relocation', async () => {

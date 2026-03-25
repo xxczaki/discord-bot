@@ -24,6 +24,7 @@ export default async function relocateCommandHandler(
 	}
 
 	const originalInteraction = queue.metadata.interaction;
+	const oldChannel = originalInteraction.channel;
 
 	queue.metadata.interaction = {
 		user: originalInteraction.user,
@@ -31,6 +32,10 @@ export default async function relocateCommandHandler(
 		reply: originalInteraction.reply.bind(originalInteraction),
 		editReply: originalInteraction.editReply.bind(originalInteraction),
 	};
+
+	if (oldChannel?.isSendable()) {
+		await oldChannel.send(`Queue updates have been relocated to ${channel}.`);
+	}
 
 	await interaction.editReply(
 		'Queue updates will now be sent to this channel.',
