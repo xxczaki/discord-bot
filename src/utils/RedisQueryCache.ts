@@ -15,6 +15,11 @@ import type { Redis } from 'ioredis';
 import { ExternalPlaylistCache } from './ExternalPlaylistCache';
 import isUrlSpotifyPlaylist from './isUrlSpotifyPlaylist';
 
+export interface Resolution {
+	url: string;
+	track: Track;
+}
+
 export class RedisQueryCache implements QueryCacheProvider<Track> {
 	static EXPIRY_TIMEOUT_SECONDS = 60 * 60 * 24; // 1 day
 
@@ -28,11 +33,34 @@ export class RedisQueryCache implements QueryCacheProvider<Track> {
 		return `discord-player:query-cache:${id}` as const;
 	}
 
+	#createResolutionKey(query: string) {
+		return `discord-player:query-resolutions:${query}` as const;
+	}
+
+	#createCorrectedKey(query: string) {
+		return `discord-player:query-corrected:${query}` as const;
+	}
+
 	async addData(data: SearchResult): Promise<void> {
-		// Don't cache empty results to prevent caching failed playlist resolutions
 		if ((!data.tracks || data.tracks.length === 0) && !data.playlist) {
 			return;
 		}
+
+		const firstTrack = data.tracks[0];
+
+		if (firstTrack) {
+			await this.redis.hset(
+				this.#createResolutionKey(data.query),
+				firstTrack.url,
+				JSON.stringify(serialize(firstTrack)),
+			);
+		}
+
+		const isCorrected = await this.redis.exists(
+			this.#createCorrectedKey(data.query),
+		);
+
+		if (isCorrected) return;
 
 		const key = this.#createKey(data.query);
 		const serialized = JSON.stringify(
@@ -55,6 +83,58 @@ export class RedisQueryCache implements QueryCacheProvider<Track> {
 				);
 			}
 		}
+	}
+
+	async getResolutions(query: string): Promise<Resolution[]> {
+		const player = useMainPlayer();
+		const entries = await this.redis.hgetall(this.#createResolutionKey(query));
+
+		return Object.entries(entries).map(([url, serialized]) => ({
+			url,
+			track: deserialize(player, JSON.parse(serialized)) as Track,
+		}));
+	}
+
+	async setCorrectResolution(query: string, trackUrl: string): Promise<void> {
+		const trackData = await this.redis.hget(
+			this.#createResolutionKey(query),
+			trackUrl,
+		);
+
+		if (!trackData) {
+			throw new Error(`No resolution found for URL: ${trackUrl}`);
+		}
+
+		await this.redis.set(this.#createCorrectedKey(query), trackData);
+	}
+
+	async setCorrectResolutionFromData(
+		query: string,
+		serializedTrack: string,
+	): Promise<void> {
+		await this.redis.set(this.#createCorrectedKey(query), serializedTrack);
+	}
+
+	async removeCorrectResolution(query: string): Promise<void> {
+		await this.redis.del(this.#createCorrectedKey(query));
+	}
+
+	async isQueryCorrected(query: string): Promise<boolean> {
+		const exists = await this.redis.exists(this.#createCorrectedKey(query));
+
+		return exists === 1;
+	}
+
+	async addResolution(
+		query: string,
+		trackUrl: string,
+		serializedTrack: string,
+	): Promise<void> {
+		await this.redis.hset(
+			this.#createResolutionKey(query),
+			trackUrl,
+			serializedTrack,
+		);
 	}
 
 	async getData(): Promise<DiscordPlayerQueryResultCache<Track<unknown>>[]> {
@@ -93,6 +173,23 @@ export class RedisQueryCache implements QueryCacheProvider<Track> {
 		const player = useMainPlayer();
 
 		try {
+			const corrected = await this.redis.get(
+				this.#createCorrectedKey(context.query),
+			);
+
+			if (corrected) {
+				const parsed = deserialize(player, JSON.parse(corrected)) as Track;
+
+				return new SearchResult(player, {
+					query: context.query,
+					extractor: parsed.extractor,
+					tracks: [parsed],
+					requestedBy: context.requestedBy,
+					playlist: null,
+					queryType: context.queryType,
+				});
+			}
+
 			const key = this.#createKey(context.query);
 
 			const serialized = await this.redis.get(key);

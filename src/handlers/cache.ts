@@ -34,6 +34,10 @@ interface CacheStats {
 		count: number;
 		size: number;
 	};
+	correctedQueries: {
+		count: number;
+		size: number;
+	};
 }
 
 export default async function cacheCommandHandler(
@@ -140,6 +144,7 @@ async function gatherCacheStatsWithLiveUpdates(
 		queryCache: { count: 0, size: 0 },
 		externalPlaylistCache: { count: 0, size: 0 },
 		opusCache: { count: 0, size: 0 },
+		correctedQueries: { count: 0, size: 0 },
 	};
 
 	let lastUpdateTime = 0;
@@ -180,6 +185,13 @@ async function gatherCacheStatsWithLiveUpdates(
 			stats.opusCache = result;
 			updateDisplay();
 		}),
+		getRedisCacheStatsWithUpdates(
+			'discord-player:query-corrected:*',
+			(result) => {
+				stats.correctedQueries = result;
+				updateDisplay();
+			},
+		),
 	];
 
 	await Promise.all(promises);
@@ -335,6 +347,16 @@ function createCacheStatsEmbed(stats: CacheStats): EmbedBuilder {
 					stats.opusCache.size,
 					'file',
 					'files',
+				),
+				inline: true,
+			},
+			{
+				name: 'Corrected Queries',
+				value: formatCacheField(
+					stats.correctedQueries.count,
+					stats.correctedQueries.size,
+					'query',
+					'queries',
 				),
 				inline: true,
 			},

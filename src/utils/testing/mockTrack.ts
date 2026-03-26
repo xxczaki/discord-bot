@@ -8,7 +8,7 @@ import {
 } from './constants';
 
 export function createMockTrack(overrides: Partial<Track> = {}): Track {
-	return {
+	const trackData: Record<string, unknown> = {
 		id: MOCK_TRACK_ID,
 		title: MOCK_TRACK_TITLE,
 		cleanTitle: MOCK_TRACK_TITLE,
@@ -20,8 +20,12 @@ export function createMockTrack(overrides: Partial<Track> = {}): Track {
 		requestedBy: {
 			id: 'user-123',
 		},
+		setMetadata(metadata: unknown) {
+			trackData.metadata = metadata;
+		},
 		...overrides,
-	} as Track;
+	};
+	return trackData as unknown as Track;
 }
 
 export function createMinimalMockTrack(id: string): Track<unknown> {

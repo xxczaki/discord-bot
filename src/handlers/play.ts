@@ -11,6 +11,7 @@ import createSmartInteractionHandler from '../utils/createSmartInteractionHandle
 import createTrackEmbed from '../utils/createTrackEmbed';
 import determineSearchEngine from '../utils/determineSearchEngine';
 import getTrackPosition from '../utils/getTrackPosition';
+import isObject from '../utils/isObject';
 import reportError from '../utils/reportError';
 
 export default async function playCommandHandler(
@@ -36,6 +37,11 @@ export default async function playCommandHandler(
 				defaultFFmpegFilters: ['_normalizer' as keyof QueueFilters],
 			},
 			requestedBy: interaction.user,
+		});
+
+		track.setMetadata({
+			...(isObject(track.metadata) ? track.metadata : {}),
+			originalQuery: query,
 		});
 
 		const queue = useQueue();

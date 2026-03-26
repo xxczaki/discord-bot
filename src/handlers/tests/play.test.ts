@@ -418,8 +418,10 @@ it('should create proper button states based on track position and queue status'
 
 it('should disable "Play next" button when track is at position 1', async () => {
 	const interaction = createMockInteraction();
-	const mockPlayer = createMockPlayer();
 	const mockTrack = createMockTrack();
+	const mockPlayer = {
+		play: vi.fn().mockResolvedValue({ track: mockTrack }),
+	} as unknown as ReturnType<typeof useMainPlayer>;
 	const mockQueue = createMockQueue([mockTrack]);
 	const mockEmbed = createMockEmbed();
 	const mockResponse = createMockResponse();
@@ -436,8 +438,6 @@ it('should disable "Play next" button when track is at position 1', async () => 
 
 	await playCommandHandler(interaction);
 
-	// The actual button state validation is done through the button builder chain
-	// The test validates that the proper position calculation is done
 	expect(mockedGetTrackPosition).toHaveBeenCalledWith(mockQueue, mockTrack);
 });
 

@@ -64,7 +64,13 @@ describe('RedisQueryCache', () => {
 			setex: vi.fn(),
 			keys: vi.fn(),
 			mget: vi.fn(),
-			get: vi.fn(),
+			get: vi.fn().mockResolvedValue(null),
+			set: vi.fn(),
+			del: vi.fn(),
+			exists: vi.fn().mockResolvedValue(0),
+			hset: vi.fn(),
+			hget: vi.fn(),
+			hgetall: vi.fn().mockResolvedValue({}),
 			scanStream: vi.fn(),
 		} as unknown as Redis;
 
@@ -80,10 +86,14 @@ describe('RedisQueryCache', () => {
 	});
 
 	describe('addData', () => {
-		it('should store track data', async () => {
+		it('should store track data and resolution history', async () => {
+			const mockTrack = {
+				title: 'Test Song',
+				url: 'https://youtube.com/watch?v=abc',
+			};
 			const mockSearchResult = {
 				query: EXAMPLE_QUERY,
-				tracks: [{ title: 'Test Song' }],
+				tracks: [mockTrack],
 			} as unknown as SearchResult;
 
 			vi.mocked(serialize).mockReturnValue({ title: 'Test Song' });
@@ -91,13 +101,37 @@ describe('RedisQueryCache', () => {
 
 			await redisQueryCache.addData(mockSearchResult);
 
-			expect(vi.mocked(serialize)).toHaveBeenCalledWith({ title: 'Test Song' });
+			expect(vi.mocked(serialize)).toHaveBeenCalledWith(mockTrack);
+			expect(mockRedis.hset).toHaveBeenCalledWith(
+				'discord-player:query-resolutions:test song',
+				'https://youtube.com/watch?v=abc',
+				JSON.stringify({ title: 'Test Song' }),
+			);
 			expect(mockRedis.setex).toHaveBeenCalledWith(
 				EXAMPLE_CACHE_KEY,
 				RedisQueryCache.EXPIRY_TIMEOUT_SECONDS,
 				JSON.stringify([{ title: 'Test Song' }]),
 			);
 			expect(mockedExternalPlaylistCache.setTrackCount).not.toHaveBeenCalled();
+		});
+
+		it('should skip normal cache write when query is corrected', async () => {
+			const mockTrack = {
+				title: 'Test Song',
+				url: 'https://youtube.com/watch?v=abc',
+			};
+			const mockSearchResult = {
+				query: EXAMPLE_QUERY,
+				tracks: [mockTrack],
+			} as unknown as SearchResult;
+
+			vi.mocked(serialize).mockReturnValue({ title: 'Test Song' });
+			vi.mocked(mockRedis.exists).mockResolvedValue(1);
+
+			await redisQueryCache.addData(mockSearchResult);
+
+			expect(mockRedis.hset).toHaveBeenCalled();
+			expect(mockRedis.setex).not.toHaveBeenCalled();
 		});
 
 		it('should cache playlist data and external playlist track count for Spotify playlists', async () => {
@@ -130,9 +164,11 @@ describe('RedisQueryCache', () => {
 		});
 
 		it('should not cache external playlist track count when no playlist is provided', async () => {
+			const mockTrack1 = { title: 'Track 1', url: 'https://youtube.com/1' };
+			const mockTrack2 = { title: 'Track 2', url: 'https://youtube.com/2' };
 			const mockSearchResult = {
 				query: EXAMPLE_SPOTIFY_PLAYLIST,
-				tracks: [{ title: 'Track 1' }, { title: 'Track 2' }],
+				tracks: [mockTrack1, mockTrack2],
 				playlist: null,
 			} as unknown as SearchResult;
 
@@ -260,6 +296,30 @@ describe('RedisQueryCache', () => {
 			queryType: QueryType.AUTO,
 		};
 
+		it('should resolve corrected query before normal cache', async () => {
+			const mockTrack = { title: 'Corrected Song', extractor: 'youtube' };
+			const serializedTrack = { title: 'Corrected Song' };
+
+			vi.mocked(mockRedis.get).mockResolvedValueOnce(
+				JSON.stringify(serializedTrack),
+			);
+			vi.mocked(deserialize).mockReturnValue(mockTrack as never);
+
+			await redisQueryCache.resolve(mockContext);
+
+			expect(mockRedis.get).toHaveBeenCalledWith(
+				'discord-player:query-corrected:test song',
+			);
+			expect(vi.mocked(MockedSearchResult)).toHaveBeenCalledWith(mockPlayer, {
+				query: EXAMPLE_QUERY,
+				extractor: 'youtube',
+				tracks: [mockTrack],
+				requestedBy: undefined,
+				playlist: null,
+				queryType: QueryType.AUTO,
+			});
+		});
+
 		it('should resolve cached playlist data', async () => {
 			const mockPlaylist = {
 				title: 'Test Playlist',
@@ -267,9 +327,9 @@ describe('RedisQueryCache', () => {
 			};
 			const serializedPlaylist = { title: 'Test Playlist', tracks: [] };
 
-			vi.mocked(mockRedis.get).mockResolvedValue(
-				JSON.stringify(serializedPlaylist),
-			);
+			vi.mocked(mockRedis.get)
+				.mockResolvedValueOnce(null)
+				.mockResolvedValueOnce(JSON.stringify(serializedPlaylist));
 			vi.mocked(deserialize).mockReturnValue(mockPlaylist as never);
 
 			await redisQueryCache.resolve(mockContext);
@@ -293,9 +353,9 @@ describe('RedisQueryCache', () => {
 			const mockTrack = { title: 'Test Song', extractor: 'youtube' };
 			const serializedTracks = [{ title: 'Test Song' }];
 
-			vi.mocked(mockRedis.get).mockResolvedValue(
-				JSON.stringify(serializedTracks),
-			);
+			vi.mocked(mockRedis.get)
+				.mockResolvedValueOnce(null)
+				.mockResolvedValueOnce(JSON.stringify(serializedTracks));
 			vi.mocked(deserialize).mockReturnValue(mockTrack as never);
 
 			await redisQueryCache.resolve(mockContext);
@@ -345,7 +405,9 @@ describe('RedisQueryCache', () => {
 		});
 
 		it('should handle deserialization errors', async () => {
-			vi.mocked(mockRedis.get).mockResolvedValue('["valid-json"]');
+			vi.mocked(mockRedis.get)
+				.mockResolvedValueOnce(null)
+				.mockResolvedValueOnce('["valid-json"]');
 			vi.mocked(deserialize).mockImplementation(() => {
 				throw new Error('Deserialization failed');
 			});
@@ -360,6 +422,115 @@ describe('RedisQueryCache', () => {
 				playlist: null,
 				queryType: QueryType.AUTO,
 			});
+		});
+	});
+
+	describe('resolution history', () => {
+		it('should return resolutions from hash', async () => {
+			const mockTrack = { title: 'Test Song', extractor: 'youtube' };
+			vi.mocked(mockRedis.hgetall).mockResolvedValue({
+				'https://youtube.com/1': JSON.stringify({ title: 'Test Song' }),
+			});
+			vi.mocked(deserialize).mockReturnValue(mockTrack as never);
+
+			const resolutions = await redisQueryCache.getResolutions(EXAMPLE_QUERY);
+
+			expect(mockRedis.hgetall).toHaveBeenCalledWith(
+				'discord-player:query-resolutions:test song',
+			);
+			expect(resolutions).toHaveLength(1);
+			expect(resolutions[0].url).toBe('https://youtube.com/1');
+			expect(resolutions[0].track).toBe(mockTrack);
+		});
+
+		it('should return empty array when no resolutions exist', async () => {
+			const resolutions = await redisQueryCache.getResolutions(EXAMPLE_QUERY);
+
+			expect(resolutions).toHaveLength(0);
+		});
+
+		it('should add resolution to history', async () => {
+			await redisQueryCache.addResolution(
+				EXAMPLE_QUERY,
+				'https://youtube.com/1',
+				'{"title":"Test"}',
+			);
+
+			expect(mockRedis.hset).toHaveBeenCalledWith(
+				'discord-player:query-resolutions:test song',
+				'https://youtube.com/1',
+				'{"title":"Test"}',
+			);
+		});
+	});
+
+	describe('corrected resolutions', () => {
+		it('should set correct resolution from history', async () => {
+			vi.mocked(mockRedis.hget).mockResolvedValue('{"title":"Correct"}');
+
+			await redisQueryCache.setCorrectResolution(
+				EXAMPLE_QUERY,
+				'https://youtube.com/1',
+			);
+
+			expect(mockRedis.hget).toHaveBeenCalledWith(
+				'discord-player:query-resolutions:test song',
+				'https://youtube.com/1',
+			);
+			expect(mockRedis.set).toHaveBeenCalledWith(
+				'discord-player:query-corrected:test song',
+				'{"title":"Correct"}',
+			);
+		});
+
+		it('should throw when resolution URL not found', async () => {
+			vi.mocked(mockRedis.hget).mockResolvedValue(null);
+
+			await expect(
+				redisQueryCache.setCorrectResolution(
+					EXAMPLE_QUERY,
+					'https://missing.com',
+				),
+			).rejects.toThrow('No resolution found for URL: https://missing.com');
+		});
+
+		it('should set correct resolution from external data', async () => {
+			await redisQueryCache.setCorrectResolutionFromData(
+				EXAMPLE_QUERY,
+				'{"title":"External"}',
+			);
+
+			expect(mockRedis.set).toHaveBeenCalledWith(
+				'discord-player:query-corrected:test song',
+				'{"title":"External"}',
+			);
+		});
+
+		it('should remove correct resolution', async () => {
+			await redisQueryCache.removeCorrectResolution(EXAMPLE_QUERY);
+
+			expect(mockRedis.del).toHaveBeenCalledWith(
+				'discord-player:query-corrected:test song',
+			);
+		});
+
+		it('should check if query is corrected', async () => {
+			vi.mocked(mockRedis.exists).mockResolvedValue(1);
+
+			const result = await redisQueryCache.isQueryCorrected(EXAMPLE_QUERY);
+
+			expect(result).toBe(true);
+			expect(mockRedis.exists).toHaveBeenCalledWith(
+				'discord-player:query-corrected:test song',
+			);
+		});
+
+		it('should return false when query is not corrected', async () => {
+			vi.mocked(mockRedis.exists).mockResolvedValue(0);
+
+			const result = await redisQueryCache.isQueryCorrected(EXAMPLE_QUERY);
+
+			expect(result).toBe(false);
 		});
 	});
 });

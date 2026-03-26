@@ -156,13 +156,14 @@ describe('cache command handler', () => {
 
 		const embed = call.embeds?.[0];
 		expect(embed?.data.title).toBe('Cache Statistics');
-		expect(embed?.data.fields).toHaveLength(3);
+		expect(embed?.data.fields).toHaveLength(4);
 
 		const fieldNames = embed?.data.fields.map((field) => field.name);
 		expect(fieldNames).toEqual([
 			'Query Cache',
 			'External Playlist Cache',
 			'Opus Cache',
+			'Corrected Queries',
 		]);
 	});
 
