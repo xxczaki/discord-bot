@@ -165,9 +165,13 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 
 				const writeStream = createWriteStream(filePath);
 
+				let cleanedUp = false;
 				let streamEndedNormally = false;
 
 				const cleanup = () => {
+					if (cleanedUp) return;
+					cleanedUp = true;
+
 					interceptor.interceptors.delete(writeStream);
 
 					/* v8 ignore start */
@@ -186,6 +190,8 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 				});
 
 				writeStream.on('close', () => {
+					if (cleanedUp) return;
+
 					activeWrites.delete(filePath);
 
 					opusCacheManager.addEntry({
@@ -202,11 +208,17 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 
 				readable.on('end', () => {
 					streamEndedNormally = true;
+					interceptor.interceptors.delete(writeStream);
+					writeStream.end();
 				});
 
 				readable.on('close', () => {
-					if (!streamEndedNormally && activeWrites.has(filePath)) {
-						void cleanup();
+					if (
+						!streamEndedNormally &&
+						!cleanedUp &&
+						activeWrites.has(filePath)
+					) {
+						cleanup();
 					}
 				});
 

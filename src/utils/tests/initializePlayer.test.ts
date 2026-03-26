@@ -25,6 +25,7 @@ interface MockTrack {
 interface MockWriteStream {
 	on: ReturnType<typeof vi.fn>;
 	destroy: ReturnType<typeof vi.fn>;
+	end: ReturnType<typeof vi.fn>;
 	destroyed: boolean;
 }
 
@@ -448,6 +449,7 @@ describe('onStreamExtracted callback', () => {
 		const mockWriteStream: MockWriteStream = {
 			on: vi.fn(),
 			destroy: vi.fn(),
+			end: vi.fn(),
 			destroyed: false,
 		};
 		const mockInterceptor: MockInterceptor = {
@@ -496,6 +498,7 @@ describe('onStreamExtracted callback', () => {
 		const mockWriteStream: MockWriteStream = {
 			on: vi.fn(),
 			destroy: vi.fn(),
+			end: vi.fn(),
 			destroyed: false,
 		};
 		const mockInterceptor: MockInterceptor = {
@@ -545,6 +548,7 @@ describe('onStreamExtracted callback', () => {
 		const mockWriteStream: MockWriteStream = {
 			on: vi.fn(),
 			destroy: vi.fn(),
+			end: vi.fn(),
 			destroyed: false,
 		};
 
@@ -587,6 +591,7 @@ describe('onStreamExtracted callback', () => {
 		const mockWriteStream: MockWriteStream = {
 			on: vi.fn(),
 			destroy: vi.fn(),
+			end: vi.fn(),
 			destroyed: false,
 		};
 
@@ -654,6 +659,7 @@ describe('onStreamExtracted callback', () => {
 		const mockWriteStream: MockWriteStream = {
 			on: vi.fn(),
 			destroy: vi.fn(),
+			end: vi.fn(),
 			destroyed: false,
 		};
 
@@ -699,6 +705,7 @@ describe('onStreamExtracted callback', () => {
 		const mockWriteStream: MockWriteStream = {
 			on: vi.fn(),
 			destroy: vi.fn(),
+			end: vi.fn(),
 			destroyed: false,
 		};
 
@@ -875,16 +882,27 @@ describe('onStreamExtracted callback', () => {
 		expect(result).toBe(streamObj);
 	});
 
-	it('should set `streamEndedNormally` on end event', async () => {
+	it('should end writeStream and detach interceptor on readable end', async () => {
 		const mockWriteStream: MockWriteStream = {
 			on: vi.fn(),
 			destroy: vi.fn(),
+			end: vi.fn(),
 			destroyed: false,
+		};
+		const mockInterceptor: MockInterceptor = {
+			interceptors: { add: vi.fn(), delete: vi.fn() },
 		};
 
 		vi.mocked(createWriteStream).mockReturnValue(
 			mockWriteStream as unknown as import('fs').WriteStream,
 		);
+		vi.mocked(
+			InterceptedStream as unknown as ReturnType<typeof vi.fn>,
+		).mockImplementation(function () {
+			return mockInterceptor as unknown as InstanceType<
+				typeof InterceptedStream
+			>;
+		});
 
 		await getInitializedPlayer(mockClient);
 
@@ -914,6 +932,11 @@ describe('onStreamExtracted callback', () => {
 		if (endCallback) {
 			endCallback();
 		}
+
+		expect(mockInterceptor.interceptors.delete).toHaveBeenCalledWith(
+			mockWriteStream,
+		);
+		expect(mockWriteStream.end).toHaveBeenCalled();
 
 		const closeCallback = mockOn.mock.calls.find(
 			(call: unknown[]) => call[0] === 'close',
