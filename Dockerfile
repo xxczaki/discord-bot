@@ -17,7 +17,7 @@ RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN,env=SENTRY_AUTH_TOKEN \
 RUN CI=true pnpm prune --prod
 
 
-FROM node:24.14.0-alpine
+FROM node:24.14.1-alpine
 
 ENV TZ="Europe/Berlin"
 

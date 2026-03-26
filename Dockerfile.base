@@ -1,4 +1,4 @@
-FROM node:24.14.0-alpine
+FROM node:24.14.1-alpine
 
 RUN apk add --no-cache build-base python3 make g++ cairo-dev pango-dev && \
 		corepack enable
