@@ -24,7 +24,7 @@ const MIN_CACHE_FILE_SIZE_BYTES = 1024;
 	and detect corrupted cache files (e.g., from interrupted downloads).
 */
 const EXPECTED_BYTES_PER_SECOND = 17_000;
-const MIN_CACHE_SIZE_RATIO = 0.8;
+const MIN_CACHE_SIZE_RATIO = 0.85;
 
 let initializedPlayer: Player;
 
