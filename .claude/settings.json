@@ -1,0 +1,10 @@
+{
+  "worktree": {
+    "symlinkDirectories": ["node_modules"]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledPlugins": {
+    "sentry@claude-plugins-official": true,
+    "context7@claude-plugins-official": true
+  }
+}
