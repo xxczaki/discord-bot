@@ -20,7 +20,7 @@ RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN,env=SENTRY_AUTH_TOKEN \
 
 FROM deps AS prod-deps
 
-RUN pnpm install --offline --frozen-lockfile --prod
+RUN CI=true pnpm install --offline --frozen-lockfile --prod
 
 
 FROM node:24.14.1-alpine
