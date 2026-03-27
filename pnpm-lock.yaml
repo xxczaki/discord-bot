@@ -1,3 +1,24 @@
+---
+lockfileVersion: '9.0'
+
+importers:
+
+  .:
+    configDependencies:
+      '@pnpm/plugin-esm-node-path':
+        specifier: 0.1.2
+        version: 0.1.2
+
+packages:
+
+  '@pnpm/plugin-esm-node-path@0.1.2':
+    resolution: {integrity: sha512-KzcFbJpNJHRZ60GpXmc6CoBX/zjy+fKEf/OOYdRbAlxV/Kf/f6pDNUDIVTQU8a5DHt6ODXq5mndwJPlryqMj1A==}
+
+snapshots:
+
+  '@pnpm/plugin-esm-node-path@0.1.2': {}
+
+---
 lockfileVersion: '9.0'
 
 settings:
@@ -21,9 +42,6 @@ catalogs:
     vitest:
       specifier: ^4.1.2
       version: 4.1.2
-
-overrides:
-  libsodium-wrappers: '-'
 
 packageExtensionsChecksum: sha256-msO/d9y/ZDrg0AuAY9OMmOGxOk5tXh31KHTCQYU0cn4=
 
@@ -2136,6 +2154,12 @@ packages:
     resolution: {integrity: sha512-8TNmfeTCk2Le33A3vRRwtuworG/L5RrgMvdjhKZxvyShO+mBu2fP50OWUjRLNtvw344DdDarFh9buFAZs5ujeA==}
     engines: {node: '>=18.0.0'}
     hasBin: true
+
+  libsodium-wrappers@0.7.16:
+    resolution: {integrity: sha512-Gtr/WBx4dKjvRL1pvfwZqu7gO6AfrQ0u9vFL+kXihtHf6NfkROR8pjYWn98MFDI3jN19Ii1ZUfPR9afGiPyfHg==}
+
+  libsodium@0.7.16:
+    resolution: {integrity: sha512-3HrzSPuzm6Yt9aTYCDxYEG8x8/6C0+ag655Y7rhhWZM9PT4NpdnbqlzXhGZlDnkgR6MeSTnOt/VIyHLs9aSf+Q==}
 
   lilconfig@3.1.3:
     resolution: {integrity: sha512-/vlFKAoH5Cgt3Ie+JLhRbwOsCQePABiU3tJ1egGvyQ+33R/vcwM2Zl2QR/LzjsBeItPt3oSVXapn+m4nQDvpzw==}
@@ -4748,6 +4772,7 @@ snapshots:
       discord-api-types: 0.38.42
       discord-voip: 7.2.0(bufferutil@4.1.0)(postcss@8.5.6)(tsx@4.21.0)
       discord.js: 14.25.1(bufferutil@4.1.0)
+      libsodium-wrappers: 0.7.16
       mediaplex: 1.0.0
       undici: 7.24.5
     transitivePeerDependencies:
@@ -5238,6 +5263,12 @@ snapshots:
       '@jsep-plugin/assignment': 1.3.0(jsep@1.4.0)
       '@jsep-plugin/regex': 1.0.4(jsep@1.4.0)
       jsep: 1.4.0
+
+  libsodium-wrappers@0.7.16:
+    dependencies:
+      libsodium: 0.7.16
+
+  libsodium@0.7.16: {}
 
   lilconfig@3.1.3: {}
 
