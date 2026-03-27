@@ -22,8 +22,7 @@ FROM deps AS prod-deps
 
 COPY packages/discord-player-googlevideo ./packages/discord-player-googlevideo
 RUN pnpm --filter discord-player-googlevideo run build
-RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
-		CI=true pnpm install --offline --frozen-lockfile --prod --config.enableGlobalVirtualStore=false
+RUN CI=true pnpm install --offline --frozen-lockfile --prod --config.enableGlobalVirtualStore=false
 
 
 FROM node:24.14.1-alpine
