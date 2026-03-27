@@ -16,7 +16,7 @@
 		"release": "pnpm recursive run build && changeset publish",
 		"prompt-benchmark": "tsx --env-file=.env src/benchmarks/promptBenchmark.ts"
 	},
-	"packageManager": "pnpm@11.0.0-beta.3",
+	"packageManager": "pnpm@11.0.0-dev.1005",
 	"dependencies": {
 		"@ai-sdk/openai": "^3.0.48",
 		"@kubernetes/client-node": "^1.4.0",
