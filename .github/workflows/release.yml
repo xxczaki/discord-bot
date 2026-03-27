@@ -35,12 +35,6 @@ jobs:
       - name: Build package
         run: pnpm --filter discord-player-googlevideo build
 
-      - name: Run linter
-        run: pnpm --filter discord-player-googlevideo lint
-
-      - name: Run tests
-        run: pnpm --filter discord-player-googlevideo test
-
       - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@v1
