@@ -8,21 +8,23 @@
 
 ## Features
 
-- Music playback from YouTube
-	- On-disk Opus file cache for subsequent streams
-- Cached search powered by Spotify or YouTube
-- Relies heavily on slash commands and message components
-- Playlists stored in a dedicated channel
+- Music playback from YouTube, with Spotify search and metadata bridging
+	- On-disk Opus file cache with fuzzy matching for instant replays
+	- Redis-backed query cache for fast repeated searches
+- Audio filters (bassboost, nightcore, 8D, and more) and adjustable tempo
 - Spotify-like volume normalization
-- Recovery mechanism to continue listening after an error
-- Redis-backed playback statistics
-- AI-powered queue control with the `/prompt` command
-- Maintenance mode that uses Kubernetes' API
+- AI-powered natural language queue control (`/prompt`)
+- Slash commands with autocomplete and interactive buttons throughout
+- Playlist management via a dedicated Discord channel
+	- Queue up to 5 playlists at once, with head/tail slicing
+- Queue tools: deduplicate, sort, shuffle, move, and more
+- Queue recovery across graceful restarts and stream errors
+- Redis-backed playback statistics (top tracks, requesters, playlists)
 - Lockdown mode for restricting command access temporarily
+- Maintenance mode via Kubernetes API
 - Tic-tac-toe
-- Friendly `/help` command
-- Integration with Sentry
-- Extensive logging powered by Pino
+- Integration with Sentry for error tracking
+- Structured logging with Pino
 - Easy deployment with a [Helm chart](https://github.com/xxczaki/charts/tree/main/charts/discord-bot)
 
 ## Deployment
