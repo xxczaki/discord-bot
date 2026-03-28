@@ -1,4 +1,4 @@
-import { openai } from '@ai-sdk/openai';
+import { mistral } from '@ai-sdk/mistral';
 import { streamText } from 'ai';
 import type {
 	ChatInputCommandInteraction,
@@ -24,8 +24,8 @@ vi.mock('ai', () => ({
 	stepCountIs: vi.fn((n) => ({ type: 'step-count', count: n })),
 }));
 
-vi.mock('@ai-sdk/openai', () => ({
-	openai: vi.fn(() => 'mock-model'),
+vi.mock('@ai-sdk/mistral', () => ({
+	mistral: vi.fn(() => 'mock-model'),
 }));
 
 const mockRateLimiter = vi.hoisted(() => ({
@@ -45,7 +45,7 @@ vi.mock('../../utils/RateLimiter', () => {
 
 const mockedUseQueue = vi.mocked(useQueue);
 const mockedStreamText = vi.mocked(streamText);
-const mockedOpenai = vi.mocked(openai);
+const mockedMistral = vi.mocked(mistral);
 
 function createMockStream(
 	toolCalls: Array<{
@@ -87,7 +87,7 @@ const mockVoiceChannel = {
 
 beforeEach(() => {
 	vi.clearAllMocks();
-	process.env.OPENAI_API_KEY = 'test-api-key';
+	process.env.MISTRAL_API_KEY = 'test-api-key';
 
 	mockRateLimiter.canMakeCall.mockReturnValue(true);
 	mockRateLimiter.getRemainingCalls.mockReturnValue(100);
@@ -173,7 +173,7 @@ function getEmbedFromCall(
 describe('/prompt command', () => {
 	describe('validation and error handling', () => {
 		it('should handle missing API key', async () => {
-			delete process.env.OPENAI_API_KEY;
+			delete process.env.MISTRAL_API_KEY;
 			const interaction = createMockInteraction('test');
 
 			await promptCommandHandler(interaction);
@@ -182,7 +182,7 @@ describe('/prompt command', () => {
 				'The `/prompt` command is not available.',
 			);
 
-			process.env.OPENAI_API_KEY = 'test-api-key';
+			process.env.MISTRAL_API_KEY = 'test-api-key';
 		});
 
 		it('should handle missing voice channel', async () => {
@@ -727,15 +727,14 @@ describe('/prompt command', () => {
 
 			await promptCommandHandler(interaction);
 
-			expect(mockedOpenai).toHaveBeenCalledWith(PROMPT_MODEL_ID);
+			expect(mockedMistral).toHaveBeenCalledWith(PROMPT_MODEL_ID);
 			expect(mockedStreamText).toHaveBeenCalledWith(
 				expect.objectContaining({
 					stopWhen: expect.anything(),
 					temperature: 0.1,
 					providerOptions: {
-						openai: expect.objectContaining({
+						mistral: expect.objectContaining({
 							parallelToolCalls: true,
-							promptCacheKey: 'prompt-command',
 						}),
 					},
 				}),

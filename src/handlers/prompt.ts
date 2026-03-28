@@ -1,7 +1,4 @@
-import {
-	type OpenAILanguageModelResponsesOptions,
-	openai,
-} from '@ai-sdk/openai';
+import { type MistralLanguageModelOptions, mistral } from '@ai-sdk/mistral';
 import { stepCountIs, streamText } from 'ai';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { EmbedBuilder, type GuildMember } from 'discord.js';
@@ -13,7 +10,7 @@ import {
 	generateSystemPrompt,
 	getAvailableTools,
 	isReadOnlyTool,
-	OPENAI_PROVIDER_OPTIONS,
+	MISTRAL_PROVIDER_OPTIONS,
 	PROMPT_MODEL_ID,
 	type ToolContext,
 	type ToolResult,
@@ -25,7 +22,7 @@ const rateLimiter = RateLimiter.getInstance('prompt-command', 100, 24);
 export default async function promptCommandHandler(
 	interaction: ChatInputCommandInteraction,
 ) {
-	const apiKey = process.env.OPENAI_API_KEY;
+	const apiKey = process.env.MISTRAL_API_KEY;
 
 	if (!apiKey) {
 		return interaction.editReply('The `/prompt` command is not available.');
@@ -65,7 +62,7 @@ export default async function promptCommandHandler(
 		};
 
 		const result = streamText({
-			model: openai(PROMPT_MODEL_ID),
+			model: mistral(PROMPT_MODEL_ID),
 			system: generateSystemPrompt(toolContext),
 			prompt: `User request: "${prompt}"`,
 			tools: getAvailableTools(toolContext),
@@ -73,8 +70,7 @@ export default async function promptCommandHandler(
 			maxRetries: 2,
 			temperature: 0.1,
 			providerOptions: {
-				openai:
-					OPENAI_PROVIDER_OPTIONS satisfies OpenAILanguageModelResponsesOptions,
+				mistral: MISTRAL_PROVIDER_OPTIONS satisfies MistralLanguageModelOptions,
 			},
 		});
 

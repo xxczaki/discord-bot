@@ -1,4 +1,4 @@
-import type { OpenAILanguageModelResponsesOptions } from '@ai-sdk/openai';
+import type { MistralLanguageModelOptions } from '@ai-sdk/mistral';
 import { type Tool, tool } from 'ai';
 import type {
 	ChatInputCommandInteraction,
@@ -27,12 +27,11 @@ import {
 } from './queueOperations';
 import { StatsHandler } from './StatsHandler';
 
-export const PROMPT_MODEL_ID = 'gpt-4o-mini';
+export const PROMPT_MODEL_ID = 'mistral-small-latest';
 
-export const OPENAI_PROVIDER_OPTIONS = {
+export const MISTRAL_PROVIDER_OPTIONS = {
 	parallelToolCalls: true,
-	promptCacheKey: 'prompt-command',
-} satisfies OpenAILanguageModelResponsesOptions;
+} satisfies MistralLanguageModelOptions;
 
 const pluralizeTracks = pluralize('track', 'tracks');
 const pluralizeDuplicates = pluralize('duplicate', 'duplicates');
@@ -193,7 +192,7 @@ const TOOL_REGISTRY: Record<string, ToolDefinition> = {
 		createTool: (context: ToolContext) =>
 			tool({
 				description:
-					'Move all tracks matching a pattern to a specific position in the queue. After moving tracks to the front, use skipCurrentTrack to play them immediately.',
+					'Move all tracks matching a pattern to a specific position in the queue (0 = front, -1 = end). Only moves tracks — does not skip or start playback.',
 				inputSchema: z.object({
 					artistPattern: z
 						.string()
@@ -322,7 +321,7 @@ const TOOL_REGISTRY: Record<string, ToolDefinition> = {
 		createTool: (context: ToolContext) =>
 			tool({
 				description:
-					'Search for a song and add it to the queue. Supports song names, artist names, YouTube URLs, and Spotify URLs.',
+					'Search for a song or artist and add the best match to the queue. Supports song names, artist names, YouTube URLs, and Spotify URLs.',
 				inputSchema: z.object({
 					query: z
 						.string()
@@ -587,16 +586,29 @@ export function formatToolArgs(
 
 export function generateSystemPrompt(context: ToolContext): string {
 	const parts: string[] = [
-		'You are a music bot assistant. You can inspect and control the music queue, search for songs, and enqueue internal playlists. If the user asks anything unrelated to music, respond with an error.',
+		'You are a music bot assistant that controls a music queue through tool calls. Only handle music-related requests; respond with an error for anything else.',
 	];
 
 	if (context.queue) {
 		parts.push(
-			`Current queue has ${context.trackCount} tracks. Now playing: "${context.currentTrackTitle}" by ${context.currentTrackAuthor}.`,
-			'For straightforward requests (skip, pause, resume, volume, remove/move by artist or title), act directly without reading the queue first.',
-			'When the user says "next" or "play X next", move those tracks to front (position 0) and skip the current track.',
-			'For inverse removal ("everything except X") or metadata-based filtering (e.g., by duration), use listTracks first to discover queue contents, then remove non-matching tracks individually by artist or title.',
-			'Use listAvailablePlaylists to discover internal playlists before enqueueing.',
+			`<context>\nCurrent queue has ${context.trackCount} tracks. Now playing: "${context.currentTrackTitle}" by ${context.currentTrackAuthor}.\n</context>`,
+			`<rules>
+1. For simple requests (skip, pause, resume, volume, remove/move by artist or title), call the tool directly — do not read the queue first. For ambiguous volume requests like "quieter" or "louder", pick a reasonable value and call setVolume.
+2. When the user wants to hear a queued artist/song next (e.g. "play X next", "hear X next", "I want X next"), use moveTracksByPattern to move them to front (position 0) AND skipCurrentTrack. When the user only says "move to front/end" without implying playback, just move — do not skip.
+3. For inverse removal ("everything except X") or metadata-based filtering (e.g. by duration): call listTracks first, then call removeTracksByPattern once per non-matching artist or title. The tool can only match tracks TO remove, so you must remove each unwanted artist separately.
+4. Use searchAndPlay only to add NEW songs not already in the queue. To play an internal playlist, call listAvailablePlaylists first to discover IDs, then enqueuePlaylist.
+5. searchAndPlay always returns the best match — call it once per query, do not retry.
+6. If a request requires an operation you have no tool for (e.g. sorting, reordering, or shuffling the entire queue), respond in text explaining the limitation instead of attempting workarounds.
+</rules>
+
+<examples>
+- "skip this song" → skipCurrentTrack
+- "play Arctic Monkeys next" → moveTracksByPattern(artistPattern: "Arctic Monkeys", position: 0), skipCurrentTrack
+- "move Daft Punk to the end" → moveTracksByPattern(artistPattern: "Daft Punk", position: -1)
+- "make it quieter" → setVolume(volume: 30)
+- "play the workout playlist" → listAvailablePlaylists, enqueuePlaylist(playlistId: "workout")
+- "play some Radiohead" → searchAndPlay(query: "Radiohead")
+</examples>`,
 		);
 	} else {
 		parts.push(

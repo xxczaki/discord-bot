@@ -1,3 +1,4 @@
+import { type MistralLanguageModelOptions, mistral } from '@ai-sdk/mistral';
 import {
 	type OpenAILanguageModelResponsesOptions,
 	openai,
@@ -12,36 +13,61 @@ import PQueue from 'p-queue';
 import { z } from 'zod';
 import {
 	generateSystemPrompt,
-	OPENAI_PROVIDER_OPTIONS,
 	type ToolContext,
 	type ToolResult,
 } from '../utils/promptTools';
 
+const OPENAI_PROVIDER_OPTIONS: OpenAILanguageModelResponsesOptions = {
+	parallelToolCalls: true,
+};
+
 interface ModelConfig {
 	id: string;
 	label: string;
+	provider: 'openai' | 'mistral';
 	reasoningEffort?: 'low' | 'medium' | 'high';
 }
 
 const MODEL_CONFIGS: ModelConfig[] = [
-	{ id: 'gpt-5-mini', label: 'gpt-5-mini (low)', reasoningEffort: 'low' },
 	{
 		id: 'gpt-5-mini',
-		label: 'gpt-5-mini (medium)',
-		reasoningEffort: 'medium',
+		label: 'gpt-5-mini (low)',
+		provider: 'openai',
+		reasoningEffort: 'low',
 	},
-	{ id: 'gpt-5-nano', label: 'gpt-5-nano (low)', reasoningEffort: 'low' },
 	{
 		id: 'gpt-5-nano',
-		label: 'gpt-5-nano (medium)',
-		reasoningEffort: 'medium',
+		label: 'gpt-5-nano (low)',
+		provider: 'openai',
+		reasoningEffort: 'low',
 	},
-	{ id: 'gpt-4.1-mini', label: 'gpt-4.1-mini' },
-	{ id: 'gpt-4.1-nano', label: 'gpt-4.1-nano' },
-	{ id: 'gpt-4o-mini', label: 'gpt-4o-mini' },
+	{ id: 'gpt-4.1-mini', label: 'gpt-4.1-mini', provider: 'openai' },
+	{ id: 'gpt-4o-mini', label: 'gpt-4o-mini', provider: 'openai' },
+	{
+		id: 'mistral-small-latest',
+		label: 'mistral-small-4',
+		provider: 'mistral',
+	},
+	{
+		id: 'mistral-small-latest',
+		label: 'mistral-small-4 (thinking)',
+		provider: 'mistral',
+		reasoningEffort: 'high',
+	},
+	{
+		id: 'mistral-medium-latest',
+		label: 'mistral-medium-3.1',
+		provider: 'mistral',
+	},
+	{ id: 'ministral-8b-latest', label: 'ministral-8b', provider: 'mistral' },
+	{ id: 'ministral-3b-latest', label: 'ministral-3b', provider: 'mistral' },
 ];
 
-const REASONING_MODELS = new Set(['gpt-5-mini', 'gpt-5-nano']);
+const REASONING_MODELS = new Set([
+	'gpt-5-mini',
+	'gpt-5-nano',
+	'mistral-small-latest',
+]);
 
 const CONCURRENCY = 20;
 
@@ -230,7 +256,7 @@ function createMockTools(recorder: RecordedToolCall[]): Record<string, Tool> {
 		}),
 		moveTracksByPattern: tool({
 			description:
-				'Move all tracks matching a pattern to a specific position in the queue. After moving tracks to the front, use skipCurrentTrack to play them immediately.',
+				'Move all tracks matching a pattern to a specific position in the queue (0 = front, -1 = end). Only moves tracks — does not skip or start playback.',
 			inputSchema: z.object({
 				artistPattern: z
 					.string()
@@ -295,7 +321,7 @@ function createMockTools(recorder: RecordedToolCall[]): Record<string, Tool> {
 		}),
 		searchAndPlay: tool({
 			description:
-				'Search for a song and add it to the queue. Supports song names, artist names, YouTube URLs, and Spotify URLs.',
+				'Search for a song or artist and add the best match to the queue. Supports song names, artist names, YouTube URLs, and Spotify URLs.',
 			inputSchema: z.object({
 				query: z
 					.string()
@@ -305,10 +331,11 @@ function createMockTools(recorder: RecordedToolCall[]): Record<string, Tool> {
 			}),
 			execute: async (args) => {
 				recorder.push({ name: 'searchAndPlay', args });
+				const query = args.query as string;
 				return {
 					success: true,
-					trackTitle: 'Mock Track',
-					trackAuthor: 'Mock Artist',
+					trackTitle: query,
+					trackAuthor: 'Various Artists',
 				} satisfies ToolResult;
 			},
 		}),
@@ -953,22 +980,35 @@ async function runPrompt(
 	let ttftMs = 0;
 
 	try {
+		const model =
+			config.provider === 'mistral' ? mistral(config.id) : openai(config.id);
+
 		const result = streamText({
-			model: openai(config.id),
+			model,
 			system: generateSystemPrompt(toolContext),
 			prompt: `User request: "${testCase.prompt}"`,
 			tools,
 			stopWhen: stepCountIs(5),
 			maxRetries: 2,
 			...(REASONING_MODELS.has(config.id) ? {} : { temperature: 0.1 }),
-			providerOptions: {
-				openai: {
-					...OPENAI_PROVIDER_OPTIONS,
-					...(config.reasoningEffort && {
-						reasoningEffort: config.reasoningEffort,
-					}),
-				} satisfies OpenAILanguageModelResponsesOptions,
-			},
+			providerOptions:
+				config.provider === 'mistral'
+					? {
+							mistral: {
+								parallelToolCalls: true,
+								...(config.reasoningEffort && {
+									reasoningEffort: config.reasoningEffort as 'high' | 'none',
+								}),
+							} satisfies MistralLanguageModelOptions,
+						}
+					: {
+							openai: {
+								...OPENAI_PROVIDER_OPTIONS,
+								...(config.reasoningEffort && {
+									reasoningEffort: config.reasoningEffort,
+								}),
+							} satisfies OpenAILanguageModelResponsesOptions,
+						},
 		});
 
 		for await (const part of result.fullStream) {
@@ -1054,4 +1094,4 @@ async function main() {
 	console.log(renderComparisonTable(modelResults));
 }
 
-main();
+main().then(() => process.exit(0));

@@ -686,7 +686,7 @@ describe('promptToolMessages', () => {
 		it('should emphasize music-only functionality', () => {
 			const prompt = generateSystemPrompt(createMockContext());
 
-			expect(prompt).toContain('unrelated to music');
+			expect(prompt).toContain('Only handle music-related requests');
 			expect(prompt).toContain('error');
 		});
 	});
@@ -730,7 +730,7 @@ describe('promptToolMessages', () => {
 
 			expect(tool.description).toContain('Move all tracks matching a pattern');
 			expect(tool.description).toContain(
-				'After moving tracks to the front, use skipCurrentTrack to play them immediately',
+				'Only moves tracks — does not skip or start playback',
 			);
 		});
 

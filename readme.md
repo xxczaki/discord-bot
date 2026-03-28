@@ -61,6 +61,27 @@ $ pnpm test:coverage
 
 If you are using VS Code or a compatible editor, you can start the bot with a debugger attached using the `debug` task.
 
+## Prompt Benchmark
+
+The `/prompt` command is powered by LLM tool calling. To find the best model for this use case, we run a benchmark suite of 19 real-world prompts against multiple models, measuring accuracy (correct tool calls) and latency (TTFT + total time).
+
+```sh
+# Requires OPENAI_API_KEY and MISTRAL_API_KEY in .env
+$ pnpm prompt-benchmark
+```
+
+<details>
+<summary>Disqualified models</summary>
+
+| Model | Provider | Reason |
+|---|---|---|
+| gpt-5-mini (medium) | OpenAI | Slower and less accurate than gpt-5-mini (low) — more reasoning effort hurts on tool-calling tasks |
+| gpt-5-nano (medium) | OpenAI | 2x slower than gpt-5-nano (low) with no accuracy benefit |
+| gpt-4.1-nano | OpenAI | Consistently worst accuracy (66-71%) across all runs |
+| ministral-14b | Mistral | No clear niche — slower than ministral-8b, less accurate than mistral-small-4, inconsistent latency |
+
+</details>
+
 ## Limitations
 
 The bot was designed to be used on a single Discord server, on a small scale – typically on one voice channel at once. Therefore, it doesn't scale well horizontally.
