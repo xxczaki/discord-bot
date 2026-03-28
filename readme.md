@@ -34,7 +34,7 @@ You have two options:
 
 > [!NOTE]
 > Required environment variables:
-> - `REDIS_URL` - Redis instance connection string
+> - `REDIS_URL` – Redis instance connection string
 
 [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/tgifQE?referralCode=4Ee-1n)
 
@@ -75,10 +75,10 @@ $ pnpm prompt-benchmark
 
 | Model | Provider | Reason |
 |---|---|---|
-| gpt-5-mini (medium) | OpenAI | Slower and less accurate than gpt-5-mini (low) — more reasoning effort hurts on tool-calling tasks |
+| gpt-5-mini (medium) | OpenAI | Slower and less accurate than gpt-5-mini (low) – more reasoning effort hurts on tool-calling tasks |
 | gpt-5-nano (medium) | OpenAI | 2x slower than gpt-5-nano (low) with no accuracy benefit |
 | gpt-4.1-nano | OpenAI | Consistently worst accuracy (66-71%) across all runs |
-| ministral-14b | Mistral | No clear niche — slower than ministral-8b, less accurate than mistral-small-4, inconsistent latency |
+| ministral-14b | Mistral | No clear niche – slower than ministral-8b, less accurate than mistral-small-4, inconsistent latency |
 
 </details>
 
