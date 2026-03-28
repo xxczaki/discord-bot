@@ -1,8 +1,5 @@
 locals {
-  kubeconfig = try(yamldecode(civo_kubernetes_cluster.main.kubeconfig), {
-    clusters = [{ cluster = { server = "", "certificate-authority-data" = "" } }]
-    users    = [{ user = { token = "" } }]
-  })
+  kubeconfig = yamldecode(civo_kubernetes_cluster.main.kubeconfig)
 }
 
 provider "civo" {
