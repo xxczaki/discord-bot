@@ -85,6 +85,10 @@ vi.mock('discord-player', () => ({
 	},
 }));
 
+vi.mock('@discord-player/extractor', () => ({
+	SoundCloudExtractor: vi.fn(),
+}));
+
 vi.mock('discord-player-googlevideo', () => ({
 	YoutubeSabrExtractor: vi.fn(),
 }));

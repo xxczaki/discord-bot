@@ -7,10 +7,19 @@ const EXAMPLE_SPOTIFY_PLAYLIST_URL =
 	'https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M';
 const EXAMPLE_SPOTIFY_TRACK_URL =
 	'https://open.spotify.com/track/4cOdK2wGLETKBW3PvgPWqT';
+const EXAMPLE_SOUNDCLOUD_URL = 'https://soundcloud.com/artist/track-name';
+const EXAMPLE_SOUNDCLOUD_SHORT_URL = 'https://snd.sc/abc123';
 
 it('should identify YouTube video URLs', () => {
 	expect(determineSearchEngine(EXAMPLE_YOUTUBE_URL)).toBe('youtubeVideo');
 	expect(determineSearchEngine(EXAMPLE_YOUTUBE_SHORT_URL)).toBe('youtubeVideo');
+});
+
+it('should identify SoundCloud URLs', () => {
+	expect(determineSearchEngine(EXAMPLE_SOUNDCLOUD_URL)).toBe('soundcloudTrack');
+	expect(determineSearchEngine(EXAMPLE_SOUNDCLOUD_SHORT_URL)).toBe(
+		'soundcloudTrack',
+	);
 });
 
 it('should identify Spotify playlist URLs', () => {

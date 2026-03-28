@@ -24,6 +24,10 @@ vi.mock('../../hooks/useDebugListeners');
 vi.mock('../../hooks/useDiscordEventHandlers');
 vi.mock('../../hooks/usePlayerEventHandlers');
 
+vi.mock('@discord-player/extractor', () => ({
+	SoundCloudExtractor: vi.fn(),
+}));
+
 vi.mock('discord-player-googlevideo', () => ({
 	YoutubeSabrExtractor: vi.fn(),
 }));

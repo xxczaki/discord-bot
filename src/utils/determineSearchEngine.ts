@@ -6,6 +6,10 @@ function determineSearchEngine(query: string): SearchQueryType {
 		return 'youtubeVideo';
 	}
 
+	if (query.includes('soundcloud.com') || query.includes('snd.sc')) {
+		return 'soundcloudTrack';
+	}
+
 	if (isUrlSpotifyPlaylist(query)) {
 		return 'spotifyPlaylist';
 	}

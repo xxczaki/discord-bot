@@ -16,6 +16,7 @@ const buildOptions = {
 	format: 'esm',
 	target: 'node22',
 	external: [
+		'@discord-player/extractor',
 		'@kubernetes/client-node',
 		'bufferutil',
 		'discord-player',

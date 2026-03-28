@@ -2,6 +2,7 @@ import { availableParallelism } from 'node:os';
 import type { EmbedBuilder, VoiceBasedChannel } from 'discord.js';
 import { type QueueFilters, useMainPlayer } from 'discord-player';
 import Queue from 'p-queue';
+import { FALLBACK_SEARCH_ENGINE } from '../constants/fallbackSource';
 import type { ProcessingInteraction } from '../types/ProcessingInteraction';
 import type { QueueMetadata } from '../types/QueueMetadata';
 import determineSearchEngine from './determineSearchEngine';
@@ -67,7 +68,7 @@ export default async function processTracksWithQueue({
 	};
 
 	const playOptions = {
-		fallbackSearchEngine: 'youtubeSearch' as const,
+		fallbackSearchEngine: FALLBACK_SEARCH_ENGINE,
 		nodeOptions: {
 			metadata: {
 				interaction,

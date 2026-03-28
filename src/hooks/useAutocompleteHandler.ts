@@ -6,6 +6,7 @@ import {
 import { useMainPlayer, useQueue } from 'discord-player';
 import Fuse from 'fuse.js';
 import debounce from 'p-debounce';
+import { FALLBACK_SEARCH_ENGINE } from '../constants/fallbackSource';
 import determineSearchEngine from '../utils/determineSearchEngine';
 import getEnvironmentVariable from '../utils/getEnvironmentVariable';
 import { getAllPlaylists } from '../utils/getPlaylists';
@@ -51,7 +52,7 @@ async function handleAutocomplete(interaction: AutocompleteInteraction) {
 
 			const data = await player.search(query, {
 				searchEngine: determineSearchEngine(query),
-				fallbackSearchEngine: 'youtubeSearch',
+				fallbackSearchEngine: FALLBACK_SEARCH_ENGINE,
 				requestedBy: interaction.user,
 			});
 

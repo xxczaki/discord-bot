@@ -54,6 +54,9 @@ importers:
       '@ai-sdk/mistral':
         specifier: ^3.0.27
         version: 3.0.27(zod@4.3.6)
+      '@discord-player/extractor':
+        specifier: ^7.2.0
+        version: 7.2.0
       '@kubernetes/client-node':
         specifier: ^1.4.0
         version: 1.4.0(bufferutil@4.1.0)
@@ -65,13 +68,13 @@ importers:
         version: 4.1.0
       discord-player:
         specifier: ^7.2.0
-        version: 7.2.0(@discord-player/extractor@7.1.0)(bufferutil@4.1.0)(mediaplex@1.0.0)(postcss@8.5.6)(tsx@4.21.0)
+        version: 7.2.0(@discord-player/extractor@7.2.0)(bufferutil@4.1.0)(mediaplex@1.0.0)(postcss@8.5.6)(tsx@4.21.0)
       discord-player-googlevideo:
         specifier: workspace:*
         version: link:packages/discord-player-googlevideo
       discord-player-spotify:
         specifier: ^1.1.9
-        version: 1.1.9(discord-player@7.2.0(@discord-player/extractor@7.1.0)(bufferutil@4.1.0)(mediaplex@1.0.0)(postcss@8.5.6)(tsx@4.21.0))
+        version: 1.1.9(discord-player@7.2.0(@discord-player/extractor@7.2.0)(bufferutil@4.1.0)(mediaplex@1.0.0)(postcss@8.5.6)(tsx@4.21.0))
       discord.js:
         specifier: ^14.25.1
         version: 14.25.1(bufferutil@4.1.0)
@@ -190,7 +193,7 @@ importers:
         version: 4.1.2(vitest@4.1.2(@opentelemetry/api@1.9.0)(@types/node@24.12.0)(jsdom@29.0.1(@noble/hashes@1.8.0))(vite@7.3.1(@types/node@24.12.0)(tsx@4.21.0)))
       discord-player:
         specifier: ^7.2.0
-        version: 7.2.0(@discord-player/extractor@7.1.0)(bufferutil@4.1.0)(mediaplex@1.0.0)(postcss@8.5.6)(tsx@4.21.0)
+        version: 7.2.0(@discord-player/extractor@7.2.0)(bufferutil@4.1.0)(mediaplex@1.0.0)(postcss@8.5.6)(tsx@4.21.0)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -472,8 +475,8 @@ packages:
   '@discord-player/equalizer@7.2.0':
     resolution: {integrity: sha512-k0mzMC92YrooRrSeT7LAgJNf+ce8VCxXJNDtRXL+Eli0WtUwvv30+Wz1vpIMdcuqEX+HRRDkBnMDY1thL5449A==}
 
-  '@discord-player/extractor@7.1.0':
-    resolution: {integrity: sha512-/ttNFkN0hacSS/KJNcPP8Dvk1W8+QGbdlbtJNIPHO1oBfEMazs6BimokMG5eCVmSLPb2MaWPGKTjhoQzHLlBlw==}
+  '@discord-player/extractor@7.2.0':
+    resolution: {integrity: sha512-S+e1g+A8+VXP3TUbK4CpQdVEFPLHJaJBXDVGypUHjezxWfn8YzbiS7eRdgcebuTw2kYC/bCww5+bDiUdEjxLLA==}
 
   '@discord-player/ffmpeg@7.2.0':
     resolution: {integrity: sha512-XjBbi+Zpm7dtDE7gf4KLYf53J3PNKk0gDigFt1dvRVJ38WmrUUpqRn0QdrH7CwRJhXfexTimSg71xj7Zn65jWw==}
@@ -2424,9 +2427,6 @@ packages:
     resolution: {integrity: sha512-LA4ZjwlnUblHVgq0oBF3Jl/6h/Nvs5fzBLwdEF4nuxnFdsfajde4WfxtJr3CaiH+F6ewcIB/q4jQ4UzPyid+CQ==}
     hasBin: true
 
-  node-html-parser@6.1.13:
-    resolution: {integrity: sha512-qIsTMOY4C/dAa5Q5vsobRpOOvPfC4pB61UVW2uSwZNUp0QU/jCekTal1vMmbO0DgdHeLUJpv/ARmDqErVxA3Sg==}
-
   node-html-parser@7.0.2:
     resolution: {integrity: sha512-DxodLVh7a6JMkYzWyc8nBX9MaF4M0lLFYkJHlWOiu7+9/I6mwNK9u5TbAMC7qfqDJEPX9OIoWA2A9t4C2l1mUQ==}
 
@@ -3540,11 +3540,11 @@ snapshots:
 
   '@discord-player/equalizer@7.2.0': {}
 
-  '@discord-player/extractor@7.1.0':
+  '@discord-player/extractor@7.2.0':
     dependencies:
       file-type: 16.5.4
       isomorphic-unfetch: 4.0.2
-      node-html-parser: 6.1.13
+      node-html-parser: 7.0.2
       reverbnation-scraper: 2.0.0
       soundcloud.ts: 0.5.5
       spotify-url-info: 3.2.18
@@ -4769,17 +4769,17 @@ snapshots:
 
   discord-api-types@0.38.42: {}
 
-  discord-player-spotify@1.1.9(discord-player@7.2.0(@discord-player/extractor@7.1.0)(bufferutil@4.1.0)(mediaplex@1.0.0)(postcss@8.5.6)(tsx@4.21.0)):
+  discord-player-spotify@1.1.9(discord-player@7.2.0(@discord-player/extractor@7.2.0)(bufferutil@4.1.0)(mediaplex@1.0.0)(postcss@8.5.6)(tsx@4.21.0)):
     dependencies:
       acorn: 8.16.0
-      discord-player: 7.2.0(@discord-player/extractor@7.1.0)(bufferutil@4.1.0)(mediaplex@1.0.0)(postcss@8.5.6)(tsx@4.21.0)
+      discord-player: 7.2.0(@discord-player/extractor@7.2.0)(bufferutil@4.1.0)(mediaplex@1.0.0)(postcss@8.5.6)(tsx@4.21.0)
       node-html-parser: 7.0.2
       otpauth: 9.4.1
 
-  discord-player@7.2.0(@discord-player/extractor@7.1.0)(bufferutil@4.1.0)(mediaplex@1.0.0)(postcss@8.5.6)(tsx@4.21.0):
+  discord-player@7.2.0(@discord-player/extractor@7.2.0)(bufferutil@4.1.0)(mediaplex@1.0.0)(postcss@8.5.6)(tsx@4.21.0):
     dependencies:
       '@discord-player/equalizer': 7.2.0
-      '@discord-player/extractor': 7.1.0
+      '@discord-player/extractor': 7.2.0
       '@discord-player/ffmpeg': 7.2.0
       '@discord-player/opus': 7.2.0
       '@discord-player/utils': 7.2.0
@@ -5471,11 +5471,6 @@ snapshots:
       formdata-polyfill: 4.0.10
 
   node-gyp-build@4.8.4: {}
-
-  node-html-parser@6.1.13:
-    dependencies:
-      css-select: 5.2.2
-      he: 1.2.0
 
   node-html-parser@7.0.2:
     dependencies:

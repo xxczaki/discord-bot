@@ -2,6 +2,7 @@ import { captureException } from '@sentry/node';
 import type { AutocompleteInteraction, Channel } from 'discord.js';
 import { useMainPlayer, useQueue } from 'discord-player';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { FALLBACK_SEARCH_ENGINE } from '../../constants/fallbackSource';
 import determineSearchEngine from '../../utils/determineSearchEngine';
 import getTrackPosition from '../../utils/getTrackPosition';
 import logger from '../../utils/logger';
@@ -183,7 +184,7 @@ describe('play command autocomplete', () => {
 
 		expect(mockPlayer.search).toHaveBeenCalledWith(EXAMPLE_QUERY, {
 			searchEngine: 'youtubeSearch',
-			fallbackSearchEngine: 'youtubeSearch',
+			fallbackSearchEngine: FALLBACK_SEARCH_ENGINE,
 			requestedBy: interaction.user,
 		});
 

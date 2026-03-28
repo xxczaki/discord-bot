@@ -10,6 +10,7 @@ import {
 	useMainPlayer,
 } from 'discord-player';
 import { z } from 'zod';
+import { FALLBACK_SEARCH_ENGINE } from '../constants/fallbackSource';
 import type { QueueMetadata } from '../types/QueueMetadata';
 import cleanUpPlaylistContent from './cleanUpPlaylistContent';
 import determineSearchEngine from './determineSearchEngine';
@@ -482,7 +483,7 @@ const TOOL_REGISTRY: Record<string, ToolDefinition> = {
 							try {
 								await player.play(context.voiceChannel, song, {
 									searchEngine: determineSearchEngine(song),
-									fallbackSearchEngine: 'youtubeSearch',
+									fallbackSearchEngine: FALLBACK_SEARCH_ENGINE,
 									nodeOptions: {
 										metadata: {
 											interaction: context.interaction,

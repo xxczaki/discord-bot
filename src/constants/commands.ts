@@ -1,4 +1,5 @@
 import type { ChatInputApplicationCommandData } from 'discord.js';
+import { FALLBACK_SOURCE_NAME } from './fallbackSource';
 
 export const COMMAND_CATEGORIES = [
 	'Music',
@@ -15,12 +16,11 @@ export type CategorizedCommand = ChatInputApplicationCommandData & {
 export const RAW_COMMANDS: CategorizedCommand[] = [
 	{
 		name: 'play',
-		description: 'Search for music on Spotify or YouTube and play it',
+		description: `Search for music on Spotify or ${FALLBACK_SOURCE_NAME} and play it`,
 		options: [
 			{
 				name: 'query',
-				description:
-					'Spotify search query (prefix with "youtube:" to browse YouTube instead)',
+				description: `Search query (Spotify by default, paste a ${FALLBACK_SOURCE_NAME} URL to play directly)`,
 				type: 3,
 				required: true,
 				autocomplete: true,
@@ -330,4 +330,14 @@ export const RAW_COMMANDS: CategorizedCommand[] = [
 	},
 ];
 
-export default RAW_COMMANDS.map(({ category, ...rest }) => rest);
+export function filterDisabledCommands(disabledCommands: Set<string>) {
+	return RAW_COMMANDS.filter(
+		(command) => !disabledCommands.has(command.name),
+	).map(({ category, ...rest }) => rest);
+}
+
+const DISABLED_COMMANDS = new Set(
+	(process.env.DISABLED_COMMANDS ?? '').split(',').filter(Boolean),
+);
+
+export default filterDisabledCommands(DISABLED_COMMANDS);

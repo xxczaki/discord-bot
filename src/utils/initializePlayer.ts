@@ -1,8 +1,10 @@
 import { createReadStream, createWriteStream } from 'node:fs';
 import { stat } from 'node:fs/promises';
 import { Readable } from 'node:stream';
+import { SoundCloudExtractor } from '@discord-player/extractor';
 import type { Client } from 'discord.js';
 import {
+	type BaseExtractor,
 	InterceptedStream,
 	onBeforeCreateStream,
 	onStreamExtracted,
@@ -248,12 +250,17 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 		/* v8 ignore start */
 		await initializedPlayer.extractors.register(YoutubeSabrExtractor, {});
 		await initializedPlayer.extractors.register(SpotifyExtractor, {
-			market: 'PL',
+			market: process.env.SPOTIFY_MARKET ?? 'DE',
 		});
+		await initializedPlayer.extractors.register(
+			SoundCloudExtractor as unknown as typeof BaseExtractor,
+			{},
+		);
 
 		await initializedPlayer.extractors.loadMulti([
 			YoutubeSabrExtractor,
 			SpotifyExtractor,
+			SoundCloudExtractor as unknown as typeof BaseExtractor,
 		]);
 		/* v8 ignore stop */
 	}
