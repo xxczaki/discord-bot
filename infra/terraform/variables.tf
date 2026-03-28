@@ -1,8 +1,3 @@
-variable "civo_token" {
-  type      = string
-  sensitive = true
-}
-
 variable "region" {
   type    = string
   default = "LON1"
