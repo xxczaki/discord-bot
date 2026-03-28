@@ -1,0 +1,33 @@
+# Customer configuration template
+# Add the corresponding entry to terraform.tfvars under the `customers` map.
+#
+# Example:
+#   customers = {
+#     acme = {
+#       discord_token         = "MTIz..."
+#       client_id             = "123456789"
+#       playlists_channel_id  = "111111111"
+#       bot_debug_channel_id  = "222222222"
+#       owner_user_id         = "333333333"
+#       sentry_dsn            = "https://...@sentry.io/..."
+#       spotify_client_id     = "abc123"
+#       spotify_client_secret = "def456"
+#     }
+#   }
+#
+# Required fields:
+#   discord_token         - Bot token from Discord Developer Portal
+#   client_id             - Application ID from Discord Developer Portal
+#   playlists_channel_id  - Channel ID for playlist storage
+#   bot_debug_channel_id  - Channel ID for debug messages
+#   owner_user_id         - Discord user ID of the bot owner
+#   sentry_dsn            - Sentry DSN for error tracking
+#   spotify_client_id     - Spotify app client ID
+#   spotify_client_secret - Spotify app client secret
+#
+# Optional fields (with defaults):
+#   spotify_market        - ISO 3166-1 alpha-2 country code (default: "DE")
+#   fallback_source       - "" for SoundCloud, "youtube" for YouTube (default: "")
+#   disabled_commands     - Comma-separated commands to disable (default: "maintenance,lockdown")
+#   mistral_api_key       - Mistral API key for /prompt command (default: "")
+#   openai_api_key        - OpenAI API key for /prompt command (default: "")
