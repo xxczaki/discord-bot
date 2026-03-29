@@ -1,5 +1,6 @@
 node_modules
 .env
+fly.toml
 dist/
 .DS_Store
 opus-cache
