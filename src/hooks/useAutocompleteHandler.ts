@@ -6,7 +6,7 @@ import {
 import { useMainPlayer, useQueue } from 'discord-player';
 import Fuse from 'fuse.js';
 import debounce from 'p-debounce';
-import { FALLBACK_SEARCH_ENGINE } from '../constants/fallbackSource';
+import { FALLBACK_SEARCH_ENGINE } from '../constants/sourceConfig';
 import determineSearchEngine from '../utils/determineSearchEngine';
 import getEnvironmentVariable from '../utils/getEnvironmentVariable';
 import { getAllPlaylists } from '../utils/getPlaylists';

@@ -2,7 +2,7 @@ import { captureException } from '@sentry/node';
 import type { AutocompleteInteraction, Channel } from 'discord.js';
 import { useMainPlayer, useQueue } from 'discord-player';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { FALLBACK_SEARCH_ENGINE } from '../../constants/fallbackSource';
+import { FALLBACK_SEARCH_ENGINE } from '../../constants/sourceConfig';
 import determineSearchEngine from '../../utils/determineSearchEngine';
 import getTrackPosition from '../../utils/getTrackPosition';
 import logger from '../../utils/logger';

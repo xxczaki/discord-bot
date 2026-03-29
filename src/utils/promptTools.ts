@@ -10,7 +10,7 @@ import {
 	useMainPlayer,
 } from 'discord-player';
 import { z } from 'zod';
-import { FALLBACK_SEARCH_ENGINE } from '../constants/fallbackSource';
+import { FALLBACK_SEARCH_ENGINE } from '../constants/sourceConfig';
 import type { QueueMetadata } from '../types/QueueMetadata';
 import cleanUpPlaylistContent from './cleanUpPlaylistContent';
 import determineSearchEngine from './determineSearchEngine';

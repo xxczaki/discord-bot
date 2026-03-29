@@ -12,6 +12,7 @@ import {
 } from 'discord-player';
 import { YoutubeSabrExtractor } from 'discord-player-googlevideo';
 import { SpotifyExtractor } from 'discord-player-spotify';
+import { YOUTUBE_ENABLED } from '../constants/sourceConfig';
 import defineCustomFilters from './defineCustomFilters';
 import logger from './logger';
 import { OpusCacheManager } from './OpusCacheManager';
@@ -248,7 +249,10 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 		});
 
 		/* v8 ignore start */
-		await initializedPlayer.extractors.register(YoutubeSabrExtractor, {});
+		if (YOUTUBE_ENABLED) {
+			await initializedPlayer.extractors.register(YoutubeSabrExtractor, {});
+		}
+
 		await initializedPlayer.extractors.register(SpotifyExtractor, {
 			market: process.env.SPOTIFY_MARKET ?? 'DE',
 		});
@@ -257,11 +261,18 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 			{},
 		);
 
-		await initializedPlayer.extractors.loadMulti([
-			YoutubeSabrExtractor,
-			SpotifyExtractor,
-			SoundCloudExtractor as unknown as typeof BaseExtractor,
-		]);
+		if (YOUTUBE_ENABLED) {
+			await initializedPlayer.extractors.loadMulti([
+				YoutubeSabrExtractor,
+				SpotifyExtractor,
+				SoundCloudExtractor as unknown as typeof BaseExtractor,
+			]);
+		} else {
+			await initializedPlayer.extractors.loadMulti([
+				SpotifyExtractor,
+				SoundCloudExtractor as unknown as typeof BaseExtractor,
+			]);
+		}
 		/* v8 ignore stop */
 	}
 

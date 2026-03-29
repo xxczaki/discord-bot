@@ -1,6 +1,6 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { beforeEach, expect, it, vi } from 'vitest';
-import { FALLBACK_SOURCE_NAME } from '../../constants/fallbackSource';
+import { DEFAULT_SOURCE_NAME } from '../../constants/sourceConfig';
 import { createMockInteraction as createBaseMockInteraction } from '../../utils/testing';
 import helpCommandHandler from '../help';
 
@@ -81,7 +81,7 @@ it('should include comprehensive command content and descriptions', async () => 
 	const content = getContentFromReply(mockInteraction);
 
 	expect(content).toContain(
-		`Search for music on Spotify or ${FALLBACK_SOURCE_NAME} and play it`,
+		`Search for music on Spotify or ${DEFAULT_SOURCE_NAME} and play it`,
 	);
 	expect(content).toContain('Pause the queue');
 	expect(content).toContain('Resume the queue');

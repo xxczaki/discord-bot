@@ -1,5 +1,5 @@
 import type { ChatInputApplicationCommandData } from 'discord.js';
-import { FALLBACK_SOURCE_NAME } from './fallbackSource';
+import { DEFAULT_SOURCE_NAME } from './sourceConfig';
 
 export const COMMAND_CATEGORIES = [
 	'Music',
@@ -16,11 +16,11 @@ export type CategorizedCommand = ChatInputApplicationCommandData & {
 export const RAW_COMMANDS: CategorizedCommand[] = [
 	{
 		name: 'play',
-		description: `Search for music on Spotify or ${FALLBACK_SOURCE_NAME} and play it`,
+		description: `Search for music on Spotify or ${DEFAULT_SOURCE_NAME} and play it`,
 		options: [
 			{
 				name: 'query',
-				description: `Search query (Spotify by default, paste a ${FALLBACK_SOURCE_NAME} URL to play directly)`,
+				description: `Search query (Spotify by default, paste a ${DEFAULT_SOURCE_NAME} URL to play directly)`,
 				type: 3,
 				required: true,
 				autocomplete: true,
