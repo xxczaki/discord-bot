@@ -1,5 +1,15 @@
-import { expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import determineSearchEngine from '../determineSearchEngine';
+
+const { youtubeEnabled } = vi.hoisted(() => ({
+	youtubeEnabled: { value: false },
+}));
+
+vi.mock('../../constants/sourceConfig', () => ({
+	get YOUTUBE_ENABLED() {
+		return youtubeEnabled.value;
+	},
+}));
 
 const EXAMPLE_YOUTUBE_URL = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
 const EXAMPLE_YOUTUBE_SHORT_URL = 'https://youtu.be/dQw4w9WgXcQ';
@@ -13,13 +23,6 @@ const EXAMPLE_SOUNDCLOUD_SHORT_URL = 'https://snd.sc/abc123';
 it('should identify YouTube video URLs', () => {
 	expect(determineSearchEngine(EXAMPLE_YOUTUBE_URL)).toBe('youtubeVideo');
 	expect(determineSearchEngine(EXAMPLE_YOUTUBE_SHORT_URL)).toBe('youtubeVideo');
-});
-
-it('should identify SoundCloud URLs', () => {
-	expect(determineSearchEngine(EXAMPLE_SOUNDCLOUD_URL)).toBe('soundcloudTrack');
-	expect(determineSearchEngine(EXAMPLE_SOUNDCLOUD_SHORT_URL)).toBe(
-		'soundcloudTrack',
-	);
 });
 
 it('should identify Spotify playlist URLs', () => {
@@ -37,4 +40,28 @@ it('should default to spotifySearch for non-URL queries', () => {
 		'spotifySearch',
 	);
 	expect(determineSearchEngine('')).toBe('spotifySearch');
+});
+
+describe('SoundCloud URLs', () => {
+	it('should identify SoundCloud URLs when YouTube is disabled', () => {
+		youtubeEnabled.value = false;
+
+		expect(determineSearchEngine(EXAMPLE_SOUNDCLOUD_URL)).toBe(
+			'soundcloudTrack',
+		);
+		expect(determineSearchEngine(EXAMPLE_SOUNDCLOUD_SHORT_URL)).toBe(
+			'soundcloudTrack',
+		);
+	});
+
+	it('should fall through to spotifySearch when YouTube is enabled', () => {
+		youtubeEnabled.value = true;
+
+		expect(determineSearchEngine(EXAMPLE_SOUNDCLOUD_URL)).toBe(
+			'spotifySearch',
+		);
+		expect(determineSearchEngine(EXAMPLE_SOUNDCLOUD_SHORT_URL)).toBe(
+			'spotifySearch',
+		);
+	});
 });

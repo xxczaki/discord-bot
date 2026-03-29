@@ -251,21 +251,21 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 		/* v8 ignore start */
 		if (YOUTUBE_ENABLED) {
 			await initializedPlayer.extractors.register(YoutubeSabrExtractor, {});
+		} else {
+			await initializedPlayer.extractors.register(
+				SoundCloudExtractor as unknown as typeof BaseExtractor,
+				{},
+			);
 		}
 
 		await initializedPlayer.extractors.register(SpotifyExtractor, {
 			market: process.env.SPOTIFY_MARKET ?? 'DE',
 		});
-		await initializedPlayer.extractors.register(
-			SoundCloudExtractor as unknown as typeof BaseExtractor,
-			{},
-		);
 
 		if (YOUTUBE_ENABLED) {
 			await initializedPlayer.extractors.loadMulti([
 				YoutubeSabrExtractor,
 				SpotifyExtractor,
-				SoundCloudExtractor as unknown as typeof BaseExtractor,
 			]);
 		} else {
 			await initializedPlayer.extractors.loadMulti([

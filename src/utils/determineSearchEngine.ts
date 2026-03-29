@@ -1,4 +1,5 @@
 import type { SearchQueryType } from 'discord-player';
+import { YOUTUBE_ENABLED } from '../constants/sourceConfig';
 import isUrlSpotifyPlaylist from './isUrlSpotifyPlaylist';
 
 function determineSearchEngine(query: string): SearchQueryType {
@@ -6,7 +7,10 @@ function determineSearchEngine(query: string): SearchQueryType {
 		return 'youtubeVideo';
 	}
 
-	if (query.includes('soundcloud.com') || query.includes('snd.sc')) {
+	if (
+		!YOUTUBE_ENABLED &&
+		(query.includes('soundcloud.com') || query.includes('snd.sc'))
+	) {
 		return 'soundcloudTrack';
 	}
 

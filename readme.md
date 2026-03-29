@@ -8,7 +8,7 @@
 
 ## Features
 
-- Music playback from YouTube, with Spotify search and metadata bridging
+- Music playback from SoundCloud, with Spotify search and metadata bridging (YouTube opt-in via `ENABLE_YOUTUBE`)
 	- On-disk Opus file cache with fuzzy matching for instant replays
 	- Redis-backed query cache for fast repeated searches
 - Audio filters (bassboost, nightcore, 8D, and more) and adjustable tempo
