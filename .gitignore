@@ -13,3 +13,5 @@ infra/terraform/*.tfstate
 infra/terraform/*.tfstate.backup
 infra/terraform/terraform.tfvars
 infra/kubeconfig.yaml
+infra/ssh_key
+infra/ssh_key.pub
