@@ -57,9 +57,7 @@ describe('SoundCloud URLs', () => {
 	it('should fall through to spotifySearch when YouTube is enabled', () => {
 		youtubeEnabled.value = true;
 
-		expect(determineSearchEngine(EXAMPLE_SOUNDCLOUD_URL)).toBe(
-			'spotifySearch',
-		);
+		expect(determineSearchEngine(EXAMPLE_SOUNDCLOUD_URL)).toBe('spotifySearch');
 		expect(determineSearchEngine(EXAMPLE_SOUNDCLOUD_SHORT_URL)).toBe(
 			'spotifySearch',
 		);
