@@ -8,15 +8,183 @@ importers:
       '@pnpm/plugin-esm-node-path':
         specifier: 0.1.2
         version: 0.1.2
+    packageManagerDependencies:
+      '@pnpm/exe':
+        specifier: 11.0.0-beta.3
+        version: 11.0.0-beta.3
+      pnpm:
+        specifier: 11.0.0-beta.3
+        version: 11.0.0-beta.3
 
 packages:
+
+  '@pnpm/exe@11.0.0-beta.3':
+    resolution: {integrity: sha512-yWNlHHdYmvf4c0MCkCzAa4csJDPdA+7yJCbXBUDXMbUu/0Zv/AxtO77q24MwlnBUC0dWeA+0F/pPmdkR9aTV2A==}
+    hasBin: true
+
+  '@pnpm/linux-arm64@11.0.0-beta.3':
+    resolution: {integrity: sha512-TF2fyuCY9GggR4kfhjo1hMmgn+rIohenwNoH0tLPM7JlBK7/UAIFt1LI+o999tRwTCEw7gnxHFwtI2vyQuDfNw==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@pnpm/linux-x64@11.0.0-beta.3':
+    resolution: {integrity: sha512-7GrLsnSuDH62y486GUTwJdohGIC1ugz9ZJkbKOHgxIAkNGcSTJ1IkkdARtv7/WMmOEwwESDmtpOQ6LmjnpDMSA==}
+    cpu: [x64]
+    os: [linux]
+
+  '@pnpm/macos-arm64@11.0.0-beta.3':
+    resolution: {integrity: sha512-NQKgI1DURrEiOUzpxL0Mc+yn7DV4tpShqGnjaJLbz8ZCXsX/qhmybebvCG3r+IfSk3P5KID66lcgC/Osiaz0Dg==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@pnpm/macos-x64@11.0.0-beta.3':
+    resolution: {integrity: sha512-Ky22KFYHXx8+8WU4KJT9NXVgzFioL2w9pHTQjsqTK70AbxiErscPYhrFIehlCNbXjgs+tGVIy13QNKkiwvmS8w==}
+    cpu: [x64]
+    os: [darwin]
 
   '@pnpm/plugin-esm-node-path@0.1.2':
     resolution: {integrity: sha512-KzcFbJpNJHRZ60GpXmc6CoBX/zjy+fKEf/OOYdRbAlxV/Kf/f6pDNUDIVTQU8a5DHt6ODXq5mndwJPlryqMj1A==}
 
+  '@pnpm/win-arm64@11.0.0-beta.3':
+    resolution: {integrity: sha512-7L8TFNDm25m+XYSyhcola3YFd/li6BZzzl56SsyGnZabsvUslMwnDiJad48wOz8IuN7zsrTSGh+X/x6F+GdrFQ==}
+    cpu: [arm64]
+    os: [win32]
+
+  '@pnpm/win-x64@11.0.0-beta.3':
+    resolution: {integrity: sha512-Z/6OpMUaIpggXjCtWEhp6kWjiT/2EImhkJAu8AodOORqeNcWouGEq3sO4XU0em6d+pAHmdV0hWMQ2xCUmPVuiA==}
+    cpu: [x64]
+    os: [win32]
+
+  '@reflink/reflink-darwin-arm64@0.1.19':
+    resolution: {integrity: sha512-ruy44Lpepdk1FqDz38vExBY/PVUsjxZA+chd9wozjUH9JjuDT/HEaQYA6wYN9mf041l0yLVar6BCZuWABJvHSA==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@reflink/reflink-darwin-x64@0.1.19':
+    resolution: {integrity: sha512-By85MSWrMZa+c26TcnAy8SDk0sTUkYlNnwknSchkhHpGXOtjNDUOxJE9oByBnGbeuIE1PiQsxDG3Ud+IVV9yuA==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [darwin]
+
+  '@reflink/reflink-linux-arm64-gnu@0.1.19':
+    resolution: {integrity: sha512-7P+er8+rP9iNeN+bfmccM4hTAaLP6PQJPKWSA4iSk2bNvo6KU6RyPgYeHxXmzNKzPVRcypZQTpFgstHam6maVg==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
+  '@reflink/reflink-linux-arm64-musl@0.1.19':
+    resolution: {integrity: sha512-37iO/Dp6m5DDaC2sf3zPtx/hl9FV3Xze4xoYidrxxS9bgP3S8ALroxRK6xBG/1TtfXKTvolvp+IjrUU6ujIGmA==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [musl]
+
+  '@reflink/reflink-linux-x64-gnu@0.1.19':
+    resolution: {integrity: sha512-jbI8jvuYCaA3MVUdu8vLoLAFqC+iNMpiSuLbxlAgg7x3K5bsS8nOpTRnkLF7vISJ+rVR8W+7ThXlXlUQ93ulkw==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@reflink/reflink-linux-x64-musl@0.1.19':
+    resolution: {integrity: sha512-e9FBWDe+lv7QKAwtKOt6A2W/fyy/aEEfr0g6j/hWzvQcrzHCsz07BNQYlNOjTfeytrtLU7k449H1PI95jA4OjQ==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [linux]
+    libc: [musl]
+
+  '@reflink/reflink-win32-arm64-msvc@0.1.19':
+    resolution: {integrity: sha512-09PxnVIQcd+UOn4WAW73WU6PXL7DwGS6wPlkMhMg2zlHHG65F3vHepOw06HFCq+N42qkaNAc8AKIabWvtk6cIQ==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [win32]
+
+  '@reflink/reflink-win32-x64-msvc@0.1.19':
+    resolution: {integrity: sha512-E//yT4ni2SyhwP8JRjVGWr3cbnhWDiPLgnQ66qqaanjjnMiu3O/2tjCPQXlcGc/DEYofpDc9fvhv6tALQsMV9w==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [win32]
+
+  '@reflink/reflink@0.1.19':
+    resolution: {integrity: sha512-DmCG8GzysnCZ15bres3N5AHCmwBwYgp0As6xjhQ47rAUTUXxJiK+lLUxaGsX3hd/30qUpVElh05PbGuxRPgJwA==}
+    engines: {node: '>= 10'}
+
+  pnpm@11.0.0-beta.3:
+    resolution: {integrity: sha512-6PrfRjycZV4vRX6ttG9oR6pOgbI2/OcF2QLOzHm35UcRuvtqP4zf3wQfAAPwEbeu1uAbpSg/Q5cL8h32tumy6Q==}
+    engines: {node: '>=22.13'}
+    hasBin: true
+
 snapshots:
 
+  '@pnpm/exe@11.0.0-beta.3':
+    dependencies:
+      '@reflink/reflink': 0.1.19
+    optionalDependencies:
+      '@pnpm/linux-arm64': 11.0.0-beta.3
+      '@pnpm/linux-x64': 11.0.0-beta.3
+      '@pnpm/macos-arm64': 11.0.0-beta.3
+      '@pnpm/macos-x64': 11.0.0-beta.3
+      '@pnpm/win-arm64': 11.0.0-beta.3
+      '@pnpm/win-x64': 11.0.0-beta.3
+
+  '@pnpm/linux-arm64@11.0.0-beta.3':
+    optional: true
+
+  '@pnpm/linux-x64@11.0.0-beta.3':
+    optional: true
+
+  '@pnpm/macos-arm64@11.0.0-beta.3':
+    optional: true
+
+  '@pnpm/macos-x64@11.0.0-beta.3':
+    optional: true
+
   '@pnpm/plugin-esm-node-path@0.1.2': {}
+
+  '@pnpm/win-arm64@11.0.0-beta.3':
+    optional: true
+
+  '@pnpm/win-x64@11.0.0-beta.3':
+    optional: true
+
+  '@reflink/reflink-darwin-arm64@0.1.19':
+    optional: true
+
+  '@reflink/reflink-darwin-x64@0.1.19':
+    optional: true
+
+  '@reflink/reflink-linux-arm64-gnu@0.1.19':
+    optional: true
+
+  '@reflink/reflink-linux-arm64-musl@0.1.19':
+    optional: true
+
+  '@reflink/reflink-linux-x64-gnu@0.1.19':
+    optional: true
+
+  '@reflink/reflink-linux-x64-musl@0.1.19':
+    optional: true
+
+  '@reflink/reflink-win32-arm64-msvc@0.1.19':
+    optional: true
+
+  '@reflink/reflink-win32-x64-msvc@0.1.19':
+    optional: true
+
+  '@reflink/reflink@0.1.19':
+    optionalDependencies:
+      '@reflink/reflink-darwin-arm64': 0.1.19
+      '@reflink/reflink-darwin-x64': 0.1.19
+      '@reflink/reflink-linux-arm64-gnu': 0.1.19
+      '@reflink/reflink-linux-arm64-musl': 0.1.19
+      '@reflink/reflink-linux-x64-gnu': 0.1.19
+      '@reflink/reflink-linux-x64-musl': 0.1.19
+      '@reflink/reflink-win32-arm64-msvc': 0.1.19
+      '@reflink/reflink-win32-x64-msvc': 0.1.19
+
+  pnpm@11.0.0-beta.3: {}
 
 ---
 lockfileVersion: '9.0'
@@ -44,8 +212,6 @@ catalogs:
       version: 4.1.2
 
 packageExtensionsChecksum: sha256-msO/d9y/ZDrg0AuAY9OMmOGxOk5tXh31KHTCQYU0cn4=
-
-pnpmfileChecksum: sha256-XM3tYTTXdCtCJJbCt4Mo+nnkEw6NsmCGZ6pAngPtRqU=
 
 importers:
 
@@ -76,8 +242,8 @@ importers:
         specifier: ^1.1.9
         version: 1.1.9(discord-player@7.2.0(@discord-player/extractor@7.2.0)(bufferutil@4.1.0)(mediaplex@1.0.0)(postcss@8.5.6)(tsx@4.21.0))
       discord.js:
-        specifier: ^14.25.1
-        version: 14.25.1(bufferutil@4.1.0)
+        specifier: ^14.26.0
+        version: 14.26.0(bufferutil@4.1.0)
       ioredis:
         specifier: ^5.10.1
         version: 5.10.1
@@ -487,8 +653,8 @@ packages:
   '@discord-player/utils@7.2.0':
     resolution: {integrity: sha512-07zpzOXbSKIKwwZxKdj1UznB1MYHFZjrC3mZeggreY21yJzNE+MYeH2ueDRH8V4f9tOR8KGustJc36Qza6+uMQ==}
 
-  '@discordjs/builders@1.13.1':
-    resolution: {integrity: sha512-cOU0UDHc3lp/5nKByDxkmRiNZBpdp0kx55aarbiAfakfKJHlxv/yFW1zmIqCAmwH5CRlrH9iMFKJMpvW4DPB+w==}
+  '@discordjs/builders@1.14.1':
+    resolution: {integrity: sha512-gSKkhXLqs96TCzk66VZuHHl8z2bQMJFGwrXC0f33ngK+FLNau4hU1PYny3DNJfNdSH+gVMzE85/d5FQ2BpcNwQ==}
     engines: {node: '>=16.11.0'}
 
   '@discordjs/collection@1.5.3':
@@ -1739,9 +1905,6 @@ packages:
     resolution: {integrity: sha512-WkrWp9GR4KXfKGYzOLmTuGVi1UWFfws377n9cc55/tb6DuqyF6pcQ5AbiHEshaDpY9v6oaSr2XCDidGmMwdzIA==}
     engines: {node: '>=8'}
 
-  discord-api-types@0.38.37:
-    resolution: {integrity: sha512-Cv47jzY1jkGkh5sv0bfHYqGgKOWO1peOrGMkDFM4UmaGMOTgOW8QSexhvixa9sVOiz8MnVOBryWYyw/CEVhj7w==}
-
   discord-api-types@0.38.42:
     resolution: {integrity: sha512-qs1kya7S84r5RR8m9kgttywGrmmoHaRifU1askAoi+wkoSefLpZP6aGXusjNw5b0jD3zOg3LTwUa3Tf2iHIceQ==}
 
@@ -1759,8 +1922,8 @@ packages:
   discord-voip@7.2.0:
     resolution: {integrity: sha512-bteX8XrSSqltsjV13jd6uTr5qVZ+c8yjnx2hV/AhvxgA/9qJ2i43Hkrs4qisw/o94s23Ni3tXXQohvu0EzB4+w==}
 
-  discord.js@14.25.1:
-    resolution: {integrity: sha512-2l0gsPOLPs5t6GFZfQZKnL1OJNYFcuC/ETWsW4VtKVD/tg4ICa9x+jb9bkPffkMdRpRpuUaO/fKkHCBeiCKh8g==}
+  discord.js@14.26.0:
+    resolution: {integrity: sha512-I+5dmdg7WnjIOEXspX6mJ4jLgblhZV6QpQcC3U2JjrFWnHCKDpoLkhV46SBP8k9QePs3YWJOvndVutUARRO0AQ==}
     engines: {node: '>=18'}
 
   dom-serializer@2.0.0:
@@ -2991,10 +3154,6 @@ packages:
   undici-types@7.22.0:
     resolution: {integrity: sha512-RKZvifiL60xdsIuC80UY0dq8Z7DbJUV8/l2hOVbyZAxBzEeQU4Z58+4ZzJ6WN2Lidi9KzT5EbiGX+PI/UGYuRw==}
 
-  undici@6.21.3:
-    resolution: {integrity: sha512-gBLkYIlEnSp8pFbT64yFgGE6UIB9tAkhukC23PmMDCe5Nd+cRqKxSjw5y54MK2AZMgZfJWMaNE4nYUHgi1XEOw==}
-    engines: {node: '>=18.17'}
-
   undici@6.24.1:
     resolution: {integrity: sha512-sC+b0tB1whOCzbtlx20fx3WgCXwkW627p4EA9uM+/tNNPkSS+eSEld6pAs9nDv7WbY1UUljBMYPtu9BCOrCWKA==}
     engines: {node: '>=18.17'}
@@ -3559,12 +3718,12 @@ snapshots:
     dependencies:
       '@discordjs/collection': 1.5.3
 
-  '@discordjs/builders@1.13.1':
+  '@discordjs/builders@1.14.1':
     dependencies:
       '@discordjs/formatters': 0.6.2
       '@discordjs/util': 1.2.0
       '@sapphire/shapeshift': 4.0.0
-      discord-api-types: 0.38.37
+      discord-api-types: 0.38.42
       fast-deep-equal: 3.1.3
       ts-mixer: 6.0.4
       tslib: 2.8.1
@@ -3575,7 +3734,7 @@ snapshots:
 
   '@discordjs/formatters@0.6.2':
     dependencies:
-      discord-api-types: 0.38.37
+      discord-api-types: 0.38.42
 
   '@discordjs/rest@2.6.1':
     dependencies:
@@ -3601,7 +3760,7 @@ snapshots:
       '@sapphire/async-queue': 1.5.5
       '@types/ws': 8.18.1
       '@vladfrangu/async_event_emitter': 2.4.7
-      discord-api-types: 0.38.37
+      discord-api-types: 0.38.42
       tslib: 2.8.1
       ws: 8.19.0(bufferutil@4.1.0)
     transitivePeerDependencies:
@@ -4765,8 +4924,6 @@ snapshots:
     dependencies:
       path-type: 4.0.0
 
-  discord-api-types@0.38.37: {}
-
   discord-api-types@0.38.42: {}
 
   discord-player-spotify@1.1.9(discord-player@7.2.0(@discord-player/extractor@7.2.0)(bufferutil@4.1.0)(mediaplex@1.0.0)(postcss@8.5.6)(tsx@4.21.0)):
@@ -4786,7 +4943,7 @@ snapshots:
       '@web-scrobbler/metadata-filter': 3.2.0
       discord-api-types: 0.38.42
       discord-voip: 7.2.0(bufferutil@4.1.0)(postcss@8.5.6)(tsx@4.21.0)
-      discord.js: 14.25.1(bufferutil@4.1.0)
+      discord.js: 14.26.0(bufferutil@4.1.0)
       libsodium-wrappers: 0.7.16
       mediaplex: 1.0.0
       undici: 7.24.5
@@ -4824,21 +4981,21 @@ snapshots:
       - utf-8-validate
       - yaml
 
-  discord.js@14.25.1(bufferutil@4.1.0):
+  discord.js@14.26.0(bufferutil@4.1.0):
     dependencies:
-      '@discordjs/builders': 1.13.1
+      '@discordjs/builders': 1.14.1
       '@discordjs/collection': 1.5.3
       '@discordjs/formatters': 0.6.2
       '@discordjs/rest': 2.6.1
       '@discordjs/util': 1.2.0
       '@discordjs/ws': 1.2.3(bufferutil@4.1.0)
       '@sapphire/snowflake': 3.5.3
-      discord-api-types: 0.38.37
+      discord-api-types: 0.38.42
       fast-deep-equal: 3.1.3
       lodash.snakecase: 4.1.1
       magic-bytes.js: 1.13.0
       tslib: 2.8.1
-      undici: 6.21.3
+      undici: 6.24.1
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -6037,8 +6194,6 @@ snapshots:
   undici-types@7.16.0: {}
 
   undici-types@7.22.0: {}
-
-  undici@6.21.3: {}
 
   undici@6.24.1: {}
 
