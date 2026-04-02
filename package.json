@@ -44,7 +44,7 @@
 		"@vitest/coverage-v8": "catalog:",
 		"ai": "^6.0.141",
 		"date-fns": "^4.1.0",
-		"esbuild": "^0.27.4",
+		"esbuild": "^0.28.0",
 		"esbuild-plugin-pino": "2.3.3",
 		"fuse.js": "^7.1.0",
 		"memoize": "^11.0.0",
