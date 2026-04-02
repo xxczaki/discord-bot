@@ -8,15 +8,183 @@ importers:
       '@pnpm/plugin-esm-node-path':
         specifier: 0.1.2
         version: 0.1.2
+    packageManagerDependencies:
+      '@pnpm/exe':
+        specifier: 11.0.0-beta.3
+        version: 11.0.0-beta.3
+      pnpm:
+        specifier: 11.0.0-beta.3
+        version: 11.0.0-beta.3
 
 packages:
+
+  '@pnpm/exe@11.0.0-beta.3':
+    resolution: {integrity: sha512-yWNlHHdYmvf4c0MCkCzAa4csJDPdA+7yJCbXBUDXMbUu/0Zv/AxtO77q24MwlnBUC0dWeA+0F/pPmdkR9aTV2A==}
+    hasBin: true
+
+  '@pnpm/linux-arm64@11.0.0-beta.3':
+    resolution: {integrity: sha512-TF2fyuCY9GggR4kfhjo1hMmgn+rIohenwNoH0tLPM7JlBK7/UAIFt1LI+o999tRwTCEw7gnxHFwtI2vyQuDfNw==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@pnpm/linux-x64@11.0.0-beta.3':
+    resolution: {integrity: sha512-7GrLsnSuDH62y486GUTwJdohGIC1ugz9ZJkbKOHgxIAkNGcSTJ1IkkdARtv7/WMmOEwwESDmtpOQ6LmjnpDMSA==}
+    cpu: [x64]
+    os: [linux]
+
+  '@pnpm/macos-arm64@11.0.0-beta.3':
+    resolution: {integrity: sha512-NQKgI1DURrEiOUzpxL0Mc+yn7DV4tpShqGnjaJLbz8ZCXsX/qhmybebvCG3r+IfSk3P5KID66lcgC/Osiaz0Dg==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@pnpm/macos-x64@11.0.0-beta.3':
+    resolution: {integrity: sha512-Ky22KFYHXx8+8WU4KJT9NXVgzFioL2w9pHTQjsqTK70AbxiErscPYhrFIehlCNbXjgs+tGVIy13QNKkiwvmS8w==}
+    cpu: [x64]
+    os: [darwin]
 
   '@pnpm/plugin-esm-node-path@0.1.2':
     resolution: {integrity: sha512-KzcFbJpNJHRZ60GpXmc6CoBX/zjy+fKEf/OOYdRbAlxV/Kf/f6pDNUDIVTQU8a5DHt6ODXq5mndwJPlryqMj1A==}
 
+  '@pnpm/win-arm64@11.0.0-beta.3':
+    resolution: {integrity: sha512-7L8TFNDm25m+XYSyhcola3YFd/li6BZzzl56SsyGnZabsvUslMwnDiJad48wOz8IuN7zsrTSGh+X/x6F+GdrFQ==}
+    cpu: [arm64]
+    os: [win32]
+
+  '@pnpm/win-x64@11.0.0-beta.3':
+    resolution: {integrity: sha512-Z/6OpMUaIpggXjCtWEhp6kWjiT/2EImhkJAu8AodOORqeNcWouGEq3sO4XU0em6d+pAHmdV0hWMQ2xCUmPVuiA==}
+    cpu: [x64]
+    os: [win32]
+
+  '@reflink/reflink-darwin-arm64@0.1.19':
+    resolution: {integrity: sha512-ruy44Lpepdk1FqDz38vExBY/PVUsjxZA+chd9wozjUH9JjuDT/HEaQYA6wYN9mf041l0yLVar6BCZuWABJvHSA==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@reflink/reflink-darwin-x64@0.1.19':
+    resolution: {integrity: sha512-By85MSWrMZa+c26TcnAy8SDk0sTUkYlNnwknSchkhHpGXOtjNDUOxJE9oByBnGbeuIE1PiQsxDG3Ud+IVV9yuA==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [darwin]
+
+  '@reflink/reflink-linux-arm64-gnu@0.1.19':
+    resolution: {integrity: sha512-7P+er8+rP9iNeN+bfmccM4hTAaLP6PQJPKWSA4iSk2bNvo6KU6RyPgYeHxXmzNKzPVRcypZQTpFgstHam6maVg==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
+  '@reflink/reflink-linux-arm64-musl@0.1.19':
+    resolution: {integrity: sha512-37iO/Dp6m5DDaC2sf3zPtx/hl9FV3Xze4xoYidrxxS9bgP3S8ALroxRK6xBG/1TtfXKTvolvp+IjrUU6ujIGmA==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [musl]
+
+  '@reflink/reflink-linux-x64-gnu@0.1.19':
+    resolution: {integrity: sha512-jbI8jvuYCaA3MVUdu8vLoLAFqC+iNMpiSuLbxlAgg7x3K5bsS8nOpTRnkLF7vISJ+rVR8W+7ThXlXlUQ93ulkw==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@reflink/reflink-linux-x64-musl@0.1.19':
+    resolution: {integrity: sha512-e9FBWDe+lv7QKAwtKOt6A2W/fyy/aEEfr0g6j/hWzvQcrzHCsz07BNQYlNOjTfeytrtLU7k449H1PI95jA4OjQ==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [linux]
+    libc: [musl]
+
+  '@reflink/reflink-win32-arm64-msvc@0.1.19':
+    resolution: {integrity: sha512-09PxnVIQcd+UOn4WAW73WU6PXL7DwGS6wPlkMhMg2zlHHG65F3vHepOw06HFCq+N42qkaNAc8AKIabWvtk6cIQ==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [win32]
+
+  '@reflink/reflink-win32-x64-msvc@0.1.19':
+    resolution: {integrity: sha512-E//yT4ni2SyhwP8JRjVGWr3cbnhWDiPLgnQ66qqaanjjnMiu3O/2tjCPQXlcGc/DEYofpDc9fvhv6tALQsMV9w==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [win32]
+
+  '@reflink/reflink@0.1.19':
+    resolution: {integrity: sha512-DmCG8GzysnCZ15bres3N5AHCmwBwYgp0As6xjhQ47rAUTUXxJiK+lLUxaGsX3hd/30qUpVElh05PbGuxRPgJwA==}
+    engines: {node: '>= 10'}
+
+  pnpm@11.0.0-beta.3:
+    resolution: {integrity: sha512-6PrfRjycZV4vRX6ttG9oR6pOgbI2/OcF2QLOzHm35UcRuvtqP4zf3wQfAAPwEbeu1uAbpSg/Q5cL8h32tumy6Q==}
+    engines: {node: '>=22.13'}
+    hasBin: true
+
 snapshots:
 
+  '@pnpm/exe@11.0.0-beta.3':
+    dependencies:
+      '@reflink/reflink': 0.1.19
+    optionalDependencies:
+      '@pnpm/linux-arm64': 11.0.0-beta.3
+      '@pnpm/linux-x64': 11.0.0-beta.3
+      '@pnpm/macos-arm64': 11.0.0-beta.3
+      '@pnpm/macos-x64': 11.0.0-beta.3
+      '@pnpm/win-arm64': 11.0.0-beta.3
+      '@pnpm/win-x64': 11.0.0-beta.3
+
+  '@pnpm/linux-arm64@11.0.0-beta.3':
+    optional: true
+
+  '@pnpm/linux-x64@11.0.0-beta.3':
+    optional: true
+
+  '@pnpm/macos-arm64@11.0.0-beta.3':
+    optional: true
+
+  '@pnpm/macos-x64@11.0.0-beta.3':
+    optional: true
+
   '@pnpm/plugin-esm-node-path@0.1.2': {}
+
+  '@pnpm/win-arm64@11.0.0-beta.3':
+    optional: true
+
+  '@pnpm/win-x64@11.0.0-beta.3':
+    optional: true
+
+  '@reflink/reflink-darwin-arm64@0.1.19':
+    optional: true
+
+  '@reflink/reflink-darwin-x64@0.1.19':
+    optional: true
+
+  '@reflink/reflink-linux-arm64-gnu@0.1.19':
+    optional: true
+
+  '@reflink/reflink-linux-arm64-musl@0.1.19':
+    optional: true
+
+  '@reflink/reflink-linux-x64-gnu@0.1.19':
+    optional: true
+
+  '@reflink/reflink-linux-x64-musl@0.1.19':
+    optional: true
+
+  '@reflink/reflink-win32-arm64-msvc@0.1.19':
+    optional: true
+
+  '@reflink/reflink-win32-x64-msvc@0.1.19':
+    optional: true
+
+  '@reflink/reflink@0.1.19':
+    optionalDependencies:
+      '@reflink/reflink-darwin-arm64': 0.1.19
+      '@reflink/reflink-darwin-x64': 0.1.19
+      '@reflink/reflink-linux-arm64-gnu': 0.1.19
+      '@reflink/reflink-linux-arm64-musl': 0.1.19
+      '@reflink/reflink-linux-x64-gnu': 0.1.19
+      '@reflink/reflink-linux-x64-musl': 0.1.19
+      '@reflink/reflink-win32-arm64-msvc': 0.1.19
+      '@reflink/reflink-win32-x64-msvc': 0.1.19
+
+  pnpm@11.0.0-beta.3: {}
 
 ---
 lockfileVersion: '9.0'
@@ -44,8 +212,6 @@ catalogs:
       version: 4.1.2
 
 packageExtensionsChecksum: sha256-msO/d9y/ZDrg0AuAY9OMmOGxOk5tXh31KHTCQYU0cn4=
-
-pnpmfileChecksum: sha256-XM3tYTTXdCtCJJbCt4Mo+nnkEw6NsmCGZ6pAngPtRqU=
 
 importers:
 
@@ -95,8 +261,8 @@ importers:
         version: 0.1.10
     devDependencies:
       '@ai-sdk/openai':
-        specifier: ^3.0.48
-        version: 3.0.48(zod@4.3.6)
+        specifier: ^3.0.50
+        version: 3.0.50(zod@4.3.6)
       '@biomejs/biome':
         specifier: 'catalog:'
         version: 2.4.9
@@ -215,14 +381,20 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/openai@3.0.48':
-    resolution: {integrity: sha512-ALmj/53EXpcRqMbGpPJPP4UOSWw0q4VGpnDo7YctvsynjkrKDmoneDG/1a7VQnSPYHnJp6tTRMf5ZdxZ5whulg==}
+  '@ai-sdk/openai@3.0.50':
+    resolution: {integrity: sha512-7M7bklrS+gckzPdpQpC3iG5aN5aQPRJdAJQ5jt7sEgYCqDgUuef9x4Nd570+ghIfKTZvV6tSqeeTuD6De/bZig==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
   '@ai-sdk/provider-utils@4.0.21':
     resolution: {integrity: sha512-MtFUYI1/8mgDvRmaBDjbLJPFFrMG777AvSgyIFQtZHIMzm88R/12vYBBpnk7pfiWLFE1DSZzY4WDYzGbKAcmiw==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/provider-utils@4.0.22':
+    resolution: {integrity: sha512-B2OTFcRw/Pdka9ZTjpXv6T6qZ6RruRuLokyb8HwW+aoW9ndJ3YasA3/mVswyJw7VMBF8ofXgqvcrCt9KYvFifg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -3191,13 +3363,20 @@ snapshots:
       '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
       zod: 4.3.6
 
-  '@ai-sdk/openai@3.0.48(zod@4.3.6)':
+  '@ai-sdk/openai@3.0.50(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.8
-      '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
+      '@ai-sdk/provider-utils': 4.0.22(zod@4.3.6)
       zod: 4.3.6
 
   '@ai-sdk/provider-utils@4.0.21(zod@4.3.6)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.8
+      '@standard-schema/spec': 1.1.0
+      eventsource-parser: 3.0.6
+      zod: 4.3.6
+
+  '@ai-sdk/provider-utils@4.0.22(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.8
       '@standard-schema/spec': 1.1.0
