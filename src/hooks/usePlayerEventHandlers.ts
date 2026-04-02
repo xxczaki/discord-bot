@@ -200,8 +200,7 @@ export default function usePlayerEventHandlers(
 				await answer.deferUpdate();
 
 				const searchResults = await player.search(originalQuery, {
-					searchEngine: determineSearchEngine(originalQuery),
-					fallbackSearchEngine: FALLBACK_SEARCH_ENGINE,
+					searchEngine: FALLBACK_SEARCH_ENGINE,
 				});
 
 				const candidates = searchResults.tracks
