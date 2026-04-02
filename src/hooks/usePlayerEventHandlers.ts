@@ -11,9 +11,15 @@ import {
 	type Message,
 	StringSelectMenuBuilder,
 } from 'discord.js';
-import { type Player, type Track, TrackSkipReason } from 'discord-player';
+import {
+	type Player,
+	serialize,
+	type Track,
+	TrackSkipReason,
+} from 'discord-player';
 import prettyBytes from 'pretty-bytes';
 import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
+import { FALLBACK_SEARCH_ENGINE } from '../constants/sourceConfig';
 import type { QueueMetadata } from '../types/QueueMetadata';
 import createSmartInteractionHandler from '../utils/createSmartInteractionHandler';
 import createTrackEmbed from '../utils/createTrackEmbed';
@@ -191,12 +197,20 @@ export default function usePlayerEventHandlers(
 			}
 
 			if (answer.customId === 'correct' && originalQuery) {
-				const resolutions = await queryCache.getResolutions(originalQuery);
+				await answer.deferUpdate();
 
-				if (resolutions.length === 0) {
-					await answer.update({
-						content:
-							'No alternative resolutions found yet. They accumulate over time as the query cache refreshes.',
+				const searchResults = await player.search(originalQuery, {
+					searchEngine: determineSearchEngine(originalQuery),
+					fallbackSearchEngine: FALLBACK_SEARCH_ENGINE,
+				});
+
+				const candidates = searchResults.tracks
+					.filter((candidate) => candidate.url.length <= 100)
+					.slice(0, 25);
+
+				if (candidates.length === 0) {
+					await response.edit({
+						content: 'No results found for this query.',
 						components: [],
 					});
 				} else {
@@ -204,22 +218,21 @@ export default function usePlayerEventHandlers(
 						.setCustomId('resolution-select')
 						.setPlaceholder('Select the correct version');
 
-					for (const resolution of resolutions) {
-						const label =
-							`"${resolution.track.title}" by ${resolution.track.author}`.slice(
-								0,
-								100,
-							);
-						const isPlaying = resolution.url === track.url;
+					for (const candidate of candidates) {
+						const label = `"${candidate.title}" by ${candidate.author}`.slice(
+							0,
+							100,
+						);
+						const isPlaying = candidate.url === track.url;
 
 						selectMenu.addOptions({
 							label,
 							description:
-								`${resolution.track.duration}${isPlaying ? ' (currently playing)' : ''}`.slice(
+								`${candidate.duration}${isPlaying ? ' (currently playing)' : ''}`.slice(
 									0,
 									100,
 								),
-							value: resolution.url.slice(0, 100),
+							value: candidate.url.slice(0, 100),
 						});
 					}
 
@@ -228,7 +241,7 @@ export default function usePlayerEventHandlers(
 							selectMenu,
 						);
 
-					await answer.update({
+					await response.edit({
 						components: [selectRow],
 					});
 
@@ -238,23 +251,29 @@ export default function usePlayerEventHandlers(
 							componentType: ComponentType.StringSelect,
 						});
 
-						const selectedValue = selection.values[0];
+						const selectedUrl = selection.values[0];
 
-						await queryCache.setCorrectResolution(originalQuery, selectedValue);
+						const selectedTrack = candidates.find(
+							(candidate) => candidate.url === selectedUrl,
+						);
 
-						if (selectedValue !== track.url && queue.channel) {
-							const result = await player.play(queue.channel, selectedValue, {
-								searchEngine: determineSearchEngine(selectedValue),
+						if (selectedTrack) {
+							await queryCache.setCorrectResolutionFromData(
+								originalQuery,
+								JSON.stringify(serialize(selectedTrack)),
+							);
+						}
+
+						if (selectedUrl !== track.url && queue.channel) {
+							const result = await player.play(queue.channel, selectedUrl, {
+								searchEngine: determineSearchEngine(selectedUrl),
 								requestedBy: track.requestedBy ?? undefined,
 							});
 							queue.moveTrack(result.track, 0);
 							queue.node.skip();
 						}
 
-						const selectedResolution = resolutions.find(
-							(resolution) => resolution.url === selectedValue,
-						);
-						const trackTitle = selectedResolution?.track.title ?? 'this track';
+						const trackTitle = selectedTrack?.title ?? 'this track';
 
 						await selection.update({
 							content: `"${trackTitle}" will now always resolve for "${originalQuery}"`,

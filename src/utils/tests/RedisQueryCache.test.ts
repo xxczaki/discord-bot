@@ -68,9 +68,6 @@ describe('RedisQueryCache', () => {
 			set: vi.fn(),
 			del: vi.fn(),
 			exists: vi.fn().mockResolvedValue(0),
-			hset: vi.fn(),
-			hget: vi.fn(),
-			hgetall: vi.fn().mockResolvedValue({}),
 			scanStream: vi.fn(),
 		} as unknown as Redis;
 
@@ -86,7 +83,7 @@ describe('RedisQueryCache', () => {
 	});
 
 	describe('addData', () => {
-		it('should store track data and resolution history', async () => {
+		it('should store track data in cache', async () => {
 			const mockTrack = {
 				title: 'Test Song',
 				url: 'https://youtube.com/watch?v=abc',
@@ -102,11 +99,6 @@ describe('RedisQueryCache', () => {
 			await redisQueryCache.addData(mockSearchResult);
 
 			expect(vi.mocked(serialize)).toHaveBeenCalledWith(mockTrack);
-			expect(mockRedis.hset).toHaveBeenCalledWith(
-				'discord-player:query-resolutions:test song',
-				'https://youtube.com/watch?v=abc',
-				JSON.stringify({ title: 'Test Song' }),
-			);
 			expect(mockRedis.setex).toHaveBeenCalledWith(
 				EXAMPLE_CACHE_KEY,
 				RedisQueryCache.EXPIRY_TIMEOUT_SECONDS,
@@ -130,7 +122,6 @@ describe('RedisQueryCache', () => {
 
 			await redisQueryCache.addData(mockSearchResult);
 
-			expect(mockRedis.hset).toHaveBeenCalled();
 			expect(mockRedis.setex).not.toHaveBeenCalled();
 		});
 
@@ -425,75 +416,7 @@ describe('RedisQueryCache', () => {
 		});
 	});
 
-	describe('resolution history', () => {
-		it('should return resolutions from hash', async () => {
-			const mockTrack = { title: 'Test Song', extractor: 'youtube' };
-			vi.mocked(mockRedis.hgetall).mockResolvedValue({
-				'https://youtube.com/1': JSON.stringify({ title: 'Test Song' }),
-			});
-			vi.mocked(deserialize).mockReturnValue(mockTrack as never);
-
-			const resolutions = await redisQueryCache.getResolutions(EXAMPLE_QUERY);
-
-			expect(mockRedis.hgetall).toHaveBeenCalledWith(
-				'discord-player:query-resolutions:test song',
-			);
-			expect(resolutions).toHaveLength(1);
-			expect(resolutions[0].url).toBe('https://youtube.com/1');
-			expect(resolutions[0].track).toBe(mockTrack);
-		});
-
-		it('should return empty array when no resolutions exist', async () => {
-			const resolutions = await redisQueryCache.getResolutions(EXAMPLE_QUERY);
-
-			expect(resolutions).toHaveLength(0);
-		});
-
-		it('should add resolution to history', async () => {
-			await redisQueryCache.addResolution(
-				EXAMPLE_QUERY,
-				'https://youtube.com/1',
-				'{"title":"Test"}',
-			);
-
-			expect(mockRedis.hset).toHaveBeenCalledWith(
-				'discord-player:query-resolutions:test song',
-				'https://youtube.com/1',
-				'{"title":"Test"}',
-			);
-		});
-	});
-
 	describe('corrected resolutions', () => {
-		it('should set correct resolution from history', async () => {
-			vi.mocked(mockRedis.hget).mockResolvedValue('{"title":"Correct"}');
-
-			await redisQueryCache.setCorrectResolution(
-				EXAMPLE_QUERY,
-				'https://youtube.com/1',
-			);
-
-			expect(mockRedis.hget).toHaveBeenCalledWith(
-				'discord-player:query-resolutions:test song',
-				'https://youtube.com/1',
-			);
-			expect(mockRedis.set).toHaveBeenCalledWith(
-				'discord-player:query-corrected:test song',
-				'{"title":"Correct"}',
-			);
-		});
-
-		it('should throw when resolution URL not found', async () => {
-			vi.mocked(mockRedis.hget).mockResolvedValue(null);
-
-			await expect(
-				redisQueryCache.setCorrectResolution(
-					EXAMPLE_QUERY,
-					'https://missing.com',
-				),
-			).rejects.toThrow('No resolution found for URL: https://missing.com');
-		});
-
 		it('should set correct resolution from external data', async () => {
 			await redisQueryCache.setCorrectResolutionFromData(
 				EXAMPLE_QUERY,
