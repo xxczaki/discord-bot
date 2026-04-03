@@ -20,9 +20,7 @@ if (dsn) {
 		beforeSend(event) {
 			const message = event.exception?.values?.[0]?.value ?? '';
 
-			if (
-				IGNORED_ERROR_PATTERNS.some((pattern) => message.includes(pattern))
-			) {
+			if (IGNORED_ERROR_PATTERNS.some((pattern) => message.includes(pattern))) {
 				return null;
 			}
 
