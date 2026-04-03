@@ -12,7 +12,7 @@ catalogMode: strict
 catalogs:
   default:
     '@biomejs/biome': 2.4.10
-    '@types/node': ^24.12.0
+    '@types/node': ^24.12.2
     '@vitest/coverage-v8': ^4.1.2
     typescript: ^5.9.3i
     vitest: ^4.1.2
