@@ -27,19 +27,6 @@
 - Structured logging with Pino
 - Easy deployment with a [Helm chart](https://github.com/xxczaki/charts/tree/main/charts/discord-bot)
 
-## Deployment
-
-You have two options:
-
-1. Use the [Helm chart](https://github.com/xxczaki/charts/tree/main/charts/discord-bot) (recommended)
-2. Use the Docker image from either [Docker Hub](https://hub.docker.com/r/xxczaki/discord-bot) or [GitHub Container Registry](https://github.com/xxczaki/discord-bot/pkgs/container/discord-bot)
-
-> [!NOTE]
-> Required environment variables:
-> - `REDIS_URL` – Redis instance connection string
-
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/tgifQE?referralCode=4Ee-1n)
-
 ## Development
 
 First, install the Node.js version defined in the `.nvmrc` file and pnpm (ideally through Corepack).

@@ -1,5 +1,4 @@
 import * as Sentry from '@sentry/node';
-import getEnvironmentVariable from './getEnvironmentVariable';
 
 const IGNORED_ERROR_PATTERNS = [
 	'The operation was aborted',
@@ -7,17 +6,28 @@ const IGNORED_ERROR_PATTERNS = [
 ];
 
 /* v8 ignore start */
-Sentry.init({
-	dsn: getEnvironmentVariable('SENTRY_DSN'),
-	tracesSampleRate: 1.0,
-	beforeSend(event) {
-		const message = event.exception?.values?.[0]?.value ?? '';
+const dsn = process.env.SENTRY_DSN;
 
-		if (IGNORED_ERROR_PATTERNS.some((pattern) => message.includes(pattern))) {
-			return null;
-		}
+if (dsn) {
+	Sentry.init({
+		dsn,
+		tracesSampleRate: 1.0,
+		initialScope: {
+			tags: {
+				'bot.fly_app': process.env.FLY_APP_NAME,
+			},
+		},
+		beforeSend(event) {
+			const message = event.exception?.values?.[0]?.value ?? '';
 
-		return event;
-	},
-});
+			if (
+				IGNORED_ERROR_PATTERNS.some((pattern) => message.includes(pattern))
+			) {
+				return null;
+			}
+
+			return event;
+		},
+	});
+}
 /* v8 ignore stop */
