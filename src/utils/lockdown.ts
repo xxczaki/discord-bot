@@ -1,10 +1,14 @@
-import type { ChatInputCommandInteraction } from 'discord.js';
+import type {
+	APIInteractionGuildMember,
+	ChatInputCommandInteraction,
+	GuildMember,
+} from 'discord.js';
 import { RAW_COMMANDS } from '../constants/commands';
 import getEnvironmentVariable from './getEnvironmentVariable';
 
 export default class LockdownManager {
 	static #instance: LockdownManager;
-	#ownerUserId: string | null = null;
+	#ownerRoleId: string | null = null;
 	#isLockdownActive = false;
 	#lockdownAffectedCategories = new Set(['Music']);
 	#ownerOnlyCommands = new Set(['maintenance', 'lockdown']);
@@ -19,11 +23,11 @@ export default class LockdownManager {
 		return LockdownManager.#instance;
 	}
 
-	#getOwnerUserId(): string {
-		if (this.#ownerUserId === null) {
-			this.#ownerUserId = getEnvironmentVariable('OWNER_USER_ID');
+	#getOwnerRoleId(): string {
+		if (this.#ownerRoleId === null) {
+			this.#ownerRoleId = getEnvironmentVariable('OWNER_ROLE_ID');
 		}
-		return this.#ownerUserId;
+		return this.#ownerRoleId;
 	}
 
 	resetState(): void {
@@ -35,8 +39,14 @@ export default class LockdownManager {
 		this.#ownerOnlyCommands.add('lockdown');
 	}
 
-	isOwner(userId: string): boolean {
-		return userId === this.#getOwnerUserId();
+	isOwner(member: GuildMember | APIInteractionGuildMember): boolean {
+		const roleId = this.#getOwnerRoleId();
+
+		if (Array.isArray(member.roles)) {
+			return member.roles.includes(roleId);
+		}
+
+		return member.roles.cache.has(roleId);
 	}
 
 	isEnabled(): boolean {
@@ -85,13 +95,13 @@ export default class LockdownManager {
 	}
 
 	hasCommandPermission(interaction: ChatInputCommandInteraction): boolean {
-		const userId = interaction.member?.user.id;
+		const member = interaction.member;
 
-		if (!userId) {
+		if (!member) {
 			return false;
 		}
 
-		if (this.isOwner(userId)) {
+		if (this.isOwner(member)) {
 			return true;
 		}
 
@@ -111,11 +121,11 @@ export default class LockdownManager {
 	async sendPermissionDeniedMessage(
 		interaction: ChatInputCommandInteraction,
 	): Promise<void> {
-		const ownerIdForMessage = this.#getOwnerUserId();
+		const roleId = this.#getOwnerRoleId();
 
 		if (this.isOwnerOnlyCommand(interaction.commandName)) {
 			await interaction.reply({
-				content: `Only <@!${ownerIdForMessage}> is allowed to run this command.`,
+				content: `This command is restricted to <@&${roleId}>.`,
 				flags: ['Ephemeral'],
 			});
 		} else if (
@@ -123,12 +133,12 @@ export default class LockdownManager {
 			this.isCommandAffected(interaction.commandName)
 		) {
 			await interaction.reply({
-				content: `🔒 This command is currently locked down. Only <@!${ownerIdForMessage}> can use it during lockdown mode.`,
+				content: `🔒 This command is currently locked down. Only <@&${roleId}> can use it during lockdown mode.`,
 				flags: ['Ephemeral'],
 			});
 		} else {
 			await interaction.reply({
-				content: `Only <@!${ownerIdForMessage}> is allowed to run this command.`,
+				content: `This command is restricted to <@&${roleId}>.`,
 				flags: ['Ephemeral'],
 			});
 		}

@@ -13,8 +13,8 @@ vi.mock('node:path', () => ({
 
 vi.mock('../../utils/getEnvironmentVariable', () => ({
 	default: vi.fn((key: string) => {
-		if (key === 'OWNER_USER_ID') {
-			return 'mock-owner-id';
+		if (key === 'OWNER_ROLE_ID') {
+			return 'mock-owner-role-id';
 		}
 		throw new TypeError(`Environment variable ${key} is not defined`);
 	}),
@@ -32,13 +32,7 @@ function createMockInteraction(
 	return {
 		commandName,
 		member: {
-			user: {
-				id: 'mock-owner-id',
-				username: 'mockuser',
-				discriminator: '0000',
-				global_name: null,
-				avatar: null,
-			},
+			roles: ['mock-owner-role-id'],
 		},
 		reply: vi.fn().mockResolvedValue({}),
 		editReply: vi.fn().mockResolvedValue({}),
@@ -101,20 +95,14 @@ it.each([
 it('should handle lockdown permission denied for owner-only commands', async () => {
 	const interaction = createMockInteraction('maintenance', {
 		member: {
-			user: {
-				id: 'non-owner-id',
-				username: 'nonowner',
-				discriminator: '0000',
-				global_name: null,
-				avatar: null,
-			},
+			roles: ['other-role'],
 		},
 	});
 
 	await useCommandHandlers(interaction);
 
 	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'Only <@!mock-owner-id> is allowed to run this command.',
+		content: 'This command is restricted to <@&mock-owner-role-id>.',
 		flags: ['Ephemeral'],
 	});
 });
@@ -126,13 +114,7 @@ it('should handle lockdown permission denied for locked down commands', async ()
 
 	const interaction = createMockInteraction('play', {
 		member: {
-			user: {
-				id: 'non-owner-id',
-				username: 'nonowner',
-				discriminator: '0000',
-				global_name: null,
-				avatar: null,
-			},
+			roles: ['other-role'],
 		},
 	});
 
@@ -140,7 +122,7 @@ it('should handle lockdown permission denied for locked down commands', async ()
 
 	expect(interaction.reply).toHaveBeenCalledWith({
 		content:
-			'🔒 This command is currently locked down. Only <@!mock-owner-id> can use it during lockdown mode.',
+			'🔒 This command is currently locked down. Only <@&mock-owner-role-id> can use it during lockdown mode.',
 		flags: ['Ephemeral'],
 	});
 });

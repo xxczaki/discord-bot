@@ -6,8 +6,6 @@ import logger from '../../utils/logger';
 import maintenanceCommandHandler from '../maintenance';
 
 const mocks = vi.hoisted(() => {
-	const OWNER_USER_ID = 'mock-owner-id';
-
 	const mockApi = {
 		deleteNamespacedDeployment: vi.fn(),
 	};
@@ -21,8 +19,6 @@ const mocks = vi.hoisted(() => {
 	mockedCreateK8sClient.mockReturnValue(mockApi);
 
 	return {
-		OWNER_USER_ID,
-		DIFFERENT_USER_ID: 'user456',
 		mockApi,
 		mockKubeConfig,
 		KubeConfig: vi.fn(() => mockKubeConfig),

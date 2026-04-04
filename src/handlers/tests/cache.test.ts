@@ -8,7 +8,7 @@ import cacheCommandHandler, {
 
 vi.mock('../../utils/getEnvironmentVariable', () => ({
 	default: vi.fn((key: string) => {
-		if (key === 'OWNER_USER_ID') return 'owner-123';
+		if (key === 'OWNER_ROLE_ID') return 'owner-role-123';
 		if (key === 'NODE_ENV') return 'production';
 		throw new Error(`Unknown env var: ${key}`);
 	}),
@@ -72,10 +72,10 @@ function getEditReplyCall(
 }
 
 function createMockInteraction(
-	userId = 'user-456',
+	roles: string[] = ['other-role'],
 ): ChatInputCommandInteraction {
 	return {
-		user: { id: userId },
+		member: { roles },
 		reply: vi.fn().mockResolvedValue({}),
 		editReply: vi.fn().mockResolvedValue({}),
 		channel: {
@@ -188,7 +188,7 @@ describe('cache command handler', () => {
 	});
 
 	it('should create flush buttons for owner', async () => {
-		const mockInteraction = createMockInteraction('owner-123');
+		const mockInteraction = createMockInteraction(['owner-role-123']);
 		mockOpendir.mockResolvedValue(createMockDirectory([]) as never);
 
 		await cacheCommandHandler(mockInteraction);
@@ -203,7 +203,7 @@ describe('cache command handler', () => {
 	});
 
 	it('should disable flush buttons for non-owner', async () => {
-		const mockInteraction = createMockInteraction('regular-user');
+		const mockInteraction = createMockInteraction(['other-role']);
 		mockOpendir.mockResolvedValue(createMockDirectory([]) as never);
 
 		await cacheCommandHandler(mockInteraction);
@@ -266,7 +266,7 @@ describe('cache command handler', () => {
 	});
 
 	it('should set up message component collector', async () => {
-		const mockInteraction = createMockInteraction('owner-123');
+		const mockInteraction = createMockInteraction(['owner-role-123']);
 		const mockCollector = { on: vi.fn() };
 		const mockCreateCollector = vi.fn(() => mockCollector as never);
 
@@ -329,9 +329,9 @@ describe('cache command handler', () => {
 	});
 
 	it('should handle non-owner button clicks with error message', async () => {
-		const mockInteraction = createMockInteraction('owner-123');
+		const mockInteraction = createMockInteraction(['owner-role-123']);
 		const mockButtonInteraction = {
-			user: { id: 'regular-user' },
+			member: { roles: ['other-role'] },
 			customId: 'flush_query_cache',
 			reply: vi.fn().mockResolvedValue({}),
 		};
@@ -368,9 +368,9 @@ describe('cache command handler', () => {
 	});
 
 	it('should handle unknown button actions', async () => {
-		const mockInteraction = createMockInteraction('owner-123');
+		const mockInteraction = createMockInteraction(['owner-role-123']);
 		const mockButtonInteraction = {
-			user: { id: 'owner-123' },
+			member: { roles: ['owner-role-123'] },
 			customId: 'unknown_action',
 			update: vi.fn().mockResolvedValue({}),
 		};
@@ -436,9 +436,9 @@ describe('cache command handler', () => {
 	});
 
 	it('should skip button processing if already deferred', async () => {
-		const mockInteraction = createMockInteraction('owner-123');
+		const mockInteraction = createMockInteraction(['owner-role-123']);
 		const mockButtonInteraction = {
-			user: { id: 'owner-123' },
+			member: { roles: ['owner-role-123'] },
 			customId: 'flush_query_cache',
 			deferred: true,
 			replied: false,
@@ -474,9 +474,9 @@ describe('cache command handler', () => {
 	});
 
 	it('should skip button processing if already replied', async () => {
-		const mockInteraction = createMockInteraction('owner-123');
+		const mockInteraction = createMockInteraction(['owner-role-123']);
 		const mockButtonInteraction = {
-			user: { id: 'owner-123' },
+			member: { roles: ['owner-role-123'] },
 			customId: 'flush_query_cache',
 			deferred: false,
 			replied: true,
@@ -512,7 +512,7 @@ describe('cache command handler', () => {
 	});
 
 	it('should handle collector end event', async () => {
-		const mockInteraction = createMockInteraction('owner-123');
+		const mockInteraction = createMockInteraction(['owner-role-123']);
 
 		const mockCollector = {
 			on: vi.fn(),
@@ -543,7 +543,7 @@ describe('cache command handler', () => {
 	});
 
 	it('should handle collector end event errors gracefully', async () => {
-		const mockInteraction = createMockInteraction('owner-123');
+		const mockInteraction = createMockInteraction(['owner-role-123']);
 
 		const mockCollector = {
 			on: vi.fn(),
@@ -579,7 +579,7 @@ describe('cache command handler', () => {
 	});
 
 	it('should show updated stats when clicking multiple flush buttons sequentially', async () => {
-		const mockInteraction = createMockInteraction('owner-123');
+		const mockInteraction = createMockInteraction(['owner-role-123']);
 
 		const mockCollector = {
 			on: vi.fn(),
@@ -664,7 +664,7 @@ describe('cache command handler', () => {
 		expect(collectCallback).toBeDefined();
 
 		const firstButtonInteraction = {
-			user: { id: 'owner-123' },
+			member: { roles: ['owner-role-123'] },
 			customId: 'flush_query_cache',
 			deferred: false,
 			replied: false,
@@ -688,7 +688,7 @@ describe('cache command handler', () => {
 		expect(firstQueryCacheField?.value).toContain('2 entries');
 
 		const secondButtonInteraction = {
-			user: { id: 'owner-123' },
+			member: { roles: ['owner-role-123'] },
 			customId: 'flush_external_playlist_cache',
 			deferred: false,
 			replied: false,
@@ -774,7 +774,7 @@ describe('createActionRowWithRemovedButton', () => {
 
 describe('cache flush error handling', () => {
 	it('should handle flush query cache Redis pipeline error gracefully', async () => {
-		const mockInteraction = createMockInteraction('owner-123');
+		const mockInteraction = createMockInteraction(['owner-role-123']);
 
 		const mockCollector = {
 			on: vi.fn(),
@@ -830,7 +830,7 @@ describe('cache flush error handling', () => {
 		expect(collectCallback).toBeDefined();
 
 		const buttonInteraction = {
-			user: { id: 'owner-123' },
+			member: { roles: ['owner-role-123'] },
 			customId: 'flush_query_cache',
 			deferred: false,
 			replied: false,
@@ -845,7 +845,7 @@ describe('cache flush error handling', () => {
 	});
 
 	it('should handle flush external playlist cache Redis pipeline error gracefully', async () => {
-		const mockInteraction = createMockInteraction('owner-123');
+		const mockInteraction = createMockInteraction(['owner-role-123']);
 
 		const mockCollector = {
 			on: vi.fn(),
@@ -901,7 +901,7 @@ describe('cache flush error handling', () => {
 		expect(collectCallback).toBeDefined();
 
 		const buttonInteraction = {
-			user: { id: 'owner-123' },
+			member: { roles: ['owner-role-123'] },
 			customId: 'flush_external_playlist_cache',
 			deferred: false,
 			replied: false,

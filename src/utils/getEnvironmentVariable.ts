@@ -7,7 +7,7 @@ type EnvironmentVariableNames =
 	| 'NODE_ENV'
 	| 'PLAYLISTS_CHANNEL_ID'
 	| 'BOT_DEBUG_CHANNEL_ID'
-	| 'OWNER_USER_ID';
+	| 'OWNER_ROLE_ID';
 
 function getEnvironmentVariable(name: EnvironmentVariableNames) {
 	const rawVariable = process.env[name];

@@ -11,7 +11,7 @@ import {
 } from 'discord.js';
 import prettyBytes from 'pretty-bytes';
 import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
-import getEnvironmentVariable from '../utils/getEnvironmentVariable';
+import LockdownManager from '../utils/lockdown';
 import logger from '../utils/logger';
 import { OpusCacheManager } from '../utils/OpusCacheManager';
 import pluralize from '../utils/pluralize';
@@ -19,7 +19,6 @@ import redis from '../utils/redis';
 import reportError from '../utils/reportError';
 
 const opusCacheDirectory = OpusCacheManager.getDirectoryPath();
-const OWNER_ID = getEnvironmentVariable('OWNER_USER_ID');
 
 interface CacheStats {
 	queryCache: {
@@ -47,7 +46,11 @@ export default async function cacheCommandHandler(
 
 	try {
 		const usedButtons = new Set<string>();
-		const actionRow = createActionRow(interaction.user.id === OWNER_ID);
+		const lockdown = LockdownManager.getInstance();
+		const isOwner = interaction.member
+			? lockdown.isOwner(interaction.member)
+			: false;
+		const actionRow = createActionRow(isOwner);
 		let stats = await gatherCacheStatsWithLiveUpdates(
 			interaction,
 			usedButtons,
@@ -66,7 +69,11 @@ export default async function cacheCommandHandler(
 		});
 
 		collector?.on('collect', async (buttonInteraction: ButtonInteraction) => {
-			if (buttonInteraction.user.id !== OWNER_ID) {
+			const isButtonOwner = buttonInteraction.member
+				? lockdown.isOwner(buttonInteraction.member)
+				: false;
+
+			if (!isButtonOwner) {
 				await buttonInteraction.reply({
 					content: 'Only the bot owner can use these buttons.',
 					flags: ['Ephemeral'],

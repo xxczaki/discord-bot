@@ -6,8 +6,8 @@ import lockdownCommandHandler from '../lockdown';
 
 vi.mock('../../utils/getEnvironmentVariable', () => ({
 	default: vi.fn((key: string) => {
-		if (key === 'OWNER_USER_ID') {
-			return 'owner-123';
+		if (key === 'OWNER_ROLE_ID') {
+			return 'owner-role-123';
 		}
 		throw new TypeError(`Environment variable ${key} is not defined`);
 	}),
@@ -18,16 +18,14 @@ vi.mock('../../utils/presenceManager', () => ({
 }));
 
 function createMockInteraction(
-	userId: string,
+	roles: string[],
 	withClient = false,
 ): ChatInputCommandInteraction {
 	const mockClient = withClient ? { id: 'bot-123' } : undefined;
 
 	return {
 		member: {
-			user: {
-				id: userId,
-			},
+			roles,
 		},
 		client: mockClient,
 		reply: vi.fn().mockResolvedValue({}),
@@ -42,7 +40,7 @@ beforeEach(() => {
 });
 
 it('should enable lockdown when currently disabled', async () => {
-	const interaction = createMockInteraction('owner-123');
+	const interaction = createMockInteraction(['owner-role-123']);
 
 	await lockdownCommandHandler(interaction);
 
@@ -54,7 +52,7 @@ it('should enable lockdown when currently disabled', async () => {
 it('should disable lockdown when currently enabled', async () => {
 	LockdownManager.getInstance().setState(true);
 
-	const interaction = createMockInteraction('owner-123');
+	const interaction = createMockInteraction(['owner-role-123']);
 
 	await lockdownCommandHandler(interaction);
 
@@ -64,7 +62,7 @@ it('should disable lockdown when currently enabled', async () => {
 });
 
 it('should include affected categories in response', async () => {
-	const interaction = createMockInteraction('owner-123');
+	const interaction = createMockInteraction(['owner-role-123']);
 
 	await lockdownCommandHandler(interaction);
 
@@ -76,7 +74,7 @@ it('should include affected categories in response', async () => {
 it('should toggle from enabled to disabled', async () => {
 	LockdownManager.getInstance().setState(true);
 
-	const interaction = createMockInteraction('owner-123');
+	const interaction = createMockInteraction(['owner-role-123']);
 
 	await lockdownCommandHandler(interaction);
 
@@ -90,7 +88,7 @@ it('should toggle from enabled to disabled', async () => {
 });
 
 it('should toggle from disabled to enabled', async () => {
-	const interaction = createMockInteraction('owner-123');
+	const interaction = createMockInteraction(['owner-role-123']);
 
 	await lockdownCommandHandler(interaction);
 
@@ -106,17 +104,17 @@ it('should toggle from disabled to enabled', async () => {
 });
 
 it('should reject non-owner users', async () => {
-	const interaction = createMockInteraction('user-456');
+	const interaction = createMockInteraction(['other-role']);
 
 	await lockdownCommandHandler(interaction);
 
 	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'Only <@!owner-123> is allowed to run this command.',
+		content: 'This command is restricted to <@&owner-role-123>.',
 		flags: ['Ephemeral'],
 	});
 });
 
-it('should handle missing user ID', async () => {
+it('should handle missing member', async () => {
 	const interaction = {
 		member: null,
 		reply: vi.fn().mockResolvedValue({}),
@@ -126,13 +124,13 @@ it('should handle missing user ID', async () => {
 	await lockdownCommandHandler(interaction);
 
 	expect(interaction.reply).toHaveBeenCalledWith({
-		content: 'Only <@!owner-123> is allowed to run this command.',
+		content: 'This command is restricted to <@&owner-role-123>.',
 		flags: ['Ephemeral'],
 	});
 });
 
 it('should call setPresence when client is available', async () => {
-	const interaction = createMockInteraction('owner-123', true);
+	const interaction = createMockInteraction(['owner-role-123'], true);
 
 	await lockdownCommandHandler(interaction);
 

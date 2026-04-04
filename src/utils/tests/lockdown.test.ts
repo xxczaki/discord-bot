@@ -4,8 +4,8 @@ import LockdownManager from '../lockdown';
 
 vi.mock('../getEnvironmentVariable', () => ({
 	default: vi.fn((key: string) => {
-		if (key === 'OWNER_USER_ID') {
-			return 'owner-123';
+		if (key === 'OWNER_ROLE_ID') {
+			return 'owner-role-123';
 		}
 		throw new TypeError(`Environment variable ${key} is not defined`);
 	}),
@@ -13,14 +13,12 @@ vi.mock('../getEnvironmentVariable', () => ({
 
 function createMockInteraction(
 	commandName: string,
-	userId: string,
+	roles: string[],
 ): ChatInputCommandInteraction {
 	return {
 		commandName,
 		member: {
-			user: {
-				id: userId,
-			},
+			roles,
 		},
 		reply: vi.fn().mockResolvedValue({}),
 	} as unknown as ChatInputCommandInteraction;
@@ -32,10 +30,12 @@ beforeEach(() => {
 	vi.clearAllMocks();
 });
 
-it('should correctly identify owner', () => {
+it('should correctly identify owner by role', () => {
 	const lockdown = LockdownManager.getInstance();
-	expect(lockdown.isOwner('owner-123')).toBe(true);
-	expect(lockdown.isOwner('user-456')).toBe(false);
+	const ownerMember = { roles: ['owner-role-123'] };
+	const regularMember = { roles: ['other-role'] };
+	expect(lockdown.isOwner(ownerMember as never)).toBe(true);
+	expect(lockdown.isOwner(regularMember as never)).toBe(false);
 });
 
 it('should manage lockdown state', () => {
@@ -90,28 +90,29 @@ it('should manage owner-only commands', () => {
 
 it('should allow owner to run any command', () => {
 	const lockdown = LockdownManager.getInstance();
-	const ownerInteraction = createMockInteraction('play', 'owner-123');
+	const ownerInteraction = createMockInteraction('play', ['owner-role-123']);
 
 	expect(lockdown.hasCommandPermission(ownerInteraction)).toBe(true);
 
 	lockdown.setState(true);
 	expect(lockdown.hasCommandPermission(ownerInteraction)).toBe(true);
 
-	const ownerOnlyInteraction = createMockInteraction(
-		'maintenance',
-		'owner-123',
-	);
+	const ownerOnlyInteraction = createMockInteraction('maintenance', [
+		'owner-role-123',
+	]);
 
 	expect(lockdown.hasCommandPermission(ownerOnlyInteraction)).toBe(true);
 });
 
 it('should handle non-owner permissions correctly without lockdown', () => {
 	const lockdown = LockdownManager.getInstance();
-	const userInteraction = createMockInteraction('play', 'user-456');
+	const userInteraction = createMockInteraction('play', ['other-role']);
 
 	expect(lockdown.hasCommandPermission(userInteraction)).toBe(true);
 
-	const ownerOnlyInteraction = createMockInteraction('maintenance', 'user-456');
+	const ownerOnlyInteraction = createMockInteraction('maintenance', [
+		'other-role',
+	]);
 	expect(lockdown.hasCommandPermission(ownerOnlyInteraction)).toBe(false);
 });
 
@@ -119,42 +120,44 @@ it('should handle non-owner permissions correctly with lockdown', () => {
 	const lockdown = LockdownManager.getInstance();
 	lockdown.setState(true);
 
-	const musicInteraction = createMockInteraction('play', 'user-456');
-	const nonMusicInteraction = createMockInteraction('help', 'user-456');
+	const musicInteraction = createMockInteraction('play', ['other-role']);
+	const nonMusicInteraction = createMockInteraction('help', ['other-role']);
 
 	expect(lockdown.hasCommandPermission(musicInteraction)).toBe(false);
 
 	expect(lockdown.hasCommandPermission(nonMusicInteraction)).toBe(true);
 });
 
-it('should handle missing user ID', () => {
+it('should handle missing member', () => {
 	const lockdown = LockdownManager.getInstance();
-	const interactionWithoutUser = {
+	const interactionWithoutMember = {
 		commandName: 'play',
 		member: null,
 	} as unknown as ChatInputCommandInteraction;
 
-	expect(lockdown.hasCommandPermission(interactionWithoutUser)).toBe(false);
+	expect(lockdown.hasCommandPermission(interactionWithoutMember)).toBe(false);
 });
 
 it('should send appropriate permission denied messages', async () => {
 	const lockdown = LockdownManager.getInstance();
-	const ownerOnlyInteraction = createMockInteraction('maintenance', 'user-456');
+	const ownerOnlyInteraction = createMockInteraction('maintenance', [
+		'other-role',
+	]);
 
 	await lockdown.sendPermissionDeniedMessage(ownerOnlyInteraction);
 
 	expect(ownerOnlyInteraction.reply).toHaveBeenCalledWith({
-		content: 'Only <@!owner-123> is allowed to run this command.',
+		content: 'This command is restricted to <@&owner-role-123>.',
 		flags: ['Ephemeral'],
 	});
 
 	lockdown.setState(true);
-	const lockdownInteraction = createMockInteraction('play', 'user-456');
+	const lockdownInteraction = createMockInteraction('play', ['other-role']);
 	await lockdown.sendPermissionDeniedMessage(lockdownInteraction);
 
 	expect(lockdownInteraction.reply).toHaveBeenCalledWith({
 		content:
-			'🔒 This command is currently locked down. Only <@!owner-123> can use it during lockdown mode.',
+			'🔒 This command is currently locked down. Only <@&owner-role-123> can use it during lockdown mode.',
 		flags: ['Ephemeral'],
 	});
 });

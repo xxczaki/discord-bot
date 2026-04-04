@@ -5,10 +5,10 @@ import { setPresence } from '../utils/presenceManager';
 export default async function lockdownCommandHandler(
 	interaction: ChatInputCommandInteraction,
 ) {
-	const userId = interaction.member?.user.id;
+	const member = interaction.member;
 	const lockdown = LockdownManager.getInstance();
 
-	if (!userId || !lockdown.isOwner(userId)) {
+	if (!member || !lockdown.isOwner(member)) {
 		return lockdown.sendPermissionDeniedMessage(interaction);
 	}
 
