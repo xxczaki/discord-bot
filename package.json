@@ -36,7 +36,7 @@
 	"devDependencies": {
 		"@ai-sdk/openai": "^3.0.53",
 		"@biomejs/biome": "catalog:",
-		"@changesets/cli": "^2.30.0",
+		"@changesets/cli": "^2.31.0",
 		"@discordjs/rest": "^2.6.1",
 		"@sentry/esbuild-plugin": "^5.2.0",
 		"@snazzah/davey": "^0.1.11",
