@@ -130,6 +130,7 @@ This is a Discord music bot built with TypeScript using the discord-player libra
 - **Logging**: Use `logger` from `src/utils/logger.ts` instead of console methods
 - **Type Safety**: Use `isObject()`, `getEnvironmentVariable()` and other type-safe utilities
 - **Variable Naming**: Use descriptive names, avoid single-letter variables (e.g., use `field` instead of `f`, `item` instead of `i`)
+- **Dashes**: Use en dashes (–), never em dashes (—)
 
 ### Discord.js Embed Styling
 
