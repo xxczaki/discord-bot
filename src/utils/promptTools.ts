@@ -193,7 +193,7 @@ const TOOL_REGISTRY: Record<string, ToolDefinition> = {
 		createTool: (context: ToolContext) =>
 			tool({
 				description:
-					'Move all tracks matching a pattern to a specific position in the queue (0 = front, -1 = end). Only moves tracks — does not skip or start playback.',
+					'Move all tracks matching a pattern to a specific position in the queue (0 = front, -1 = end). Only moves tracks – does not skip or start playback.',
 				inputSchema: z.object({
 					artistPattern: z
 						.string()
@@ -594,11 +594,11 @@ export function generateSystemPrompt(context: ToolContext): string {
 		parts.push(
 			`<context>\nCurrent queue has ${context.trackCount} tracks. Now playing: "${context.currentTrackTitle}" by ${context.currentTrackAuthor}.\n</context>`,
 			`<rules>
-1. For simple requests (skip, pause, resume, volume, remove/move by artist or title), call the tool directly — do not read the queue first. For ambiguous volume requests like "quieter" or "louder", pick a reasonable value and call setVolume.
-2. When the user wants to hear a queued artist/song next (e.g. "play X next", "hear X next", "I want X next"), use moveTracksByPattern to move them to front (position 0) AND skipCurrentTrack. When the user only says "move to front/end" without implying playback, just move — do not skip.
+1. For simple requests (skip, pause, resume, volume, remove/move by artist or title), call the tool directly – do not read the queue first. For ambiguous volume requests like "quieter" or "louder", pick a reasonable value and call setVolume.
+2. When the user wants to hear a queued artist/song next (e.g. "play X next", "hear X next", "I want X next"), use moveTracksByPattern to move them to front (position 0) AND skipCurrentTrack. When the user only says "move to front/end" without implying playback, just move – do not skip.
 3. For inverse removal ("everything except X") or metadata-based filtering (e.g. by duration): call listTracks first, then call removeTracksByPattern once per non-matching artist or title. The tool can only match tracks TO remove, so you must remove each unwanted artist separately.
 4. Use searchAndPlay only to add NEW songs not already in the queue. To play an internal playlist, call listAvailablePlaylists first to discover IDs, then enqueuePlaylist.
-5. searchAndPlay always returns the best match — call it once per query, do not retry.
+5. searchAndPlay always returns the best match – call it once per query, do not retry.
 6. If a request requires an operation you have no tool for (e.g. sorting, reordering, or shuffling the entire queue), respond in text explaining the limitation instead of attempting workarounds.
 </rules>
 

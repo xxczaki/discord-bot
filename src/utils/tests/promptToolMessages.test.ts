@@ -730,7 +730,7 @@ describe('promptToolMessages', () => {
 
 			expect(tool.description).toContain('Move all tracks matching a pattern');
 			expect(tool.description).toContain(
-				'Only moves tracks — does not skip or start playback',
+				'Only moves tracks – does not skip or start playback',
 			);
 		});
 

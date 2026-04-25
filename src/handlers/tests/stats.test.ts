@@ -178,7 +178,7 @@ it('should handle tracks with multiple plays correctly', async () => {
 
 	if (isObject(callArg) && 'embeds' in callArg) {
 		const embed = (callArg as { embeds: EmbedBuilder[] }).embeds[0];
-		expect(embed.data.description).toContain('2 — "Test Song" by Test Artist');
+		expect(embed.data.description).toContain('2 – "Test Song" by Test Artist');
 	}
 });
 
@@ -320,8 +320,8 @@ it('should aggregate stats by user correctly', async () => {
 
 	if (isObject(callArg) && 'embeds' in callArg) {
 		const embed = (callArg as { embeds: EmbedBuilder[] }).embeds[0];
-		expect(embed.data.description).toContain('2 — <@!123>');
-		expect(embed.data.description).toContain('1 — <@!456>');
+		expect(embed.data.description).toContain('2 – <@!123>');
+		expect(embed.data.description).toContain('1 – <@!456>');
 	}
 });
 
@@ -505,8 +505,8 @@ it('should process playlist stats correctly', async () => {
 	if (isObject(callArg) && 'embeds' in callArg) {
 		const embed = (callArg as { embeds: EmbedBuilder[] }).embeds[0];
 
-		expect(embed.data.description).toContain('2 — spotify-playlist-123');
-		expect(embed.data.description).toContain('1 — spotify-playlist-456');
+		expect(embed.data.description).toContain('2 – spotify-playlist-123');
+		expect(embed.data.description).toContain('1 – spotify-playlist-456');
 	}
 });
 

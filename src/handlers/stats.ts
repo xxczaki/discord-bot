@@ -163,7 +163,7 @@ export default async function statsCommandHandler(
 				.filter(([, occurences]) => occurences > 1)
 				.sort(([, a], [, b]) => b - a)
 				.slice(0, 10)
-				.map(([key, occurences]) => `${occurences} — ${key}`)
+				.map(([key, occurences]) => `${occurences} – ${key}`)
 				.join('\n');
 
 			const listToCount = Object.entries(requestedStatsMap).sort(
@@ -171,13 +171,13 @@ export default async function statsCommandHandler(
 			);
 
 			const requestedList = listToCount
-				.map(([key, value]) => `${value} — <@!${key}>`)
+				.map(([key, value]) => `${value} – <@!${key}>`)
 				.join('\n');
 
 			const playlistList = Object.entries(playlistStatsMap)
 				.sort(([, a], [, b]) => b - a)
 				.slice(0, 10)
-				.map(([playlistId, count]) => `${count} — ${playlistId}`)
+				.map(([playlistId, count]) => `${count} – ${playlistId}`)
 				.join('\n');
 
 			const totalPlayed = listToCount.reduce((a, [, b]) => a + b, 0);

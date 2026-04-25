@@ -256,7 +256,7 @@ function createMockTools(recorder: RecordedToolCall[]): Record<string, Tool> {
 		}),
 		moveTracksByPattern: tool({
 			description:
-				'Move all tracks matching a pattern to a specific position in the queue (0 = front, -1 = end). Only moves tracks — does not skip or start playback.',
+				'Move all tracks matching a pattern to a specific position in the queue (0 = front, -1 = end). Only moves tracks – does not skip or start playback.',
 			inputSchema: z.object({
 				artistPattern: z
 					.string()
@@ -759,7 +759,7 @@ function pad(
 }
 
 function formatTime(ms: number): string {
-	return ms > 0 ? `${(ms / 1000).toFixed(1)}s` : '—';
+	return ms > 0 ? `${(ms / 1000).toFixed(1)}s` : '–';
 }
 
 const COL = { num: 4, prompt: 34, score: 7, ttft: 8, total: 8, tools: 30 };
