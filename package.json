@@ -42,7 +42,7 @@
 		"@snazzah/davey": "^0.1.11",
 		"@types/node": "catalog:",
 		"@vitest/coverage-v8": "catalog:",
-		"ai": "^6.0.158",
+		"ai": "^6.0.168",
 		"date-fns": "^4.1.0",
 		"esbuild": "^0.28.0",
 		"esbuild-plugin-pino": "2.3.3",
