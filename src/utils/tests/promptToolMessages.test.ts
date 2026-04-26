@@ -686,8 +686,8 @@ describe('promptToolMessages', () => {
 		it('should emphasize music-only functionality', () => {
 			const prompt = generateSystemPrompt(createMockContext());
 
-			expect(prompt).toContain('Only handle music-related requests');
-			expect(prompt).toContain('error');
+			expect(prompt).toContain('Stay strictly within this scope');
+			expect(prompt).toContain('I can only help with the music queue');
 		});
 	});
 

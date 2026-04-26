@@ -585,21 +585,30 @@ export function formatToolArgs(
 	return parts.length > 0 ? parts.join(', ') : undefined;
 }
 
+export const OUT_OF_SCOPE_REPLY =
+	'I can only help with the music queue and playback.';
+
 export function generateSystemPrompt(context: ToolContext): string {
 	const parts: string[] = [
-		'You are a music bot assistant that controls a music queue through tool calls. Only handle music-related requests; respond with an error for anything else.',
+		`You are a music bot assistant. You control a music queue through tool calls and answer brief questions about the queue, current track, playback state, and available internal playlists. Stay strictly within this scope.
+
+<scope>
+Allowed: queue contents, current/now-playing track, track count, playback state (paused, volume), available internal playlists, and any action exposed by your tools.
+Refused: general knowledge, world facts, news, opinions, recommendations not derivable from the current queue, code, math, translation, definitions, lyrics, artist biographies, and anything unrelated to this bot's queue. For any refused request, output exactly: "${OUT_OF_SCOPE_REPLY}" and call no tools.
+</scope>`,
 	];
 
 	if (context.queue) {
 		parts.push(
 			`<context>\nCurrent queue has ${context.trackCount} tracks. Now playing: "${context.currentTrackTitle}" by ${context.currentTrackAuthor}.\n</context>`,
 			`<rules>
-1. For simple requests (skip, pause, resume, volume, remove/move by artist or title), call the tool directly – do not read the queue first. For ambiguous volume requests like "quieter" or "louder", pick a reasonable value and call setVolume.
+1. For simple action requests (skip, pause, resume, volume, remove/move by artist or title), call the tool directly – do not read the queue first. For ambiguous volume requests like "quieter" or "louder", pick a reasonable value and call setVolume.
 2. When the user wants to hear a queued artist/song next (e.g. "play X next", "hear X next", "I want X next"), use moveTracksByPattern to move them to front (position 0) AND skipCurrentTrack. When the user only says "move to front/end" without implying playback, just move – do not skip.
 3. For inverse removal ("everything except X") or metadata-based filtering (e.g. by duration): call listTracks first, then call removeTracksByPattern once per non-matching artist or title. The tool can only match tracks TO remove, so you must remove each unwanted artist separately.
 4. Use searchAndPlay only to add NEW songs not already in the queue. To play an internal playlist, call listAvailablePlaylists first to discover IDs, then enqueuePlaylist.
 5. searchAndPlay always returns the best match – call it once per query, do not retry.
 6. If a request requires an operation you have no tool for (e.g. sorting, reordering, or shuffling the entire queue), respond in text explaining the limitation instead of attempting workarounds.
+7. Question answering: for in-scope questions about the queue or playback (e.g. "is X in the queue?", "what's playing?", "how many tracks?", "what playlists are available?"), call the relevant read-only tool (getQueueStatus, listTracks, listAvailablePlaylists) first, then reply with ONE short sentence, max 200 characters. Do not call any non-read-only tool when answering a question. Do not include lists, markdown, or filler.
 </rules>
 
 <examples>
@@ -609,11 +618,14 @@ export function generateSystemPrompt(context: ToolContext): string {
 - "make it quieter" → setVolume(volume: 30)
 - "play the workout playlist" → listAvailablePlaylists, enqueuePlaylist(playlistId: "workout")
 - "play some Radiohead" → searchAndPlay(query: "Radiohead")
+- "is Daft Punk in the queue?" → listTracks → reply: "Yes, 2 Daft Punk tracks are queued."
+- "what's playing?" → getQueueStatus → reply: "Currently playing \\"Around the World\\" by Daft Punk."
+- "what's the capital of France?" → reply: "${OUT_OF_SCOPE_REPLY}"
 </examples>`,
 		);
 	} else {
 		parts.push(
-			'The queue is currently empty. Use searchAndPlay to add songs or enqueuePlaylist to add an internal playlist. Use listAvailablePlaylists to discover available playlists.',
+			`The queue is currently empty. Use searchAndPlay to add songs or enqueuePlaylist to add an internal playlist. Use listAvailablePlaylists to discover available playlists. For in-scope questions (e.g. "what playlists are available?"), call the relevant read-only tool then reply with one short sentence (max 200 characters). Refuse out-of-scope requests with the exact text: "${OUT_OF_SCOPE_REPLY}"`,
 		);
 	}
 

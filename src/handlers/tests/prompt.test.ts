@@ -53,6 +53,7 @@ function createMockStream(
 		input: Record<string, unknown>;
 		output?: Record<string, unknown>;
 	}> = [],
+	textChunks: string[] = [],
 ) {
 	return {
 		fullStream: (async function* () {
@@ -75,6 +76,14 @@ function createMockStream(
 						output: call.output,
 					};
 				}
+			}
+
+			for (const chunk of textChunks) {
+				yield {
+					type: 'text-delta' as const,
+					id: 'text-1',
+					text: chunk,
+				};
 			}
 		})(),
 		totalUsage: Promise.resolve({ inputTokens: 500, outputTokens: 100 }),
@@ -717,6 +726,20 @@ describe('/prompt command', () => {
 			expect(toolNames).not.toContain('listTracks');
 		});
 
+		it('should pass maxOutputTokens cap to streamText', async () => {
+			const tracks = [createMockTrack()];
+			const mockQueue = createMockQueue(tracks);
+			const interaction = createMockInteraction('test');
+
+			mockedUseQueue.mockReturnValue(mockQueue);
+			mockedStreamText.mockReturnValue(createMockStream() as never);
+
+			await promptCommandHandler(interaction);
+
+			const [[callArg]] = mockedStreamText.mock.calls;
+			expect(callArg.maxOutputTokens).toBe(200);
+		});
+
 		it('should use gpt-5-nano model with low reasoning and provider options', async () => {
 			const tracks = [createMockTrack()];
 			const mockQueue = createMockQueue(tracks);
@@ -739,6 +762,98 @@ describe('/prompt command', () => {
 					},
 				}),
 			);
+		});
+	});
+
+	describe('text reply', () => {
+		it('should render text reply when no actions performed', async () => {
+			const tracks = [
+				createMockTrack({ title: 'Song A', author: 'Daft Punk' }),
+			];
+			const mockQueue = createMockQueue(tracks);
+			const interaction = createMockInteraction('is daft punk in the queue?');
+
+			mockedUseQueue.mockReturnValue(mockQueue);
+			mockedStreamText.mockReturnValue(
+				createMockStream(
+					[
+						{
+							toolName: 'listTracks',
+							input: {},
+							output: { success: true, tracks: [], total: 1 },
+						},
+					],
+					['Yes, ', '1 Daft Punk track is queued.'],
+				) as never,
+			);
+
+			await promptCommandHandler(interaction);
+
+			const embed = getEmbedFromCall(interaction, 'editReply');
+			expect(embed?.title).toBe('Prompt');
+			expect(embed?.color).toBe(0x3498db); // Blue
+			expect(embed?.description).toBe('Yes, 1 Daft Punk track is queued.');
+		});
+
+		it('should truncate text reply that exceeds the char cap', async () => {
+			const tracks = [createMockTrack()];
+			const mockQueue = createMockQueue(tracks);
+			const interaction = createMockInteraction('what is in the queue?');
+			const longText = 'a'.repeat(600);
+
+			mockedUseQueue.mockReturnValue(mockQueue);
+			mockedStreamText.mockReturnValue(
+				createMockStream([], [longText]) as never,
+			);
+
+			await promptCommandHandler(interaction);
+
+			const embed = getEmbedFromCall(interaction, 'editReply');
+			expect((embed?.description as string).length).toBe(400);
+		});
+
+		it('should prefer action confirmations over text reply when both present', async () => {
+			const tracks = [createMockTrack()];
+			const mockQueue = createMockQueue(tracks);
+			const interaction = createMockInteraction('skip and explain');
+
+			mockedUseQueue.mockReturnValue(mockQueue);
+			mockedStreamText.mockReturnValue(
+				createMockStream(
+					[
+						{
+							toolName: 'skipCurrentTrack',
+							input: {},
+							output: { success: true },
+						},
+					],
+					['Skipped current track for you.'],
+				) as never,
+			);
+
+			await promptCommandHandler(interaction);
+
+			const embed = getEmbedFromCall(interaction, 'editReply');
+			expect(embed?.title).toBe('✅ Prompt');
+			expect(embed?.description).toContain('✅');
+			expect(embed?.description).not.toContain('Skipped current track for you');
+		});
+
+		it('should fall back to "no actions" when reply is whitespace only', async () => {
+			const tracks = [createMockTrack()];
+			const mockQueue = createMockQueue(tracks);
+			const interaction = createMockInteraction('test');
+
+			mockedUseQueue.mockReturnValue(mockQueue);
+			mockedStreamText.mockReturnValue(
+				createMockStream([], ['   ', '\n']) as never,
+			);
+
+			await promptCommandHandler(interaction);
+
+			const embed = getEmbedFromCall(interaction, 'editReply');
+			expect(embed?.title).toBe('❌ Prompt');
+			expect(embed?.description).toContain('No actions were performed');
 		});
 	});
 });

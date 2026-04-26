@@ -19,6 +19,9 @@ import { RateLimiter } from '../utils/RateLimiter';
 
 const rateLimiter = RateLimiter.getInstance('prompt-command', 100, 24);
 
+const MAX_TEXT_REPLY_OUTPUT_TOKENS = 200;
+const MAX_TEXT_REPLY_CHARS = 400;
+
 export default async function promptCommandHandler(
 	interaction: ChatInputCommandInteraction,
 ) {
@@ -69,6 +72,7 @@ export default async function promptCommandHandler(
 			stopWhen: stepCountIs(5),
 			maxRetries: 2,
 			temperature: 0.1,
+			maxOutputTokens: MAX_TEXT_REPLY_OUTPUT_TOKENS,
 			providerOptions: {
 				mistral: MISTRAL_PROVIDER_OPTIONS satisfies MistralLanguageModelOptions,
 			},
@@ -77,6 +81,7 @@ export default async function promptCommandHandler(
 		rateLimiter.incrementCall();
 
 		const completedActions: string[] = [];
+		let textReply = '';
 
 		const pendingTools = new Map<string, string>();
 
@@ -105,6 +110,10 @@ export default async function promptCommandHandler(
 
 				embed.setDescription(completedActions.join('\n'));
 				await interaction.editReply({ embeds: [embed] });
+			} else if (part.type === 'text-delta') {
+				if (textReply.length < MAX_TEXT_REPLY_CHARS) {
+					textReply += part.text;
+				}
 			} else if (part.type === 'error') {
 				/* v8 ignore start */
 				const streamError = 'error' in part ? part.error : 'Unknown error';
@@ -115,24 +124,25 @@ export default async function promptCommandHandler(
 
 		const { inputTokens, outputTokens } = await result.totalUsage;
 		const totalTokens = (inputTokens ?? 0) + (outputTokens ?? 0);
+		const footer = `${PROMPT_MODEL_ID} · ${totalTokens.toLocaleString()} tokens`;
+		const trimmedReply = textReply.trim().slice(0, MAX_TEXT_REPLY_CHARS);
 
-		if (completedActions.length === 0) {
+		if (completedActions.length > 0) {
+			embed.setTitle('✅ Prompt').setColor('Green').setFooter({ text: footer });
+		} else if (trimmedReply.length > 0) {
+			embed
+				.setTitle('Prompt')
+				.setColor('Blue')
+				.setDescription(trimmedReply)
+				.setFooter({ text: footer });
+		} else {
 			embed
 				.setTitle('❌ Prompt')
 				.setColor('Red')
 				.setDescription(
 					'No actions were performed. The request might not match any tracks in the queue.',
 				)
-				.setFooter({
-					text: `${PROMPT_MODEL_ID} · ${totalTokens.toLocaleString()} tokens`,
-				});
-		} else {
-			embed
-				.setTitle('✅ Prompt')
-				.setColor('Green')
-				.setFooter({
-					text: `${PROMPT_MODEL_ID} · ${totalTokens.toLocaleString()} tokens`,
-				});
+				.setFooter({ text: footer });
 		}
 
 		await interaction.editReply({ embeds: [embed] });
