@@ -99,7 +99,7 @@ importers:
         version: 0.1.10
     devDependencies:
       '@ai-sdk/openai':
-        specifier: ^3.0.58
+        specifier: ^3.0.65
         version: 3.0.65(zod@4.4.3)
       '@biomejs/biome':
         specifier: 'catalog:'
