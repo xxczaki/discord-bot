@@ -32,7 +32,7 @@ catalogs:
       specifier: 2.4.14
       version: 2.4.14
     '@types/node':
-      specifier: ^24.12.2
+      specifier: ^24.12.4
       version: 24.12.4
     '@vitest/coverage-v8':
       specifier: ^4.1.5
