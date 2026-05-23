@@ -27,6 +27,10 @@ enableGlobalVirtualStore: true
 overrides:
   libsodium-wrappers: '-'
 
+minimumReleaseAgeExclude:
+  - '@ai-sdk/gateway'
+  - ai
+
 packageExtensions:
   discord-player:
     dependencies:
