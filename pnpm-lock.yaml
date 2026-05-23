@@ -56,7 +56,7 @@ importers:
   .:
     dependencies:
       '@ai-sdk/mistral':
-        specifier: ^3.0.33
+        specifier: ^3.0.37
         version: 3.0.37(zod@4.4.3)
       '@discord-player/extractor':
         specifier: ^7.2.0
