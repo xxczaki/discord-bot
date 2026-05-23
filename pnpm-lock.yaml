@@ -187,7 +187,7 @@ importers:
         specifier: 'catalog:'
         version: 2.4.15
       '@types/jsdom':
-        specifier: ^28.0.1
+        specifier: ^28.0.3
         version: 28.0.3
       '@types/node':
         specifier: 'catalog:'
