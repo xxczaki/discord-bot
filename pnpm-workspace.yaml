@@ -30,6 +30,7 @@ overrides:
 minimumReleaseAgeExclude:
   - '@ai-sdk/gateway'
   - ai
+  - date-fns@4.3.0
 
 packageExtensions:
   discord-player:
