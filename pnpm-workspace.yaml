@@ -14,7 +14,7 @@ dedupePeers: true
 catalogs:
   default:
     '@biomejs/biome': 2.5.0
-    '@types/node': ^24.12.4
+    '@types/node': ^24.13.2
     '@vitest/coverage-v8': ^4.1.7
     typescript: ^6.0.3
     vitest: ^4.1.7
