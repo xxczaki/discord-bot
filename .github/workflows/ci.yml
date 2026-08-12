@@ -11,7 +11,7 @@ jobs:
     name: Lint with Biome CLI
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: biomejs/setup-biome@v2
       - run: biome ci ./src
 
@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -55,7 +55,7 @@ jobs:
     runs-on: ubuntu-24.04-arm
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Login to Docker Hub
         uses: docker/login-action@v4
         with:
@@ -100,7 +100,7 @@ jobs:
           build-args: |
             GIT_COMMIT_SHA=${{ github.sha }}
       - name: Checkout charts repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: xxczaki/charts
           token: ${{ secrets.GH_PAT }}
