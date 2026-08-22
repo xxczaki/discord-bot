@@ -214,8 +214,7 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 
 		let poToken: string | undefined;
 		try {
-			const poTokenResult = await generateWebPoToken(videoId);
-			poToken = poTokenResult.poToken;
+			poToken = await generateWebPoToken(videoId);
 		} catch (error) {
 			console.warn(
 				'[YoutubeSabrExtractor] Failed to generate PO token:',
@@ -365,7 +364,10 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 
 		const discordPlayerPlaylist = new Playlist(this.context.player, {
 			title: youtubePlaylist.info.title || 'Unknown',
-			author: youtubePlaylist.info.author || 'Unknown',
+			author: {
+				url: youtubePlaylist.info.author.url || '',
+				name: youtubePlaylist.info.author.name,
+			},
 			type: 'playlist',
 			url: `https://www.youtube.com/playlist?list=${playlistId}`,
 			id: playlistId,

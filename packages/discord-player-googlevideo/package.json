@@ -51,10 +51,10 @@
 		"discord-player": "^7.2.0"
 	},
 	"dependencies": {
-		"bgutils-js": "^3.2.0",
+		"bgutils-js": "^4.0.3",
 		"googlevideo": "^4.0.4",
 		"jsdom": "^29.1.1",
-		"youtubei.js": "^17.0.1"
+		"youtubei.js": "^18.0.0"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "catalog:",
