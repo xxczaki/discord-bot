@@ -1,5 +1,7 @@
 FROM ghcr.io/xxczaki/discord-bot-base:latest AS deps
 
+WORKDIR /app
+
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .pnpmfile.mjs ./
 COPY packages/discord-player-googlevideo/package.json ./packages/discord-player-googlevideo/
 
@@ -31,10 +33,10 @@ ENV TZ="Europe/Berlin"
 
 RUN apk add --no-cache ffmpeg
 
-COPY --from=build package.json ./dist/
-COPY --from=build dist ./dist/
-COPY --from=prod-deps node_modules ./dist/node_modules/
-COPY --from=prod-deps packages ./dist/packages/
+COPY --from=build /app/package.json ./dist/
+COPY --from=build /app/dist ./dist/
+COPY --from=prod-deps /app/node_modules ./dist/node_modules/
+COPY --from=prod-deps /app/packages ./dist/packages/
 
 WORKDIR /dist
 
