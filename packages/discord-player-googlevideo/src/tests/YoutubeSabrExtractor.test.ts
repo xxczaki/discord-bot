@@ -127,7 +127,6 @@ describe('YoutubeSabrExtractor', () => {
 
 			expect(Platform.shim.eval).toBeDefined();
 		});
-
 	});
 
 	describe('deactivate', () => {
@@ -349,6 +348,10 @@ describe('YoutubeSabrExtractor', () => {
 			const mockPlaylistInfo = {
 				info: {
 					title: 'Playlist title',
+					author: {
+						url: 'https://example.com/author',
+						name: 'Test author',
+					},
 				},
 				has_continuation: false,
 				videos: [
@@ -379,6 +382,8 @@ describe('YoutubeSabrExtractor', () => {
 			expect(result.playlist).toBeTruthy();
 			expect(mockInnertube.search).not.toHaveBeenCalled();
 			expect(result.tracks).toHaveLength(2);
+			expect(result.playlist?.author.url).toBe('https://example.com/author');
+			expect(result.playlist?.author.name).toBe('Test author');
 			expect(result.tracks[0].title).toBe('Playlist Video 1');
 			expect(result.tracks[0].author).toBe('Author 1');
 			expect(result.tracks[1].title).toBe('Playlist Video 2');
@@ -392,6 +397,7 @@ describe('YoutubeSabrExtractor', () => {
 			const mockPlaylistInfo = {
 				info: {
 					title: 'Playlist title',
+					author: {},
 				},
 				get has_continuation() {
 					return hasContinuation;
@@ -445,7 +451,7 @@ describe('YoutubeSabrExtractor', () => {
 
 		it('should filter out playlist videos without id', async () => {
 			mockInnertube.getPlaylist.mockResolvedValue({
-				info: { title: 'Test Playlist' },
+				info: { title: 'Test Playlist', author: {} },
 				has_continuation: false,
 				videos: [
 					{ title: { text: 'No ID' } },
@@ -491,7 +497,9 @@ describe('YoutubeSabrExtractor', () => {
 
 		it('should handle playlist with missing title', async () => {
 			mockInnertube.getPlaylist.mockResolvedValue({
-				info: {},
+				info: {
+					author: {},
+				},
 				has_continuation: false,
 				videos: [
 					{
@@ -610,7 +618,6 @@ describe('YoutubeSabrExtractor', () => {
 
 			expect(stream).toBeInstanceOf(PassThrough);
 		});
-
 	});
 
 	describe('getRelatedTracks', () => {
@@ -969,6 +976,7 @@ describe('YoutubeSabrExtractor', () => {
 			const mockVideoInfo = {
 				info: {
 					title: 'Playlist title',
+					author: {},
 				},
 				has_continuation: false,
 				videos: [],
@@ -994,6 +1002,7 @@ describe('YoutubeSabrExtractor', () => {
 			const mockVideoInfo = {
 				info: {
 					title: 'Playlist title',
+					author: {},
 				},
 				has_continuation: false,
 				videos: [],
