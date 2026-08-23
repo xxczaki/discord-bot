@@ -809,7 +809,7 @@ describe('/prompt command', () => {
 			await promptCommandHandler(interaction);
 
 			const embed = getEmbedFromCall(interaction, 'editReply');
-			expect((embed?.description as string).length).toBe(400);
+			expect(embed?.description).toHaveLength(400);
 		});
 
 		it('should prefer action confirmations over text reply when both present', async () => {
