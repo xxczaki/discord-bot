@@ -121,7 +121,7 @@ jobs:
       - name: Get previous tag
         id: previousTag
         run: |
-          TAG=$(git -C charts-repo tag --sort=-version:refname | head -1)
+          TAG=$(git -C charts-repo tag --list 'discord-bot-*' --sort=-version:refname | head -1)
           echo "tag=${TAG:-discord-bot-${{ steps.currentVersion.outputs.result }}}" >> "$GITHUB_OUTPUT"
       - name: Update chart version
         uses: mikefarah/yq@master
