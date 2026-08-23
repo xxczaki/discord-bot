@@ -11,6 +11,8 @@ catalogMode: strict
 
 dedupePeers: true
 
+minimumReleaseAge: 1440
+
 catalogs:
   default:
     '@biomejs/biome': 2.5.10

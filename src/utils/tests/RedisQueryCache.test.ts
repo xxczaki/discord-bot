@@ -194,18 +194,23 @@ describe('RedisQueryCache', () => {
 			['empty array', []],
 			['null', null],
 			['undefined', undefined],
-		])('should not cache when `tracks` is %s', async (_description, tracksValue) => {
-			const mockSearchResult = {
-				query: EXAMPLE_QUERY,
-				tracks: tracksValue,
-			} as unknown as SearchResult;
+		])(
+			'should not cache when `tracks` is %s',
+			async (_description, tracksValue) => {
+				const mockSearchResult = {
+					query: EXAMPLE_QUERY,
+					tracks: tracksValue,
+				} as unknown as SearchResult;
 
-			await redisQueryCache.addData(mockSearchResult);
+				await redisQueryCache.addData(mockSearchResult);
 
-			expect(vi.mocked(serialize)).not.toHaveBeenCalled();
-			expect(mockRedis.setex).not.toHaveBeenCalled();
-			expect(mockedExternalPlaylistCache.setTrackCount).not.toHaveBeenCalled();
-		});
+				expect(vi.mocked(serialize)).not.toHaveBeenCalled();
+				expect(mockRedis.setex).not.toHaveBeenCalled();
+				expect(
+					mockedExternalPlaylistCache.setTrackCount,
+				).not.toHaveBeenCalled();
+			},
+		);
 	});
 
 	describe('getData', () => {
