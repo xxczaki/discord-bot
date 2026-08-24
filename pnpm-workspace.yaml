@@ -21,6 +21,8 @@ catalogs:
     typescript: ^6.0.3
     vitest: ^4.1.11
 
+enableGlobalVirtualStore: true
+
 overrides:
   libsodium-wrappers: '-'
 
