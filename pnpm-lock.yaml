@@ -172,8 +172,8 @@ importers:
         specifier: ^4.0.3
         version: 4.0.3
       googlevideo:
-        specifier: ^4.0.4
-        version: 4.0.4
+        specifier: ^4.1.1
+        version: 4.1.1
       jsdom:
         specifier: ^29.1.1
         version: 29.1.1(@noble/hashes@2.2.0)
@@ -2373,8 +2373,8 @@ packages:
     resolution: {integrity: sha512-jhIXaOzy1sb8IyocaruWSn1TjmnBVs8Ayhcy83rmxNJ8q2uWKCAj3CnJY+KpGSXCueAPc0i05kVvVKtP1t9S3g==}
     engines: {node: '>=10'}
 
-  googlevideo@4.0.4:
-    resolution: {integrity: sha512-S/rfuoPBI+qXCEUPJeVhXsHoISMgVhOz8hHSpGWa0OztfHhh+g9EKaEcqAb/+ttO7meoNQNqIy9dfIpz7HPc4g==}
+  googlevideo@4.1.1:
+    resolution: {integrity: sha512-14o64O+CXXlQ1stYZK/+ypCEwZb25lzEuzhbFYYEzf26R+HhBDOR+Dkdk7MKkZ3qXeIjvZfeC0AJlVKjwQCFjw==}
 
   gopd@1.2.0:
     resolution: {integrity: sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg==}
@@ -5686,7 +5686,7 @@ snapshots:
       merge2: 1.4.1
       slash: 3.0.0
 
-  googlevideo@4.0.4:
+  googlevideo@4.1.1:
     dependencies:
       '@bufbuild/protobuf': 2.12.0
 
