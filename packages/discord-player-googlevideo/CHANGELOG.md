@@ -1,5 +1,11 @@
 # discord-player-googlevideo
 
+## 0.2.6
+
+### Patch Changes
+
+- 24ae6da: Fix PO token generation
+
 ## 0.2.5
 
 ### Patch Changes
