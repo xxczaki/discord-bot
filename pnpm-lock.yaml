@@ -49,8 +49,6 @@ overrides:
 
 packageExtensionsChecksum: sha256-msO/d9y/ZDrg0AuAY9OMmOGxOk5tXh31KHTCQYU0cn4=
 
-pnpmfileChecksum: sha256-XM3tYTTXdCtCJJbCt4Mo+nnkEw6NsmCGZ6pAngPtRqU=
-
 importers:
 
   .:
@@ -111,8 +109,8 @@ importers:
         specifier: ^2.6.3
         version: 2.6.3
       '@sentry/esbuild-plugin':
-        specifier: ^5.3.0
-        version: 5.3.0(supports-color@7.2.0)
+        specifier: ^5.4.0
+        version: 5.4.0(rollup@4.60.4)(supports-color@7.2.0)
       '@snazzah/davey':
         specifier: ^0.1.12
         version: 0.1.12(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
@@ -1416,13 +1414,17 @@ packages:
     resolution: {integrity: sha512-xzvBr1Q1c4lCe7i6sRnrofxeO1QTP/LKQ6A6qy0iB4x5yfiSfARMEQEghojzTNALDTcv8En04qYNIco9/K9eZQ==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
 
-  '@sentry/babel-plugin-component-annotate@5.3.0':
-    resolution: {integrity: sha512-p4q8gn8wcFqZGP/s2MnJCAAd8fTikaU6A0mM97RDHQgStcrYiaS0Sc5zUNfb1V+UOLPuvdEdL6MwyxfzjYJQTA==}
+  '@sentry/bundler-plugins@10.70.0':
+    resolution: {integrity: sha512-M+a32VOZVeTUxF+QecQ+OHYj8hb5FeppKwwWpTQ9cfS6ixgoNUK7/B7NhB2XbfxE3F1BcGvOxyS+AB+fvPfSRQ==}
     engines: {node: '>= 18'}
-
-  '@sentry/bundler-plugin-core@5.3.0':
-    resolution: {integrity: sha512-L5T60sWdAI3qWwdg3Ptwek/0TY59PERrxyqp4XMUkroayQvGd9r5dIW9Q1kSeXX9iJ442nXbFZKAOyCKV4Z13Q==}
-    engines: {node: '>= 18'}
+    peerDependencies:
+      rollup: '>=3.2.0'
+      webpack: '>=5.0.0'
+    peerDependenciesMeta:
+      rollup:
+        optional: true
+      webpack:
+        optional: true
 
   '@sentry/cli-darwin@2.58.6':
     resolution: {integrity: sha512-udAVvcyfNa0R+95GvPz/+43/N3TC0TYKdkQ7D7jhPSzbcMc7l2fxRNN5yB3UpCA5fWFnW4toeaqwDBhb/Wh3LA==}
@@ -1484,8 +1486,8 @@ packages:
     resolution: {integrity: sha512-ozhCTDqg89oB4XmWfAwuHshABpvT7AkRpaPnogopPfMAaI61G1t8EKCJ4W7aum8JSBonlfyjPCyW5oYZFm0KvA==}
     engines: {node: '>=18'}
 
-  '@sentry/esbuild-plugin@5.3.0':
-    resolution: {integrity: sha512-irCsMPs435toPEX66RZV86xvdAPjohv/ul5BvzRF11EwYVSRX3sMX30P28iCGuvarjFH3wh+RK7EtDkEIOTyPg==}
+  '@sentry/esbuild-plugin@5.4.0':
+    resolution: {integrity: sha512-ACn/W1j1GUqVjfZvqtGfMRAhtgXAKKzJGBEgt4LrazQYoTh+rtrZy1JwfRKzGTsA3XgE+p5gXtFdU32Jc8fY7Q==}
     engines: {node: '>= 18'}
 
   '@sentry/node-core@10.70.0':
@@ -2161,8 +2163,8 @@ packages:
   domutils@3.2.2:
     resolution: {integrity: sha512-6kZKyUajlDuqlHKVX1w7gyslj9MPIXzIFiz/rGu35uC1wMi+kMhQwGhl4lt9unC9Vb9INnY9Z3/ZA3+FhASLaw==}
 
-  dotenv@16.6.1:
-    resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
+  dotenv@17.4.2:
+    resolution: {integrity: sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==}
     engines: {node: '>=12'}
 
   dunder-proto@1.0.1:
@@ -4676,17 +4678,17 @@ snapshots:
 
   '@sapphire/snowflake@3.5.5': {}
 
-  '@sentry/babel-plugin-component-annotate@5.3.0': {}
-
-  '@sentry/bundler-plugin-core@5.3.0(supports-color@7.2.0)':
+  '@sentry/bundler-plugins@10.70.0(rollup@4.60.4)(supports-color@7.2.0)':
     dependencies:
       '@babel/core': 7.29.0(supports-color@7.2.0)
-      '@sentry/babel-plugin-component-annotate': 5.3.0
       '@sentry/cli': 2.58.6(supports-color@7.2.0)
-      dotenv: 16.6.1
+      '@sentry/core': 10.70.0
+      dotenv: 17.4.2
       find-up: 5.0.0
       glob: 13.0.6
       magic-string: 0.30.21
+    optionalDependencies:
+      rollup: 4.60.4
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -4741,12 +4743,14 @@ snapshots:
     dependencies:
       '@sentry/conventions': 0.16.0
 
-  '@sentry/esbuild-plugin@5.3.0(supports-color@7.2.0)':
+  '@sentry/esbuild-plugin@5.4.0(rollup@4.60.4)(supports-color@7.2.0)':
     dependencies:
-      '@sentry/bundler-plugin-core': 5.3.0(supports-color@7.2.0)
+      '@sentry/bundler-plugins': 10.70.0(rollup@4.60.4)(supports-color@7.2.0)
     transitivePeerDependencies:
       - encoding
+      - rollup
       - supports-color
+      - webpack
 
   '@sentry/node-core@10.70.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.10.0)(@opentelemetry/instrumentation@0.220.0)(@opentelemetry/sdk-trace-base@2.10.0)':
     dependencies:
@@ -5416,7 +5420,7 @@ snapshots:
       domelementtype: 2.3.0
       domhandler: 5.0.3
 
-  dotenv@16.6.1: {}
+  dotenv@17.4.2: {}
 
   dunder-proto@1.0.1:
     dependencies:
