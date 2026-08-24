@@ -1,24 +1,3 @@
----
-lockfileVersion: '9.0'
-
-importers:
-
-  .:
-    configDependencies:
-      '@pnpm/plugin-esm-node-path':
-        specifier: 0.1.2
-        version: 0.1.2
-
-packages:
-
-  '@pnpm/plugin-esm-node-path@0.1.2':
-    resolution: {integrity: sha512-KzcFbJpNJHRZ60GpXmc6CoBX/zjy+fKEf/OOYdRbAlxV/Kf/f6pDNUDIVTQU8a5DHt6ODXq5mndwJPlryqMj1A==}
-
-snapshots:
-
-  '@pnpm/plugin-esm-node-path@0.1.2': {}
-
----
 lockfileVersion: '9.0'
 
 settings:
@@ -48,8 +27,6 @@ overrides:
   libsodium-wrappers: '-'
 
 packageExtensionsChecksum: sha256-msO/d9y/ZDrg0AuAY9OMmOGxOk5tXh31KHTCQYU0cn4=
-
-pnpmfileChecksum: sha256-XM3tYTTXdCtCJJbCt4Mo+nnkEw6NsmCGZ6pAngPtRqU=
 
 importers:
 
