@@ -33,8 +33,8 @@ importers:
   .:
     dependencies:
       '@ai-sdk/mistral':
-        specifier: ^3.0.61
-        version: 3.0.61(zod@4.4.3)
+        specifier: ^3.0.62
+        version: 3.0.62(zod@4.4.3)
       '@discord-player/extractor':
         specifier: ^7.2.0
         version: 7.2.0
@@ -190,8 +190,8 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/mistral@3.0.61':
-    resolution: {integrity: sha512-OoH8ykaVqLZc9ziLpqXMa3iAiiCAH/jiHO/vB6Ht47fo8baQvOb+Y8lGLcFlExx8IYgjq8eEaTu77pqmKNk65g==}
+  '@ai-sdk/mistral@3.0.62':
+    resolution: {integrity: sha512-ecAD8GCQFF/fnC/7zFPda4SIOizGWymRHjdZVgUcjH8BiRhZ2m8myyvSFoik46lCR9M61m98lx3wq/WhoQo37Q==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -204,6 +204,12 @@ packages:
 
   '@ai-sdk/provider-utils@4.0.48':
     resolution: {integrity: sha512-l3LqNFx3hgIqaCNHKbZgWPhKMw8xxOjsNhElzeawWe1Gsjozu2EA4NJUMoKi7sUsNQjn1cw0DPs/zR519oHRXQ==}
+    engines: {node: '>=18.17'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/provider-utils@4.0.49':
+    resolution: {integrity: sha512-8e7pd+82bobqrFOaD5dG/PiEuvLYr5olaE3I56ch0jipR0H7sGD6ohwTUynv6k8O8QidWiyIbEsZCtr/2dyXIA==}
     engines: {node: '>=18.17'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -3449,10 +3455,10 @@ snapshots:
       '@vercel/oidc': 3.2.0
       zod: 4.4.3
 
-  '@ai-sdk/mistral@3.0.61(zod@4.4.3)':
+  '@ai-sdk/mistral@3.0.62(zod@4.4.3)':
     dependencies:
       '@ai-sdk/provider': 3.0.15
-      '@ai-sdk/provider-utils': 4.0.48(zod@4.4.3)
+      '@ai-sdk/provider-utils': 4.0.49(zod@4.4.3)
       zod: 4.4.3
 
   '@ai-sdk/openai@3.0.101(zod@4.4.3)':
@@ -3462,6 +3468,14 @@ snapshots:
       zod: 4.4.3
 
   '@ai-sdk/provider-utils@4.0.48(zod@4.4.3)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.15
+      '@standard-schema/spec': 1.1.0
+      eventsource-parser: 3.0.8
+      undici: 6.28.0
+      zod: 4.4.3
+
+  '@ai-sdk/provider-utils@4.0.49(zod@4.4.3)':
     dependencies:
       '@ai-sdk/provider': 3.0.15
       '@standard-schema/spec': 1.1.0
