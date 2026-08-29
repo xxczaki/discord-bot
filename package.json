@@ -34,7 +34,7 @@
 		"zlib-sync": "^0.1.10"
 	},
 	"devDependencies": {
-		"@ai-sdk/openai": "^3.0.104",
+		"@ai-sdk/openai": "^4.0.51",
 		"@biomejs/biome": "catalog:",
 		"@changesets/cli": "^2.31.1",
 		"@discordjs/rest": "^2.6.3",
