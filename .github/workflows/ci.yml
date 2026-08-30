@@ -34,6 +34,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
 
+      - name: Run type checks
+        run: |
+          pnpm --filter discord-player-googlevideo build
+          pnpm --filter discord-bot tsc
+
       - name: Run tests with coverage
         run: pnpm test:coverage
 
