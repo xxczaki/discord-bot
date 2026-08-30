@@ -122,7 +122,7 @@ export default async function promptCommandHandler(
 			}
 		}
 
-		const { inputTokens, outputTokens } = await result.totalUsage;
+		const { inputTokens, outputTokens } = await result.usage;
 		const totalTokens = (inputTokens ?? 0) + (outputTokens ?? 0);
 		const footer = `${PROMPT_MODEL_ID} · ${totalTokens.toLocaleString()} tokens`;
 		const trimmedReply = textReply.trim().slice(0, MAX_TEXT_REPLY_CHARS);
