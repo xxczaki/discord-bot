@@ -1,5 +1,5 @@
 import { type MistralLanguageModelOptions, mistral } from '@ai-sdk/mistral';
-import { stepCountIs, streamText } from 'ai';
+import { isStepCount, streamText } from 'ai';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { EmbedBuilder, type GuildMember } from 'discord.js';
 import { useQueue } from 'discord-player';
@@ -66,10 +66,10 @@ export default async function promptCommandHandler(
 
 		const result = streamText({
 			model: mistral(PROMPT_MODEL_ID),
-			system: generateSystemPrompt(toolContext),
+			instructions: generateSystemPrompt(toolContext),
 			prompt: `User request: "${prompt}"`,
 			tools: getAvailableTools(toolContext),
-			stopWhen: stepCountIs(5),
+			stopWhen: isStepCount(5),
 			maxRetries: 2,
 			temperature: 0.1,
 			maxOutputTokens: MAX_TEXT_REPLY_OUTPUT_TOKENS,
@@ -85,7 +85,7 @@ export default async function promptCommandHandler(
 
 		const pendingTools = new Map<string, string>();
 
-		for await (const part of result.fullStream) {
+		for await (const part of result.stream) {
 			if (part.type === 'tool-call') {
 				pendingTools.set(part.toolCallId, part.toolName);
 			} else if (part.type === 'tool-result') {
@@ -122,7 +122,7 @@ export default async function promptCommandHandler(
 			}
 		}
 
-		const { inputTokens, outputTokens } = await result.totalUsage;
+		const { inputTokens, outputTokens } = await result.usage;
 		const totalTokens = (inputTokens ?? 0) + (outputTokens ?? 0);
 		const footer = `${PROMPT_MODEL_ID} · ${totalTokens.toLocaleString()} tokens`;
 		const trimmedReply = textReply.trim().slice(0, MAX_TEXT_REPLY_CHARS);

@@ -3,7 +3,7 @@ import {
 	type OpenAILanguageModelResponsesOptions,
 	openai,
 } from '@ai-sdk/openai';
-import { stepCountIs, streamText, type Tool, tool } from 'ai';
+import { isStepCount, streamText, type Tool, tool } from 'ai';
 import type {
 	ChatInputCommandInteraction,
 	VoiceBasedChannel,
@@ -985,10 +985,10 @@ async function runPrompt(
 
 		const result = streamText({
 			model,
-			system: generateSystemPrompt(toolContext),
+			instructions: generateSystemPrompt(toolContext),
 			prompt: `User request: "${testCase.prompt}"`,
 			tools,
-			stopWhen: stepCountIs(5),
+			stopWhen: isStepCount(5),
 			maxRetries: 2,
 			...(REASONING_MODELS.has(config.id) ? {} : { temperature: 0.1 }),
 			providerOptions:
@@ -1011,7 +1011,7 @@ async function runPrompt(
 						},
 		});
 
-		for await (const part of result.fullStream) {
+		for await (const part of result.stream) {
 			if (part.type === 'tool-call' && ttftMs === 0) {
 				ttftMs = performance.now() - startTime;
 			}

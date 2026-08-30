@@ -106,6 +106,7 @@ function executeTool(tool: Tool, input: Record<string, unknown>) {
 		toolCallId: 'test',
 		messages: [],
 		abortSignal: AbortSignal.timeout(5000),
+		context: undefined,
 	});
 }
 

@@ -53,12 +53,12 @@
 	"dependencies": {
 		"bgutils-js": "^4.0.3",
 		"googlevideo": "^4.1.1",
-		"jsdom": "^29.1.1",
+		"jsdom": "^30.0.1",
 		"youtubei.js": "^18.0.0"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "catalog:",
-		"@types/jsdom": "^28.0.3",
+		"@types/jsdom": "^30.0.0",
 		"@types/node": "catalog:",
 		"@vitest/coverage-v8": "catalog:",
 		"discord-player": "^7.2.0",
