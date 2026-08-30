@@ -21,7 +21,7 @@ vi.mock('discord-player', () => ({
 vi.mock('ai', () => ({
 	streamText: vi.fn(),
 	tool: vi.fn((config) => config),
-	stepCountIs: vi.fn((n) => ({ type: 'step-count', count: n })),
+	isStepCount: vi.fn((n) => ({ type: 'step-count', count: n })),
 }));
 
 vi.mock('@ai-sdk/mistral', () => ({
@@ -56,7 +56,7 @@ function createMockStream(
 	textChunks: string[] = [],
 ) {
 	return {
-		fullStream: (async function* () {
+		stream: (async function* () {
 			for (const call of toolCalls) {
 				const callId = `call-${Math.random()}`;
 
@@ -228,7 +228,7 @@ describe('/prompt command', () => {
 
 			mockedUseQueue.mockReturnValue(mockQueue);
 			mockedStreamText.mockReturnValue({
-				fullStream: (async function* () {
+				stream: (async function* () {
 					yield { type: 'text-delta' as const, textDelta: '' };
 					throw new Error('AI service error');
 				})(),
@@ -249,7 +249,7 @@ describe('/prompt command', () => {
 
 			mockedUseQueue.mockReturnValue(mockQueue);
 			mockedStreamText.mockReturnValue({
-				fullStream: (async function* () {
+				stream: (async function* () {
 					yield { type: 'text-delta' as const, textDelta: '' };
 					throw 'Unknown error';
 				})(),
@@ -270,7 +270,7 @@ describe('/prompt command', () => {
 
 			mockedUseQueue.mockReturnValue(mockQueue);
 			mockedStreamText.mockReturnValue({
-				fullStream: (async function* () {
+				stream: (async function* () {
 					yield {
 						type: 'tool-call' as const,
 						toolName: 'skipCurrentTrack',
@@ -300,7 +300,7 @@ describe('/prompt command', () => {
 
 			mockedUseQueue.mockReturnValue(mockQueue);
 			mockedStreamText.mockReturnValue({
-				fullStream: (async function* () {
+				stream: (async function* () {
 					yield {
 						type: 'tool-result' as const,
 						toolCallId: 'unknown-call-id',
@@ -326,7 +326,7 @@ describe('/prompt command', () => {
 
 			mockedUseQueue.mockReturnValue(mockQueue);
 			mockedStreamText.mockReturnValue({
-				fullStream: (async function* () {
+				stream: (async function* () {
 					yield {
 						type: 'error' as const,
 						error: 'Stream processing error',
@@ -385,7 +385,7 @@ describe('/prompt command', () => {
 			await promptCommandHandler(interaction);
 
 			const [[callArg]] = mockedStreamText.mock.calls;
-			expect(callArg.system).toContain('empty');
+			expect(callArg.instructions).toContain('empty');
 		});
 
 		it('should use fallback values when currentTrack is null', async () => {
@@ -399,8 +399,8 @@ describe('/prompt command', () => {
 			await promptCommandHandler(interaction);
 
 			const [[callArg]] = mockedStreamText.mock.calls;
-			expect(callArg.system).toContain('None');
-			expect(callArg.system).toContain('N/A');
+			expect(callArg.instructions).toContain('None');
+			expect(callArg.instructions).toContain('N/A');
 		});
 
 		it('should increment rate limiter after successful call', async () => {
@@ -676,9 +676,9 @@ describe('/prompt command', () => {
 			await promptCommandHandler(interaction);
 
 			const [[callArg]] = mockedStreamText.mock.calls;
-			expect(callArg.system).toContain('Current Song');
-			expect(callArg.system).toContain('Current Artist');
-			expect(callArg.system).toContain('2 tracks');
+			expect(callArg.instructions).toContain('Current Song');
+			expect(callArg.instructions).toContain('Current Artist');
+			expect(callArg.instructions).toContain('2 tracks');
 		});
 
 		it('should pass tools to AI', async () => {
