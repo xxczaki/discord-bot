@@ -86,7 +86,7 @@ function createMockStream(
 				};
 			}
 		})(),
-		totalUsage: Promise.resolve({ inputTokens: 500, outputTokens: 100 }),
+		usage: Promise.resolve({ inputTokens: 500, outputTokens: 100 }),
 	};
 }
 
@@ -232,7 +232,7 @@ describe('/prompt command', () => {
 					yield { type: 'text-delta' as const, textDelta: '' };
 					throw new Error('AI service error');
 				})(),
-				totalUsage: Promise.resolve({ inputTokens: 0, outputTokens: 0 }),
+				usage: Promise.resolve({ inputTokens: 0, outputTokens: 0 }),
 			} as never);
 
 			await promptCommandHandler(interaction);
@@ -253,7 +253,7 @@ describe('/prompt command', () => {
 					yield { type: 'text-delta' as const, textDelta: '' };
 					throw 'Unknown error';
 				})(),
-				totalUsage: Promise.resolve({ inputTokens: 0, outputTokens: 0 }),
+				usage: Promise.resolve({ inputTokens: 0, outputTokens: 0 }),
 			} as never);
 
 			await promptCommandHandler(interaction);
@@ -284,7 +284,7 @@ describe('/prompt command', () => {
 						toolName: 'skipCurrentTrack',
 					};
 				})(),
-				totalUsage: Promise.resolve({ inputTokens: 100, outputTokens: 50 }),
+				usage: Promise.resolve({ inputTokens: 100, outputTokens: 50 }),
 			} as never);
 
 			await promptCommandHandler(interaction);
@@ -309,7 +309,7 @@ describe('/prompt command', () => {
 						output: { success: true, removedCount: 1 },
 					};
 				})(),
-				totalUsage: Promise.resolve({ inputTokens: 100, outputTokens: 50 }),
+				usage: Promise.resolve({ inputTokens: 100, outputTokens: 50 }),
 			} as never);
 
 			await promptCommandHandler(interaction);
@@ -347,7 +347,7 @@ describe('/prompt command', () => {
 						output: { success: true, removedCount: 1 },
 					};
 				})(),
-				totalUsage: Promise.resolve({ inputTokens: 200, outputTokens: 100 }),
+				usage: Promise.resolve({ inputTokens: 200, outputTokens: 100 }),
 			} as never);
 
 			await promptCommandHandler(interaction);
