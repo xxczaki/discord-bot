@@ -1,5 +1,11 @@
 # discord-player-googlevideo
 
+## 0.2.7
+
+### Patch Changes
+
+- 84774c5: Upgrade jsdom to version 30 and require its supported Node.js runtime.
+
 ## 0.2.6
 
 ### Patch Changes
