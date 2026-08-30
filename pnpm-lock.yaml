@@ -34,7 +34,7 @@ importers:
     dependencies:
       '@ai-sdk/mistral':
         specifier: ^4.0.36
-        version: 4.0.36(zod@4.4.3)
+        version: 4.0.36(zod@4.5.4)
       '@discord-player/extractor':
         specifier: ^7.2.0
         version: 7.2.0
@@ -77,7 +77,7 @@ importers:
     devDependencies:
       '@ai-sdk/openai':
         specifier: ^4.0.51
-        version: 4.0.51(zod@4.4.3)
+        version: 4.0.51(zod@4.5.4)
       '@biomejs/biome':
         specifier: 'catalog:'
         version: 2.5.11
@@ -101,7 +101,7 @@ importers:
         version: 4.1.11(vitest@4.1.11)
       ai:
         specifier: ^7.0.84
-        version: 7.0.84(zod@4.4.3)
+        version: 7.0.84(zod@4.5.4)
       date-fns:
         specifier: ^4.4.0
         version: 4.4.0
@@ -142,8 +142,8 @@ importers:
         specifier: 'catalog:'
         version: 4.1.11(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.0.14)
       zod:
-        specifier: ^4.4.3
-        version: 4.4.3
+        specifier: ^4.5.4
+        version: 4.5.4
 
   packages/discord-player-googlevideo:
     dependencies:
@@ -3197,38 +3197,38 @@ packages:
   zlib-sync@0.1.10:
     resolution: {integrity: sha512-t7/pYg5tLBznL1RuhmbAt8rNp5tbhr+TSrJFnMkRtrGIaPJZ6Dc0uR4u3OoQI2d6cGlVI62E3Gy6gwkxyIqr/w==}
 
-  zod@4.4.3:
-    resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
+  zod@4.5.4:
+    resolution: {integrity: sha512-sC95tT5iHHH9gtpj6A81kh+NEaRAUFN+qlUPDUbRfOMvNf5QCBqsb3WgvnpVtK5Y+4UfA6KqufotuTvMGiTlsA==}
 
 snapshots:
 
-  '@ai-sdk/gateway@4.0.68(zod@4.4.3)':
+  '@ai-sdk/gateway@4.0.68(zod@4.5.4)':
     dependencies:
       '@ai-sdk/provider': 4.0.8
-      '@ai-sdk/provider-utils': 5.0.33(zod@4.4.3)
+      '@ai-sdk/provider-utils': 5.0.33(zod@4.5.4)
       '@vercel/oidc': 3.2.0
-      zod: 4.4.3
+      zod: 4.5.4
 
-  '@ai-sdk/mistral@4.0.36(zod@4.4.3)':
+  '@ai-sdk/mistral@4.0.36(zod@4.5.4)':
     dependencies:
       '@ai-sdk/provider': 4.0.8
-      '@ai-sdk/provider-utils': 5.0.33(zod@4.4.3)
-      zod: 4.4.3
+      '@ai-sdk/provider-utils': 5.0.33(zod@4.5.4)
+      zod: 4.5.4
 
-  '@ai-sdk/openai@4.0.51(zod@4.4.3)':
+  '@ai-sdk/openai@4.0.51(zod@4.5.4)':
     dependencies:
       '@ai-sdk/provider': 4.0.8
-      '@ai-sdk/provider-utils': 5.0.33(zod@4.4.3)
-      zod: 4.4.3
+      '@ai-sdk/provider-utils': 5.0.33(zod@4.5.4)
+      zod: 4.5.4
 
-  '@ai-sdk/provider-utils@5.0.33(zod@4.4.3)':
+  '@ai-sdk/provider-utils@5.0.33(zod@4.5.4)':
     dependencies:
       '@ai-sdk/provider': 4.0.8
       '@standard-schema/spec': 1.1.0
       '@workflow/serde': 4.1.0
       eventsource-parser: 3.0.8
       undici: 7.29.0
-      zod: 4.4.3
+      zod: 4.5.4
 
   '@ai-sdk/provider@4.0.8':
     dependencies:
@@ -4434,12 +4434,12 @@ snapshots:
 
   agent-base@9.0.0: {}
 
-  ai@7.0.84(zod@4.4.3):
+  ai@7.0.84(zod@4.5.4):
     dependencies:
-      '@ai-sdk/gateway': 4.0.68(zod@4.4.3)
+      '@ai-sdk/gateway': 4.0.68(zod@4.5.4)
       '@ai-sdk/provider': 4.0.8
-      '@ai-sdk/provider-utils': 5.0.33(zod@4.4.3)
-      zod: 4.4.3
+      '@ai-sdk/provider-utils': 5.0.33(zod@4.5.4)
+      zod: 4.5.4
 
   any-promise@1.3.0: {}
 
@@ -5973,4 +5973,4 @@ snapshots:
     dependencies:
       nan: 2.27.0
 
-  zod@4.4.3: {}
+  zod@4.5.4: {}
