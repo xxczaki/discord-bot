@@ -100,8 +100,8 @@ importers:
         specifier: 'catalog:'
         version: 4.1.11(vitest@4.1.11)
       ai:
-        specifier: ^7.0.87
-        version: 7.0.87(zod@4.5.4)
+        specifier: ^7.0.88
+        version: 7.0.88(zod@4.5.4)
       date-fns:
         specifier: ^4.4.0
         version: 4.4.0
@@ -1615,8 +1615,8 @@ packages:
     resolution: {integrity: sha512-TQf59BsZnytt8GdJKLPfUZ54g/iaUL2OWDSFCCvMOhsHduDQxO8xC4PNeyIkVcA5KwL2phPSv0douC0fgWzmnA==}
     engines: {node: '>= 20'}
 
-  ai@7.0.87:
-    resolution: {integrity: sha512-/hrT7toRx8vLIyr/lTKOOPDxCGdxk2tVs5viHDwIPlUsge5FBaLe9h3BhPAr7cOmEAXkN/Cf2+2N8HYGCjJbHg==}
+  ai@7.0.88:
+    resolution: {integrity: sha512-8+tPsIXE6IqajzLWiJ+hnpsV4y+S+E9jbPDX0zqRUT1d3o/AfuNJtKqy7PiYgZjUrl2sGpMj56/P83TcQxAKxA==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -4434,7 +4434,7 @@ snapshots:
 
   agent-base@9.0.0: {}
 
-  ai@7.0.87(zod@4.5.4):
+  ai@7.0.88(zod@4.5.4):
     dependencies:
       '@ai-sdk/gateway': 4.0.70(zod@4.5.4)
       '@ai-sdk/provider': 4.0.9
