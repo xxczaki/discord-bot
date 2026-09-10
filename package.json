@@ -18,7 +18,7 @@
 	},
 	"packageManager": "pnpm@11.26.0+sha512.fc0e2bf890b9f983611f1ab68c0637bce914390653699f83c1a78b005ed25f2c81e77920c8fd8eee2ecf0b58b28cdcb00a84d97f69bcf7c56b2f344710238664",
 	"dependencies": {
-		"@ai-sdk/mistral": "^4.0.40",
+		"@ai-sdk/mistral": "^4.0.42",
 		"@discord-player/extractor": "^7.2.0",
 		"@kubernetes/client-node": "^2.0.0",
 		"@sentry/node": "^10.73.0",
