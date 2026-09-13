@@ -76,8 +76,8 @@ importers:
         version: 0.1.10
     devDependencies:
       '@ai-sdk/openai':
-        specifier: ^4.0.65
-        version: 4.0.65(zod@4.6.2)
+        specifier: ^4.0.66
+        version: 4.0.66(zod@4.6.2)
       '@biomejs/biome':
         specifier: 'catalog:'
         version: 2.5.13
@@ -196,8 +196,8 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/openai@4.0.65':
-    resolution: {integrity: sha512-rpk1Tv7TR0H338zTKmSVMxv4yo++HDOxioiuvBySb8cWkx2fS10tWl/5cEwL0diJbcV/+p3+9gpIOre52UoQJA==}
+  '@ai-sdk/openai@4.0.66':
+    resolution: {integrity: sha512-W4GooZjROdOmf7dfjWlRWNVs+Vvr7ZwfDZbyAJRPo1bgQbpRoDd9ZcCwy/PX1X0s2G7B/dhN2RWOORsHtr0wGg==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -3225,10 +3225,10 @@ snapshots:
       '@ai-sdk/provider-utils': 5.0.40(zod@4.6.2)
       zod: 4.6.2
 
-  '@ai-sdk/openai@4.0.65(zod@4.6.2)':
+  '@ai-sdk/openai@4.0.66(zod@4.6.2)':
     dependencies:
-      '@ai-sdk/provider': 4.0.13
-      '@ai-sdk/provider-utils': 5.0.39(zod@4.6.2)
+      '@ai-sdk/provider': 4.0.14
+      '@ai-sdk/provider-utils': 5.0.40(zod@4.6.2)
       zod: 4.6.2
 
   '@ai-sdk/provider-utils@5.0.39(zod@4.6.2)':
