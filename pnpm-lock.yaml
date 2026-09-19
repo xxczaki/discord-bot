@@ -33,8 +33,8 @@ importers:
   .:
     dependencies:
       '@ai-sdk/mistral':
-        specifier: ^4.0.44
-        version: 4.0.44(zod@4.6.5)
+        specifier: ^4.0.46
+        version: 4.0.46(zod@4.6.5)
       '@discord-player/extractor':
         specifier: ^7.2.0
         version: 7.2.0
@@ -190,8 +190,8 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/mistral@4.0.44':
-    resolution: {integrity: sha512-ZkV33FPzyLjuwsq71/DyPq40fZjAytRLFBrkNUiGI9mWgiLy6teM0en5jJ09Iq3Sm4pcNrS3Buas5ggF203nCA==}
+  '@ai-sdk/mistral@4.0.46':
+    resolution: {integrity: sha512-2PXR/CK/ZggUeqOXXFGTzR10PHoijBF/vWAiXEz4LiYiR48UO4jTL65J49ITvBE6bPivTgcnITrPl2NaGkj13Q==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -3227,10 +3227,10 @@ snapshots:
       '@vercel/oidc': 3.2.0
       zod: 4.6.5
 
-  '@ai-sdk/mistral@4.0.44(zod@4.6.5)':
+  '@ai-sdk/mistral@4.0.46(zod@4.6.5)':
     dependencies:
-      '@ai-sdk/provider': 4.0.15
-      '@ai-sdk/provider-utils': 5.0.41(zod@4.6.5)
+      '@ai-sdk/provider': 4.0.17
+      '@ai-sdk/provider-utils': 5.0.43(zod@4.6.5)
       zod: 4.6.5
 
   '@ai-sdk/openai@4.0.67(zod@4.6.5)':
