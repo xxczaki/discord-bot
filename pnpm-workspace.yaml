@@ -18,7 +18,7 @@ catalogs:
     '@biomejs/biome': 2.5.14
     '@types/node': ^24.13.5
     '@vitest/coverage-v8': ^4.1.11
-    typescript: ^6.0.3
+    typescript: ^7.0.2
     vitest: ^4.1.11
 
 enableGlobalVirtualStore: true
