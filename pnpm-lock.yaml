@@ -88,8 +88,8 @@ importers:
         specifier: ^2.6.3
         version: 2.6.3
       '@sentry/esbuild-plugin':
-        specifier: ^5.4.0
-        version: 5.4.0(rollup@4.60.4)(supports-color@7.2.0)
+        specifier: ^5.4.1
+        version: 5.4.1(rollup@4.60.4)(supports-color@7.2.0)
       '@snazzah/davey':
         specifier: ^0.1.12
         version: 0.1.12(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
@@ -1209,8 +1209,8 @@ packages:
     resolution: {integrity: sha512-xzvBr1Q1c4lCe7i6sRnrofxeO1QTP/LKQ6A6qy0iB4x5yfiSfARMEQEghojzTNALDTcv8En04qYNIco9/K9eZQ==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
 
-  '@sentry/bundler-plugins@10.70.0':
-    resolution: {integrity: sha512-M+a32VOZVeTUxF+QecQ+OHYj8hb5FeppKwwWpTQ9cfS6ixgoNUK7/B7NhB2XbfxE3F1BcGvOxyS+AB+fvPfSRQ==}
+  '@sentry/bundler-plugins@10.76.2':
+    resolution: {integrity: sha512-5ovSYkHaTTDwe6p9vq0AzE+W9likkINBpzCv7VychGqYUfBGNzr+0YVkAt9//saJI9BKs+lWud5qX5iASf6wkw==}
     engines: {node: '>= 18'}
     peerDependencies:
       rollup: '>=3.2.0'
@@ -1277,16 +1277,16 @@ packages:
     resolution: {integrity: sha512-fO9PLmHdVURcSPUpWCItWAtgKiMwGdJHbovoSEyLplX5sxs2ugvI4CBPTrkkgqhObnZOD0CnWBKDzSVQYBKEyQ==}
     engines: {node: '>=14'}
 
-  '@sentry/core@10.70.0':
-    resolution: {integrity: sha512-ozhCTDqg89oB4XmWfAwuHshABpvT7AkRpaPnogopPfMAaI61G1t8EKCJ4W7aum8JSBonlfyjPCyW5oYZFm0KvA==}
-    engines: {node: '>=18'}
-
   '@sentry/core@10.76.0':
     resolution: {integrity: sha512-H9irBNXHdkgvl86EKlQrPTGYyzvI8GUZ8eoWLay9IuqqZC6pWesf0nH7z/glxKBo7BEw3PIG+unQByHugBnsCg==}
     engines: {node: '>=18'}
 
-  '@sentry/esbuild-plugin@5.4.0':
-    resolution: {integrity: sha512-ACn/W1j1GUqVjfZvqtGfMRAhtgXAKKzJGBEgt4LrazQYoTh+rtrZy1JwfRKzGTsA3XgE+p5gXtFdU32Jc8fY7Q==}
+  '@sentry/core@10.76.2':
+    resolution: {integrity: sha512-vndrQalRiwYatTkjlLWvyf69KocXIb9TKJ4A9oiyWguL8PJYtqIRTlRe4OpkpjLrxS18fvRdV0jEm29c/9p3hQ==}
+    engines: {node: '>=18'}
+
+  '@sentry/esbuild-plugin@5.4.1':
+    resolution: {integrity: sha512-45JfJIqVgRlNKcSBQXmc5/c+t50/LKkKq62/gbmiq/i9PGsKtlgKXj35S/nh+m9NmpDsgy+BW9C3hpnUdhFY+g==}
     engines: {node: '>= 18'}
 
   '@sentry/node-core@10.76.0':
@@ -3981,11 +3981,11 @@ snapshots:
 
   '@sapphire/snowflake@3.5.5': {}
 
-  '@sentry/bundler-plugins@10.70.0(rollup@4.60.4)(supports-color@7.2.0)':
+  '@sentry/bundler-plugins@10.76.2(rollup@4.60.4)(supports-color@7.2.0)':
     dependencies:
       '@babel/core': 7.29.0(supports-color@7.2.0)
       '@sentry/cli': 2.58.6(supports-color@7.2.0)
-      '@sentry/core': 10.70.0
+      '@sentry/core': 10.76.2
       dotenv: 17.4.2
       find-up: 5.0.0
       glob: 13.0.6
@@ -4042,17 +4042,17 @@ snapshots:
 
   '@sentry/conventions@0.16.0': {}
 
-  '@sentry/core@10.70.0':
-    dependencies:
-      '@sentry/conventions': 0.16.0
-
   '@sentry/core@10.76.0':
     dependencies:
       '@sentry/conventions': 0.16.0
 
-  '@sentry/esbuild-plugin@5.4.0(rollup@4.60.4)(supports-color@7.2.0)':
+  '@sentry/core@10.76.2':
     dependencies:
-      '@sentry/bundler-plugins': 10.70.0(rollup@4.60.4)(supports-color@7.2.0)
+      '@sentry/conventions': 0.16.0
+
+  '@sentry/esbuild-plugin@5.4.1(rollup@4.60.4)(supports-color@7.2.0)':
+    dependencies:
+      '@sentry/bundler-plugins': 10.76.2(rollup@4.60.4)(supports-color@7.2.0)
     transitivePeerDependencies:
       - encoding
       - rollup
