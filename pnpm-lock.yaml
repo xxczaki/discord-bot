@@ -100,7 +100,7 @@ importers:
         specifier: 'catalog:'
         version: 4.1.11(vitest@4.1.11)
       ai:
-        specifier: ^7.0.128
+        specifier: ^7.0.133
         version: 7.0.136(zod@4.6.5)
       date-fns:
         specifier: ^4.4.0
