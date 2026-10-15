@@ -56,6 +56,6 @@
 		"tsx": "^4.23.15",
 		"typescript": "catalog:",
 		"vitest": "catalog:",
-		"zod": "^4.6.5"
+		"zod": "^4.6.6"
 	}
 }
