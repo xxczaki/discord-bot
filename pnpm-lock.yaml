@@ -121,7 +121,7 @@ importers:
         specifier: ^5.1.1
         version: 5.1.1
       p-queue:
-        specifier: ^9.3.4
+        specifier: ^9.3.5
         version: 9.3.5
       pino-pretty:
         specifier: ^13.2.0
