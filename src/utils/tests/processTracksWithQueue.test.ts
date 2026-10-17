@@ -82,7 +82,7 @@ function createMockGuildQueue(): Partial<GuildQueue> {
 
 function createMockQueueInstance(): Partial<Queue> {
 	return {
-		on: vi.fn(),
+		addEventListener: vi.fn(),
 		addAll: vi.fn().mockResolvedValue(undefined),
 		onIdle: vi.fn().mockResolvedValue(undefined),
 		pending: 0,
@@ -115,7 +115,7 @@ it('should return enqueued count for track lists', async () => {
 	const mockPlayer = createMockPlayer();
 	const mockGuildQueue = createMockGuildQueue();
 	const mockQueueInstance = {
-		on: vi.fn(),
+		addEventListener: vi.fn(),
 		addAll: vi
 			.fn()
 			.mockImplementation(async (tasks: (() => Promise<unknown>)[]) => {
@@ -145,7 +145,7 @@ it('should play first track directly and queue remaining items', async () => {
 	const mockPlayer = createMockPlayer();
 	const mockGuildQueue = createMockGuildQueue();
 	const mockQueueInstance = {
-		on: vi.fn(),
+		addEventListener: vi.fn(),
 		addAll: vi
 			.fn()
 			.mockImplementation(async (tasks: (() => Promise<unknown>)[]) => {
@@ -182,7 +182,7 @@ it('should handle errors gracefully with custom `onError` handler', async () => 
 	} as Partial<Player>;
 	const mockGuildQueue = createMockGuildQueue();
 	const mockQueueInstance = {
-		on: vi.fn(),
+		addEventListener: vi.fn(),
 		addAll: vi
 			.fn()
 			.mockImplementation(async (tasks: (() => Promise<unknown>)[]) => {
@@ -217,7 +217,7 @@ it('should handle large track lists with per-item concurrency', async () => {
 	const mockPlayer = createMockPlayer();
 	const mockGuildQueue = createMockGuildQueue();
 	const mockQueueInstance = {
-		on: vi.fn(),
+		addEventListener: vi.fn(),
 		addAll: vi
 			.fn()
 			.mockImplementation(async (tasks: (() => Promise<unknown>)[]) => {
@@ -256,7 +256,7 @@ it('should handle failed play attempts for large lists', async () => {
 	} as Partial<Player>;
 	const mockGuildQueue = createMockGuildQueue();
 	const mockQueueInstance = {
-		on: vi.fn(),
+		addEventListener: vi.fn(),
 		addAll: vi
 			.fn()
 			.mockImplementation(async (tasks: (() => Promise<unknown>)[]) => {
@@ -295,7 +295,7 @@ it('should store queries in track metadata when provided', async () => {
 	} as Partial<Player>;
 	const mockGuildQueue = createMockGuildQueue();
 	const mockQueueInstance = {
-		on: vi.fn(),
+		addEventListener: vi.fn(),
 		addAll: vi.fn().mockResolvedValue(undefined),
 		onIdle: vi.fn().mockResolvedValue(undefined),
 		pending: 0,
@@ -334,7 +334,7 @@ it('should handle tracks with non-object metadata when storing queries', async (
 	} as Partial<Player>;
 	const mockGuildQueue = createMockGuildQueue();
 	const mockQueueInstance = {
-		on: vi.fn(),
+		addEventListener: vi.fn(),
 		addAll: vi.fn().mockResolvedValue(undefined),
 		onIdle: vi.fn().mockResolvedValue(undefined),
 		pending: 0,
@@ -373,7 +373,7 @@ it('should handle metadata assignment in large list processing', async () => {
 	} as Partial<Player>;
 	const mockGuildQueue = createMockGuildQueue();
 	const mockQueueInstance = {
-		on: vi.fn(),
+		addEventListener: vi.fn(),
 		addAll: vi
 			.fn()
 			.mockImplementation(async (tasks: (() => Promise<unknown>)[]) => {
