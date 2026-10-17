@@ -1,4 +1,11 @@
 {
 	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
-	"extends": ["github>xxczaki/renovate-config", "customManagers:biomeVersions"]
+	"extends": ["github>xxczaki/renovate-config", "customManagers:biomeVersions"],
+	"packageRules": [
+		{
+			"description": "Group Vercel AI SDK packages so @ai-sdk/provider always resolves to a single version",
+			"matchPackageNames": ["ai", "@ai-sdk/**"],
+			"groupName": "Vercel AI SDK"
+		}
+	]
 }
