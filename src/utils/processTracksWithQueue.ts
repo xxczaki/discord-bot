@@ -124,7 +124,7 @@ export default async function processTracksWithQueue({
 	}
 
 	if (remainingItems.length > 0) {
-		tracksQueue.on('completed', () => updateProgress());
+		tracksQueue.addEventListener('completed', () => updateProgress());
 
 		await tracksQueue.addAll(
 			remainingItems.map((item, index) => async () => {
