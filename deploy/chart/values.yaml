@@ -1,0 +1,121 @@
+secrets:
+  # -- Points to a Secret containing the Discord bot token
+  # @section -- Bot
+  token:
+    name: ""
+    key: ""
+  # -- Points to a Secret containing the Sentry DSN
+  # Learn more: https://docs.sentry.io/concepts/key-terms/dsn-explainer/
+  # @section -- Bot
+  sentryDsn:
+    name: ""
+    key: ""
+  # -- Points to a Secret containing the Spotify API client secret
+  # Used by https://github.com/iTsMaaT/discord-player-spotify
+  # @section -- Bot
+  spotifyClientSecret:
+    name: ""
+    key: ""
+  # -- Points to a Secret containing the OpenAI API key
+  # Used for the `/prompt` command
+  # @section -- Bot
+  openAiApiKey:
+    name: ""
+    key: ""
+  # -- Points to a Secret containing the Mistral API key
+  # Used for the `/prompt` command
+  # @section -- Bot
+  mistralApiKey:
+    name: ""
+    key: ""
+env:
+  # -- Client ID used for Discord API authorization
+  # @section -- Bot
+  clientId: ""
+  # -- ID of the channel used for storing the user playlists
+  # @section -- Bot
+  playlistsChannelId: ""
+  # -- ID of the channel used for sending debug messages
+  # @section -- Bot
+  botDebugChannelId: ""
+  # -- ID of the role that should be allowed to perform sensitive actions, like clearing the query cache
+  # @section -- Bot
+  ownerRoleId: ""
+  # -- Optional client ID for the Spotify API
+  # Used by https://github.com/iTsMaaT/discord-player-spotify
+  # @section -- Bot
+  spotifyClientId: ""
+  # -- Spotify market code (ISO 3166-1 alpha-2) for search results
+  # @section -- Bot
+  spotifyMarket: "DE"
+  # -- Enable YouTube for search and playback
+  # Set to "true" to enable YouTube extractor, leave empty for SoundCloud-only
+  # @section -- Bot
+  enableYoutube: ""
+  # -- Comma-separated list of commands to disable (e.g. "maintenance,lockdown")
+  # Disabled commands are not registered with Discord
+  # @section -- Bot
+  disabledCommands: ""
+# -- Configuration of the PVC used for storing the cached songs
+# @section -- Bot
+persistentVolumeClaim:
+  size: "5Gi"
+  accessModes:
+    - ReadWriteOnce
+  storageClass: ""
+# -- RBAC configuration to access the Kubernetes API
+# @section -- RBAC
+rbac:
+  create: true
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+# -- General configuration of the Redis instance used for query caching and storing usage statistics
+# @section -- Redis
+redis:
+  architecture: 'standalone'
+  # The public Bitnami Secure Images chart defaults to the mutable `latest` tag.
+  # Pin its multi-architecture digest so installs and upgrades are reproducible.
+  image:
+    digest: "sha256:d75bda00b778ad5e03a639ec36e00f6665a5d7e0f35a6250be5b103fb2117275"
+  auth:
+    enabled: false
+  commonConfiguration: |-
+    # Enable AOF https://redis.io/topics/persistence#append-only-file
+    appendonly yes
+    # Disable RDB persistence, AOF persistence already enabled.
+    save ""
+# -- General configuration of the Redis instance used for query caching and storing usage statistics
+image:
+  repository: xxczaki/discord-bot
+  pullPolicy: Always
+  tag: ""
+# -- Security context used for the bot Pod
+securityContext:
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  capabilities:
+    drop: ["ALL"]
+  seccompProfile:
+    type: RuntimeDefault
+# -- Resource limits used for the bot Pod
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "400m"
+# -- Readiness probe used for the bot Pod
+readinessProbe:
+  tcpSocket:
+    port: 8000
+  initialDelaySeconds: 10
+  periodSeconds: 10
+# -- Liveness probe used for the bot Pod
+livenessProbe:
+  tcpSocket:
+    port: 8000
+  initialDelaySeconds: 10
+  periodSeconds: 10

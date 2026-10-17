@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: {{ template "discord-bot.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+  name: {{ template "discord-bot.fullname" . }}
+spec:
+  accessModes:
+    {{ toYaml .Values.persistentVolumeClaim.accessModes | indent 4 }}
+  storageClassName: "{{ .Values.persistentVolumeClaim.storageClass }}"
+  resources:
+    requests:
+      storage: "{{ .Values.persistentVolumeClaim.size }}"
