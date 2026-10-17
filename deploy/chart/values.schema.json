@@ -1,0 +1,115 @@
+{
+	"$schema": "https://json-schema.org/draft-07/schema#",
+	"title": "Values",
+	"type": "object",
+	"required": ["secrets", "env"],
+	"properties": {
+		"secrets": {
+			"type": "object",
+			"required": ["token", "sentryDsn"],
+			"properties": {
+				"token": {
+					"type": "object",
+					"required": ["name", "key"],
+					"properties": {
+						"name": {
+							"type": "string"
+						},
+						"key": {
+							"type": "string"
+						}
+					}
+				},
+				"sentryDsn": {
+					"type": "object",
+					"required": ["name", "key"],
+					"properties": {
+						"name": {
+							"type": "string"
+						},
+						"key": {
+							"type": "string"
+						}
+					}
+				},
+				"spotifyClientSecret": {
+					"type": "object",
+					"required": ["name", "key"],
+					"properties": {
+						"name": {
+							"type": "string"
+						},
+						"key": {
+							"type": "string"
+						}
+					}
+				},
+				"openAiApiKey": {
+					"type": "object",
+					"required": ["name", "key"],
+					"properties": {
+						"name": {
+							"type": "string"
+						},
+						"key": {
+							"type": "string"
+						}
+					}
+				}
+			}
+		},
+		"env": {
+			"type": "object",
+			"required": ["clientId", "playlistsChannelId", "botDebugChannelId", "ownerRoleId"],
+			"properties": {
+				"clientId": {
+					"type": "string"
+				},
+				"playlistsChannelId": {
+					"type": "string"
+				},
+  			"botDebugChannelId": {
+					"type": "string"
+				},
+  			"ownerRoleId": {
+					"type": "string"
+				},
+				"spotifyClientId": {
+					"type": "string"
+				},
+				"spotifyMarket": {
+					"type": "string"
+				},
+				"enableYoutube": {
+					"type": "string",
+					"enum": ["", "true"]
+				},
+				"disabledCommands": {
+					"type": "string"
+				}
+			}
+		},
+		"rbac": {
+			"type": "object",
+			"properties": {
+				"create": {
+					"type": "boolean"
+				}
+			}
+		},
+		"serviceAccount": {
+			"type": "object",
+			"properties": {
+				"create": {
+					"type": "boolean"
+				},
+				"annotations": {
+					"type": "object"
+				},
+				"name": {
+					"type": "string"
+				}
+			}
+		}
+	}
+}

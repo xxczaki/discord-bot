@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "discord-bot.fullname" . }}
+  labels:
+    {{- include "discord-bot.labels" . | nindent 4 }}
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "discord-bot.selectorLabels" . | nindent 6 }}
+  revisionHistoryLimit: 3
+  template:
+    metadata:
+      labels:
+        {{- include "discord-bot.labels" . | nindent 8 }}
+    spec:
+      terminationGracePeriodSeconds: 15
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "discord-bot.serviceAccountName" . }}
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.secrets.token.name }}
+                key: {{ .Values.secrets.token.key }}
+          - name: CLIENT_ID
+            value: "{{ .Values.env.clientId }}"
+          - name: REDIS_URL
+            value: redis://discord-bot-redis-master.{{ .Release.Namespace }}.svc.cluster.local:6379
+          - name: NODE_ENV
+            value: "production"
+          - name: SENTRY_DSN
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.secrets.sentryDsn.name }}
+                key: {{ .Values.secrets.sentryDsn.key }}
+          - name: PLAYLISTS_CHANNEL_ID
+            value: "{{ .Values.env.playlistsChannelId }}"
+          - name: BOT_DEBUG_CHANNEL_ID
+            value: "{{ .Values.env.botDebugChannelId }}"
+          - name: OWNER_ROLE_ID
+            value: "{{ .Values.env.ownerRoleId }}"
+          - name: DP_SPOTIFY_CLIENT_ID
+            value: "{{ .Values.env.spotifyClientId }}"
+          - name: DP_SPOTIFY_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.secrets.spotifyClientSecret.name }}
+                key: {{ .Values.secrets.spotifyClientSecret.key }}
+          - name: OPENAI_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.secrets.openAiApiKey.name }}
+                key: {{ .Values.secrets.openAiApiKey.key }}
+          {{- if .Values.env.spotifyMarket }}
+          - name: SPOTIFY_MARKET
+            value: "{{ .Values.env.spotifyMarket }}"
+          {{- end }}
+          {{- if .Values.env.enableYoutube }}
+          - name: ENABLE_YOUTUBE
+            value: "{{ .Values.env.enableYoutube }}"
+          {{- end }}
+          {{- if .Values.env.disabledCommands }}
+          - name: DISABLED_COMMANDS
+            value: "{{ .Values.env.disabledCommands }}"
+          {{- end }}
+          {{- if and .Values.secrets.mistralApiKey.name .Values.secrets.mistralApiKey.key }}
+          - name: MISTRAL_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.secrets.mistralApiKey.name }}
+                key: {{ .Values.secrets.mistralApiKey.key }}
+          {{- end }}
+          volumeMounts:
+          - mountPath: /opus-cache
+            name: opus-cache
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+      - name: opus-cache
+        persistentVolumeClaim:
+          claimName: {{ template "discord-bot.fullname" . }}

@@ -48,7 +48,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           file: coverage/lcov.info
 
-  deploy:
+  build:
     if: github.ref == 'refs/heads/main'
     needs: [lint, test]
     permissions:
@@ -56,9 +56,21 @@ jobs:
       contents: read
       attestations: write
       packages: write
-    name: Build and deploy
-    runs-on: ubuntu-24.04-arm
+    name: Build image (${{ matrix.platform }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-latest
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
     steps:
+      - name: Prepare
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: echo "PLATFORM_PAIR=${PLATFORM//\//-}" >> "$GITHUB_ENV"
       - name: Checkout
         uses: actions/checkout@v7
       - name: Login to Docker Hub
@@ -72,8 +84,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
       - name: Extract metadata
@@ -83,58 +93,162 @@ jobs:
           images: |
             xxczaki/discord-bot
             ghcr.io/xxczaki/discord-bot
-          flavor: |
-            latest=true
-          tags: |
-            type=sha,prefix=,format=long
-      - name: Build and push
+      - name: Build and push by digest
         uses: docker/build-push-action@v7
         id: push
         with:
           context: .
-          push: true
-          platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.meta.outputs.tags }}
+          platforms: ${{ matrix.platform }}
+          labels: ${{ steps.meta.outputs.labels }}
           annotations: ${{ steps.meta.outputs.annotations }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          outputs: type=image,"name=xxczaki/discord-bot,ghcr.io/xxczaki/discord-bot",push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha,scope=build-${{ env.PLATFORM_PAIR }}
+          cache-to: type=gha,mode=max,scope=build-${{ env.PLATFORM_PAIR }}
           provenance: mode=max
           sbom: true
           secrets: |
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
           build-args: |
             GIT_COMMIT_SHA=${{ github.sha }}
+      - name: Export digest
+        env:
+          DIGEST: ${{ steps.push.outputs.digest }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/digests"
+          touch "$RUNNER_TEMP/digests/${DIGEST#sha256:}"
+      - name: Upload digest
+        uses: actions/upload-artifact@v7
+        with:
+          name: digests-${{ env.PLATFORM_PAIR }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    needs: [build]
+    permissions:
+      contents: read
+      packages: write
+    name: Push multi-arch manifest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v8
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: digests-*
+          merge-multiple: true
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v6
+        env:
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: index
+        with:
+          images: |
+            xxczaki/discord-bot
+            ghcr.io/xxczaki/discord-bot
+          flavor: |
+            latest=true
+          tags: |
+            type=sha,prefix=,format=long
+      - name: Create manifest list and push
+        working-directory: ${{ runner.temp }}/digests
+        run: |
+          mapfile -t tag_args < <(jq -r '.tags[] | ("--tag", .)' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          mapfile -t annotation_args < <(jq -r '.annotations[] | ("--annotation", .)' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          sources=()
+          for digest in *; do
+            sources+=("xxczaki/discord-bot@sha256:${digest}")
+          done
+          docker buildx imagetools create "${tag_args[@]}" "${annotation_args[@]}" "${sources[@]}"
+      - name: Inspect images
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          docker buildx imagetools inspect "xxczaki/discord-bot:${VERSION}"
+          docker buildx imagetools inspect "ghcr.io/xxczaki/discord-bot:${VERSION}"
+
+  promote:
+    needs: [merge]
+    name: Deploy to homelab
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout homelab repo
+        uses: actions/checkout@v7
+        with:
+          repository: xxczaki/homelab
+          token: ${{ secrets.GH_PAT }}
+          path: homelab
+      - name: Pin commit in Argo CD Application
+        working-directory: homelab
+        env:
+          APPLICATION_FILE: apps/discord-bot/application.yaml
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          source_path=$(yq 'select(.kind == "Application") | .spec.source.path' "$APPLICATION_FILE")
+          if [ "$source_path" != "deploy/chart" ]; then
+            echo "::notice::Skipping homelab deploy: ${APPLICATION_FILE} uses source path '${source_path}', not 'deploy/chart'"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          apply_change() {
+            yq -i '
+              (select(.kind == "Application") | .spec.source.targetRevision) = strenv(COMMIT_SHA) |
+              (select(.kind == "Application") | .spec.source.helm.valuesObject.image.tag) = strenv(COMMIT_SHA)
+            ' "$APPLICATION_FILE"
+            if git diff --quiet; then
+              echo "Homelab already deploys ${COMMIT_SHA}"
+              return 1
+            fi
+            git commit --quiet --all --message "chore(discord-bot): deploy ${COMMIT_SHA::7}"
+          }
+
+          apply_change || exit 0
+          for attempt in 1 2 3 4 5; do
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "Push attempt ${attempt} failed, retrying on top of the latest main"
+            sleep $((attempt * 2))
+            git fetch --quiet origin main
+            git reset --quiet --hard origin/main
+            apply_change || exit 0
+          done
+          echo "::error::Could not push the homelab deploy commit after 5 attempts"
+          exit 1
+
+  publish-chart:
+    needs: [merge]
+    name: Publish Helm chart
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          path: discord-bot
       - name: Checkout charts repo
         uses: actions/checkout@v7
         with:
           repository: xxczaki/charts
           token: ${{ secrets.GH_PAT }}
-          fetch-depth: 1
           fetch-tags: true
           path: charts-repo
-      - name: Update image tag and appVersion
-        uses: mikefarah/yq@master
-        with:
-          cmd: |
-            yq -i '.image.tag = "${{ github.sha }}"' 'charts-repo/charts/discord-bot/values.yaml'
-            yq -i '.appVersion = "${{ github.sha }}"' 'charts-repo/charts/discord-bot/Chart.yaml'
-      - name: Get current version
-        id: currentVersion
-        uses: mikefarah/yq@master
-        with:
-          cmd: yq '.version' charts-repo/charts/discord-bot/Chart.yaml
-      - name: Get previous tag
-        id: previousTag
-        run: |
-          TAG=$(git -C charts-repo tag --list 'discord-bot-*' --sort=-version:refname | head -1)
-          echo "tag=${TAG:-discord-bot-${{ steps.currentVersion.outputs.result }}}" >> "$GITHUB_OUTPUT"
-      - name: Update chart version
-        uses: mikefarah/yq@master
-        if: steps.previousTag.outputs.tag == format('discord-bot-{0}', steps.currentVersion.outputs.result)
-        env:
-          PREVIOUS_VERSION: ${{ steps.currentVersion.outputs.result }}
-        with:
-          cmd: NEXT_VERSION=${PREVIOUS_VERSION%.*}.$((${PREVIOUS_VERSION##*.} + 1)) yq -i '.version = strenv(NEXT_VERSION)' 'charts-repo/charts/discord-bot/Chart.yaml'
       - name: Import GPG key
         id: import-gpg
         uses: crazy-max/ghaction-import-gpg@v7
@@ -144,11 +258,50 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
           workdir: charts-repo
-      - name: Commit chart update
-        uses: stefanzweifel/git-auto-commit-action@v7
-        with:
-          commit_message: Update Helm chart
-          commit_author: "${{ steps.import-gpg.outputs.name }} <${{ steps.import-gpg.outputs.email }}>"
-          commit_user_name: ${{ steps.import-gpg.outputs.name }}
-          commit_user_email: ${{ steps.import-gpg.outputs.email }}
-          repository: charts-repo
+      - name: Update and push chart
+        working-directory: charts-repo
+        env:
+          SOURCE_CHART: ${{ github.workspace }}/discord-bot/deploy/chart/
+          TARGET_CHART: charts/discord-bot
+          COMMIT_SHA: ${{ github.sha }}
+          GIT_USER_NAME: ${{ steps.import-gpg.outputs.name }}
+          GIT_USER_EMAIL: ${{ steps.import-gpg.outputs.email }}
+        run: |
+          git config user.name "$GIT_USER_NAME"
+          git config user.email "$GIT_USER_EMAIL"
+
+          apply_change() {
+            published_version=$(yq '.version' "$TARGET_CHART/Chart.yaml")
+            latest_tag=$(git tag --list 'discord-bot-*' --sort=-version:refname | head -1)
+            base_version=$(printf '%s\n' "${latest_tag#discord-bot-}" "$published_version" | grep -v '^$' | sort -V | tail -1)
+            next_patch_version="${base_version%.*}.$((${base_version##*.} + 1))"
+            source_version=$(yq '.version' "${SOURCE_CHART}Chart.yaml")
+            NEXT_VERSION=$(printf '%s\n' "$next_patch_version" "$source_version" | sort -V | tail -1)
+            export NEXT_VERSION
+
+            rsync --archive --delete --exclude README.md "$SOURCE_CHART" "$TARGET_CHART/"
+            yq -i '.image.tag = strenv(COMMIT_SHA)' "$TARGET_CHART/values.yaml"
+            yq -i '.appVersion = strenv(COMMIT_SHA) | .version = strenv(NEXT_VERSION)' "$TARGET_CHART/Chart.yaml"
+
+            git add --all "$TARGET_CHART"
+            if git diff --cached --quiet; then
+              echo "Chart already up to date"
+              return 1
+            fi
+            echo "Publishing discord-bot chart ${NEXT_VERSION}"
+            git commit --quiet --message "chore: update discord-bot chart"
+          }
+
+          apply_change || exit 0
+          for attempt in 1 2 3 4 5; do
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "Push attempt ${attempt} failed, retrying on top of the latest main"
+            sleep $((attempt * 2))
+            git fetch --quiet --tags origin main
+            git reset --quiet --hard origin/main
+            apply_change || exit 0
+          done
+          echo "::error::Could not push the chart update after 5 attempts"
+          exit 1

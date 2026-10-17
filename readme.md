@@ -25,7 +25,7 @@
 - Tic-tac-toe
 - Integration with Sentry for error tracking
 - Structured logging with Pino
-- Easy deployment with a [Helm chart](https://github.com/xxczaki/charts/tree/main/charts/discord-bot)
+- Easy deployment with a [Helm chart](./deploy/chart), published at https://xxczaki.github.io/charts
 
 ## Development
 
@@ -80,7 +80,7 @@ The bot is designed to run as a single instance serving one Discord server at a 
 - the Docker images are tagged with commit SHAs
 - the Helm chart uses a `MAJOR.MINOR.PATCH` format where:
 	- the `PATCH` increases with each Docker image update
-	- the `MINOR` increases when other changes are made to the chart itself, e.g., when a Redis version is updated
+	- the `MINOR` increases when other changes are made to the chart itself, e.g., when a Redis version is updated (set `version` in `deploy/chart/Chart.yaml` to the new `MAJOR.MINOR.0`; CI otherwise publishes the next patch)
 
 ## Stability
 
