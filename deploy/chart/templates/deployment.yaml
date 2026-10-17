@@ -30,7 +30,7 @@ spec:
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion | required "image.tag is required when the chart has no appVersion" }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
           - name: TOKEN
