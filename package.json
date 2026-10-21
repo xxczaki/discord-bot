@@ -29,7 +29,7 @@
 		"discord.js": "^14.27.0",
 		"ioredis": "^6.0.0",
 		"pino": "^10.4.0",
-		"sodium-native": "^5.1.0",
+		"sodium-native": "^5.2.0",
 		"ulid": "^3.0.2",
 		"zlib-sync": "^0.1.10"
 	},
