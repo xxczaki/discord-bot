@@ -224,8 +224,8 @@ importers:
         specifier: ^10.4.0
         version: 10.4.0
       sodium-native:
-        specifier: ^5.1.0
-        version: 5.1.0(bare-events@2.8.3)(bare-url@2.4.3)
+        specifier: ^5.2.0
+        version: 5.2.0(bare-events@2.8.3)(bare-url@2.4.3)
       ulid:
         specifier: ^3.0.2
         version: 3.0.2
@@ -3040,8 +3040,8 @@ packages:
     resolution: {integrity: sha512-LJhUYUvItdQ0LkJTmPeaEObWXAqFyfmP85x0tch/ez9cahmhlBBLbIqDFnvBnUJGagb0JbIQrkBs1wJ+yRYpEw==}
     engines: {node: '>= 10.0.0', npm: '>= 3.0.0'}
 
-  sodium-native@5.1.0:
-    resolution: {integrity: sha512-3RxgyWyJlhTsABPnJVpCI5CoTDANZTqqFrEPqr+kjfnRaBihpVtMUE3yTF40ukdoB1APXeoBNKF3MzZAIHg39g==}
+  sodium-native@5.2.0:
+    resolution: {integrity: sha512-ntJqNSc9bWmWqcJkx8NA5eS0HUwQnmDlluUzoKCOQUWey8i7LXptk+E/qo2T2RPO9uK2br+3N0zYQme8qPXG+g==}
     engines: {bare: '>=1.16.0'}
 
   sonic-boom@4.2.1:
@@ -5832,7 +5832,7 @@ snapshots:
       ip-address: 10.2.0
       smart-buffer: 4.2.0
 
-  sodium-native@5.1.0(bare-events@2.8.3)(bare-url@2.4.3):
+  sodium-native@5.2.0(bare-events@2.8.3)(bare-url@2.4.3):
     dependencies:
       bare-assert: 1.2.0(bare-events@2.8.3)
       require-addon: 1.2.0(bare-url@2.4.3)
