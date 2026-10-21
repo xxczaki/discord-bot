@@ -172,13 +172,13 @@ catalogs:
       specifier: ^24.19.2
       version: 24.19.2
     '@vitest/coverage-v8':
-      specifier: ^5.0.4
+      specifier: ^5.0.5
       version: 5.0.5
     typescript:
       specifier: ^7.0.2
       version: 7.0.2
     vitest:
-      specifier: ^5.0.4
+      specifier: ^5.0.5
       version: 5.0.5
 
 overrides:
