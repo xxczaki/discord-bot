@@ -197,8 +197,8 @@ importers:
         specifier: ^7.2.0
         version: 7.2.0
       '@kubernetes/client-node':
-        specifier: ^2.0.0
-        version: 2.0.0(bufferutil@4.1.0)(supports-color@8.1.1)
+        specifier: ^2.0.1
+        version: 2.0.1(bufferutil@4.1.0)(supports-color@8.1.1)
       '@sentry/node':
         specifier: ^11.8.0
         version: 11.8.0(@babel/core@7.29.0)(rollup@4.60.4)
@@ -1042,8 +1042,8 @@ packages:
     peerDependencies:
       jsep: ^0.4.0||^1.0.0
 
-  '@kubernetes/client-node@2.0.0':
-    resolution: {integrity: sha512-Jx2cRxEVb4XkDNiR/cg8SX9dH6ZHdMhKmZdQcfhn2vdBWHdb2ldwM0P3I0dK4msYhFmC6TCODsNHH144IpA06w==}
+  '@kubernetes/client-node@2.0.1':
+    resolution: {integrity: sha512-evJgmEtgArEYlj6DNkMGjK41IrFK/hEwb5lWVxx0VRBWybQpnvi+2TtA19mLgVfRHfqX5yjHObX6e9W7LEZBjw==}
 
   '@manypkg/find-root@3.1.0':
     resolution: {integrity: sha512-BcSqCyKhBVZ5YkSzOiheMCV41kqAFptW6xGqYSTjkVTl9XQpr+pqHhwgGCOHQtjDCv7Is6EFyA14Sm5GVbVABA==}
@@ -3254,10 +3254,6 @@ packages:
     resolution: {integrity: sha512-IDxfleLmmbSskfWSUATiN1nfn2rDuvnMOqb5CWR92iIfojA0Ud+ulOAAEQ57LPr9rWmsreUyf5lwyao+7GNNVw==}
     engines: {node: '>=20.18.1'}
 
-  undici@8.10.0:
-    resolution: {integrity: sha512-HvltHd7avK13QIw/oLe4qoOLyoVSoafqJ2jYOrtMRBkbYT31eiBQ8O0ehRKZiEZCMEyLFQNIADpgCWC5fALvYQ==}
-    engines: {node: '>=22.19.0'}
-
   undici@8.12.3:
     resolution: {integrity: sha512-+fdndUTwBP86cVjihTp21hZHo7d6oj1c/47XPA3lL8mM0XHs+C4EkcjmgRsFnFk2f/UONGDy9ItBItmXsLOQHw==}
     engines: {node: '>=22.19.0'}
@@ -4063,7 +4059,7 @@ snapshots:
     dependencies:
       jsep: 1.4.0
 
-  '@kubernetes/client-node@2.0.0(bufferutil@4.1.0)(supports-color@8.1.1)':
+  '@kubernetes/client-node@2.0.1(bufferutil@4.1.0)(supports-color@8.1.1)':
     dependencies:
       '@types/js-yaml': 4.0.9
       '@types/node': 26.4.0
@@ -4079,7 +4075,7 @@ snapshots:
       socks-proxy-agent: 10.1.0(supports-color@8.1.1)
       stream-buffers: 3.0.3
       tar-fs: 3.1.2
-      undici: 8.10.0
+      undici: 8.12.3
       ws: 8.21.0(bufferutil@4.1.0)
     transitivePeerDependencies:
       - bare-abort-controller
@@ -6080,8 +6076,6 @@ snapshots:
   undici@6.28.0: {}
 
   undici@7.29.0: {}
-
-  undici@8.10.0: {}
 
   undici@8.12.3: {}
 
