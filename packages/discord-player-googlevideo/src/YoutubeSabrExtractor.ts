@@ -223,6 +223,7 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 		}
 
 		const serverAbrStream = new SabrStream({
+			videoId,
 			formats: sabrFormats,
 			serverAbrStreamingUrl,
 			videoPlaybackUstreamerConfig,
@@ -239,19 +240,11 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 			},
 		});
 
-		type SabrPlaybackOptions = {
-			audioQuality: 'AUDIO_QUALITY_MEDIUM';
-			enabledTrackTypes: typeof EnabledTrackTypes.AUDIO_ONLY;
-		};
-
-		const startOptions: SabrPlaybackOptions = {
-			audioQuality: 'AUDIO_QUALITY_MEDIUM' as const,
+		const { audioStream } = serverAbrStream.start({
+			audioPreferences: { quality: 'AUDIO_QUALITY_MEDIUM' },
 			enabledTrackTypes: EnabledTrackTypes.AUDIO_ONLY,
-		};
-
-		const { audioStream } = await serverAbrStream.start(
-			startOptions as Record<string, unknown>,
-		);
+			isPostLiveDvr: false,
+		});
 
 		// Web ReadableStream from googlevideo needs to be converted to Node.js stream
 		// @ts-expect-error - ReadableStream type mismatch between web and Node.js streams
