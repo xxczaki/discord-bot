@@ -9,7 +9,6 @@ import type { Player, Track } from 'discord-player';
 import { useQueue } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
 import getCommitLink from '../../utils/getCommitLink';
-import getDeploymentVersion from '../../utils/getDeploymentVersion';
 import { OpusCacheManager } from '../../utils/OpusCacheManager';
 import useDiscordEventHandlers, {
 	useReadyEventHandler,
@@ -51,24 +50,18 @@ vi.mock('../../utils/getEnvironmentVariable', () => ({
 	default: vi.fn().mockReturnValue('mocked-channel-id'),
 }));
 
-vi.mock('../../utils/getDeploymentVersion', () => ({
-	default: vi.fn(),
-}));
-
 vi.mock('../../utils/getCommitLink', () => ({
 	default: vi.fn(),
 }));
 
 const mockedUseQueue = vi.mocked(useQueue);
 const mockedOpusCacheManager = vi.mocked(OpusCacheManager);
-const mockedGetDeploymentVersion = vi.mocked(getDeploymentVersion);
 const mockedGetCommitLink = vi.mocked(getCommitLink);
 
 beforeEach(() => {
 	vi.clearAllMocks();
 	process.env.GIT_COMMIT_SHA = MOCK_COMMIT_SHA;
 
-	mockedGetDeploymentVersion.mockResolvedValue('0.14.0');
 	mockedGetCommitLink.mockReturnValue(
 		'[`abc123def456`](https://github.com/xxczaki/discord-bot/commit/abc123def456)',
 	);
@@ -409,7 +402,7 @@ it('should not delete opus cache when channel did not change (mute/deafen)', asy
 	).not.toHaveBeenCalled();
 });
 
-it('should send commit link when deployment version is not available', async () => {
+it('should send commit link on ready', async () => {
 	const mockChannel = createMockChannel();
 	const mockClient = createMockClient();
 
@@ -417,7 +410,6 @@ it('should send commit link when deployment version is not available', async () 
 		mockChannel,
 	);
 
-	mockedGetDeploymentVersion.mockResolvedValue(undefined);
 	mockedGetCommitLink.mockReturnValue(
 		'[`abc123def456`](https://github.com/xxczaki/discord-bot/commit/abc123def456)',
 	);
