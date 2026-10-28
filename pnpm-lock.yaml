@@ -288,7 +288,7 @@ importers:
         specifier: ^7.2.0
         version: 7.2.0
       transliteration:
-        specifier: ^2.6.2
+        specifier: ^2.7.0
         version: 2.7.0
       tsx:
         specifier: ^4.23.15
