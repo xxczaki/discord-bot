@@ -2,15 +2,13 @@ import { expect, it } from 'vitest';
 import { filterDisabledCommands, RAW_COMMANDS } from '../commands';
 
 it('should exclude commands listed in the disabled set', () => {
-	const commands = filterDisabledCommands(new Set(['maintenance', 'lockdown']));
+	const commands = filterDisabledCommands(new Set(['lockdown', 'prompt']));
 
-	expect(RAW_COMMANDS.some((command) => command.name === 'maintenance')).toBe(
+	expect(RAW_COMMANDS.some((command) => command.name === 'lockdown')).toBe(
 		true,
 	);
-	expect(commands.some((command) => command.name === 'maintenance')).toBe(
-		false,
-	);
 	expect(commands.some((command) => command.name === 'lockdown')).toBe(false);
+	expect(commands.some((command) => command.name === 'prompt')).toBe(false);
 	expect(commands.some((command) => command.name === 'play')).toBe(true);
 });
 

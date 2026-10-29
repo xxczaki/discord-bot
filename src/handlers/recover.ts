@@ -37,8 +37,10 @@ export default async function recoverCommandHandler(
 	await interaction.editReply('Looking up what can be recovered…');
 
 	const player = useMainPlayer();
-	const { tracks, progress, savedAt } =
-		await queueRecoveryService.getContents(player);
+	const { tracks, progress, savedAt } = await queueRecoveryService.getContents(
+		player,
+		voiceChannel.guild.id,
+	);
 
 	if (tracks.length === 0) {
 		return interaction.editReply('Nothing to recover.');

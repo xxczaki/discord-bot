@@ -49,12 +49,10 @@ spec:
               secretKeyRef:
                 name: {{ .Values.secrets.sentryDsn.name }}
                 key: {{ .Values.secrets.sentryDsn.key }}
-          - name: PLAYLISTS_CHANNEL_ID
-            value: "{{ .Values.env.playlistsChannelId }}"
           - name: BOT_DEBUG_CHANNEL_ID
             value: "{{ .Values.env.botDebugChannelId }}"
-          - name: OWNER_ROLE_ID
-            value: "{{ .Values.env.ownerRoleId }}"
+          - name: GUILD_CONFIG
+            value: {{ .Values.env.guilds | toJson | quote }}
           - name: DP_SPOTIFY_CLIENT_ID
             value: "{{ .Values.env.spotifyClientId }}"
           - name: DP_SPOTIFY_CLIENT_SECRET

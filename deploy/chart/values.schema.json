@@ -60,19 +60,29 @@
 		},
 		"env": {
 			"type": "object",
-			"required": ["clientId", "playlistsChannelId", "botDebugChannelId", "ownerRoleId"],
+			"required": ["clientId", "botDebugChannelId", "guilds"],
 			"properties": {
 				"clientId": {
-					"type": "string"
-				},
-				"playlistsChannelId": {
 					"type": "string"
 				},
   			"botDebugChannelId": {
 					"type": "string"
 				},
-  			"ownerRoleId": {
-					"type": "string"
+				"guilds": {
+					"type": "object",
+					"minProperties": 1,
+					"additionalProperties": {
+						"type": "object",
+						"required": ["playlistsChannelId"],
+						"properties": {
+							"playlistsChannelId": {
+								"type": "string"
+							},
+							"ownerRoleId": {
+								"type": "string"
+							}
+						}
+					}
 				},
 				"spotifyClientId": {
 					"type": "string"
@@ -86,14 +96,6 @@
 				},
 				"disabledCommands": {
 					"type": "string"
-				}
-			}
-		},
-		"rbac": {
-			"type": "object",
-			"properties": {
-				"create": {
-					"type": "boolean"
 				}
 			}
 		},

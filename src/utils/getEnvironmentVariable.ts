@@ -5,9 +5,8 @@ type EnvironmentVariableNames =
 	| 'CLIENT_ID'
 	| 'REDIS_URL'
 	| 'NODE_ENV'
-	| 'PLAYLISTS_CHANNEL_ID'
 	| 'BOT_DEBUG_CHANNEL_ID'
-	| 'OWNER_ROLE_ID';
+	| 'GUILD_CONFIG';
 
 function getEnvironmentVariable(name: EnvironmentVariableNames) {
 	const rawVariable = process.env[name];

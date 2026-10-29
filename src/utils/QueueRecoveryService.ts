@@ -10,6 +10,15 @@ import type { QueueMetadata } from '../types/QueueMetadata';
 import isObject from './isObject';
 import redis from './redis';
 
+function getKeys(guildId: string) {
+	return {
+		tracks: `queue-recovery:${guildId}:tracks`,
+		progress: `queue-recovery:${guildId}:progress`,
+		savedAt: `queue-recovery:${guildId}:saved-at`,
+		channelId: `queue-recovery:${guildId}:channel-id`,
+	};
+}
+
 const DEFAULT_CONTENTS = {
 	tracks: [],
 	progress: 0,
@@ -46,40 +55,40 @@ export class QueueRecoveryService {
 					null)
 				: null;
 
+		const keys = getKeys(queue.guild.id);
 		const pipeline = redis.pipeline();
 
-		pipeline.set('queue-recovery:tracks', JSON.stringify(tracks));
-		pipeline.set(
-			'queue-recovery:progress',
-			queue.node.getTimestamp()?.current.value ?? 0,
-		);
-		pipeline.set('queue-recovery:saved-at', Date.now());
+		pipeline.set(keys.tracks, JSON.stringify(tracks));
+		pipeline.set(keys.progress, queue.node.getTimestamp()?.current.value ?? 0);
+		pipeline.set(keys.savedAt, Date.now());
 
 		if (channelId) {
-			pipeline.set('queue-recovery:channel-id', channelId);
+			pipeline.set(keys.channelId, channelId);
 		}
 
 		await pipeline.exec();
 	}
 
-	async deleteQueue() {
+	async deleteQueue(guildId: string) {
+		const keys = getKeys(guildId);
 		const pipeline = redis.pipeline();
 
-		pipeline.del('queue-recovery:tracks');
-		pipeline.del('queue-recovery:progress');
-		pipeline.del('queue-recovery:saved-at');
-		pipeline.del('queue-recovery:channel-id');
+		pipeline.del(keys.tracks);
+		pipeline.del(keys.progress);
+		pipeline.del(keys.savedAt);
+		pipeline.del(keys.channelId);
 
 		await pipeline.exec();
 	}
 
-	async getContents(player: Player) {
+	async getContents(player: Player, guildId: string) {
+		const keys = getKeys(guildId);
 		const pipeline = redis.pipeline();
 
-		pipeline.get('queue-recovery:tracks');
-		pipeline.get('queue-recovery:progress');
-		pipeline.get('queue-recovery:saved-at');
-		pipeline.get('queue-recovery:channel-id');
+		pipeline.get(keys.tracks);
+		pipeline.get(keys.progress);
+		pipeline.get(keys.savedAt);
+		pipeline.get(keys.channelId);
 
 		const result = await pipeline.exec();
 

@@ -4,14 +4,13 @@ import type {
 	GuildMember,
 } from 'discord.js';
 import { RAW_COMMANDS } from '../constants/commands';
-import getEnvironmentVariable from './getEnvironmentVariable';
+import getGuildConfig from './getGuildConfig';
 
 export default class LockdownManager {
 	static #instance: LockdownManager;
-	#ownerRoleId: string | null = null;
-	#isLockdownActive = false;
+	#lockedDownGuildIds = new Set<string>();
 	#lockdownAffectedCategories = new Set(['Music']);
-	#ownerOnlyCommands = new Set(['maintenance', 'lockdown']);
+	#ownerOnlyCommands = new Set(['lockdown']);
 
 	private constructor() {}
 
@@ -23,24 +22,27 @@ export default class LockdownManager {
 		return LockdownManager.#instance;
 	}
 
-	#getOwnerRoleId(): string {
-		if (this.#ownerRoleId === null) {
-			this.#ownerRoleId = getEnvironmentVariable('OWNER_ROLE_ID');
-		}
-		return this.#ownerRoleId;
+	#getOwnerRoleId(guildId: string | null): string | null {
+		return getGuildConfig(guildId)?.ownerRoleId ?? null;
 	}
 
 	resetState(): void {
-		this.#isLockdownActive = false;
+		this.#lockedDownGuildIds.clear();
 		this.#lockdownAffectedCategories.clear();
 		this.#lockdownAffectedCategories.add('Music');
 		this.#ownerOnlyCommands.clear();
-		this.#ownerOnlyCommands.add('maintenance');
 		this.#ownerOnlyCommands.add('lockdown');
 	}
 
-	isOwner(member: GuildMember | APIInteractionGuildMember): boolean {
-		const roleId = this.#getOwnerRoleId();
+	isOwner(
+		member: GuildMember | APIInteractionGuildMember,
+		guildId: string | null,
+	): boolean {
+		const roleId = this.#getOwnerRoleId(guildId);
+
+		if (!roleId) {
+			return false;
+		}
 
 		if (Array.isArray(member.roles)) {
 			return member.roles.includes(roleId);
@@ -49,12 +51,20 @@ export default class LockdownManager {
 		return member.roles.cache.has(roleId);
 	}
 
-	isEnabled(): boolean {
-		return this.#isLockdownActive;
+	isEnabled(guildId: string | null): boolean {
+		return guildId !== null && this.#lockedDownGuildIds.has(guildId);
 	}
 
-	setState(active: boolean): void {
-		this.#isLockdownActive = active;
+	isAnyEnabled(): boolean {
+		return this.#lockedDownGuildIds.size > 0;
+	}
+
+	setState(guildId: string, active: boolean): void {
+		if (active) {
+			this.#lockedDownGuildIds.add(guildId);
+		} else {
+			this.#lockedDownGuildIds.delete(guildId);
+		}
 	}
 
 	isCommandAffected(commandName: string): boolean {
@@ -95,25 +105,25 @@ export default class LockdownManager {
 	}
 
 	hasCommandPermission(interaction: ChatInputCommandInteraction): boolean {
-		const member = interaction.member;
+		const { member, guildId, commandName } = interaction;
 
 		if (!member) {
 			return false;
 		}
 
-		if (this.isOwner(member)) {
+		if (this.isOwner(member, guildId)) {
 			return true;
 		}
 
-		if (this.isOwnerOnlyCommand(interaction.commandName)) {
+		if (this.isOwnerOnlyCommand(commandName)) {
 			return false;
 		}
 
-		if (!this.isEnabled()) {
+		if (!this.isEnabled(guildId)) {
 			return true;
 		}
 
-		const isAffected = this.isCommandAffected(interaction.commandName);
+		const isAffected = this.isCommandAffected(commandName);
 
 		return !isAffected;
 	}
@@ -121,15 +131,20 @@ export default class LockdownManager {
 	async sendPermissionDeniedMessage(
 		interaction: ChatInputCommandInteraction,
 	): Promise<void> {
-		const roleId = this.#getOwnerRoleId();
+		const roleId = this.#getOwnerRoleId(interaction.guildId);
 
-		if (this.isOwnerOnlyCommand(interaction.commandName)) {
+		if (!roleId) {
+			await interaction.reply({
+				content: 'This command is not available in this server.',
+				flags: ['Ephemeral'],
+			});
+		} else if (this.isOwnerOnlyCommand(interaction.commandName)) {
 			await interaction.reply({
 				content: `This command is restricted to <@&${roleId}>.`,
 				flags: ['Ephemeral'],
 			});
 		} else if (
-			this.isEnabled() &&
+			this.isEnabled(interaction.guildId) &&
 			this.isCommandAffected(interaction.commandName)
 		) {
 			await interaction.reply({

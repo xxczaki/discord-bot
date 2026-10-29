@@ -12,11 +12,13 @@ const mockClient = {
 
 beforeEach(() => {
 	vi.clearAllMocks();
-	vi.spyOn(LockdownManager.getInstance(), 'isEnabled').mockReturnValue(false);
+	vi.spyOn(LockdownManager.getInstance(), 'isAnyEnabled').mockReturnValue(
+		false,
+	);
 });
 
 it('should set lockdown presence when lockdown is enabled', () => {
-	vi.spyOn(LockdownManager.getInstance(), 'isEnabled').mockReturnValue(true);
+	vi.spyOn(LockdownManager.getInstance(), 'isAnyEnabled').mockReturnValue(true);
 
 	setPresence(mockClient, {
 		name: 'Some song',
@@ -36,7 +38,7 @@ it('should set lockdown presence when lockdown is enabled', () => {
 });
 
 it('should override custom activity when lockdown is enabled', () => {
-	vi.spyOn(LockdownManager.getInstance(), 'isEnabled').mockReturnValue(true);
+	vi.spyOn(LockdownManager.getInstance(), 'isAnyEnabled').mockReturnValue(true);
 
 	setPresence(mockClient, {
 		name: 'Custom activity',
@@ -108,7 +110,7 @@ it('should set idle presence when no options provided and lockdown disabled', ()
 });
 
 it('should set lockdown presence when no options provided but lockdown enabled', () => {
-	vi.spyOn(LockdownManager.getInstance(), 'isEnabled').mockReturnValue(true);
+	vi.spyOn(LockdownManager.getInstance(), 'isAnyEnabled').mockReturnValue(true);
 
 	setPresence(mockClient);
 
@@ -161,7 +163,7 @@ it('should reset presence to idle when lockdown disabled', () => {
 });
 
 it('should reset presence to lockdown when lockdown enabled', () => {
-	vi.spyOn(LockdownManager.getInstance(), 'isEnabled').mockReturnValue(true);
+	vi.spyOn(LockdownManager.getInstance(), 'isAnyEnabled').mockReturnValue(true);
 
 	resetPresence(mockClient);
 

@@ -447,11 +447,15 @@ it('should save play stats when skip button times out', async () => {
 
 	await playerStartHandler(mockQueue, mockTrack);
 
-	expect(mockedStatsHandler.saveStat).toHaveBeenCalledWith('play', {
-		title: MOCK_TRACK_TITLE,
-		author: MOCK_TRACK_AUTHOR,
-		requestedById: MOCK_USER_ID,
-	});
+	expect(mockedStatsHandler.saveStat).toHaveBeenCalledWith(
+		'mock-guild-id',
+		'play',
+		{
+			title: MOCK_TRACK_TITLE,
+			author: MOCK_TRACK_AUTHOR,
+			requestedById: MOCK_USER_ID,
+		},
+	);
 });
 
 it('should save play stats without `requestedById` when track has no requester', async () => {
@@ -481,11 +485,15 @@ it('should save play stats without `requestedById` when track has no requester',
 
 	await playerStartHandler(mockQueue, mockTrack);
 
-	expect(mockedStatsHandler.saveStat).toHaveBeenCalledWith('play', {
-		title: MOCK_TRACK_TITLE,
-		author: MOCK_TRACK_AUTHOR,
-		requestedById: undefined,
-	});
+	expect(mockedStatsHandler.saveStat).toHaveBeenCalledWith(
+		'mock-guild-id',
+		'play',
+		{
+			title: MOCK_TRACK_TITLE,
+			author: MOCK_TRACK_AUTHOR,
+			requestedById: undefined,
+		},
+	);
 });
 
 it('should handle `emptyQueue` event by sending message and resetting presence', async () => {
@@ -505,7 +513,9 @@ it('should handle `emptyQueue` event by sending message and resetting presence',
 	await emptyQueueHandler(mockQueue);
 
 	expect(mockChannel.send).toHaveBeenCalledWith('Queue finished, leaving…');
-	expect(mockedQueueRecoveryService.deleteQueue).toHaveBeenCalled();
+	expect(mockedQueueRecoveryService.deleteQueue).toHaveBeenCalledWith(
+		'mock-guild-id',
+	);
 	expect(mockedResetPresence).toHaveBeenCalledWith(mockClient);
 });
 
@@ -665,11 +675,15 @@ it('should handle unknown button interaction by falling through to catch block',
 
 	await playerStartHandler(mockQueue, mockTrack);
 
-	expect(mockedStatsHandler.saveStat).toHaveBeenCalledWith('play', {
-		title: MOCK_TRACK_TITLE,
-		author: MOCK_TRACK_AUTHOR,
-		requestedById: MOCK_USER_ID,
-	});
+	expect(mockedStatsHandler.saveStat).toHaveBeenCalledWith(
+		'mock-guild-id',
+		'play',
+		{
+			title: MOCK_TRACK_TITLE,
+			author: MOCK_TRACK_AUTHOR,
+			requestedById: MOCK_USER_ID,
+		},
+	);
 });
 
 it('should register `playerFinish` event handler', () => {

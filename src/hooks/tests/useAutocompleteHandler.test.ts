@@ -1,5 +1,5 @@
 import { captureException } from '@sentry/node';
-import type { AutocompleteInteraction, Channel } from 'discord.js';
+import type { AutocompleteInteraction, Channel, Client } from 'discord.js';
 import { useMainPlayer, useQueue } from 'discord-player';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { FALLBACK_SEARCH_ENGINE } from '../../constants/sourceConfig';
@@ -22,7 +22,7 @@ const mockedUseQueue = vi.mocked(useQueue);
 const mockedDetermineSearchEngine = vi.mocked(determineSearchEngine);
 const mockedGetTrackPosition = vi.mocked(getTrackPosition);
 
-const mockGetEnvironmentVariable = vi.hoisted(() => vi.fn());
+const mockGetPlaylistsChannel = vi.hoisted(() => vi.fn());
 const mockGetAllPlaylists = vi.hoisted(() => vi.fn());
 
 interface MockTextChannel {
@@ -33,8 +33,8 @@ vi.mock('@sentry/node');
 vi.mock('discord-player');
 vi.mock('../../utils/determineSearchEngine');
 vi.mock('../../utils/getTrackPosition');
-vi.mock('../../utils/getEnvironmentVariable', () => ({
-	default: mockGetEnvironmentVariable,
+vi.mock('../../utils/getGuildConfig', () => ({
+	getPlaylistsChannel: mockGetPlaylistsChannel,
 }));
 vi.mock('../../utils/getPlaylists', () => ({
 	getAllPlaylists: mockGetAllPlaylists,
@@ -56,6 +56,7 @@ function createMockAutocompleteInteraction(
 		isAutocomplete: () => true,
 		responded,
 		commandName,
+		guildId: 'test-guild-id',
 		options: {
 			getString: vi.fn((optionName: string) => {
 				if (optionName === 'query') return query;
@@ -448,7 +449,9 @@ describe('move command autocomplete', () => {
 describe('playlists command autocomplete', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		mockGetEnvironmentVariable.mockReturnValue('test-channel-id');
+		mockGetPlaylistsChannel.mockImplementation((client: Client) =>
+			client.channels.cache.get('test-channel-id'),
+		);
 	});
 
 	it('should return empty array if channel is not text-based', async () => {
@@ -471,8 +474,9 @@ describe('playlists command autocomplete', () => {
 
 		expect(interaction.respond).toHaveBeenCalledWith([]);
 		expect(mockNonTextChannel.isTextBased).toHaveBeenCalled();
-		expect(interaction.client.channels.cache.get).toHaveBeenCalledWith(
-			'test-channel-id',
+		expect(mockGetPlaylistsChannel).toHaveBeenCalledWith(
+			interaction.client,
+			'test-guild-id',
 		);
 	});
 
@@ -654,7 +658,9 @@ describe('playlists command autocomplete', () => {
 describe('head command autocomplete', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		mockGetEnvironmentVariable.mockReturnValue('test-channel-id');
+		mockGetPlaylistsChannel.mockImplementation((client: Client) =>
+			client.channels.cache.get('test-channel-id'),
+		);
 	});
 
 	it('should return all playlists without filtering', async () => {
@@ -735,7 +741,9 @@ describe('head command autocomplete', () => {
 describe('tail command autocomplete', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		mockGetEnvironmentVariable.mockReturnValue('test-channel-id');
+		mockGetPlaylistsChannel.mockImplementation((client: Client) =>
+			client.channels.cache.get('test-channel-id'),
+		);
 	});
 
 	it('should return all playlists without filtering', async () => {

@@ -54,6 +54,7 @@ interface MockStream extends EventEmitter {
 
 function createMockInteraction(): ChatInputCommandInteraction {
 	return {
+		guildId: 'guild-123',
 		client: {
 			user: {
 				id: 'bot-id-12345',
@@ -134,8 +135,14 @@ it('should reply with loading message and process stats successfully', async () 
 	await promise;
 
 	expect(interaction.editReply).toHaveBeenCalledWith('Loading latest stats…');
-	expect(mockStatsHandlerInstance.getStats).toHaveBeenCalledWith('play');
-	expect(mockStatsHandlerInstance.getStats).toHaveBeenCalledWith('playlist');
+	expect(mockStatsHandlerInstance.getStats).toHaveBeenCalledWith(
+		'guild-123',
+		'play',
+	);
+	expect(mockStatsHandlerInstance.getStats).toHaveBeenCalledWith(
+		'guild-123',
+		'playlist',
+	);
 
 	expect(mockedRedis.pipeline).toHaveBeenCalledTimes(1);
 	const pipelineInstance = mockedRedis.pipeline();

@@ -305,11 +305,6 @@ export const RAW_COMMANDS: CategorizedCommand[] = [
 		category: 'Other',
 	},
 	{
-		name: 'maintenance',
-		description: "Activate maintenance mode by deleting the bot's deployment",
-		category: 'Owner-only',
-	},
-	{
 		name: 'lockdown',
 		description: 'Toggle lockdown mode for certain commands',
 		category: 'Owner-only',
