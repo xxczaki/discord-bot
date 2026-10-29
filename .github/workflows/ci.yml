@@ -178,8 +178,17 @@ jobs:
         env:
           VERSION: ${{ steps.meta.outputs.version }}
         run: |
-          docker buildx imagetools inspect "xxczaki/discord-bot:${VERSION}"
-          docker buildx imagetools inspect "ghcr.io/xxczaki/discord-bot:${VERSION}"
+          for image in "xxczaki/discord-bot:${VERSION}" "ghcr.io/xxczaki/discord-bot:${VERSION}"; do
+            for attempt in 1 2 3 4 5; do
+              if docker buildx imagetools inspect "$image"; then
+                continue 2
+              fi
+              echo "Inspect attempt ${attempt} for ${image} failed, retrying"
+              sleep $((attempt * 3))
+            done
+            echo "::error::Could not inspect ${image} after 5 attempts"
+            exit 1
+          done
 
   promote:
     needs: [merge]
