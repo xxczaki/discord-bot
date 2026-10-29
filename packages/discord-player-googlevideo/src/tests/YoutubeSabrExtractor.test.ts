@@ -571,7 +571,7 @@ describe('YoutubeSabrExtractor', () => {
 
 			const mockReadableStream = new ReadableStream();
 
-			mockSabrStream.start.mockResolvedValue({
+			mockSabrStream.start.mockReturnValue({
 				audioStream: mockReadableStream,
 			});
 
@@ -608,7 +608,7 @@ describe('YoutubeSabrExtractor', () => {
 
 			const mockReadableStream = new ReadableStream();
 
-			mockSabrStream.start.mockResolvedValue({
+			mockSabrStream.start.mockReturnValue({
 				audioStream: mockReadableStream,
 			});
 
