@@ -5,7 +5,7 @@ experimental = true
 idiomatic_version_file_enable_tools = ["node"]
 
 [tools]
-pnpm = "12"
+pnpm = "12.15.0"
 
 [env]
 _.path = ["{{config_root}}/node_modules/.bin"]
