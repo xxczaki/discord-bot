@@ -32,15 +32,14 @@ env:
   # -- Client ID used for Discord API authorization
   # @section -- Bot
   clientId: ""
-  # -- ID of the channel used for storing the user playlists
-  # @section -- Bot
-  playlistsChannelId: ""
   # -- ID of the channel used for sending debug messages
+  # The server containing this channel is treated as the home server, whose owners can manage shared caches
   # @section -- Bot
   botDebugChannelId: ""
-  # -- ID of the role that should be allowed to perform sensitive actions, like clearing the query cache
+  # -- Servers allowed to use the bot, keyed by guild ID
+  # Each entry needs `playlistsChannelId` (channel storing the server's playlists) and can set `ownerRoleId` (role allowed to use owner-only commands like `/lockdown`, which are unavailable without it)
   # @section -- Bot
-  ownerRoleId: ""
+  guilds: {}
   # -- Optional client ID for the Spotify API
   # Used by https://github.com/iTsMaaT/discord-player-spotify
   # @section -- Bot
@@ -52,7 +51,7 @@ env:
   # Set to "true" to enable YouTube extractor, leave empty for SoundCloud-only
   # @section -- Bot
   enableYoutube: ""
-  # -- Comma-separated list of commands to disable (e.g. "maintenance,lockdown")
+  # -- Comma-separated list of commands to disable (e.g. "lockdown,prompt")
   # Disabled commands are not registered with Discord
   # @section -- Bot
   disabledCommands: ""
@@ -63,10 +62,8 @@ persistentVolumeClaim:
   accessModes:
     - ReadWriteOnce
   storageClass: ""
-# -- RBAC configuration to access the Kubernetes API
-# @section -- RBAC
-rbac:
-  create: true
+# -- Service account used by the bot Pod
+# @section -- Service Account
 serviceAccount:
   create: true
   annotations: {}

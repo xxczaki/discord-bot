@@ -14,7 +14,7 @@ import { useQueue } from 'discord-player';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../../constants/miscellaneous';
 import enqueuePlaylists from '../enqueuePlaylists';
-import getEnvironmentVariable from '../getEnvironmentVariable';
+import { getPlaylistsChannel } from '../getGuildConfig';
 import processTracksWithQueue from '../processTracksWithQueue';
 
 const EXAMPLE_PLAYLIST_IDS = ['playlist1', 'playlist2'];
@@ -43,8 +43,8 @@ vi.mock('discord-player', () => ({
 	useQueue: vi.fn(),
 }));
 
-vi.mock('../getEnvironmentVariable', () => ({
-	default: vi.fn(),
+vi.mock('../getGuildConfig', () => ({
+	getPlaylistsChannel: vi.fn(),
 }));
 
 vi.mock('../processTracksWithQueue', () => ({
@@ -52,7 +52,7 @@ vi.mock('../processTracksWithQueue', () => ({
 }));
 
 const mockedUseQueue = vi.mocked(useQueue);
-const mockedGetEnvironmentVariable = vi.mocked(getEnvironmentVariable);
+const mockedGetPlaylistsChannel = vi.mocked(getPlaylistsChannel);
 const mockedProcessTracksWithQueue = vi.mocked(processTracksWithQueue);
 
 let mockInteraction: StringSelectMenuInteraction;
@@ -93,6 +93,7 @@ beforeEach(() => {
 
 	mockInteraction = {
 		values: EXAMPLE_PLAYLIST_IDS,
+		guildId: 'guild123',
 		user: {
 			id: 'user123',
 		},
@@ -109,9 +110,11 @@ beforeEach(() => {
 		editReply: vi.fn().mockResolvedValue(mockResponse),
 	} as unknown as StringSelectMenuInteraction;
 
-	mockVoiceChannel = {} as VoiceBasedChannel;
+	mockVoiceChannel = { guild: { id: 'guild123' } } as VoiceBasedChannel;
 
-	mockedGetEnvironmentVariable.mockReturnValue(EXAMPLE_PLAYLISTS_CHANNEL_ID);
+	mockedGetPlaylistsChannel.mockImplementation((client) =>
+		client.channels.cache.get(EXAMPLE_PLAYLISTS_CHANNEL_ID),
+	);
 	mockedProcessTracksWithQueue.mockResolvedValue({
 		enqueued: EXAMPLE_ENQUEUED_COUNT,
 	});
@@ -136,14 +139,12 @@ it('should return early when playlists channel is not text-based', async () => {
 	});
 });
 
-it('should fetch playlists channel using environment variable', async () => {
+it('should fetch the playlists channel of the interaction guild', async () => {
 	await enqueuePlaylists(mockInteraction, mockVoiceChannel);
 
-	expect(mockedGetEnvironmentVariable).toHaveBeenCalledWith(
-		'PLAYLISTS_CHANNEL_ID',
-	);
-	expect(mockInteraction.client.channels.cache.get).toHaveBeenCalledWith(
-		EXAMPLE_PLAYLISTS_CHANNEL_ID,
+	expect(mockedGetPlaylistsChannel).toHaveBeenCalledWith(
+		mockInteraction.client,
+		'guild123',
 	);
 });
 
@@ -406,9 +407,11 @@ describe('enqueuePlaylists with ChatInputCommandInteraction and playlist IDs', (
 			editReply: vi.fn().mockResolvedValue(mockResponse),
 		} as unknown as ChatInputCommandInteraction;
 
-		mockVoiceChannel = {} as VoiceBasedChannel;
+		mockVoiceChannel = { guild: { id: 'guild123' } } as VoiceBasedChannel;
 
-		mockedGetEnvironmentVariable.mockReturnValue(EXAMPLE_PLAYLISTS_CHANNEL_ID);
+		mockedGetPlaylistsChannel.mockImplementation((client) =>
+			client.channels.cache.get(EXAMPLE_PLAYLISTS_CHANNEL_ID),
+		);
 		mockedProcessTracksWithQueue.mockResolvedValue({
 			enqueued: EXAMPLE_ENQUEUED_COUNT,
 		});

@@ -300,7 +300,7 @@ export default function usePlayerEventHandlers(
 
 			throw 'fallthrough to catch block';
 		} catch {
-			void statsHandler.saveStat('play', {
+			void statsHandler.saveStat(queue.guild.id, 'play', {
 				title: track.title,
 				author: track.author,
 				requestedById: track.requestedBy?.id,
@@ -389,7 +389,7 @@ export default function usePlayerEventHandlers(
 			await interaction.channel.send('Queue finished, leaving…');
 		}
 
-		void queueRecoveryService.deleteQueue();
+		void queueRecoveryService.deleteQueue(queue.guild.id);
 
 		resetPresence(client);
 	});

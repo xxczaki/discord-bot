@@ -10,7 +10,7 @@ import {
 import { useQueue } from 'discord-player';
 import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
 import cleanUpPlaylistContent from './cleanUpPlaylistContent';
-import getEnvironmentVariable from './getEnvironmentVariable';
+import { getPlaylistsChannel } from './getGuildConfig';
 import pluralize from './pluralize';
 import processTracksWithQueue from './processTracksWithQueue';
 import { StatsHandler } from './StatsHandler';
@@ -38,8 +38,9 @@ export default async function enqueuePlaylists(
 				(value) => `id="${value}"`,
 			);
 
-	const playlistsChannel = interaction.client.channels.cache.get(
-		getEnvironmentVariable('PLAYLISTS_CHANNEL_ID'),
+	const playlistsChannel = getPlaylistsChannel(
+		interaction.client,
+		interaction.guildId,
 	);
 
 	if (!interaction.deferred) {
@@ -95,7 +96,7 @@ export default async function enqueuePlaylists(
 	);
 
 	for (const playlistId of actualPlaylistIds) {
-		void statsHandler.saveStat('playlist', {
+		void statsHandler.saveStat(voiceChannel.guild.id, 'playlist', {
 			playlistId,
 			requestedById: interaction.user.id,
 		});

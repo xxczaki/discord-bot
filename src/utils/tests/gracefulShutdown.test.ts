@@ -1,5 +1,10 @@
 import type { Server } from 'node:net';
-import type { Client, TextChannel } from 'discord.js';
+import {
+	type Client,
+	Collection,
+	type Guild,
+	type TextChannel,
+} from 'discord.js';
 import type { GuildQueue } from 'discord-player';
 import { useQueue } from 'discord-player';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
@@ -30,6 +35,7 @@ const mockedLogger = vi.mocked(logger);
 let mockClient: Client;
 let mockServer: Server;
 let mockChannel: TextChannel;
+let mockSaveQueue: ReturnType<typeof vi.fn>;
 let processExitSpy: ReturnType<typeof vi.spyOn>;
 let sigTermListenersBefore: NodeJS.SignalsListener[];
 
@@ -50,19 +56,12 @@ beforeEach(() => {
 		send: vi.fn().mockResolvedValue(undefined),
 	} as unknown as TextChannel;
 
-	mockClient = {
-		guilds: {
-			cache: {
-				first: vi.fn().mockReturnValue({ id: 'test-guild-id' }),
-			},
-		},
-		channels: {
-			cache: {
-				get: vi.fn().mockReturnValue(mockChannel),
-			},
-		},
-		destroy: vi.fn(),
-	} as unknown as Client;
+	mockSaveQueue = vi.fn().mockResolvedValue(undefined);
+	mockedQueueRecoveryService.getInstance.mockReturnValue({
+		saveQueue: mockSaveQueue,
+	} as unknown as QueueRecoveryService);
+
+	mockClient = createMockClient(['test-guild-id']);
 
 	mockServer = {
 		close: vi.fn(),
@@ -86,6 +85,26 @@ afterEach(() => {
 	processExitSpy.mockRestore();
 });
 
+function createGuildCache(guildIds: string[]): Collection<string, Guild> {
+	return new Collection(
+		guildIds.map((guildId) => [guildId, { id: guildId } as Guild]),
+	);
+}
+
+function createMockClient(guildIds: string[]): Client {
+	return {
+		guilds: {
+			cache: createGuildCache(guildIds),
+		},
+		channels: {
+			cache: {
+				get: vi.fn().mockReturnValue(mockChannel),
+			},
+		},
+		destroy: vi.fn(),
+	} as unknown as Client;
+}
+
 const emitSigterm = async () => {
 	process.emit('SIGTERM', 'SIGTERM');
 	await vi.advanceTimersByTimeAsync(0);
@@ -103,12 +122,8 @@ it('should register a SIGTERM handler', () => {
 
 it('should save queue and exit gracefully on SIGTERM', async () => {
 	const mockQueue = { id: 'test-queue' } as unknown as GuildQueue;
-	const mockSaveQueue = vi.fn().mockResolvedValue(undefined);
 
 	mockedUseQueue.mockReturnValue(mockQueue);
-	mockedQueueRecoveryService.getInstance.mockReturnValue({
-		saveQueue: mockSaveQueue,
-	} as unknown as QueueRecoveryService);
 
 	setupGracefulShutdown(mockClient, mockServer);
 	await emitSigterm();
@@ -129,27 +144,45 @@ it('should save queue and exit gracefully on SIGTERM', async () => {
 	expect(processExitSpy).toHaveBeenCalledWith(0);
 });
 
-it('should skip queue save when no guild exists', async () => {
-	(mockClient.guilds.cache.first as ReturnType<typeof vi.fn>).mockReturnValue(
-		undefined,
+it('should save the queue of every guild on SIGTERM', async () => {
+	const firstQueue = { id: 'first-queue' } as unknown as GuildQueue;
+	const secondQueue = { id: 'second-queue' } as unknown as GuildQueue;
+
+	mockClient = createMockClient(['first-guild', 'second-guild']);
+	mockedUseQueue.mockImplementation((guildId) =>
+		guildId === 'first-guild' ? firstQueue : secondQueue,
 	);
 
 	setupGracefulShutdown(mockClient, mockServer);
 	await emitSigterm();
 
+	expect(mockedUseQueue).toHaveBeenCalledWith('first-guild');
+	expect(mockedUseQueue).toHaveBeenCalledWith('second-guild');
+	expect(mockSaveQueue).toHaveBeenCalledWith(firstQueue);
+	expect(mockSaveQueue).toHaveBeenCalledWith(secondQueue);
+	expect(processExitSpy).toHaveBeenCalledWith(0);
+});
+
+it('should skip queue save when no guild exists', async () => {
+	mockClient = createMockClient([]);
+
+	setupGracefulShutdown(mockClient, mockServer);
+	await emitSigterm();
+
 	expect(mockedUseQueue).not.toHaveBeenCalled();
+	expect(mockSaveQueue).not.toHaveBeenCalled();
 	expect(mockedRedis.set).toHaveBeenCalled();
 	expect(processExitSpy).toHaveBeenCalledWith(0);
 });
 
-it('should skip queue save when no active queue exists', async () => {
+it('should pass `null` to `saveQueue` when no active queue exists', async () => {
 	mockedUseQueue.mockReturnValue(null);
 
 	setupGracefulShutdown(mockClient, mockServer);
 	await emitSigterm();
 
 	expect(mockedUseQueue).toHaveBeenCalledWith('test-guild-id');
-	expect(mockedQueueRecoveryService.getInstance).not.toHaveBeenCalled();
+	expect(mockSaveQueue).toHaveBeenCalledWith(null);
 	expect(processExitSpy).toHaveBeenCalledWith(0);
 });
 

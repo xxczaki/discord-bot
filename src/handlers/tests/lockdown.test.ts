@@ -4,13 +4,13 @@ import LockdownManager from '../../utils/lockdown';
 import { setPresence } from '../../utils/presenceManager';
 import lockdownCommandHandler from '../lockdown';
 
-vi.mock('../../utils/getEnvironmentVariable', () => ({
-	default: vi.fn((key: string) => {
-		if (key === 'OWNER_ROLE_ID') {
-			return 'owner-role-123';
-		}
-		throw new TypeError(`Environment variable ${key} is not defined`);
-	}),
+const GUILD_ID = 'guild-123';
+
+vi.mock('../../utils/getGuildConfig', () => ({
+	default: vi.fn(() => ({
+		playlistsChannelId: 'playlists-channel',
+		ownerRoleId: 'owner-role-123',
+	})),
 }));
 
 vi.mock('../../utils/presenceManager', () => ({
@@ -20,10 +20,12 @@ vi.mock('../../utils/presenceManager', () => ({
 function createMockInteraction(
 	roles: string[],
 	withClient = false,
+	guildId: string | null = GUILD_ID,
 ): ChatInputCommandInteraction {
 	const mockClient = withClient ? { id: 'bot-123' } : undefined;
 
 	return {
+		guildId,
 		member: {
 			roles,
 		},
@@ -50,7 +52,7 @@ it('should enable lockdown when currently disabled', async () => {
 });
 
 it('should disable lockdown when currently enabled', async () => {
-	LockdownManager.getInstance().setState(true);
+	LockdownManager.getInstance().setState(GUILD_ID, true);
 
 	const interaction = createMockInteraction(['owner-role-123']);
 
@@ -72,7 +74,7 @@ it('should include affected categories in response', async () => {
 });
 
 it('should toggle from enabled to disabled', async () => {
-	LockdownManager.getInstance().setState(true);
+	LockdownManager.getInstance().setState(GUILD_ID, true);
 
 	const interaction = createMockInteraction(['owner-role-123']);
 
@@ -116,6 +118,7 @@ it('should reject non-owner users', async () => {
 
 it('should handle missing member', async () => {
 	const interaction = {
+		guildId: GUILD_ID,
 		member: null,
 		reply: vi.fn().mockResolvedValue({}),
 		editReply: vi.fn().mockResolvedValue({}),
@@ -135,4 +138,26 @@ it('should call setPresence when client is available', async () => {
 	await lockdownCommandHandler(interaction);
 
 	expect(setPresence).toHaveBeenCalledWith(interaction.client);
+});
+
+it('should only toggle lockdown for the current guild', async () => {
+	const interaction = createMockInteraction(['owner-role-123']);
+
+	await lockdownCommandHandler(interaction);
+
+	const lockdown = LockdownManager.getInstance();
+	expect(lockdown.isEnabled(GUILD_ID)).toBe(true);
+	expect(lockdown.isEnabled('another-guild')).toBe(false);
+});
+
+it('should reject interactions outside of a guild', async () => {
+	const interaction = createMockInteraction(['owner-role-123'], false, null);
+
+	await lockdownCommandHandler(interaction);
+
+	expect(interaction.editReply).not.toHaveBeenCalled();
+	expect(interaction.reply).toHaveBeenCalledWith({
+		content: 'This command is restricted to <@&owner-role-123>.',
+		flags: ['Ephemeral'],
+	});
 });

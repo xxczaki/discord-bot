@@ -14,7 +14,7 @@ import { FALLBACK_SEARCH_ENGINE } from '../constants/sourceConfig';
 import type { QueueMetadata } from '../types/QueueMetadata';
 import cleanUpPlaylistContent from './cleanUpPlaylistContent';
 import determineSearchEngine from './determineSearchEngine';
-import getEnvironmentVariable from './getEnvironmentVariable';
+import { getPlaylistsChannel } from './getGuildConfig';
 import logger from './logger';
 import pluralize from './pluralize';
 import {
@@ -376,10 +376,10 @@ const TOOL_REGISTRY: Record<string, ToolDefinition> = {
 				inputSchema: z.object({}),
 				execute: async () => {
 					try {
-						const playlistsChannel =
-							context.interaction.client.channels.cache.get(
-								getEnvironmentVariable('PLAYLISTS_CHANNEL_ID'),
-							);
+						const playlistsChannel = getPlaylistsChannel(
+							context.interaction.client,
+							context.interaction.guildId,
+						);
 
 						if (!playlistsChannel?.isTextBased()) {
 							return {
@@ -431,10 +431,10 @@ const TOOL_REGISTRY: Record<string, ToolDefinition> = {
 				}),
 				execute: async ({ playlistId }) => {
 					try {
-						const playlistsChannel =
-							context.interaction.client.channels.cache.get(
-								getEnvironmentVariable('PLAYLISTS_CHANNEL_ID'),
-							);
+						const playlistsChannel = getPlaylistsChannel(
+							context.interaction.client,
+							context.interaction.guildId,
+						);
 
 						if (!playlistsChannel?.isTextBased()) {
 							return {
@@ -501,10 +501,14 @@ const TOOL_REGISTRY: Record<string, ToolDefinition> = {
 							}
 						}
 
-						void statsHandler.saveStat('playlist', {
-							playlistId,
-							requestedById: context.interaction.user.id,
-						});
+						void statsHandler.saveStat(
+							context.voiceChannel.guild.id,
+							'playlist',
+							{
+								playlistId,
+								requestedById: context.interaction.user.id,
+							},
+						);
 
 						return {
 							success: true,

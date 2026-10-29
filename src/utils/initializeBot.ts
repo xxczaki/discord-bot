@@ -9,6 +9,7 @@ import getEnvironmentVariable from './getEnvironmentVariable';
 import setupGracefulShutdown from './gracefulShutdown';
 import initializeCommands from './initializeCommands';
 import getInitializedPlayer from './initializePlayer';
+import migrateLegacyStats from './migrateLegacyStats';
 import performStartupRecovery from './startupRecovery';
 
 export interface BotInitializationResult {
@@ -33,6 +34,7 @@ export async function initializeBot(): Promise<BotInitializationResult> {
 	usePlayerEventHandlers(client, player);
 
 	void performStartupRecovery(client, player);
+	void migrateLegacyStats(client);
 	setupGracefulShutdown(client, server);
 
 	return { client, token };

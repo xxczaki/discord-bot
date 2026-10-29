@@ -1,6 +1,7 @@
 import { join } from 'node:path';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { RAW_COMMANDS } from '../constants/commands';
+import getGuildConfig from '../utils/getGuildConfig';
 import LockdownManager from '../utils/lockdown';
 import logger from '../utils/logger';
 import reportError from '../utils/reportError';
@@ -16,6 +17,13 @@ export default async function useCommandHandlers(
 	if (!RAW_COMMANDS.some((command) => command.name === commandName)) {
 		logger.warn(`Unknown command, "${commandName}"`);
 		return;
+	}
+
+	if (!getGuildConfig(interaction.guildId)) {
+		return interaction.reply({
+			content: 'This server is not configured to use this bot.',
+			flags: ['Ephemeral'],
+		});
 	}
 
 	const lockdown = LockdownManager.getInstance();

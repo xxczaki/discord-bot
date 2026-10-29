@@ -5,18 +5,18 @@ import { setPresence } from '../utils/presenceManager';
 export default async function lockdownCommandHandler(
 	interaction: ChatInputCommandInteraction,
 ) {
-	const member = interaction.member;
+	const { member, guildId } = interaction;
 	const lockdown = LockdownManager.getInstance();
 
-	if (!member || !lockdown.isOwner(member)) {
+	if (!member || !guildId || !lockdown.isOwner(member, guildId)) {
 		return lockdown.sendPermissionDeniedMessage(interaction);
 	}
 
-	const currentState = lockdown.isEnabled();
+	const currentState = lockdown.isEnabled(guildId);
 	const newState = !currentState;
 	const affectedCategories = lockdown.getCategories();
 
-	lockdown.setState(newState);
+	lockdown.setState(guildId, newState);
 
 	if (interaction.client) {
 		setPresence(interaction.client);

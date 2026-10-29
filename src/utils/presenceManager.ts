@@ -12,7 +12,7 @@ export function setPresence(
 	client: Client<boolean>,
 	options?: PresenceOptions,
 ): void {
-	if (LockdownManager.getInstance().isEnabled()) {
+	if (LockdownManager.getInstance().isAnyEnabled()) {
 		client.user?.setPresence({
 			activities: [
 				{

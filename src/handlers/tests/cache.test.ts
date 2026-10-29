@@ -1,6 +1,7 @@
 import { opendir, stat } from 'node:fs/promises';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { isHomeGuild } from '../../utils/getGuildConfig';
 import redis from '../../utils/redis';
 import cacheCommandHandler, {
 	createActionRowWithRemovedButton,
@@ -8,10 +9,17 @@ import cacheCommandHandler, {
 
 vi.mock('../../utils/getEnvironmentVariable', () => ({
 	default: vi.fn((key: string) => {
-		if (key === 'OWNER_ROLE_ID') return 'owner-role-123';
 		if (key === 'NODE_ENV') return 'production';
 		throw new Error(`Unknown env var: ${key}`);
 	}),
+}));
+
+vi.mock('../../utils/getGuildConfig', () => ({
+	default: vi.fn(() => ({
+		playlistsChannelId: 'playlists-channel-123',
+		ownerRoleId: 'owner-role-123',
+	})),
+	isHomeGuild: vi.fn(() => true),
 }));
 
 vi.mock('../../utils/OpusCacheManager', () => ({
@@ -27,6 +35,7 @@ vi.mock('node:fs/promises', () => ({
 
 const mockOpendir = vi.mocked(opendir);
 const mockStat = vi.mocked(stat);
+const mockIsHomeGuild = vi.mocked(isHomeGuild);
 
 interface MockCollector {
 	on: ReturnType<typeof vi.fn>;
@@ -75,6 +84,7 @@ function createMockInteraction(
 	roles: string[] = ['other-role'],
 ): ChatInputCommandInteraction {
 	return {
+		guildId: 'guild-123',
 		member: { roles },
 		reply: vi.fn().mockResolvedValue({}),
 		editReply: vi.fn().mockResolvedValue({}),
@@ -204,6 +214,20 @@ describe('cache command handler', () => {
 
 	it('should disable flush buttons for non-owner', async () => {
 		const mockInteraction = createMockInteraction(['other-role']);
+		mockOpendir.mockResolvedValue(createMockDirectory([]) as never);
+
+		await cacheCommandHandler(mockInteraction);
+
+		const call = getEditReplyCall(mockInteraction);
+		const components = call.components;
+
+		expect(components?.[0].components[0].data.disabled).toBe(true);
+		expect(components?.[0].components[1].data.disabled).toBe(true);
+	});
+
+	it('should disable flush buttons for owners outside the home guild', async () => {
+		mockIsHomeGuild.mockReturnValueOnce(false);
+		const mockInteraction = createMockInteraction(['owner-role-123']);
 		mockOpendir.mockResolvedValue(createMockDirectory([]) as never);
 
 		await cacheCommandHandler(mockInteraction);

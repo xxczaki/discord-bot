@@ -8,7 +8,7 @@ import Fuse from 'fuse.js';
 import debounce from 'p-debounce';
 import { FALLBACK_SEARCH_ENGINE } from '../constants/sourceConfig';
 import determineSearchEngine from '../utils/determineSearchEngine';
-import getEnvironmentVariable from '../utils/getEnvironmentVariable';
+import { getPlaylistsChannel } from '../utils/getGuildConfig';
 import { getAllPlaylists } from '../utils/getPlaylists';
 import getTrackPosition from '../utils/getTrackPosition';
 import reportError from '../utils/reportError';
@@ -125,8 +125,9 @@ async function handleAutocomplete(interaction: AutocompleteInteraction) {
 		const focusedOption = interaction.options.getFocused(true);
 
 		try {
-			const channel = interaction.client.channels.cache.get(
-				getEnvironmentVariable('PLAYLISTS_CHANNEL_ID'),
+			const channel = getPlaylistsChannel(
+				interaction.client,
+				interaction.guildId,
 			);
 
 			if (!channel?.isTextBased()) {

@@ -1,4 +1,9 @@
-import type { Client, TextChannel } from 'discord.js';
+import {
+	type Client,
+	Collection,
+	type Guild,
+	type TextChannel,
+} from 'discord.js';
 import type { Player, Track } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
 import type { ProcessingInteraction } from '../../types/ProcessingInteraction';
@@ -89,9 +94,9 @@ function createMockClient(
 	return {
 		user,
 		guilds: {
-			cache: {
-				first: vi.fn().mockReturnValue(hasGuild ? guild : undefined),
-			},
+			cache: new Collection<string, Guild>(
+				hasGuild ? [[guild.id, guild as unknown as Guild]] : [],
+			),
 		},
 		channels: {
 			cache: {
@@ -254,6 +259,85 @@ it('should not send crash message when channel is not sendable', async () => {
 
 	await performStartupRecovery(mockClient, mockPlayer);
 
+	expect(mockChannel.send).not.toHaveBeenCalled();
+});
+
+it('should look up saved queue contents per guild', async () => {
+	const mockClient = createMockClient();
+	const mockGetContents = vi
+		.fn()
+		.mockResolvedValue({ tracks: [], progress: 0 });
+
+	mockedRedis.get.mockResolvedValue('graceful');
+	mockedRedis.del.mockResolvedValue(1);
+	mockedQueueRecoveryService.getInstance.mockReturnValue({
+		getContents: mockGetContents,
+	} as unknown as QueueRecoveryService);
+
+	await performStartupRecovery(mockClient, mockPlayer);
+
+	expect(mockGetContents).toHaveBeenCalledWith(mockPlayer, 'test-guild-id');
+});
+
+it('should recover every guild with a saved queue', async () => {
+	const tracks = createMockTracks(1);
+	const mockClient = createMockClient();
+	const firstGuild = mockClient.guilds.cache.first();
+	const secondGuild = { ...firstGuild, id: 'second-guild-id' } as Guild;
+
+	mockClient.guilds.cache.set(secondGuild.id, secondGuild);
+
+	const mockGetContents = vi.fn().mockResolvedValue({ tracks, progress: 0 });
+
+	mockedRedis.get.mockResolvedValue('graceful');
+	mockedRedis.del.mockResolvedValue(1);
+	mockedQueueRecoveryService.getInstance.mockReturnValue({
+		getContents: mockGetContents,
+	} as unknown as QueueRecoveryService);
+	mockedEnqueueTracks.mockResolvedValue(undefined);
+
+	await performStartupRecovery(mockClient, mockPlayer);
+
+	expect(mockGetContents).toHaveBeenCalledWith(mockPlayer, 'test-guild-id');
+	expect(mockGetContents).toHaveBeenCalledWith(mockPlayer, 'second-guild-id');
+	expect(mockedEnqueueTracks).toHaveBeenCalledTimes(2);
+});
+
+it('should log per-guild recovery errors without stopping other guilds', async () => {
+	const mockClient = createMockClient();
+
+	mockedRedis.get.mockResolvedValue('graceful');
+	mockedRedis.del.mockResolvedValue(1);
+	mockedQueueRecoveryService.getInstance.mockReturnValue({
+		getContents: vi.fn().mockRejectedValue(new Error('Bad data')),
+	} as unknown as QueueRecoveryService);
+
+	await performStartupRecovery(mockClient, mockPlayer);
+
+	expect(mockedLogger.error).toHaveBeenCalledWith(
+		expect.any(Error),
+		'Startup recovery failed for guild test-guild-id',
+	);
+});
+
+it('should suggest `/recover` in the previous channel after a crash', async () => {
+	const tracks = createMockTracks();
+	const mockClient = createMockClient();
+
+	mockedRedis.get.mockResolvedValue(null);
+	mockedQueueRecoveryService.getInstance.mockReturnValue({
+		getContents: vi.fn().mockResolvedValue({
+			tracks,
+			progress: 0,
+			channelId: 'previous-channel-id',
+		}),
+	} as unknown as QueueRecoveryService);
+
+	await performStartupRecovery(mockClient, mockPlayer);
+
+	expect(mockPreviousChannel.send).toHaveBeenCalledWith(
+		'Found a saved queue from a previous session. Use `/recover` to restore it.',
+	);
 	expect(mockChannel.send).not.toHaveBeenCalled();
 });
 

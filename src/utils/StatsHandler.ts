@@ -1,6 +1,10 @@
 import { ulid } from 'ulid';
 import redis from './redis';
 
+type StatType = 'play' | 'playlist';
+
+const STAT_TYPES: StatType[] = ['play', 'playlist'];
+
 export class StatsHandler {
 	static #instance: StatsHandler;
 
@@ -15,21 +19,54 @@ export class StatsHandler {
 	}
 
 	async saveStat(
-		type: 'play' | 'playlist',
+		guildId: string,
+		type: StatType,
 		payload:
 			| { title: string; author: string; requestedById?: string }
 			| { playlistId: string; requestedById: string },
 	) {
 		await redis.set(
-			`discord-player:stats:${type}:${ulid()}`,
+			`discord-player:stats:${guildId}:${type}:${ulid()}`,
 			JSON.stringify(payload),
 		);
 	}
 
-	getStats(type: 'play' | 'playlist') {
+	getStats(guildId: string, type: StatType) {
 		return redis.scanStream({
-			match: `discord-player:stats:${type}:*`,
+			match: `discord-player:stats:${guildId}:${type}:*`,
 			count: 1000,
 		});
+	}
+
+	async migrateLegacyStats(guildId: string): Promise<number> {
+		let migratedCount = 0;
+
+		for (const type of STAT_TYPES) {
+			const legacyPrefix = `discord-player:stats:${type}:`;
+			const stream = redis.scanStream({
+				match: `${legacyPrefix}*`,
+				count: 1000,
+			});
+
+			for await (const keys of stream as AsyncIterable<string[]>) {
+				if (keys.length === 0) {
+					continue;
+				}
+
+				const pipeline = redis.pipeline();
+
+				for (const key of keys) {
+					pipeline.renamenx(
+						key,
+						`discord-player:stats:${guildId}:${type}:${key.slice(legacyPrefix.length)}`,
+					);
+				}
+
+				await pipeline.exec();
+				migratedCount += keys.length;
+			}
+		}
+
+		return migratedCount;
 	}
 }

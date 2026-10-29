@@ -1,11 +1,13 @@
 import type { Tool } from 'ai';
 import type {
 	ChatInputCommandInteraction,
+	Client,
 	VoiceBasedChannel,
 } from 'discord.js';
 import type { GuildQueue } from 'discord-player';
 import { useMainPlayer } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
+import { getPlaylistsChannel } from '../getGuildConfig';
 import {
 	formatToolArgs,
 	generatePendingMessage,
@@ -53,8 +55,10 @@ vi.mock('../determineSearchEngine', () => ({
 	default: vi.fn().mockReturnValue('youtubeSearch'),
 }));
 
-vi.mock('../getEnvironmentVariable', () => ({
-	default: vi.fn().mockReturnValue('playlists-channel-id'),
+vi.mock('../getGuildConfig', () => ({
+	getPlaylistsChannel: vi.fn((client: Client) =>
+		client.channels.cache.get('playlists-channel-id'),
+	),
 }));
 
 vi.mock('../StatsHandler', () => ({
@@ -89,7 +93,9 @@ const mockQueue = {
 } as unknown as GuildQueue;
 
 const mockInteraction = {} as ChatInputCommandInteraction;
-const mockVoiceChannel = {} as VoiceBasedChannel;
+const mockVoiceChannel = {
+	guild: { id: 'guild-id' },
+} as unknown as VoiceBasedChannel;
 
 const mockContext: ToolContext = {
 	queue: mockQueue,
@@ -556,6 +562,7 @@ it('should list available playlists', async () => {
 		...mockContext,
 		queue: null,
 		interaction: {
+			guildId: 'guild-id',
 			client: {
 				channels: {
 					cache: { get: vi.fn().mockReturnValue(mockChannel) },
@@ -572,6 +579,10 @@ it('should list available playlists', async () => {
 		success: true,
 		playlists: ['jazz', 'rock'],
 	});
+	expect(getPlaylistsChannel).toHaveBeenCalledWith(
+		contextWithChannel.interaction.client,
+		'guild-id',
+	);
 });
 
 it('should handle error in `listAvailablePlaylists`', async () => {

@@ -13,7 +13,7 @@ import { beforeEach, expect, it, vi } from 'vitest';
 import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../../constants/miscellaneous';
 import cleanUpPlaylistContent from '../cleanUpPlaylistContent';
 import enqueuePlaylistSlice from '../enqueuePlaylistSlice';
-import getEnvironmentVariable from '../getEnvironmentVariable';
+import { getPlaylistsChannel } from '../getGuildConfig';
 import processTracksWithQueue from '../processTracksWithQueue';
 
 vi.mock('discord-player', () => ({
@@ -21,7 +21,7 @@ vi.mock('discord-player', () => ({
 }));
 
 vi.mock('../cleanUpPlaylistContent');
-vi.mock('../getEnvironmentVariable');
+vi.mock('../getGuildConfig');
 vi.mock('../processTracksWithQueue');
 
 const mockStatsHandlerInstance = vi.hoisted(() => ({
@@ -36,12 +36,14 @@ vi.mock('../StatsHandler', () => ({
 
 const mockUseQueue = vi.mocked(useQueue);
 const mockCleanUpPlaylistContent = vi.mocked(cleanUpPlaylistContent);
-const mockGetEnvironmentVariable = vi.mocked(getEnvironmentVariable);
+const mockGetPlaylistsChannel = vi.mocked(getPlaylistsChannel);
 const mockProcessTracksWithQueue = vi.mocked(processTracksWithQueue);
 
 beforeEach(() => {
 	vi.clearAllMocks();
-	mockGetEnvironmentVariable.mockReturnValue('playlists-channel-123');
+	mockGetPlaylistsChannel.mockImplementation((client) =>
+		client.channels.cache.get('playlists-channel-123'),
+	);
 	mockProcessTracksWithQueue.mockResolvedValue({ enqueued: 5 });
 });
 
@@ -49,7 +51,8 @@ function createMockVoiceChannel(): VoiceBasedChannel {
 	return {
 		id: 'voice-channel-123',
 		name: 'General',
-	} as VoiceBasedChannel;
+		guild: { id: 'guild-123' },
+	} as unknown as VoiceBasedChannel;
 }
 
 function createMockPlaylistsChannel(): TextBasedChannel {
@@ -85,6 +88,7 @@ function createMockInteraction(
 	} as unknown as Message;
 
 	return {
+		guildId: 'guild-123',
 		user: {
 			id: 'user-12345',
 		},
@@ -329,6 +333,10 @@ it('should handle missing playlists channel', async () => {
 		3,
 	);
 
+	expect(mockGetPlaylistsChannel).toHaveBeenCalledWith(
+		interaction.client,
+		'guild-123',
+	);
 	expect(interaction.editReply).toHaveBeenCalledWith({
 		content: 'Invalid playlists channel type!',
 		components: [],

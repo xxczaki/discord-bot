@@ -14,6 +14,7 @@ const EXAMPLE_TRACK_TITLE = 'Test Song';
 const EXAMPLE_TRACK_AUTHOR = 'Test Artist';
 const EXAMPLE_TRACK_URL = 'https://example.com/track';
 const EXAMPLE_PROGRESS = 30000;
+const EXAMPLE_GUILD_ID = 'guild-123';
 
 const EXAMPLE_SERIALIZED_TRACK: SerializedTrack = {
 	title: EXAMPLE_TRACK_TITLE,
@@ -86,6 +87,7 @@ const createMockQueue = (
 
 	return {
 		size: 3,
+		guild: { id: EXAMPLE_GUILD_ID },
 		currentTrack: mockTrack,
 		tracks: mockTracks,
 		node: mockNode,
@@ -148,19 +150,19 @@ describe('QueueRecoveryService', () => {
 
 			expect(mockedSerialize).toHaveBeenCalledTimes(allTracks.length);
 			expect(mockPipeline.set).toHaveBeenCalledWith(
-				'queue-recovery:tracks',
+				'queue-recovery:guild-123:tracks',
 				JSON.stringify(Array(allTracks.length).fill(EXAMPLE_SERIALIZED_TRACK)),
 			);
 			expect(mockPipeline.set).toHaveBeenCalledWith(
-				'queue-recovery:progress',
+				'queue-recovery:guild-123:progress',
 				EXAMPLE_PROGRESS,
 			);
 			expect(mockPipeline.set).toHaveBeenCalledWith(
-				'queue-recovery:saved-at',
+				'queue-recovery:guild-123:saved-at',
 				expect.any(Number),
 			);
 			expect(mockPipeline.set).toHaveBeenCalledWith(
-				'queue-recovery:channel-id',
+				'queue-recovery:guild-123:channel-id',
 				'test-channel-id',
 			);
 			expect(mockPipeline.exec).toHaveBeenCalledOnce();
@@ -205,7 +207,7 @@ describe('QueueRecoveryService', () => {
 			await queueRecoveryService.saveQueue(mockQueue);
 
 			expect(mockPipeline.set).toHaveBeenCalledWith(
-				'queue-recovery:progress',
+				'queue-recovery:guild-123:progress',
 				0,
 			);
 		});
@@ -215,13 +217,19 @@ describe('QueueRecoveryService', () => {
 		it('should delete queue, progress, and timestamp from Redis', async () => {
 			mockPipeline.exec.mockResolvedValue([]);
 
-			await queueRecoveryService.deleteQueue();
+			await queueRecoveryService.deleteQueue(EXAMPLE_GUILD_ID);
 
-			expect(mockPipeline.del).toHaveBeenCalledWith('queue-recovery:tracks');
-			expect(mockPipeline.del).toHaveBeenCalledWith('queue-recovery:progress');
-			expect(mockPipeline.del).toHaveBeenCalledWith('queue-recovery:saved-at');
 			expect(mockPipeline.del).toHaveBeenCalledWith(
-				'queue-recovery:channel-id',
+				'queue-recovery:guild-123:tracks',
+			);
+			expect(mockPipeline.del).toHaveBeenCalledWith(
+				'queue-recovery:guild-123:progress',
+			);
+			expect(mockPipeline.del).toHaveBeenCalledWith(
+				'queue-recovery:guild-123:saved-at',
+			);
+			expect(mockPipeline.del).toHaveBeenCalledWith(
+				'queue-recovery:guild-123:channel-id',
 			);
 			expect(mockPipeline.exec).toHaveBeenCalledOnce();
 		});
@@ -242,13 +250,22 @@ describe('QueueRecoveryService', () => {
 			]);
 			mockedDeserialize.mockReturnValue(mockTrack);
 
-			const result = await queueRecoveryService.getContents(mockPlayer);
+			const result = await queueRecoveryService.getContents(
+				mockPlayer,
+				EXAMPLE_GUILD_ID,
+			);
 
-			expect(mockPipeline.get).toHaveBeenCalledWith('queue-recovery:tracks');
-			expect(mockPipeline.get).toHaveBeenCalledWith('queue-recovery:progress');
-			expect(mockPipeline.get).toHaveBeenCalledWith('queue-recovery:saved-at');
 			expect(mockPipeline.get).toHaveBeenCalledWith(
-				'queue-recovery:channel-id',
+				'queue-recovery:guild-123:tracks',
+			);
+			expect(mockPipeline.get).toHaveBeenCalledWith(
+				'queue-recovery:guild-123:progress',
+			);
+			expect(mockPipeline.get).toHaveBeenCalledWith(
+				'queue-recovery:guild-123:saved-at',
+			);
+			expect(mockPipeline.get).toHaveBeenCalledWith(
+				'queue-recovery:guild-123:channel-id',
 			);
 			expect(mockedDeserialize).toHaveBeenCalledWith(
 				mockPlayer,
@@ -267,7 +284,10 @@ describe('QueueRecoveryService', () => {
 
 			mockPipeline.exec.mockResolvedValue(null);
 
-			const result = await queueRecoveryService.getContents(mockPlayer);
+			const result = await queueRecoveryService.getContents(
+				mockPlayer,
+				EXAMPLE_GUILD_ID,
+			);
 
 			expect(result).toEqual({
 				tracks: [],
@@ -287,7 +307,10 @@ describe('QueueRecoveryService', () => {
 				[null, null],
 			]);
 
-			const result = await queueRecoveryService.getContents(mockPlayer);
+			const result = await queueRecoveryService.getContents(
+				mockPlayer,
+				EXAMPLE_GUILD_ID,
+			);
 
 			expect(result).toEqual({
 				tracks: [],
@@ -307,7 +330,10 @@ describe('QueueRecoveryService', () => {
 				[null, null],
 			]);
 
-			const result = await queueRecoveryService.getContents(mockPlayer);
+			const result = await queueRecoveryService.getContents(
+				mockPlayer,
+				EXAMPLE_GUILD_ID,
+			);
 
 			expect(result).toEqual({
 				tracks: [],
@@ -327,7 +353,10 @@ describe('QueueRecoveryService', () => {
 				[null, null],
 			]);
 
-			const result = await queueRecoveryService.getContents(mockPlayer);
+			const result = await queueRecoveryService.getContents(
+				mockPlayer,
+				EXAMPLE_GUILD_ID,
+			);
 
 			expect(result).toEqual({
 				tracks: [],
@@ -356,7 +385,10 @@ describe('QueueRecoveryService', () => {
 				.mockReturnValueOnce(mockTrack1)
 				.mockReturnValueOnce(mockTrack2);
 
-			const result = await queueRecoveryService.getContents(mockPlayer);
+			const result = await queueRecoveryService.getContents(
+				mockPlayer,
+				EXAMPLE_GUILD_ID,
+			);
 
 			expect(mockedDeserialize).toHaveBeenCalledTimes(2);
 			expect(result).toEqual({
@@ -381,7 +413,10 @@ describe('QueueRecoveryService', () => {
 			]);
 			mockedDeserialize.mockReturnValue(mockTrack);
 
-			const result = await queueRecoveryService.getContents(mockPlayer);
+			const result = await queueRecoveryService.getContents(
+				mockPlayer,
+				EXAMPLE_GUILD_ID,
+			);
 
 			expect(result.savedAt).toBe(savedAt);
 			expect(typeof result.savedAt).toBe('number');

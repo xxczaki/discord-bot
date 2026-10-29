@@ -8,8 +8,14 @@ const statsHandler = StatsHandler.getInstance();
 export default async function statsCommandHandler(
 	interaction: ChatInputCommandInteraction,
 ) {
-	const playStatsStream = statsHandler.getStats('play');
-	const playlistStatsStream = statsHandler.getStats('playlist');
+	const playStatsStream = statsHandler.getStats(
+		interaction.guildId ?? '',
+		'play',
+	);
+	const playlistStatsStream = statsHandler.getStats(
+		interaction.guildId ?? '',
+		'playlist',
+	);
 
 	const playStatsMap: Record<string, number> = {};
 	const requestedStatsMap: Record<string, number> = {};

@@ -11,13 +11,17 @@ vi.mock('node:path', () => ({
 	join: mockJoin,
 }));
 
-vi.mock('../../utils/getEnvironmentVariable', () => ({
-	default: vi.fn((key: string) => {
-		if (key === 'OWNER_ROLE_ID') {
-			return 'mock-owner-role-id';
-		}
-		throw new TypeError(`Environment variable ${key} is not defined`);
-	}),
+const GUILD_ID = 'mock-guild-id';
+
+vi.mock('../../utils/getGuildConfig', () => ({
+	default: vi.fn((guildId: string | null) =>
+		guildId === 'mock-guild-id'
+			? {
+					playlistsChannelId: 'mock-playlists-channel-id',
+					ownerRoleId: 'mock-owner-role-id',
+				}
+			: null,
+	),
 }));
 
 vi.mock('../../utils/reportError');
@@ -31,6 +35,8 @@ function createMockInteraction(
 ): ChatInputCommandInteraction {
 	return {
 		commandName,
+		guildId: GUILD_ID,
+		client: {},
 		member: {
 			roles: ['mock-owner-role-id'],
 		},
@@ -93,7 +99,7 @@ it.each([
 );
 
 it('should handle lockdown permission denied for owner-only commands', async () => {
-	const interaction = createMockInteraction('maintenance', {
+	const interaction = createMockInteraction('lockdown', {
 		member: {
 			roles: ['other-role'],
 		},
@@ -110,7 +116,7 @@ it('should handle lockdown permission denied for owner-only commands', async () 
 it('should handle lockdown permission denied for locked down commands', async () => {
 	const lockdown = LockdownManager.getInstance();
 
-	lockdown.setState(true);
+	lockdown.setState(GUILD_ID, true);
 
 	const interaction = createMockInteraction('play', {
 		member: {
@@ -183,4 +189,19 @@ it('should return early if deferReply fails', async () => {
 		'Failed to defer reply for command "play"',
 	);
 	expect(interaction.editReply).not.toHaveBeenCalled();
+});
+
+it('should reject commands from guilds without configuration', async () => {
+	const interaction = createMockInteraction('play', {
+		guildId: 'unconfigured-guild-id',
+	});
+
+	await useCommandHandlers(interaction);
+
+	expect(interaction.reply).toHaveBeenCalledWith({
+		content: 'This server is not configured to use this bot.',
+		flags: ['Ephemeral'],
+	});
+	expect(interaction.deferReply).not.toHaveBeenCalled();
+	expect(mockJoin).not.toHaveBeenCalled();
 });

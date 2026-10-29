@@ -20,16 +20,13 @@ export default function setupGracefulShutdown(
 		}, SHUTDOWN_TIMEOUT_MS);
 
 		try {
-			const guild = client.guilds.cache.first();
+			const queueRecoveryService = QueueRecoveryService.getInstance();
 
-			if (guild) {
-				const queue = useQueue(guild.id);
-
-				if (queue) {
-					const queueRecoveryService = QueueRecoveryService.getInstance();
-					await queueRecoveryService.saveQueue(queue);
-				}
-			}
+			await Promise.all(
+				client.guilds.cache.map((guild) =>
+					queueRecoveryService.saveQueue(useQueue(guild.id)),
+				),
+			);
 
 			await redis.set(
 				'discord-bot:shutdown-reason',

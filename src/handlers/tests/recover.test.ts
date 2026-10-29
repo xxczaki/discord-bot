@@ -66,7 +66,8 @@ function createMockVoiceChannel(): VoiceBasedChannel {
 	return {
 		id: 'voice-channel-123',
 		name: 'General',
-	} as VoiceBasedChannel;
+		guild: { id: 'guild-123' },
+	} as unknown as VoiceBasedChannel;
 }
 
 function createMockInteraction(
@@ -166,6 +167,7 @@ it('should reply with "Nothing to recover" when no tracks are found', async () =
 	);
 	expect(mockedQueueRecoveryService.getContents).toHaveBeenCalledWith(
 		mockPlayer,
+		'guild-123',
 	);
 	expect(interaction.editReply).toHaveBeenCalledWith('Nothing to recover.');
 });
@@ -197,6 +199,7 @@ it('should show recovery prompt when tracks are found', async () => {
 	);
 	expect(mockedQueueRecoveryService.getContents).toHaveBeenCalledWith(
 		mockPlayer,
+		'guild-123',
 	);
 
 	const editReplyCall = vi

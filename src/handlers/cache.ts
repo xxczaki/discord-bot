@@ -11,6 +11,7 @@ import {
 } from 'discord.js';
 import prettyBytes from 'pretty-bytes';
 import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
+import { isHomeGuild } from '../utils/getGuildConfig';
 import LockdownManager from '../utils/lockdown';
 import logger from '../utils/logger';
 import { OpusCacheManager } from '../utils/OpusCacheManager';
@@ -47,9 +48,14 @@ export default async function cacheCommandHandler(
 	try {
 		const usedButtons = new Set<string>();
 		const lockdown = LockdownManager.getInstance();
-		const isOwner = interaction.member
-			? lockdown.isOwner(interaction.member)
-			: false;
+		const canManageCache = (
+			member: typeof interaction.member,
+			guildId: string | null,
+		) =>
+			member !== null &&
+			isHomeGuild(interaction.client, guildId) &&
+			lockdown.isOwner(member, guildId);
+		const isOwner = canManageCache(interaction.member, interaction.guildId);
 		const actionRow = createActionRow(isOwner);
 		let stats = await gatherCacheStatsWithLiveUpdates(
 			interaction,
@@ -69,9 +75,10 @@ export default async function cacheCommandHandler(
 		});
 
 		collector?.on('collect', async (buttonInteraction: ButtonInteraction) => {
-			const isButtonOwner = buttonInteraction.member
-				? lockdown.isOwner(buttonInteraction.member)
-				: false;
+			const isButtonOwner = canManageCache(
+				buttonInteraction.member,
+				buttonInteraction.guildId,
+			);
 
 			if (!isButtonOwner) {
 				await buttonInteraction.reply({
