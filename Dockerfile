@@ -27,7 +27,7 @@ RUN pnpm --filter discord-player-googlevideo run build
 RUN CI=true pnpm install --offline --frozen-lockfile --prod --config.enableGlobalVirtualStore=false
 
 
-FROM node:26.12.1-alpine
+FROM node:26.13.0-alpine
 
 ENV TZ="Europe/Berlin"
 
