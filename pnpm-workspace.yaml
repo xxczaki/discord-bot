@@ -42,3 +42,5 @@ packageExtensions:
       '@snazzah/davey': '*'
       discord-api-types: '*'
       ws: '*'
+patchedDependencies:
+  '@discord-player/ffmpeg@7.2.0': patches/@discord-player__ffmpeg@7.2.0.patch
