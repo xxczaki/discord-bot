@@ -186,6 +186,9 @@ overrides:
 
 packageExtensionsChecksum: sha256-msO/d9y/ZDrg0AuAY9OMmOGxOk5tXh31KHTCQYU0cn4=
 
+patchedDependencies:
+  '@discord-player/ffmpeg@7.2.0': e2de22cd156cbd421a065d95dd3f641fa6424262f13045dc3b4e618e61907713
+
 importers:
 
   .:
@@ -3303,7 +3306,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@discord-player/ffmpeg@7.2.0': {}
+  '@discord-player/ffmpeg@7.2.0(patch_hash=e2de22cd156cbd421a065d95dd3f641fa6424262f13045dc3b4e618e61907713)': {}
 
   '@discord-player/opus@7.2.0': {}
 
@@ -4252,7 +4255,7 @@ snapshots:
     dependencies:
       '@discord-player/equalizer': 7.2.0
       '@discord-player/extractor': 7.2.0
-      '@discord-player/ffmpeg': 7.2.0
+      '@discord-player/ffmpeg': 7.2.0(patch_hash=e2de22cd156cbd421a065d95dd3f641fa6424262f13045dc3b4e618e61907713)
       '@discord-player/opus': 7.2.0
       '@discord-player/utils': 7.2.0
       '@web-scrobbler/metadata-filter': 3.2.0
@@ -4277,7 +4280,7 @@ snapshots:
   discord-voip@7.2.0(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(bufferutil@4.1.0)(postcss@8.5.26)(supports-color@8.1.1)(tsx@4.23.15)(yaml@2.9.0):
     dependencies:
       '@discord-player/equalizer': 7.2.0
-      '@discord-player/ffmpeg': 7.2.0
+      '@discord-player/ffmpeg': 7.2.0(patch_hash=e2de22cd156cbd421a065d95dd3f641fa6424262f13045dc3b4e618e61907713)
       '@discord-player/opus': 7.2.0
       '@discord-player/utils': 7.2.0
       '@snazzah/davey': 0.1.12(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)

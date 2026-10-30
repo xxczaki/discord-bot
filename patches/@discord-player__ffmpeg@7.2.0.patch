@@ -1,0 +1,14 @@
+diff --git a/dist/index.js b/dist/index.js
+index eb3e0a38ec6147340c6d981cbc1e56aac6a9ccdd..9ceff26932a5fa08b9d54749843365b73207b847 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -198,6 +198,9 @@ ${errors.join("\n")}`);
+       this[method] = target[method].bind(target);
+     }
+   }
++  _write(chunk, encoding, cb) {
++    return this._writer._write(chunk, encoding, cb);
++  }
+   _destroy(err, cb) {
+     this._cleanup();
+     if (cb) return cb(err);
