@@ -5,7 +5,7 @@ import {
 	MOCK_TRACK_ID,
 	MOCK_TRACK_TITLE,
 	MOCK_TRACK_URL,
-} from './constants';
+} from './constants.ts';
 
 export function createMockTrack(overrides: Partial<Track> = {}): Track {
 	const trackData: Record<string, unknown> = {

@@ -1,9 +1,9 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { beforeEach, expect, it, vi } from 'vitest';
-import LockdownManager from '../../utils/lockdown';
-import logger from '../../utils/logger';
-import reportError from '../../utils/reportError';
-import useCommandHandlers from '../useCommandHandlers';
+import LockdownManager from '../../utils/lockdown.ts';
+import logger from '../../utils/logger.ts';
+import reportError from '../../utils/reportError.ts';
+import useCommandHandlers from '../useCommandHandlers.ts';
 
 const mockJoin = vi.hoisted(() => vi.fn());
 

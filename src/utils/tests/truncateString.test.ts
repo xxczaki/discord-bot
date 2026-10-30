@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 
-import truncateString from '../truncateString';
+import truncateString from '../truncateString.ts';
 
 it('should return the original string when it is shorter than the limit', () => {
 	const result = truncateString('Hello', 10);

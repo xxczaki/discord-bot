@@ -9,11 +9,11 @@ import {
 import type { GuildQueue, Player, Track } from 'discord-player';
 import { useMainPlayer, useQueue } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
-import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../../constants/miscellaneous';
-import enqueueTracks from '../../utils/enqueueTracks';
-import isObject from '../../utils/isObject';
-import { QueueRecoveryService } from '../../utils/QueueRecoveryService';
-import recoverCommandHandler from '../recover';
+import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../../constants/miscellaneous.ts';
+import enqueueTracks from '../../utils/enqueueTracks.ts';
+import isObject from '../../utils/isObject.ts';
+import { QueueRecoveryService } from '../../utils/QueueRecoveryService.ts';
+import recoverCommandHandler from '../recover.ts';
 
 const EXAMPLE_TRACK_URL = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
 const EXAMPLE_TRACK_URL_2 = 'https://www.youtube.com/watch?v=abc123def';

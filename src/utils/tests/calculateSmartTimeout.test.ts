@@ -1,7 +1,7 @@
 import type { GuildQueue, Track } from 'discord-player';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../../constants/miscellaneous';
-import calculateSmartTimeout from '../calculateSmartTimeout';
+import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../../constants/miscellaneous.ts';
+import calculateSmartTimeout from '../calculateSmartTimeout.ts';
 
 const createMockQueue = (
 	overrides: Partial<GuildQueue<unknown>> = {},

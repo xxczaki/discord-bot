@@ -1,8 +1,8 @@
 import type { ChatInputCommandInteraction, User } from 'discord.js';
 import { EmbedBuilder } from 'discord.js';
 import { beforeEach, expect, it, vi } from 'vitest';
-import { createMockInteraction as createBaseMockInteraction } from '../../utils/testing';
-import avatarCommandHandler from '../avatar';
+import { createMockInteraction as createBaseMockInteraction } from '../../utils/testing/index.ts';
+import avatarCommandHandler from '../avatar.ts';
 
 const EXAMPLE_USER_ID = '123456789012345678';
 const EXAMPLE_AVATAR_URL =

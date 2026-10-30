@@ -1,10 +1,10 @@
 import type { ChainableCommander, ScanStream } from 'ioredis';
-import { ulid } from 'ulid';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import redis from '../redis';
-import { StatsHandler } from '../StatsHandler';
+import redis from '../redis.ts';
+import { StatsHandler } from '../StatsHandler.ts';
 
-const TEST_ULID = ulid();
+const UUID_V7_PATTERN =
+	'[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}';
 const TEST_GUILD_ID = 'guild-123';
 
 vi.mock('../redis', () => ({
@@ -16,7 +16,6 @@ vi.mock('../redis', () => ({
 }));
 
 const mockedRedis = vi.mocked(redis);
-const mockedUlid = vi.mocked(ulid);
 
 function createScanStream(batches: string[][]): ScanStream {
 	return {
@@ -45,7 +44,6 @@ describe('StatsHandler', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		statsHandler = StatsHandler.getInstance();
-		mockedUlid.mockReturnValue(TEST_ULID);
 	});
 
 	it('should be a singleton', () => {
@@ -65,7 +63,11 @@ describe('StatsHandler', () => {
 			await statsHandler.saveStat(TEST_GUILD_ID, 'play', payload);
 
 			expect(mockedRedis.set).toHaveBeenCalledWith(
-				`discord-player:stats:${TEST_GUILD_ID}:play:${TEST_ULID}`,
+				expect.stringMatching(
+					new RegExp(
+						`^discord-player:stats:${TEST_GUILD_ID}:play:${UUID_V7_PATTERN}$`,
+					),
+				),
 				JSON.stringify(payload),
 			);
 		});
@@ -79,7 +81,11 @@ describe('StatsHandler', () => {
 			await statsHandler.saveStat(TEST_GUILD_ID, 'play', payload);
 
 			expect(mockedRedis.set).toHaveBeenCalledWith(
-				`discord-player:stats:${TEST_GUILD_ID}:play:${TEST_ULID}`,
+				expect.stringMatching(
+					new RegExp(
+						`^discord-player:stats:${TEST_GUILD_ID}:play:${UUID_V7_PATTERN}$`,
+					),
+				),
 				JSON.stringify(payload),
 			);
 		});
@@ -90,7 +96,11 @@ describe('StatsHandler', () => {
 			await statsHandler.saveStat(TEST_GUILD_ID, 'playlist', payload);
 
 			expect(mockedRedis.set).toHaveBeenCalledWith(
-				`discord-player:stats:${TEST_GUILD_ID}:playlist:${TEST_ULID}`,
+				expect.stringMatching(
+					new RegExp(
+						`^discord-player:stats:${TEST_GUILD_ID}:playlist:${UUID_V7_PATTERN}$`,
+					),
+				),
 				JSON.stringify(payload),
 			);
 		});

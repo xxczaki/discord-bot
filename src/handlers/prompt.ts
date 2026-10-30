@@ -3,7 +3,7 @@ import { isStepCount, streamText } from 'ai';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { EmbedBuilder, type GuildMember } from 'discord.js';
 import { useQueue } from 'discord-player';
-import logger from '../utils/logger';
+import logger from '../utils/logger.ts';
 import {
 	formatToolArgs,
 	generateSuccessMessage,
@@ -14,8 +14,8 @@ import {
 	PROMPT_MODEL_ID,
 	type ToolContext,
 	type ToolResult,
-} from '../utils/promptTools';
-import { RateLimiter } from '../utils/RateLimiter';
+} from '../utils/promptTools.ts';
+import { RateLimiter } from '../utils/RateLimiter.ts';
 
 const rateLimiter = RateLimiter.getInstance('prompt-command', 100, 24);
 

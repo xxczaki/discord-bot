@@ -2,9 +2,9 @@ import type { ChatInputCommandInteraction } from 'discord.js';
 import type { Track } from 'discord-player';
 import { useQueue } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
-import { OpusCacheManager } from '../../utils/OpusCacheManager';
-import { QueueRecoveryService } from '../../utils/QueueRecoveryService';
-import purgeCommandHandler from '../purge';
+import { OpusCacheManager } from '../../utils/OpusCacheManager.ts';
+import { QueueRecoveryService } from '../../utils/QueueRecoveryService.ts';
+import purgeCommandHandler from '../purge.ts';
 
 vi.mock('discord-player', () => ({
 	useQueue: vi.fn(),

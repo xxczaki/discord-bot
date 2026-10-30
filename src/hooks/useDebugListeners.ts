@@ -2,11 +2,11 @@ import { createServer, type Server } from 'node:net';
 import { captureException } from '@sentry/node';
 import { type Client, EmbedBuilder } from 'discord.js';
 import type { GuildQueue, Player } from 'discord-player';
-import getEnvironmentVariable from '../utils/getEnvironmentVariable';
-import isObject from '../utils/isObject';
-import logger from '../utils/logger';
-import { OpusCacheManager } from '../utils/OpusCacheManager';
-import reportError from '../utils/reportError';
+import getEnvironmentVariable from '../utils/getEnvironmentVariable.ts';
+import isObject from '../utils/isObject.ts';
+import logger from '../utils/logger.ts';
+import { OpusCacheManager } from '../utils/OpusCacheManager.ts';
+import reportError from '../utils/reportError.ts';
 
 const FATAL_ERROR_MESSAGE_DEBOUNCE = 1000 * 30; // 30 seconds
 

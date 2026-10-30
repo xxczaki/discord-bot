@@ -6,12 +6,12 @@ import {
 } from 'discord.js';
 import type { Player, Track } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
-import type { ProcessingInteraction } from '../../types/ProcessingInteraction';
-import enqueueTracks from '../enqueueTracks';
-import logger from '../logger';
-import { QueueRecoveryService } from '../QueueRecoveryService';
-import redis from '../redis';
-import performStartupRecovery from '../startupRecovery';
+import type { ProcessingInteraction } from '../../types/ProcessingInteraction.ts';
+import enqueueTracks from '../enqueueTracks.ts';
+import logger from '../logger.ts';
+import { QueueRecoveryService } from '../QueueRecoveryService.ts';
+import redis from '../redis.ts';
+import performStartupRecovery from '../startupRecovery.ts';
 
 vi.mock('../getEnvironmentVariable', () => ({
 	default: vi.fn().mockReturnValue('test-debug-channel-id'),

@@ -1,5 +1,6 @@
 {
 	"$schema": "https://biomejs.dev/schemas/2.6.3/schema.json",
+	"files": { "includes": ["**", "!packages"] },
 	"assist": { "actions": { "source": { "organizeImports": "on" } } },
 	"linter": {
 		"enabled": true,
@@ -19,6 +20,9 @@
 			},
 			"complexity": {
 				"useArrowFunction": "off"
+			},
+			"correctness": {
+				"useImportExtensions": "error"
 			}
 		}
 	},

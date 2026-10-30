@@ -59,7 +59,7 @@ afterEach(() => {
 
 it('should reply with debug information embed when commit hash is available', async () => {
 	process.env.GIT_COMMIT_SHA = EXAMPLE_COMMIT_HASH;
-	const { default: debugCommandHandler } = await import('../debug');
+	const { default: debugCommandHandler } = await import('../debug.ts');
 
 	await debugCommandHandler(mockInteraction);
 
@@ -101,7 +101,7 @@ it('should reply with debug information embed when commit hash is available', as
 
 it('should show N/A for release when deployment was manual', async () => {
 	process.env.GIT_COMMIT_SHA = '';
-	const { default: debugCommandHandler } = await import('../debug');
+	const { default: debugCommandHandler } = await import('../debug.ts');
 
 	await debugCommandHandler(mockInteraction);
 
@@ -126,7 +126,7 @@ it('should show N/A for release when deployment was manual', async () => {
 });
 
 it('should format client latency without decimal places', async () => {
-	const { default: debugCommandHandler } = await import('../debug');
+	const { default: debugCommandHandler } = await import('../debug.ts');
 	const highLatency = 123.456;
 	mockInteraction = {
 		...mockInteraction,
@@ -150,7 +150,7 @@ it('should format client latency without decimal places', async () => {
 });
 
 it('should include player scan dependencies in description', async () => {
-	const { default: debugCommandHandler } = await import('../debug');
+	const { default: debugCommandHandler } = await import('../debug.ts');
 	const customScanOutput = 'custom scan output';
 	mockPlayer.scanDeps.mockReturnValue(customScanOutput);
 

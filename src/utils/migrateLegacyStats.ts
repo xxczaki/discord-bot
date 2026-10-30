@@ -1,8 +1,8 @@
 import type { Client } from 'discord.js';
-import { getHomeGuildId } from './getGuildConfig';
-import logger from './logger';
-import reportError from './reportError';
-import { StatsHandler } from './StatsHandler';
+import { getHomeGuildId } from './getGuildConfig.ts';
+import logger from './logger.ts';
+import reportError from './reportError.ts';
+import { StatsHandler } from './StatsHandler.ts';
 
 export default async function migrateLegacyStats(
 	client: Client,

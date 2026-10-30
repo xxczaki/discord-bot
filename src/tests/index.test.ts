@@ -1,6 +1,6 @@
 import type { Client } from 'discord.js';
 import { beforeEach, expect, it, vi } from 'vitest';
-import * as botInitialization from '../utils/initializeBot';
+import * as botInitialization from '../utils/initializeBot.ts';
 
 vi.mock('../utils/instrument', () => ({}));
 
@@ -20,7 +20,7 @@ it('should call `initializeBot`', async () => {
 		token: 'test-token',
 	});
 
-	await import('../index');
+	await import('../index.ts');
 
 	expect(mockedInitializeBot).toHaveBeenCalledOnce();
 });

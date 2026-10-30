@@ -3,8 +3,8 @@ import type {
 	ChatInputCommandInteraction,
 	GuildMember,
 } from 'discord.js';
-import { RAW_COMMANDS } from '../constants/commands';
-import getGuildConfig from './getGuildConfig';
+import { RAW_COMMANDS } from '../constants/commands.ts';
+import getGuildConfig from './getGuildConfig.ts';
 
 export default class LockdownManager {
 	static #instance: LockdownManager;

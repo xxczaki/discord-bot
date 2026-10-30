@@ -1,6 +1,6 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
-import isObject from '../utils/isObject';
-import useQueueWithValidation from '../utils/useQueueWithValidation';
+import isObject from '../utils/isObject.ts';
+import useQueueWithValidation from '../utils/useQueueWithValidation.ts';
 
 export default async function relocateCommandHandler(
 	interaction: ChatInputCommandInteraction,

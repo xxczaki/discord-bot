@@ -18,19 +18,19 @@ import {
 	TrackSkipReason,
 } from 'discord-player';
 import prettyBytes from 'pretty-bytes';
-import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
-import { FALLBACK_SEARCH_ENGINE } from '../constants/sourceConfig';
-import type { QueueMetadata } from '../types/QueueMetadata';
-import createSmartInteractionHandler from '../utils/createSmartInteractionHandler';
-import createTrackEmbed from '../utils/createTrackEmbed';
-import determineSearchEngine from '../utils/determineSearchEngine';
-import isObject from '../utils/isObject';
-import { OpusCacheManager } from '../utils/OpusCacheManager';
-import { resetPresence, setPresence } from '../utils/presenceManager';
-import { QueueRecoveryService } from '../utils/QueueRecoveryService';
-import { RedisQueryCache } from '../utils/RedisQueryCache';
-import redis from '../utils/redis';
-import { StatsHandler } from '../utils/StatsHandler';
+import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous.ts';
+import { FALLBACK_SEARCH_ENGINE } from '../constants/sourceConfig.ts';
+import type { QueueMetadata } from '../types/QueueMetadata.ts';
+import createSmartInteractionHandler from '../utils/createSmartInteractionHandler.ts';
+import createTrackEmbed from '../utils/createTrackEmbed.ts';
+import determineSearchEngine from '../utils/determineSearchEngine.ts';
+import isObject from '../utils/isObject.ts';
+import { OpusCacheManager } from '../utils/OpusCacheManager.ts';
+import { resetPresence, setPresence } from '../utils/presenceManager.ts';
+import { QueueRecoveryService } from '../utils/QueueRecoveryService.ts';
+import { RedisQueryCache } from '../utils/RedisQueryCache.ts';
+import redis from '../utils/redis.ts';
+import { StatsHandler } from '../utils/StatsHandler.ts';
 
 const statsHandler = StatsHandler.getInstance();
 const queueRecoveryService = QueueRecoveryService.getInstance();

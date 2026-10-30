@@ -1,6 +1,5 @@
-import { differenceInCalendarDays } from 'date-fns';
-import { ulid } from 'ulid';
-import redis from './redis';
+import { randomUUIDv7 } from 'node:crypto';
+import redis from './redis.ts';
 
 export class LatenessHandler {
 	static #instance: LatenessHandler;
@@ -34,7 +33,10 @@ export class LatenessHandler {
 			return;
 		}
 
-		if (actual && differenceInCalendarDays(expected, actual) > 2) {
+		if (
+			actual &&
+			toPlainDate(actual).until(toPlainDate(new Date(expected))).days > 2
+		) {
 			await redis.del('discord-player:lateness-lock');
 			return;
 		}
@@ -43,7 +45,7 @@ export class LatenessHandler {
 			.multi()
 			.del('discord-player:lateness-lock')
 			.set(
-				`discord-player:lateness:${ulid()}`,
+				`discord-player:lateness:${randomUUIDv7()}`,
 				JSON.stringify({
 					expected,
 					actual: actual?.toString() ?? null,
@@ -56,10 +58,17 @@ export class LatenessHandler {
 		return redis.exists('discord-player:lateness-lock');
 	}
 
-	getStats() {
+	getStats(): AsyncIterable<string[]> {
 		return redis.scanStream({
 			match: 'discord-player:lateness:*',
 			count: 500,
 		});
 	}
+}
+
+function toPlainDate(date: Date) {
+	return date
+		.toTemporalInstant()
+		.toZonedDateTimeISO(Temporal.Now.timeZoneId())
+		.toPlainDate();
 }

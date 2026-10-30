@@ -1,5 +1,5 @@
 import type { GuildQueue, Track } from 'discord-player';
-import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS as DEFAULT_TIMEOUT } from '../constants/miscellaneous';
+import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS as DEFAULT_TIMEOUT } from '../constants/miscellaneous.ts';
 
 const MIN_TIMEOUT = 30 * 1000;
 const MAX_TIMEOUT = 10 * 60 * 1000;

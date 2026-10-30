@@ -3,9 +3,9 @@ import { readdir, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import { captureException } from '@sentry/node';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import getEnvironmentVariable from '../getEnvironmentVariable';
-import logger from '../logger';
-import { OpusCacheManager } from '../OpusCacheManager';
+import getEnvironmentVariable from '../getEnvironmentVariable.ts';
+import logger from '../logger.ts';
+import { OpusCacheManager } from '../OpusCacheManager.ts';
 
 const MOCK_CACHE_DIRECTORY = '/mock/cache/directory';
 

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import formatRelativeTime from '../formatRelativeTime';
+import formatRelativeTime from '../formatRelativeTime.ts';
 
 describe('formatRelativeTime', () => {
 	beforeEach(() => {

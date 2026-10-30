@@ -1,11 +1,11 @@
 import { join } from 'node:path';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import { RAW_COMMANDS } from '../constants/commands';
-import getGuildConfig from '../utils/getGuildConfig';
-import LockdownManager from '../utils/lockdown';
-import logger from '../utils/logger';
-import reportError from '../utils/reportError';
-import snakeToCamelCase from '../utils/snakeToCamelCase';
+import { RAW_COMMANDS } from '../constants/commands.ts';
+import getGuildConfig from '../utils/getGuildConfig.ts';
+import LockdownManager from '../utils/lockdown.ts';
+import logger from '../utils/logger.ts';
+import reportError from '../utils/reportError.ts';
+import snakeToCamelCase from '../utils/snakeToCamelCase.ts';
 
 const EPHEMERAL_COMMANDS = new Set(['debug', 'help', 'tic_tac_toe', 'filters']);
 

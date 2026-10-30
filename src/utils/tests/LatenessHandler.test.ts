@@ -1,10 +1,10 @@
 import type { ChainableCommander, ScanStream } from 'ioredis';
-import { ulid } from 'ulid';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { LatenessHandler } from '../LatenessHandler';
-import redis from '../redis';
+import { LatenessHandler } from '../LatenessHandler.ts';
+import redis from '../redis.ts';
 
-const TEST_ULID = ulid();
+const UUID_V7_PATTERN =
+	'[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}';
 const EXPECTED_DATE = new Date('2025-05-24T10:00:00Z');
 const ACTUAL_DATE = new Date('2025-05-24T10:05:00Z');
 const OLD_ACTUAL_DATE = new Date('2025-05-21T10:00:00Z');
@@ -21,7 +21,6 @@ vi.mock('../redis', () => ({
 }));
 
 const mockedRedis = vi.mocked(redis);
-const mockedUlid = vi.mocked(ulid);
 
 describe('LatenessHandler', () => {
 	let latenessHandler: LatenessHandler;
@@ -29,7 +28,6 @@ describe('LatenessHandler', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		latenessHandler = LatenessHandler.getInstance();
-		mockedUlid.mockReturnValue(TEST_ULID);
 	});
 
 	it('should be a singleton', () => {
@@ -110,7 +108,9 @@ describe('LatenessHandler', () => {
 				'discord-player:lateness-lock',
 			);
 			expect(mockMulti.set).toHaveBeenCalledWith(
-				`discord-player:lateness:${TEST_ULID}`,
+				expect.stringMatching(
+					new RegExp(`^discord-player:lateness:${UUID_V7_PATTERN}$`),
+				),
 				JSON.stringify({
 					expected: EXPECTED_DATE.toString(),
 					actual: ACTUAL_DATE.toString(),
@@ -130,7 +130,9 @@ describe('LatenessHandler', () => {
 				'discord-player:lateness-lock',
 			);
 			expect(mockMulti.set).toHaveBeenCalledWith(
-				`discord-player:lateness:${TEST_ULID}`,
+				expect.stringMatching(
+					new RegExp(`^discord-player:lateness:${UUID_V7_PATTERN}$`),
+				),
 				JSON.stringify({
 					expected: EXPECTED_DATE.toString(),
 					actual: null,

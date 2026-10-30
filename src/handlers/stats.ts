@@ -1,7 +1,7 @@
 import { type ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
-import redis from '../utils/redis';
-import reportError from '../utils/reportError';
-import { StatsHandler } from '../utils/StatsHandler';
+import redis from '../utils/redis.ts';
+import reportError from '../utils/reportError.ts';
+import { StatsHandler } from '../utils/StatsHandler.ts';
 
 const statsHandler = StatsHandler.getInstance();
 
@@ -25,181 +25,118 @@ export default async function statsCommandHandler(
 
 	await interaction.editReply('Loading latest stats…');
 
-	const pendingPromises: Promise<void>[] = [];
+	for await (const keys of playStatsStream) {
+		if (keys.length === 0) {
+			continue;
+		}
 
-	return new Promise((resolve) => {
-		playStatsStream.on('data', (keys = []) => {
-			playStatsStream.pause();
+		try {
+			const results = await getValues(keys);
 
-			const processingPromise = (async () => {
-				if (keys.length > 0) {
-					try {
-						const pipeline = redis.pipeline();
+			for (const rawKeyValue of results) {
+				try {
+					const value: {
+						title: string;
+						author: string;
+						requestedById?: string;
+					} = JSON.parse(rawKeyValue);
 
-						for (const key of keys) {
-							pipeline.get(key);
-						}
-
-						const results = await pipeline.exec();
-
-						if (results) {
-							for (const [error, rawKeyValue] of results) {
-								if (error || !rawKeyValue) {
-									continue;
-								}
-
-								try {
-									const value: {
-										title: string;
-										author: string;
-										requestedById?: string;
-									} = JSON.parse(rawKeyValue as string);
-
-									if (!value.requestedById || value.requestedById === botId) {
-										continue;
-									}
-
-									const identifier = `"${value.title}" by ${value.author}`;
-
-									if (identifier in playStatsMap) {
-										playStatsMap[identifier] = playStatsMap[identifier] + 1;
-									} else {
-										playStatsMap[identifier] = 1;
-									}
-
-									if (value.requestedById in requestedStatsMap) {
-										requestedStatsMap[value.requestedById] =
-											requestedStatsMap[value.requestedById] + 1;
-										continue;
-									}
-
-									requestedStatsMap[value.requestedById] = 1;
-								} catch (error) {
-									reportError(error, 'Failed to parse stats JSON value');
-								}
-							}
-						}
-					} catch (error) {
-						reportError(error, 'Failed to process stats data from Redis');
+					if (!value.requestedById || value.requestedById === botId) {
+						continue;
 					}
+
+					const identifier = `"${value.title}" by ${value.author}`;
+
+					playStatsMap[identifier] = (playStatsMap[identifier] ?? 0) + 1;
+					requestedStatsMap[value.requestedById] =
+						(requestedStatsMap[value.requestedById] ?? 0) + 1;
+				} catch (error) {
+					reportError(error, 'Failed to parse stats JSON value');
 				}
-			})();
+			}
+		} catch (error) {
+			reportError(error, 'Failed to process stats data from Redis');
+		}
+	}
 
-			pendingPromises.push(processingPromise);
+	for await (const keys of playlistStatsStream) {
+		if (keys.length === 0) {
+			continue;
+		}
 
-			processingPromise.finally(() => {
-				playStatsStream.resume();
-			});
-		});
+		try {
+			const results = await getValues(keys);
 
-		playStatsStream.on('end', async () => {
-			await Promise.all(pendingPromises);
-			playlistStatsStream.emit('start');
-		});
+			/* v8 ignore start */
+			for (const rawKeyValue of results) {
+				try {
+					const value: {
+						playlistId: string;
+						requestedById: string;
+					} = JSON.parse(rawKeyValue);
 
-		playlistStatsStream.on('start', () => {
-			playlistStatsStream.resume();
-		});
-
-		playlistStatsStream.on('data', (keys = []) => {
-			playlistStatsStream.pause();
-
-			const processingPromise = (async () => {
-				if (keys.length > 0) {
-					try {
-						const pipeline = redis.pipeline();
-
-						for (const key of keys) {
-							pipeline.get(key);
-						}
-
-						const results = await pipeline.exec();
-
-						/* v8 ignore start */
-						if (results) {
-							for (const [error, rawKeyValue] of results) {
-								if (error || !rawKeyValue) {
-									continue;
-								}
-
-								try {
-									const value: {
-										playlistId: string;
-										requestedById: string;
-									} = JSON.parse(rawKeyValue as string);
-
-									if (value.requestedById === botId) {
-										continue;
-									}
-
-									if (value.playlistId in playlistStatsMap) {
-										playlistStatsMap[value.playlistId] =
-											playlistStatsMap[value.playlistId] + 1;
-									} else {
-										playlistStatsMap[value.playlistId] = 1;
-									}
-								} catch (error) {
-									reportError(
-										error,
-										'Failed to parse playlist stats JSON value',
-									);
-								}
-							}
-							/* v8 ignore stop */
-						}
-					} catch (error) {
-						reportError(
-							error,
-							'Failed to process playlist stats data from Redis',
-						);
+					if (value.requestedById === botId) {
+						continue;
 					}
+
+					playlistStatsMap[value.playlistId] =
+						(playlistStatsMap[value.playlistId] ?? 0) + 1;
+				} catch (error) {
+					reportError(error, 'Failed to parse playlist stats JSON value');
 				}
-			})();
+			}
+			/* v8 ignore stop */
+		} catch (error) {
+			reportError(error, 'Failed to process playlist stats data from Redis');
+		}
+	}
 
-			pendingPromises.push(processingPromise);
+	const playedList = Object.entries(playStatsMap)
+		.filter(([, occurences]) => occurences > 1)
+		.sort(([, a], [, b]) => b - a)
+		.slice(0, 10)
+		.map(([key, occurences]) => `${occurences} – ${key}`)
+		.join('\n');
 
-			processingPromise.finally(() => {
-				playlistStatsStream.resume();
-			});
-		});
+	const listToCount = Object.entries(requestedStatsMap).sort(
+		([, a], [, b]) => b - a,
+	);
 
-		playlistStatsStream.on('end', async () => {
-			await Promise.all(pendingPromises);
-			const playedList = Object.entries(playStatsMap)
-				.filter(([, occurences]) => occurences > 1)
-				.sort(([, a], [, b]) => b - a)
-				.slice(0, 10)
-				.map(([key, occurences]) => `${occurences} – ${key}`)
-				.join('\n');
+	const requestedList = listToCount
+		.map(([key, value]) => `${value} – <@!${key}>`)
+		.join('\n');
 
-			const listToCount = Object.entries(requestedStatsMap).sort(
-				([, a], [, b]) => b - a,
-			);
+	const playlistList = Object.entries(playlistStatsMap)
+		.sort(([, a], [, b]) => b - a)
+		.slice(0, 10)
+		.map(([playlistId, count]) => `${count} – ${playlistId}`)
+		.join('\n');
 
-			const requestedList = listToCount
-				.map(([key, value]) => `${value} – <@!${key}>`)
-				.join('\n');
+	const totalPlayed = listToCount.reduce((a, [, b]) => a + b, 0);
 
-			const playlistList = Object.entries(playlistStatsMap)
-				.sort(([, a], [, b]) => b - a)
-				.slice(0, 10)
-				.map(([playlistId, count]) => `${count} – ${playlistId}`)
-				.join('\n');
+	const embed = new EmbedBuilder()
+		.setTitle('Statistics')
+		.setColor('Blue')
+		.setDescription(
+			`**Top 10 Most Frequently Played**:\n${
+				playedList || '*empty*'
+			}\n\n**Total Played**: ${totalPlayed}\n\n**Most Requested By**:\n${requestedList || '*empty*'}\n\n**Top 10 Most Enqueued Playlists**:\n${playlistList || '*empty*'}`,
+		)
+		.setFooter({ text: 'Not showing tracks played just once' });
 
-			const totalPlayed = listToCount.reduce((a, [, b]) => a + b, 0);
+	await interaction.editReply({ embeds: [embed], content: null });
+}
 
-			const embed = new EmbedBuilder()
-				.setTitle('Statistics')
-				.setColor('Blue')
-				.setDescription(
-					`**Top 10 Most Frequently Played**:\n${
-						playedList || '*empty*'
-					}\n\n**Total Played**: ${totalPlayed}\n\n**Most Requested By**:\n${requestedList || '*empty*'}\n\n**Top 10 Most Enqueued Playlists**:\n${playlistList || '*empty*'}`,
-				)
-				.setFooter({ text: 'Not showing tracks played just once' });
+async function getValues(keys: string[]) {
+	const pipeline = redis.pipeline();
 
-			await interaction.editReply({ embeds: [embed], content: null });
-			resolve(void 'empty');
-		});
-	});
+	for (const key of keys) {
+		pipeline.get(key);
+	}
+
+	const results = (await pipeline.exec()) ?? [];
+
+	return results.flatMap(([error, value]) =>
+		!error && typeof value === 'string' && value ? [value] : [],
+	);
 }

@@ -6,13 +6,13 @@ import {
 import { useMainPlayer, useQueue } from 'discord-player';
 import Fuse from 'fuse.js';
 import debounce from 'p-debounce';
-import { FALLBACK_SEARCH_ENGINE } from '../constants/sourceConfig';
-import determineSearchEngine from '../utils/determineSearchEngine';
-import { getPlaylistsChannel } from '../utils/getGuildConfig';
-import { getAllPlaylists } from '../utils/getPlaylists';
-import getTrackPosition from '../utils/getTrackPosition';
-import reportError from '../utils/reportError';
-import truncateString from '../utils/truncateString';
+import { FALLBACK_SEARCH_ENGINE } from '../constants/sourceConfig.ts';
+import determineSearchEngine from '../utils/determineSearchEngine.ts';
+import { getPlaylistsChannel } from '../utils/getGuildConfig.ts';
+import { getAllPlaylists } from '../utils/getPlaylists.ts';
+import getTrackPosition from '../utils/getTrackPosition.ts';
+import reportError from '../utils/reportError.ts';
+import truncateString from '../utils/truncateString.ts';
 
 const EXPIRED_INTERACTION_CODES = new Set([10_062, 40_060]);
 

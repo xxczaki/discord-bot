@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import determineSearchEngine from '../determineSearchEngine';
+import determineSearchEngine from '../determineSearchEngine.ts';
 
 const { youtubeEnabled } = vi.hoisted(() => ({
 	youtubeEnabled: { value: false },

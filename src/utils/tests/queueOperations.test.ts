@@ -9,7 +9,7 @@ import {
 	setVolume,
 	skipCurrentTrack,
 	TrackMatcher,
-} from '../queueOperations';
+} from '../queueOperations.ts';
 
 function createMockTrack(title: string, author: string, id?: string): Track {
 	return {

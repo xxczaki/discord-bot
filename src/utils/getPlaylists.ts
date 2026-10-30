@@ -2,11 +2,11 @@ import {
 	StringSelectMenuOptionBuilder,
 	type TextBasedChannel,
 } from 'discord.js';
-import cleanUpPlaylistContent from './cleanUpPlaylistContent';
-import { ExternalPlaylistCache } from './ExternalPlaylistCache';
-import isUrlSpotifyPlaylist from './isUrlSpotifyPlaylist';
-import pluralize from './pluralize';
-import redis from './redis';
+import cleanUpPlaylistContent from './cleanUpPlaylistContent.ts';
+import { ExternalPlaylistCache } from './ExternalPlaylistCache.ts';
+import isUrlSpotifyPlaylist from './isUrlSpotifyPlaylist.ts';
+import pluralize from './pluralize.ts';
+import redis from './redis.ts';
 
 const ITEMS_PER_PAGE = 25;
 

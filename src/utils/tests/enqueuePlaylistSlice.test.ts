@@ -10,11 +10,11 @@ import {
 import type { Track } from 'discord-player';
 import { useQueue } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
-import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../../constants/miscellaneous';
-import cleanUpPlaylistContent from '../cleanUpPlaylistContent';
-import enqueuePlaylistSlice from '../enqueuePlaylistSlice';
-import { getPlaylistsChannel } from '../getGuildConfig';
-import processTracksWithQueue from '../processTracksWithQueue';
+import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../../constants/miscellaneous.ts';
+import cleanUpPlaylistContent from '../cleanUpPlaylistContent.ts';
+import enqueuePlaylistSlice from '../enqueuePlaylistSlice.ts';
+import { getPlaylistsChannel } from '../getGuildConfig.ts';
+import processTracksWithQueue from '../processTracksWithQueue.ts';
 
 vi.mock('discord-player', () => ({
 	useQueue: vi.fn(),

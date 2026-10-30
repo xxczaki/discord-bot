@@ -1,7 +1,7 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { useQueue } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
-import pauseCommandHandler from '../pause';
+import pauseCommandHandler from '../pause.ts';
 
 vi.mock('discord-player', () => ({
 	useQueue: vi.fn(),

@@ -4,8 +4,8 @@ import type { GuildQueue, Player } from 'discord-player';
 import { useMainPlayer, useQueue } from 'discord-player';
 import Queue from 'p-queue';
 import { beforeEach, expect, it, vi } from 'vitest';
-import type { ProcessingInteraction } from '../../types/ProcessingInteraction';
-import processTracksWithQueue from '../processTracksWithQueue';
+import type { ProcessingInteraction } from '../../types/ProcessingInteraction.ts';
+import processTracksWithQueue from '../processTracksWithQueue.ts';
 
 const EXAMPLE_TRACKS = [
 	'https://www.youtube.com/watch?v=dQw4w9WgXcQ',

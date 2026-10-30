@@ -6,7 +6,7 @@ import {
 	ButtonStyle,
 	type ChatInputCommandInteraction,
 } from 'discord.js';
-import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
+import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous.ts';
 
 export const GRID_SIZE = 3;
 export const EMPTY_CHARACTER = '‎';

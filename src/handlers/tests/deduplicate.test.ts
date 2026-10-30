@@ -7,8 +7,8 @@ import {
 	createMockQueue as createBaseMockQueue,
 	createMockTrack,
 	MOCK_TRACK_URL,
-} from '../../utils/testing';
-import deduplicateCommandHandler from '../deduplicate';
+} from '../../utils/testing/index.ts';
+import deduplicateCommandHandler from '../deduplicate.ts';
 
 const EXAMPLE_TRACK_URL_2 =
 	'https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh';

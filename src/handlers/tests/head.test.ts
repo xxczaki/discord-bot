@@ -4,8 +4,8 @@ import type {
 	VoiceBasedChannel,
 } from 'discord.js';
 import { beforeEach, expect, it, vi } from 'vitest';
-import enqueuePlaylistSlice from '../../utils/enqueuePlaylistSlice';
-import headCommandHandler from '../head';
+import enqueuePlaylistSlice from '../../utils/enqueuePlaylistSlice.ts';
+import headCommandHandler from '../head.ts';
 
 vi.mock('../../utils/enqueuePlaylistSlice');
 

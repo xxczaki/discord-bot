@@ -6,13 +6,13 @@ import {
 	type GuildMember,
 } from 'discord.js';
 import { type QueueFilters, useMainPlayer, useQueue } from 'discord-player';
-import type { QueueMetadata } from '../types/QueueMetadata';
-import createSmartInteractionHandler from '../utils/createSmartInteractionHandler';
-import createTrackEmbed from '../utils/createTrackEmbed';
-import determineSearchEngine from '../utils/determineSearchEngine';
-import getTrackPosition from '../utils/getTrackPosition';
-import isObject from '../utils/isObject';
-import reportError from '../utils/reportError';
+import type { QueueMetadata } from '../types/QueueMetadata.ts';
+import createSmartInteractionHandler from '../utils/createSmartInteractionHandler.ts';
+import createTrackEmbed from '../utils/createTrackEmbed.ts';
+import determineSearchEngine from '../utils/determineSearchEngine.ts';
+import getTrackPosition from '../utils/getTrackPosition.ts';
+import isObject from '../utils/isObject.ts';
+import reportError from '../utils/reportError.ts';
 
 export default async function playCommandHandler(
 	interaction: ChatInputCommandInteraction,

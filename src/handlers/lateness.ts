@@ -1,4 +1,3 @@
-import { differenceInMinutes, format } from 'date-fns';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -6,11 +5,11 @@ import {
 	type ChatInputCommandInteraction,
 	EmbedBuilder,
 } from 'discord.js';
-import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
-import { LatenessHandler } from '../utils/LatenessHandler';
-import logger from '../utils/logger';
-import redis from '../utils/redis';
-import reportError from '../utils/reportError';
+import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous.ts';
+import { LatenessHandler } from '../utils/LatenessHandler.ts';
+import logger from '../utils/logger.ts';
+import redis from '../utils/redis.ts';
+import reportError from '../utils/reportError.ts';
 
 const lateness = LatenessHandler.getInstance();
 
@@ -81,93 +80,88 @@ export default async function latenessCommandHandler(
 
 	if (!expected) {
 		const statsStream = lateness.getStats();
-		const stats: Record<number, string> = {};
+		const stats = new Map<number, string>();
 		const delays: number[] = [];
 
 		await interaction.editReply('Loading lateness data…');
 
-		return new Promise((resolve) => {
-			statsStream.on('data', async (keys = []) => {
-				statsStream.pause();
-
-				for (const key of keys) {
-					try {
-						const rawKeyValue = await redis.get(key);
-
-						if (!rawKeyValue) {
-							continue;
-						}
-
-						const value: {
-							expected: string;
-							actual: string | null;
-						} = JSON.parse(rawKeyValue);
-
-						const expected = new Date(value.expected);
-						const actual = !value.actual ? null : new Date(value.actual);
-
-						const difference = !actual
-							? null
-							: differenceInMinutes(actual, expected);
-
-						if (difference && difference > 0) {
-							delays.push(difference);
-						}
-
-						const identifier = `- \`${format(
-							expected,
-							'LLL d, HH:mm',
-						)}\` **${calculateLateness(difference)}**`;
-
-						stats[expected.getTime()] = identifier;
-					} catch (error) {
-						reportError(error, 'Failed to parse lateness stats JSON data');
-					}
-				}
-
-				// @ts-expect-error Object.entries is loosely typed
-				const entries = Object.entries(stats) as [number, string][];
-				const list = entries
-					.sort(([a], [b]) => b - a)
-					.slice(0, 20)
-					.map(([, identifier]) => identifier)
-					.join('\n');
-
-				const embed = new EmbedBuilder()
-					.setTitle('Lateness')
-					.setColor('Blue')
-					.setDescription(`**20 Most Recent Records**:\n${list || '*empty*'}`)
-					.setFields([
-						{
-							name: 'Total Records',
-							value: entries.length.toString(),
-							inline: true,
-						},
-						{
-							name: 'Average Delay',
-							value: `\`${
-								Math.round(delays.reduce((a, b) => a + b, 0) / delays.length) ||
-								0
-							} min\` (n: ${delays.length})`,
-							inline: true,
-						},
-					])
-					.setFooter({
-						text: 'Not showing and counting records spanning more than 2 days',
-					});
-
+		for await (const keys of statsStream) {
+			for (const key of keys) {
 				try {
-					await interaction.editReply({ embeds: [embed], content: null });
+					const rawKeyValue = await redis.get(key);
+
+					if (!rawKeyValue) {
+						continue;
+					}
+
+					const value: {
+						expected: string;
+						actual: string | null;
+					} = JSON.parse(rawKeyValue);
+
+					const expected = new Date(value.expected).toTemporalInstant();
+					const actual = value.actual
+						? new Date(value.actual).toTemporalInstant()
+						: null;
+
+					const difference = actual
+						? expected.until(actual, { largestUnit: 'minutes' }).minutes
+						: null;
+
+					if (difference && difference > 0) {
+						delays.push(difference);
+					}
+
+					const identifier = `- \`${expected.toLocaleString('en-US', {
+						month: 'short',
+						day: 'numeric',
+						hour: '2-digit',
+						minute: '2-digit',
+						hourCycle: 'h23',
+					})}\` **${calculateLateness(difference)}**`;
+
+					stats.set(expected.epochMilliseconds, identifier);
 				} catch (error) {
-					logger.warn(error, 'Failed to edit lateness reply');
+					reportError(error, 'Failed to parse lateness stats JSON data');
 				}
-				statsStream.resume();
+			}
+		}
+
+		const list = [...stats]
+			.sort(([a], [b]) => b - a)
+			.slice(0, 20)
+			.map(([, identifier]) => identifier)
+			.join('\n');
+
+		const embed = new EmbedBuilder()
+			.setTitle('Lateness')
+			.setColor('Blue')
+			.setDescription(`**20 Most Recent Records**:\n${list || '*empty*'}`)
+			.setFields([
+				{
+					name: 'Total Records',
+					value: stats.size.toString(),
+					inline: true,
+				},
+				{
+					name: 'Average Delay',
+					value: `\`${
+						Math.round(delays.reduce((a, b) => a + b, 0) / delays.length) || 0
+					} min\` (n: ${delays.length})`,
+					inline: true,
+				},
+			])
+			.setFooter({
+				text: 'Not showing and counting records spanning more than 2 days',
 			});
 
-			statsStream.on('end', () => {
-				resolve(void 'empty');
-			});
-		});
+		try {
+			await interaction.editReply({ embeds: [embed], content: null });
+		} catch (error) {
+			logger.warn(error, 'Failed to edit lateness reply');
+		}
+
+		return;
 	}
 
 	const today = new Date();

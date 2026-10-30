@@ -7,7 +7,7 @@ import type {
 import type { GuildQueue } from 'discord-player';
 import { useMainPlayer } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
-import { getPlaylistsChannel } from '../getGuildConfig';
+import { getPlaylistsChannel } from '../getGuildConfig.ts';
 import {
 	formatToolArgs,
 	generatePendingMessage,
@@ -17,7 +17,7 @@ import {
 	getToolMessages,
 	isReadOnlyTool,
 	type ToolContext,
-} from '../promptTools';
+} from '../promptTools.ts';
 import {
 	deduplicateQueue,
 	moveTracksByPattern,
@@ -26,7 +26,7 @@ import {
 	resumePlayback,
 	setVolume,
 	skipCurrentTrack,
-} from '../queueOperations';
+} from '../queueOperations.ts';
 
 vi.mock('../queueOperations', () => ({
 	removeTracksByPattern: vi.fn().mockReturnValue({
@@ -69,7 +69,7 @@ vi.mock('../StatsHandler', () => ({
 	},
 }));
 
-import cleanUpPlaylistContent from '../cleanUpPlaylistContent';
+import cleanUpPlaylistContent from '../cleanUpPlaylistContent.ts';
 
 vi.mock('../cleanUpPlaylistContent', () => ({
 	default: vi.fn().mockReturnValue('song one\nsong two'),

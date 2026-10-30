@@ -2,12 +2,12 @@ import { captureException } from '@sentry/node';
 import type { AutocompleteInteraction, Channel, Client } from 'discord.js';
 import { useMainPlayer, useQueue } from 'discord-player';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { FALLBACK_SEARCH_ENGINE } from '../../constants/sourceConfig';
-import determineSearchEngine from '../../utils/determineSearchEngine';
-import getTrackPosition from '../../utils/getTrackPosition';
-import logger from '../../utils/logger';
-import truncateString from '../../utils/truncateString';
-import useAutocompleteHandler from '../useAutocompleteHandler';
+import { FALLBACK_SEARCH_ENGINE } from '../../constants/sourceConfig.ts';
+import determineSearchEngine from '../../utils/determineSearchEngine.ts';
+import getTrackPosition from '../../utils/getTrackPosition.ts';
+import logger from '../../utils/logger.ts';
+import truncateString from '../../utils/truncateString.ts';
+import useAutocompleteHandler from '../useAutocompleteHandler.ts';
 
 const EXAMPLE_TRACK_URL = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
 const EXAMPLE_QUERY = 'never gonna give you up';

@@ -1,8 +1,8 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { beforeEach, expect, it, vi } from 'vitest';
-import { DEFAULT_SOURCE_NAME } from '../../constants/sourceConfig';
-import { createMockInteraction as createBaseMockInteraction } from '../../utils/testing';
-import helpCommandHandler from '../help';
+import { DEFAULT_SOURCE_NAME } from '../../constants/sourceConfig.ts';
+import { createMockInteraction as createBaseMockInteraction } from '../../utils/testing/index.ts';
+import helpCommandHandler from '../help.ts';
 
 function createMockInteraction(): ChatInputCommandInteraction {
 	return createBaseMockInteraction({ editReply: true });

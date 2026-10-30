@@ -1,8 +1,8 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { beforeEach, expect, it, vi } from 'vitest';
-import LockdownManager from '../../utils/lockdown';
-import { setPresence } from '../../utils/presenceManager';
-import lockdownCommandHandler from '../lockdown';
+import LockdownManager from '../../utils/lockdown.ts';
+import { setPresence } from '../../utils/presenceManager.ts';
+import lockdownCommandHandler from '../lockdown.ts';
 
 const GUILD_ID = 'guild-123';
 

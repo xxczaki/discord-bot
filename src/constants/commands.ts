@@ -1,5 +1,5 @@
 import type { ChatInputApplicationCommandData } from 'discord.js';
-import { DEFAULT_SOURCE_NAME } from './sourceConfig';
+import { DEFAULT_SOURCE_NAME } from './sourceConfig.ts';
 
 export const COMMAND_CATEGORIES = [
 	'Music',

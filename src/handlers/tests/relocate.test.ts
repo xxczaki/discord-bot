@@ -5,8 +5,8 @@ import type {
 } from 'discord.js';
 import { useQueue } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
-import type { ProcessingInteraction } from '../../types/ProcessingInteraction';
-import relocateCommandHandler from '../relocate';
+import type { ProcessingInteraction } from '../../types/ProcessingInteraction.ts';
+import relocateCommandHandler from '../relocate.ts';
 
 interface QueueMetadata {
 	interaction: ProcessingInteraction;

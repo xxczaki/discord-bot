@@ -2,10 +2,10 @@ import { stat } from 'node:fs/promises';
 import { EmbedBuilder } from 'discord.js';
 import type { Track } from 'discord-player';
 import prettyBytes from 'pretty-bytes';
-import isObject from '../utils/isObject';
-import getTrackThumbnail from './getTrackThumbnail';
-import isUrlSpotifyPlaylist from './isUrlSpotifyPlaylist';
-import { OpusCacheManager } from './OpusCacheManager';
+import isObject from '../utils/isObject.ts';
+import getTrackThumbnail from './getTrackThumbnail.ts';
+import isUrlSpotifyPlaylist from './isUrlSpotifyPlaylist.ts';
+import { OpusCacheManager } from './OpusCacheManager.ts';
 
 const fileStatsCache = new Map<string, { size: number; timestamp: number }>();
 const CACHE_DURATION_MS = 30_000;

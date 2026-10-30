@@ -2,7 +2,7 @@ import type { ChatInputCommandInteraction } from 'discord.js';
 import type { GuildQueue } from 'discord-player';
 import { useQueue } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
-import useQueueWithValidation from '../useQueueWithValidation';
+import useQueueWithValidation from '../useQueueWithValidation.ts';
 
 const MOCK_QUEUE = { id: 'test-queue' } as GuildQueue;
 

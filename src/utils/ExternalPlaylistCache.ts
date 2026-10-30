@@ -6,7 +6,11 @@ interface ExternalPlaylistMetadata {
 }
 
 export class ExternalPlaylistCache {
-	constructor(private redis: Redis) {}
+	readonly #redis: Redis;
+
+	constructor(redis: Redis) {
+		this.#redis = redis;
+	}
 
 	#createKey(playlistUrl: string) {
 		return `external-playlist-cache:${playlistUrl}` as const;
@@ -19,7 +23,7 @@ export class ExternalPlaylistCache {
 		};
 
 		const key = this.#createKey(playlistUrl);
-		await this.redis.set(key, JSON.stringify(metadata));
+		await this.#redis.set(key, JSON.stringify(metadata));
 	}
 
 	async getTrackCount(
@@ -27,7 +31,7 @@ export class ExternalPlaylistCache {
 	): Promise<ExternalPlaylistMetadata | null> {
 		try {
 			const key = this.#createKey(playlistUrl);
-			const cached = await this.redis.get(key);
+			const cached = await this.#redis.get(key);
 
 			if (!cached) {
 				return null;

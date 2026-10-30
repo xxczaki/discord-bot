@@ -1,10 +1,10 @@
 import type { Server } from 'node:net';
 import type { Client } from 'discord.js';
 import { useQueue } from 'discord-player';
-import getEnvironmentVariable from './getEnvironmentVariable';
-import logger from './logger';
-import { QueueRecoveryService } from './QueueRecoveryService';
-import redis from './redis';
+import getEnvironmentVariable from './getEnvironmentVariable.ts';
+import logger from './logger.ts';
+import { QueueRecoveryService } from './QueueRecoveryService.ts';
+import redis from './redis.ts';
 
 const SHUTDOWN_TIMEOUT_MS = 5000;
 const SHUTDOWN_REASON_TTL_SECONDS = 300;

@@ -8,11 +8,11 @@ import type {
 import type { Player, Track } from 'discord-player';
 import { useQueue } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
-import getCommitLink from '../../utils/getCommitLink';
-import { OpusCacheManager } from '../../utils/OpusCacheManager';
+import getCommitLink from '../../utils/getCommitLink.ts';
+import { OpusCacheManager } from '../../utils/OpusCacheManager.ts';
 import useDiscordEventHandlers, {
 	useReadyEventHandler,
-} from '../useDiscordEventHandlers';
+} from '../useDiscordEventHandlers.ts';
 
 const MOCK_GUILD_ID = '123456789';
 const MOCK_COMMIT_SHA = 'abc123def456';

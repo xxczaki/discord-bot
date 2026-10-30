@@ -8,8 +8,8 @@ import type {
 import type { GuildQueue, Track } from 'discord-player';
 import { useQueue } from 'discord-player';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { PROMPT_MODEL_ID } from '../../utils/promptTools';
-import promptCommandHandler from '../prompt';
+import { PROMPT_MODEL_ID } from '../../utils/promptTools.ts';
+import promptCommandHandler from '../prompt.ts';
 
 const EXAMPLE_TRACK_TITLE = 'Like a Rolling Stone';
 const EXAMPLE_TRACK_AUTHOR = 'Bob Dylan';

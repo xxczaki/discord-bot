@@ -1,10 +1,9 @@
-import { EventEmitter } from 'node:events';
 import { captureException } from '@sentry/node';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import logger from '../../utils/logger';
-import redis from '../../utils/redis';
-import latenessCommandHandler from '../lateness';
+import logger from '../../utils/logger.ts';
+import redis from '../../utils/redis.ts';
+import latenessCommandHandler from '../lateness.ts';
 
 const EXPECTED_HOUR = '14:30';
 const EXPECTED_DATE = new Date('2025-05-28T14:30:00.000Z');
@@ -48,6 +47,54 @@ const mockAnswer = {
 	customId: '',
 	update: vi.fn(),
 };
+
+function createScanStream(batches: string[][]): AsyncIterable<string[]> {
+	return {
+		async *[Symbol.asyncIterator]() {
+			for (const batch of batches) {
+				yield batch;
+			}
+		},
+	};
+}
+
+function createFailingScanStream(error: Error): AsyncIterable<string[]> {
+	return {
+		async *[Symbol.asyncIterator]() {
+			yield* [];
+			throw error;
+		},
+	};
+}
+
+function formatExpectedLabel(date: Date) {
+	const month = date.toLocaleString('en-US', { month: 'short' });
+	const hours = date.getHours().toString().padStart(2, '0');
+	const minutes = date.getMinutes().toString().padStart(2, '0');
+
+	return `${month} ${date.getDate()}, ${hours}:${minutes}`;
+}
+
+function getEmbedReplies() {
+	return vi
+		.mocked(mockInteraction.editReply)
+		.mock.calls.filter(
+			([payload]) => typeof payload === 'object' && 'embeds' in payload,
+		);
+}
+
+function expectEmbedDescriptionToContain(text: string) {
+	expect(mockInteraction.editReply).toHaveBeenLastCalledWith({
+		embeds: [
+			expect.objectContaining({
+				data: expect.objectContaining({
+					description: expect.stringContaining(text),
+				}),
+			}),
+		],
+		content: null,
+	});
+}
 
 beforeEach(() => {
 	vi.clearAllMocks();
@@ -184,62 +231,49 @@ describe('when starting new measurement', () => {
 });
 
 describe('when showing stats without expected hour', () => {
-	let mockStatsStream: EventEmitter & { pause: () => void; resume: () => void };
-
 	beforeEach(() => {
 		mockInteraction.options.getString = vi.fn().mockReturnValue(null);
-		mockStatsStream = Object.assign(new EventEmitter(), {
-			pause: vi.fn(),
-			resume: vi.fn(),
-		});
-		mockLatenessHandler.getStats = vi.fn().mockReturnValue(mockStatsStream);
+		mockLatenessHandler.getStats = vi
+			.fn()
+			.mockReturnValue(createScanStream([]));
 	});
 
 	it('should show loading message initially', async () => {
-		const promise = latenessCommandHandler(mockInteraction);
+		await latenessCommandHandler(mockInteraction);
 
-		// Trigger stream end to resolve the promise
-		process.nextTick(() => mockStatsStream.emit('end'));
-
-		await promise;
-
-		expect(mockInteraction.editReply).toHaveBeenCalledWith(
+		expect(mockInteraction.editReply).toHaveBeenNthCalledWith(
+			1,
 			'Loading lateness data…',
 		);
 	});
 
 	it('should process stats data and create embed with records', async () => {
 		mockedRedis.get.mockResolvedValue(SAMPLE_REDIS_DATA);
+		mockLatenessHandler.getStats = vi
+			.fn()
+			.mockReturnValue(createScanStream([[SAMPLE_REDIS_KEY]]));
 
-		const promise = latenessCommandHandler(mockInteraction);
-
-		// Emit data then end
-		process.nextTick(() => {
-			mockStatsStream.emit('data', [SAMPLE_REDIS_KEY]);
-			mockStatsStream.emit('end');
-		});
-
-		await promise;
+		await latenessCommandHandler(mockInteraction);
 
 		expect(mockedRedis.get).toHaveBeenCalledWith(SAMPLE_REDIS_KEY);
-		expect(mockInteraction.editReply).toHaveBeenCalledWith({
+		expect(mockInteraction.editReply).toHaveBeenLastCalledWith({
 			embeds: [
 				expect.objectContaining({
 					data: expect.objectContaining({
 						title: 'Lateness',
-						description: expect.stringContaining('**20 Most Recent Records**:'),
-						fields: expect.arrayContaining([
-							expect.objectContaining({
+						description: `**20 Most Recent Records**:\n- \`${formatExpectedLabel(EXPECTED_DATE)}\` **Late ≤ 15 min**`,
+						fields: [
+							{
 								name: 'Total Records',
 								value: '1',
 								inline: true,
-							}),
-							expect.objectContaining({
+							},
+							{
 								name: 'Average Delay',
-								value: expect.stringContaining('5 min'),
+								value: '`5 min` (n: 1)',
 								inline: true,
-							}),
-						]),
+							},
+						],
 						footer: expect.objectContaining({
 							text: 'Not showing and counting records spanning more than 2 days',
 						}),
@@ -250,18 +284,98 @@ describe('when showing stats without expected hour', () => {
 		});
 	});
 
-	it('should handle empty stats gracefully', async () => {
-		const promise = latenessCommandHandler(mockInteraction);
+	it('should render a single embed after consuming every batch', async () => {
+		const laterDate = new Date('2025-05-29T14:30:00.000Z');
 
-		// Emit empty data then end
-		process.nextTick(() => {
-			mockStatsStream.emit('data', []);
-			mockStatsStream.emit('end');
+		mockedRedis.get
+			.mockResolvedValueOnce(SAMPLE_REDIS_DATA)
+			.mockResolvedValueOnce(
+				JSON.stringify({
+					expected: laterDate.toISOString(),
+					actual: new Date('2025-05-29T14:50:00.000Z').toISOString(),
+				}),
+			);
+		mockLatenessHandler.getStats = vi
+			.fn()
+			.mockReturnValue(createScanStream([['key1'], [], ['key2']]));
+
+		await latenessCommandHandler(mockInteraction);
+
+		expect(getEmbedReplies()).toHaveLength(1);
+		expect(mockInteraction.editReply).toHaveBeenLastCalledWith({
+			embeds: [
+				expect.objectContaining({
+					data: expect.objectContaining({
+						description: `**20 Most Recent Records**:\n- \`${formatExpectedLabel(laterDate)}\` **Late**\n- \`${formatExpectedLabel(EXPECTED_DATE)}\` **Late ≤ 15 min**`,
+						fields: expect.arrayContaining([
+							expect.objectContaining({
+								name: 'Total Records',
+								value: '2',
+							}),
+							expect.objectContaining({
+								name: 'Average Delay',
+								value: '`13 min` (n: 2)',
+							}),
+						]),
+					}),
+				}),
+			],
+			content: null,
 		});
+	});
 
-		await promise;
+	it('should only list the 20 most recent records', async () => {
+		const keys = Array.from({ length: 25 }, (_, index) => `key-${index}`);
 
-		expect(mockInteraction.editReply).toHaveBeenCalledWith({
+		for (const [index] of keys.entries()) {
+			const expectedDate = new Date(EXPECTED_DATE);
+			expectedDate.setUTCDate(expectedDate.getUTCDate() + index);
+
+			mockedRedis.get.mockResolvedValueOnce(
+				JSON.stringify({
+					expected: expectedDate.toISOString(),
+					actual: expectedDate.toISOString(),
+				}),
+			);
+		}
+
+		mockLatenessHandler.getStats = vi
+			.fn()
+			.mockReturnValue(createScanStream([keys.slice(0, 10), keys.slice(10)]));
+
+		await latenessCommandHandler(mockInteraction);
+
+		const [[payload]] = getEmbedReplies();
+
+		if (typeof payload !== 'object' || !('embeds' in payload)) {
+			throw new Error('Expected an embed reply');
+		}
+
+		const [embed] = payload.embeds ?? [];
+		const embedData = 'toJSON' in embed ? embed.toJSON() : embed;
+		const records = embedData.description?.split('\n').slice(1) ?? [];
+
+		const newestDate = new Date(EXPECTED_DATE);
+		newestDate.setUTCDate(newestDate.getUTCDate() + 24);
+
+		expect(records).toHaveLength(20);
+		expect(records[0]).toContain(formatExpectedLabel(newestDate));
+		expect(embedData.fields).toContainEqual({
+			name: 'Total Records',
+			value: '25',
+			inline: true,
+		});
+	});
+
+	it('should handle empty stats gracefully', async () => {
+		mockLatenessHandler.getStats = vi
+			.fn()
+			.mockReturnValue(createScanStream([[]]));
+
+		await latenessCommandHandler(mockInteraction);
+
+		expect(mockedRedis.get).not.toHaveBeenCalled();
+		expect(mockInteraction.editReply).toHaveBeenLastCalledWith({
 			embeds: [
 				expect.objectContaining({
 					data: expect.objectContaining({
@@ -273,7 +387,7 @@ describe('when showing stats without expected hour', () => {
 							}),
 							expect.objectContaining({
 								name: 'Average Delay',
-								value: expect.stringContaining('0 min'),
+								value: '`0 min` (n: 0)',
 							}),
 						]),
 					}),
@@ -285,71 +399,88 @@ describe('when showing stats without expected hour', () => {
 
 	it('should skip invalid Redis data', async () => {
 		mockedRedis.get.mockResolvedValue(null);
+		mockLatenessHandler.getStats = vi
+			.fn()
+			.mockReturnValue(createScanStream([[SAMPLE_REDIS_KEY]]));
 
-		const promise = latenessCommandHandler(mockInteraction);
+		await latenessCommandHandler(mockInteraction);
 
-		process.nextTick(() => {
-			mockStatsStream.emit('data', [SAMPLE_REDIS_KEY]);
-			mockStatsStream.emit('end');
-		});
-
-		await promise;
-
-		expect(mockInteraction.editReply).toHaveBeenCalledWith({
-			embeds: [
-				expect.objectContaining({
-					data: expect.objectContaining({
-						description: expect.stringContaining('*empty*'),
-					}),
-				}),
-			],
-			content: null,
-		});
+		expectEmbedDescriptionToContain('*empty*');
 	});
 
 	it('should handle Redis data parsing errors', async () => {
 		mockedRedis.get.mockResolvedValue('invalid-json');
+		mockLatenessHandler.getStats = vi
+			.fn()
+			.mockReturnValue(createScanStream([[SAMPLE_REDIS_KEY]]));
 
-		const promise = latenessCommandHandler(mockInteraction);
+		await latenessCommandHandler(mockInteraction);
 
-		process.nextTick(() => {
-			mockStatsStream.emit('data', [SAMPLE_REDIS_KEY]);
-			mockStatsStream.emit('end');
-		});
-
-		await promise;
-
-		expect(mockedLogger.error).toHaveBeenCalled();
+		expect(mockedLogger.error).toHaveBeenCalledWith(
+			expect.any(SyntaxError),
+			'Failed to parse lateness stats JSON data',
+		);
 		expect(mockedCaptureException).toHaveBeenCalled();
+		expectEmbedDescriptionToContain('*empty*');
+	});
+
+	it('should log a warning when the final reply fails', async () => {
+		const editError = new Error('Unknown interaction');
+
+		mockInteraction.editReply = vi
+			.fn()
+			.mockResolvedValueOnce(mockResponse)
+			.mockRejectedValueOnce(editError);
+
+		await expect(
+			latenessCommandHandler(mockInteraction),
+		).resolves.toBeUndefined();
+
+		expect(mockedLogger.warn).toHaveBeenCalledWith(
+			editError,
+			'Failed to edit lateness reply',
+		);
+	});
+
+	it('should propagate errors thrown while scanning', async () => {
+		mockLatenessHandler.getStats = vi
+			.fn()
+			.mockReturnValue(
+				createFailingScanStream(new Error('Redis connection lost')),
+			);
+
+		await expect(latenessCommandHandler(mockInteraction)).rejects.toThrow(
+			'Redis connection lost',
+		);
 	});
 
 	it('should only count positive delays for average calculation', async () => {
 		const onTimeData = JSON.stringify({
-			expected: EXPECTED_DATE.toISOString(),
-			actual: new Date('2025-05-28T14:25:00.000Z').toISOString(), // 5 minutes early
+			expected: new Date('2025-05-29T14:30:00.000Z').toISOString(),
+			actual: new Date('2025-05-29T14:25:00.000Z').toISOString(),
 		});
 
 		mockedRedis.get
-			.mockResolvedValueOnce(SAMPLE_REDIS_DATA) // 5 minutes late
-			.mockResolvedValueOnce(onTimeData); // 5 minutes early
+			.mockResolvedValueOnce(SAMPLE_REDIS_DATA)
+			.mockResolvedValueOnce(onTimeData);
+		mockLatenessHandler.getStats = vi
+			.fn()
+			.mockReturnValue(createScanStream([['key1', 'key2']]));
 
-		const promise = latenessCommandHandler(mockInteraction);
+		await latenessCommandHandler(mockInteraction);
 
-		process.nextTick(() => {
-			mockStatsStream.emit('data', ['key1', 'key2']);
-			mockStatsStream.emit('end');
-		});
-
-		await promise;
-
-		expect(mockInteraction.editReply).toHaveBeenCalledWith({
+		expect(mockInteraction.editReply).toHaveBeenLastCalledWith({
 			embeds: [
 				expect.objectContaining({
 					data: expect.objectContaining({
 						fields: expect.arrayContaining([
 							expect.objectContaining({
+								name: 'Total Records',
+								value: '2',
+							}),
+							expect.objectContaining({
 								name: 'Average Delay',
-								value: expect.stringContaining('5 min'),
+								value: '`5 min` (n: 1)',
 							}),
 						]),
 					}),
@@ -360,177 +491,79 @@ describe('when showing stats without expected hour', () => {
 	});
 
 	it('should handle records with no actual arrival time', async () => {
-		const noArrivalData = JSON.stringify({
-			expected: EXPECTED_DATE.toISOString(),
-			actual: null,
-		});
+		mockedRedis.get.mockResolvedValue(
+			JSON.stringify({
+				expected: EXPECTED_DATE.toISOString(),
+				actual: null,
+			}),
+		);
+		mockLatenessHandler.getStats = vi
+			.fn()
+			.mockReturnValue(createScanStream([[SAMPLE_REDIS_KEY]]));
 
-		mockedRedis.get.mockResolvedValue(noArrivalData);
+		await latenessCommandHandler(mockInteraction);
 
-		const promise = latenessCommandHandler(mockInteraction);
-
-		process.nextTick(() => {
-			mockStatsStream.emit('data', [SAMPLE_REDIS_KEY]);
-			mockStatsStream.emit('end');
-		});
-
-		await promise;
-
-		expect(mockInteraction.editReply).toHaveBeenCalledWith({
-			embeds: [
-				expect.objectContaining({
-					data: expect.objectContaining({
-						description: expect.stringContaining('Not arrived'),
-					}),
-				}),
-			],
-			content: null,
-		});
+		expectEmbedDescriptionToContain('Not arrived');
 	});
 });
 
 describe('calculateLateness function behavior', () => {
-	it('should return "NOT ARRIVED" for null difference', async () => {
-		const noArrivalData = JSON.stringify({
-			expected: EXPECTED_DATE.toISOString(),
-			actual: null,
-		});
-
-		mockedRedis.get.mockResolvedValue(noArrivalData);
+	beforeEach(() => {
 		mockInteraction.options.getString = vi.fn().mockReturnValue(null);
-
-		const mockStatsStream = Object.assign(new EventEmitter(), {
-			pause: vi.fn(),
-			resume: vi.fn(),
-		});
-		mockLatenessHandler.getStats = vi.fn().mockReturnValue(mockStatsStream);
-
-		const promise = latenessCommandHandler(mockInteraction);
-
-		process.nextTick(() => {
-			mockStatsStream.emit('data', [SAMPLE_REDIS_KEY]);
-			mockStatsStream.emit('end');
-		});
-
-		await promise;
-
-		expect(mockInteraction.editReply).toHaveBeenCalledWith({
-			embeds: [
-				expect.objectContaining({
-					data: expect.objectContaining({
-						description: expect.stringContaining('Not arrived'),
-					}),
-				}),
-			],
-			content: null,
-		});
+		mockLatenessHandler.getStats = vi
+			.fn()
+			.mockReturnValue(createScanStream([[SAMPLE_REDIS_KEY]]));
 	});
 
-	it('should return "ON TIME / EARLY" for non-positive difference', async () => {
-		const earlyData = JSON.stringify({
-			expected: EXPECTED_DATE.toISOString(),
-			actual: new Date('2025-05-28T14:25:00.000Z').toISOString(), // 5 minutes early
-		});
+	it('should return `Not arrived` for null difference', async () => {
+		mockedRedis.get.mockResolvedValue(
+			JSON.stringify({
+				expected: EXPECTED_DATE.toISOString(),
+				actual: null,
+			}),
+		);
 
-		mockedRedis.get.mockResolvedValue(earlyData);
-		mockInteraction.options.getString = vi.fn().mockReturnValue(null);
+		await latenessCommandHandler(mockInteraction);
 
-		const mockStatsStream = Object.assign(new EventEmitter(), {
-			pause: vi.fn(),
-			resume: vi.fn(),
-		});
-		mockLatenessHandler.getStats = vi.fn().mockReturnValue(mockStatsStream);
-
-		const promise = latenessCommandHandler(mockInteraction);
-
-		process.nextTick(() => {
-			mockStatsStream.emit('data', [SAMPLE_REDIS_KEY]);
-			mockStatsStream.emit('end');
-		});
-
-		await promise;
-
-		expect(mockInteraction.editReply).toHaveBeenCalledWith({
-			embeds: [
-				expect.objectContaining({
-					data: expect.objectContaining({
-						description: expect.stringContaining('On time / Early'),
-					}),
-				}),
-			],
-			content: null,
-		});
+		expectEmbedDescriptionToContain('**Not arrived**');
 	});
 
-	it('should return "LATE ≤ 15 min" for delays up to 15 minutes', async () => {
-		const slightlyLateData = JSON.stringify({
-			expected: EXPECTED_DATE.toISOString(),
-			actual: new Date('2025-05-28T14:40:00.000Z').toISOString(), // 10 minutes late
-		});
+	it('should return `On time / Early` for non-positive difference', async () => {
+		mockedRedis.get.mockResolvedValue(
+			JSON.stringify({
+				expected: EXPECTED_DATE.toISOString(),
+				actual: new Date('2025-05-28T14:25:00.000Z').toISOString(),
+			}),
+		);
 
-		mockedRedis.get.mockResolvedValue(slightlyLateData);
-		mockInteraction.options.getString = vi.fn().mockReturnValue(null);
+		await latenessCommandHandler(mockInteraction);
 
-		const mockStatsStream = Object.assign(new EventEmitter(), {
-			pause: vi.fn(),
-			resume: vi.fn(),
-		});
-		mockLatenessHandler.getStats = vi.fn().mockReturnValue(mockStatsStream);
-
-		const promise = latenessCommandHandler(mockInteraction);
-
-		process.nextTick(() => {
-			mockStatsStream.emit('data', [SAMPLE_REDIS_KEY]);
-			mockStatsStream.emit('end');
-		});
-
-		await promise;
-
-		expect(mockInteraction.editReply).toHaveBeenCalledWith({
-			embeds: [
-				expect.objectContaining({
-					data: expect.objectContaining({
-						description: expect.stringContaining('Late ≤ 15 min'),
-					}),
-				}),
-			],
-			content: null,
-		});
+		expectEmbedDescriptionToContain('**On time / Early**');
 	});
 
-	it('should return "LATE" for delays over 15 minutes', async () => {
-		const veryLateData = JSON.stringify({
-			expected: EXPECTED_DATE.toISOString(),
-			actual: new Date('2025-05-28T15:00:00.000Z').toISOString(), // 30 minutes late
-		});
+	it('should return `Late ≤ 15 min` for delays up to 15 minutes', async () => {
+		mockedRedis.get.mockResolvedValue(
+			JSON.stringify({
+				expected: EXPECTED_DATE.toISOString(),
+				actual: new Date('2025-05-28T14:45:00.000Z').toISOString(),
+			}),
+		);
 
-		mockedRedis.get.mockResolvedValue(veryLateData);
-		mockInteraction.options.getString = vi.fn().mockReturnValue(null);
+		await latenessCommandHandler(mockInteraction);
 
-		const mockStatsStream = Object.assign(new EventEmitter(), {
-			pause: vi.fn(),
-			resume: vi.fn(),
-		});
-		mockLatenessHandler.getStats = vi.fn().mockReturnValue(mockStatsStream);
+		expectEmbedDescriptionToContain('**Late ≤ 15 min**');
+	});
 
-		const promise = latenessCommandHandler(mockInteraction);
+	it('should return `Late` for delays over 15 minutes', async () => {
+		mockedRedis.get.mockResolvedValue(
+			JSON.stringify({
+				expected: EXPECTED_DATE.toISOString(),
+				actual: new Date('2025-05-28T15:00:00.000Z').toISOString(),
+			}),
+		);
 
-		process.nextTick(() => {
-			mockStatsStream.emit('data', [SAMPLE_REDIS_KEY]);
-			mockStatsStream.emit('end');
-		});
+		await latenessCommandHandler(mockInteraction);
 
-		await promise;
-
-		expect(mockInteraction.editReply).toHaveBeenCalledWith({
-			embeds: [
-				expect.objectContaining({
-					data: expect.objectContaining({
-						description: expect.stringContaining('Late'),
-					}),
-				}),
-			],
-			content: null,
-		});
+		expectEmbedDescriptionToContain('**Late**');
 	});
 });

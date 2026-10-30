@@ -15,14 +15,14 @@ import {
 	TrackSkipReason,
 } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
-import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../../constants/miscellaneous';
-import createSmartInteractionHandler from '../../utils/createSmartInteractionHandler';
-import createTrackEmbed from '../../utils/createTrackEmbed';
-import { OpusCacheManager } from '../../utils/OpusCacheManager';
-import { resetPresence, setPresence } from '../../utils/presenceManager';
-import { QueueRecoveryService } from '../../utils/QueueRecoveryService';
-import { StatsHandler } from '../../utils/StatsHandler';
-import usePlayerEventHandlers from '../usePlayerEventHandlers';
+import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../../constants/miscellaneous.ts';
+import createSmartInteractionHandler from '../../utils/createSmartInteractionHandler.ts';
+import createTrackEmbed from '../../utils/createTrackEmbed.ts';
+import { OpusCacheManager } from '../../utils/OpusCacheManager.ts';
+import { resetPresence, setPresence } from '../../utils/presenceManager.ts';
+import { QueueRecoveryService } from '../../utils/QueueRecoveryService.ts';
+import { StatsHandler } from '../../utils/StatsHandler.ts';
+import usePlayerEventHandlers from '../usePlayerEventHandlers.ts';
 
 vi.mock('node:fs/promises', () => ({
 	stat: vi.fn(),

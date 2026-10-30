@@ -4,10 +4,10 @@ import { EmbedBuilder } from 'discord.js';
 import type { GuildQueue, Player, Track } from 'discord-player';
 import { useMainPlayer, useQueue } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
-import type { ProcessingInteraction } from '../../types/ProcessingInteraction';
-import enqueueTracks from '../enqueueTracks';
-import logger from '../logger';
-import processTracksWithQueue from '../processTracksWithQueue';
+import type { ProcessingInteraction } from '../../types/ProcessingInteraction.ts';
+import enqueueTracks from '../enqueueTracks.ts';
+import logger from '../logger.ts';
+import processTracksWithQueue from '../processTracksWithQueue.ts';
 
 const EXAMPLE_TRACK_URL = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
 const EXAMPLE_TRACK_URL_2 =

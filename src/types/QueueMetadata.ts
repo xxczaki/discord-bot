@@ -1,4 +1,4 @@
-import type { ProcessingInteraction } from './ProcessingInteraction';
+import type { ProcessingInteraction } from './ProcessingInteraction.ts';
 
 export interface QueueMetadata {
 	interaction: ProcessingInteraction;

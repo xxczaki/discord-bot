@@ -13,7 +13,7 @@ import ticTacToeCommandHandler, {
 	getWinningSequences,
 	isGameOverByWin,
 	nextMove,
-} from '../ticTacToe';
+} from '../ticTacToe.ts';
 
 const WINNING_HORIZONTAL_TOP = ['0-0', '0-1', '0-2'];
 const WINNING_DIAGONAL = ['0-0', '1-1', '2-2'];

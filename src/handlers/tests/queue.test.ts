@@ -13,7 +13,7 @@ import {
 	useQueue,
 } from 'discord-player';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import queueCommandHandler from '../queue';
+import queueCommandHandler from '../queue.ts';
 
 const EXAMPLE_TRACK_TITLE = 'Never Gonna Give You Up';
 const EXAMPLE_TRACK_AUTHOR = 'Rick Astley';

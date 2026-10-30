@@ -1,6 +1,6 @@
 import type { Redis } from 'ioredis';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ExternalPlaylistCache } from '../ExternalPlaylistCache';
+import { ExternalPlaylistCache } from '../ExternalPlaylistCache.ts';
 
 const EXAMPLE_PLAYLIST_URL = 'https://open.spotify.com/playlist/123';
 const EXAMPLE_CACHE_KEY =

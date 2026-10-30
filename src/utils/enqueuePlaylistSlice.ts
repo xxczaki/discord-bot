@@ -7,12 +7,12 @@ import {
 	type VoiceBasedChannel,
 } from 'discord.js';
 import { useQueue } from 'discord-player';
-import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
-import cleanUpPlaylistContent from './cleanUpPlaylistContent';
-import { getPlaylistsChannel } from './getGuildConfig';
-import pluralize from './pluralize';
-import processTracksWithQueue from './processTracksWithQueue';
-import { StatsHandler } from './StatsHandler';
+import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous.ts';
+import cleanUpPlaylistContent from './cleanUpPlaylistContent.ts';
+import { getPlaylistsChannel } from './getGuildConfig.ts';
+import pluralize from './pluralize.ts';
+import processTracksWithQueue from './processTracksWithQueue.ts';
+import { StatsHandler } from './StatsHandler.ts';
 
 const pluralizeSongs = pluralize('song', 'songs');
 const statsHandler = StatsHandler.getInstance();

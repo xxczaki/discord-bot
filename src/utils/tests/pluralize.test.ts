@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import pluralize from '../pluralize';
+import pluralize from '../pluralize.ts';
 
 it('should use singular form when count is 1', () => {
 	const result = pluralize('item', 'items')`You have ${1} ${null} in your cart`;

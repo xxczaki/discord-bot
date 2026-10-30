@@ -7,8 +7,8 @@ import {
 	createMockResponse as createBaseMockResponse,
 	createMockButtonComponent,
 	createMockSelectMenuComponent,
-} from '../../utils/testing';
-import filtersCommandHandler from '../filters';
+} from '../../utils/testing/index.ts';
+import filtersCommandHandler from '../filters.ts';
 
 vi.mock('discord-player', () => ({
 	useQueue: vi.fn(),

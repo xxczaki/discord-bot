@@ -12,12 +12,12 @@ import {
 } from 'discord-player';
 import { YoutubeSabrExtractor } from 'discord-player-googlevideo';
 import { SpotifyExtractor } from 'discord-player-spotify';
-import { YOUTUBE_ENABLED } from '../constants/sourceConfig';
-import defineCustomFilters from './defineCustomFilters';
-import logger from './logger';
-import { OpusCacheManager } from './OpusCacheManager';
-import { RedisQueryCache } from './RedisQueryCache';
-import redis from './redis';
+import { YOUTUBE_ENABLED } from '../constants/sourceConfig.ts';
+import defineCustomFilters from './defineCustomFilters.ts';
+import logger from './logger.ts';
+import { OpusCacheManager } from './OpusCacheManager.ts';
+import { RedisQueryCache } from './RedisQueryCache.ts';
+import redis from './redis.ts';
 
 const MIN_CACHE_FILE_SIZE_BYTES = 1024;
 

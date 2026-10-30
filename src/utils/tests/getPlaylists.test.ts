@@ -1,7 +1,7 @@
 import type { Collection, Message, TextBasedChannel } from 'discord.js';
 import { StringSelectMenuOptionBuilder } from 'discord.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import getPlaylists, { getAllPlaylists } from '../getPlaylists';
+import getPlaylists, { getAllPlaylists } from '../getPlaylists.ts';
 
 const EXAMPLE_SPOTIFY_PLAYLIST = 'https://open.spotify.com/playlist/123';
 const EXAMPLE_SONG_URL = 'https://example.com/song1';

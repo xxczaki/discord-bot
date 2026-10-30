@@ -1,6 +1,6 @@
 import { serialize, type Track } from 'discord-player';
 import memoize from 'memoize';
-import isObject from './isObject';
+import isObject from './isObject.ts';
 
 /*
 	Prefer Spotify thumbnails unless it's the default one with their logo.

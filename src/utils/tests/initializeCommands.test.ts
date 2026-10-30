@@ -1,8 +1,8 @@
 import { captureException } from '@sentry/node';
 import { beforeEach, expect, it, vi } from 'vitest';
-import COMMANDS from '../../constants/commands';
-import initializeCommands from '../initializeCommands';
-import logger from '../logger';
+import COMMANDS from '../../constants/commands.ts';
+import initializeCommands from '../initializeCommands.ts';
+import logger from '../logger.ts';
 
 const mocks = vi.hoisted(() => {
 	const MOCK_TOKEN = 'mock-discord-token';

@@ -42,7 +42,3 @@ vi.mock('node:fs', async (importOriginal) => {
 		readdirSync: vi.fn().mockReturnValue([]),
 	};
 });
-
-vi.mock('ulid', () => ({
-	ulid: vi.fn(),
-}));

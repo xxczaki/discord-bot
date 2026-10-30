@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import snakeToCamelCase from '../snakeToCamelCase';
+import snakeToCamelCase from '../snakeToCamelCase.ts';
 
 it('should convert simple snake_case to camelCase', () => {
 	expect(snakeToCamelCase('hello_world')).toBe('helloWorld');

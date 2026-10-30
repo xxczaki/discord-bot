@@ -1,8 +1,8 @@
 import { REST, Routes } from 'discord.js';
-import COMMANDS from '../constants/commands';
-import getEnvironmentVariable from './getEnvironmentVariable';
-import logger from './logger';
-import reportError from './reportError';
+import COMMANDS from '../constants/commands.ts';
+import getEnvironmentVariable from './getEnvironmentVariable.ts';
+import logger from './logger.ts';
+import reportError from './reportError.ts';
 
 const token = getEnvironmentVariable('TOKEN');
 const clientId = getEnvironmentVariable('CLIENT_ID');
