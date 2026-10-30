@@ -1,10 +1,11 @@
-import { differenceInCalendarDays } from 'date-fns';
+export default function formatEndingTime(
+	estimatedEndTime: Temporal.ZonedDateTime,
+) {
+	const dayDifference = Temporal.Now.plainDateISO(
+		estimatedEndTime.timeZoneId,
+	).until(estimatedEndTime.toPlainDate()).days;
 
-export default function formatEndingTime(estimatedEndTime: Date) {
-	const now = new Date();
-	const dayDifference = differenceInCalendarDays(estimatedEndTime, now);
-
-	const formattedTime = estimatedEndTime.toLocaleTimeString('pl', {
+	const formattedTime = estimatedEndTime.toLocaleString('pl', {
 		hour: '2-digit',
 		minute: '2-digit',
 	});

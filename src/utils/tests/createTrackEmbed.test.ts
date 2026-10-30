@@ -3,7 +3,7 @@ import { stat } from 'node:fs/promises';
 import { EmbedBuilder } from 'discord.js';
 import type { Track } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
-import createTrackEmbed from '../createTrackEmbed';
+import createTrackEmbed from '../createTrackEmbed.ts';
 
 const EXAMPLE_TRACK_ID = 'track-123';
 const EXAMPLE_TRACK_TITLE = 'Test Song';

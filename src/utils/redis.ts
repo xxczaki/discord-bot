@@ -1,5 +1,5 @@
 import { Redis } from 'ioredis';
-import getEnvironmentVariable from './getEnvironmentVariable';
+import getEnvironmentVariable from './getEnvironmentVariable.ts';
 
 /* v8 ignore start */
 const redis = new Redis(getEnvironmentVariable('REDIS_URL'));

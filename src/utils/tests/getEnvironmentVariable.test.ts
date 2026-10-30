@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import getEnvironmentVariable from '../getEnvironmentVariable';
+import getEnvironmentVariable from '../getEnvironmentVariable.ts';
 
 const originalEnv = process.env;
 
@@ -21,7 +21,9 @@ it('should return the value of an existing environment variable', () => {
 it('should throw TypeError for missing environment variable', async () => {
 	process.env.TOKEN = undefined;
 	// Re-import to clear memoization cache
-	const { default: freshGetEnvVar } = await import('../getEnvironmentVariable');
+	const { default: freshGetEnvVar } = await import(
+		'../getEnvironmentVariable.ts'
+	);
 
 	expect(() => freshGetEnvVar('TOKEN')).toThrowError(
 		new TypeError('Missing environment variable: TOKEN'),

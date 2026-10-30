@@ -1,6 +1,6 @@
 import type { GuildQueue, Track } from 'discord-player';
 import { expect, it } from 'vitest';
-import getTrackPosition from '../getTrackPosition';
+import getTrackPosition from '../getTrackPosition.ts';
 
 // Minimal Track implementation for testing
 const createMockTrack = (id: string): Track<unknown> =>

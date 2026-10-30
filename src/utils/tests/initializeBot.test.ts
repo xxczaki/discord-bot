@@ -1,18 +1,18 @@
 import type { Client } from 'discord.js';
 import type { Player } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
-import useDebugListeners from '../../hooks/useDebugListeners';
+import useDebugListeners from '../../hooks/useDebugListeners.ts';
 import useDiscordEventHandlers, {
 	useReadyEventHandler,
-} from '../../hooks/useDiscordEventHandlers';
-import usePlayerEventHandlers from '../../hooks/usePlayerEventHandlers';
-import { createDiscordClient } from '../createDiscordClient';
-import getEnvironmentVariable from '../getEnvironmentVariable';
-import setupGracefulShutdown from '../gracefulShutdown';
-import { initializeBot } from '../initializeBot';
-import initializeCommands from '../initializeCommands';
-import getInitializedPlayer from '../initializePlayer';
-import performStartupRecovery from '../startupRecovery';
+} from '../../hooks/useDiscordEventHandlers.ts';
+import usePlayerEventHandlers from '../../hooks/usePlayerEventHandlers.ts';
+import { createDiscordClient } from '../createDiscordClient.ts';
+import getEnvironmentVariable from '../getEnvironmentVariable.ts';
+import setupGracefulShutdown from '../gracefulShutdown.ts';
+import { initializeBot } from '../initializeBot.ts';
+import initializeCommands from '../initializeCommands.ts';
+import getInitializedPlayer from '../initializePlayer.ts';
+import performStartupRecovery from '../startupRecovery.ts';
 
 vi.mock('../createDiscordClient');
 vi.mock('../getEnvironmentVariable');

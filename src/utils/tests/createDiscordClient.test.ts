@@ -4,7 +4,7 @@ import {
 	PresenceUpdateStatus,
 } from 'discord.js';
 import { expect, it, vi } from 'vitest';
-import { createDiscordClient } from '../createDiscordClient';
+import { createDiscordClient } from '../createDiscordClient.ts';
 
 vi.mock('discord.js', async () => {
 	const actual = await vi.importActual('discord.js');

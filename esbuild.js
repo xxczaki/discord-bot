@@ -14,7 +14,7 @@ const buildOptions = {
 	bundle: true,
 	platform: 'node',
 	format: 'esm',
-	target: 'node22',
+	target: 'node26',
 	external: [
 		'@discord-player/extractor',
 		'bufferutil',

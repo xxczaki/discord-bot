@@ -1,5 +1,5 @@
 import { ActivityType, type Client, type PresenceStatusData } from 'discord.js';
-import LockdownManager from './lockdown';
+import LockdownManager from './lockdown.ts';
 
 interface PresenceOptions {
 	name?: string;

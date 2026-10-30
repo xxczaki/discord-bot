@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import isUrlSpotifyPlaylist from '../isUrlSpotifyPlaylist';
+import isUrlSpotifyPlaylist from '../isUrlSpotifyPlaylist.ts';
 
 const EXAMPLE_PLAYLIST_URL =
 	'https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M';

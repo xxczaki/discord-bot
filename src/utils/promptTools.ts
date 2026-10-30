@@ -10,13 +10,13 @@ import {
 	useMainPlayer,
 } from 'discord-player';
 import { z } from 'zod';
-import { FALLBACK_SEARCH_ENGINE } from '../constants/sourceConfig';
-import type { QueueMetadata } from '../types/QueueMetadata';
-import cleanUpPlaylistContent from './cleanUpPlaylistContent';
-import determineSearchEngine from './determineSearchEngine';
-import { getPlaylistsChannel } from './getGuildConfig';
-import logger from './logger';
-import pluralize from './pluralize';
+import { FALLBACK_SEARCH_ENGINE } from '../constants/sourceConfig.ts';
+import type { QueueMetadata } from '../types/QueueMetadata.ts';
+import cleanUpPlaylistContent from './cleanUpPlaylistContent.ts';
+import determineSearchEngine from './determineSearchEngine.ts';
+import { getPlaylistsChannel } from './getGuildConfig.ts';
+import logger from './logger.ts';
+import pluralize from './pluralize.ts';
 import {
 	deduplicateQueue,
 	moveTracksByPattern,
@@ -25,8 +25,8 @@ import {
 	resumePlayback,
 	setVolume,
 	skipCurrentTrack,
-} from './queueOperations';
-import { StatsHandler } from './StatsHandler';
+} from './queueOperations.ts';
+import { StatsHandler } from './StatsHandler.ts';
 
 export const PROMPT_MODEL_ID = 'mistral-small-latest';
 

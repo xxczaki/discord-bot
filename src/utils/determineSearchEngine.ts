@@ -1,6 +1,6 @@
 import type { SearchQueryType } from 'discord-player';
-import { YOUTUBE_ENABLED } from '../constants/sourceConfig';
-import isUrlSpotifyPlaylist from './isUrlSpotifyPlaylist';
+import { YOUTUBE_ENABLED } from '../constants/sourceConfig.ts';
+import isUrlSpotifyPlaylist from './isUrlSpotifyPlaylist.ts';
 
 function determineSearchEngine(query: string): SearchQueryType {
 	if (query.includes('youtube.com') || query.includes('youtu.be')) {

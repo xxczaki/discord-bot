@@ -1,7 +1,7 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { useQueue } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
-import shuffleCommandHandler from '../shuffle';
+import shuffleCommandHandler from '../shuffle.ts';
 
 vi.mock('discord-player', () => ({
 	useQueue: vi.fn(),

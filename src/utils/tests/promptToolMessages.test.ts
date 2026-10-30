@@ -13,7 +13,7 @@ import {
 	isReadOnlyTool,
 	type ToolContext,
 	type ToolResult,
-} from '../promptTools';
+} from '../promptTools.ts';
 
 function createMockContext(overrides: Partial<ToolContext> = {}): ToolContext {
 	return {

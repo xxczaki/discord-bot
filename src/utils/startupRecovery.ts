@@ -5,11 +5,11 @@ import type {
 	InteractionReplyOptions,
 } from 'discord.js';
 import type { Player } from 'discord-player';
-import enqueueTracks from './enqueueTracks';
-import getEnvironmentVariable from './getEnvironmentVariable';
-import logger from './logger';
-import { QueueRecoveryService } from './QueueRecoveryService';
-import redis from './redis';
+import enqueueTracks from './enqueueTracks.ts';
+import getEnvironmentVariable from './getEnvironmentVariable.ts';
+import logger from './logger.ts';
+import { QueueRecoveryService } from './QueueRecoveryService.ts';
+import redis from './redis.ts';
 
 const SHUTDOWN_REASON_KEY = 'discord-bot:shutdown-reason';
 

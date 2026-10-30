@@ -1,5 +1,6 @@
 import { opendir, stat } from 'node:fs/promises';
 import { join } from 'node:path';
+import { setTimeout } from 'node:timers/promises';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -10,14 +11,14 @@ import {
 	EmbedBuilder,
 } from 'discord.js';
 import prettyBytes from 'pretty-bytes';
-import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
-import { isHomeGuild } from '../utils/getGuildConfig';
-import LockdownManager from '../utils/lockdown';
-import logger from '../utils/logger';
-import { OpusCacheManager } from '../utils/OpusCacheManager';
-import pluralize from '../utils/pluralize';
-import redis from '../utils/redis';
-import reportError from '../utils/reportError';
+import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous.ts';
+import { isHomeGuild } from '../utils/getGuildConfig.ts';
+import LockdownManager from '../utils/lockdown.ts';
+import logger from '../utils/logger.ts';
+import { OpusCacheManager } from '../utils/OpusCacheManager.ts';
+import pluralize from '../utils/pluralize.ts';
+import redis from '../utils/redis.ts';
+import reportError from '../utils/reportError.ts';
 
 const opusCacheDirectory = OpusCacheManager.getDirectoryPath();
 
@@ -106,10 +107,10 @@ export default async function cacheCommandHandler(
 
 				switch (buttonInteraction.customId) {
 					case 'flush_query_cache':
-						await flushQueryCache();
+						await deleteKeysMatching('discord-player:query-cache:*');
 						break;
 					case 'flush_external_playlist_cache':
-						await flushExternalPlaylistCache();
+						await deleteKeysMatching('external-playlist-cache:*');
 						break;
 					default:
 						return;
@@ -219,64 +220,42 @@ async function getRedisCacheStatsWithUpdates(
 	pattern: string,
 	onUpdate: (result: { count: number; size: number }) => void,
 ): Promise<void> {
+	let count = 0;
+	let size = 0;
+
 	try {
 		const stream = redis.scanStream({
 			match: pattern,
 			count: 200,
 		});
 
-		let count = 0;
-		let size = 0;
+		for await (const keys of stream as AsyncIterable<string[]>) {
+			if (keys.length === 0) {
+				continue;
+			}
 
-		return new Promise((resolve, reject) => {
-			stream.on('data', async (keys = []) => {
-				stream.pause();
+			try {
+				const values = await redis.mget(keys);
 
-				if (keys.length > 0) {
-					try {
-						const values = await redis.mget(keys);
-						const batchSize = values
-							.filter(Boolean)
-							.reduce(
-								(total, value) => total + Buffer.byteLength(value as string),
-								0,
-							);
+				count += keys.length;
+				size += values
+					.filter((value) => value !== null)
+					.reduce((total, value) => total + Buffer.byteLength(value), 0);
 
-						count += keys.length;
-						size += batchSize;
-
-						onUpdate({ count, size });
-
-						await new Promise((resolve) => setTimeout(resolve, 25));
-					} catch (error) {
-						logger.error(
-							error,
-							`Failed to process Redis cache batch for pattern ${pattern}:`,
-						);
-					}
-				}
-
-				stream.resume();
-			});
-
-			stream.on('end', () => {
 				onUpdate({ count, size });
-				resolve();
-			});
 
-			stream.on('error', (error) => {
+				await setTimeout(25);
+			} catch (error) {
 				logger.error(
 					error,
-					`Failed to scan Redis cache for pattern ${pattern}:`,
+					`Failed to process Redis cache batch for pattern ${pattern}:`,
 				);
-				reject(error);
-			});
-		});
+			}
+		}
+
+		onUpdate({ count, size });
 	} catch (error) {
-		logger.error(
-			error,
-			`Failed to get Redis cache stats for pattern ${pattern}:`,
-		);
+		logger.error(error, `Failed to scan Redis cache for pattern ${pattern}:`);
 		onUpdate({ count: 0, size: 0 });
 	}
 }
@@ -304,7 +283,7 @@ async function getOpusCacheStatsWithUpdates(
 					/* v8 ignore start */
 					if (processedFiles % BATCH_SIZE === 0) {
 						onUpdate({ count, size });
-						await new Promise((resolve) => setTimeout(resolve, 50));
+						await setTimeout(50);
 					}
 					/* v8 ignore stop */
 				} catch (error) {
@@ -439,81 +418,32 @@ export function createActionRowWithRemovedButton(
 	return createActionRowWithUsedButtons(usedButtons);
 }
 
-async function flushQueryCache(): Promise<void> {
+async function deleteKeysMatching(pattern: string): Promise<void> {
 	const stream = redis.scanStream({
-		match: 'discord-player:query-cache:*',
+		match: pattern,
 		count: 500,
 	});
 
-	let _deleted = 0;
+	for await (const keys of stream as AsyncIterable<string[]>) {
+		if (keys.length === 0) {
+			continue;
+		}
 
-	return new Promise((resolve) => {
-		stream.on('data', async (keys = []) => {
-			stream.pause();
+		try {
+			const pipeline = redis.pipeline();
 
-			if (keys.length > 0) {
-				try {
-					const pipeline = redis.pipeline();
-
-					for (const key of keys) {
-						pipeline.del(key);
-					}
-
-					await pipeline.exec();
-					_deleted += keys.length;
-					/* v8 ignore start */
-				} catch (error) {
-					reportError(error, 'Failed to delete query cache keys from Redis');
-				}
-				/* v8 ignore stop */
+			for (const key of keys) {
+				pipeline.del(key);
 			}
 
-			stream.resume();
-		});
-
-		stream.on('end', async () => {
-			resolve();
-		});
-	});
-}
-
-async function flushExternalPlaylistCache(): Promise<void> {
-	const stream = redis.scanStream({
-		match: 'external-playlist-cache:*',
-		count: 500,
-	});
-
-	let _deleted = 0;
-
-	return new Promise((resolve) => {
-		stream.on('data', async (keys = []) => {
-			stream.pause();
-
-			if (keys.length > 0) {
-				try {
-					const pipeline = redis.pipeline();
-
-					for (const key of keys) {
-						pipeline.del(key);
-					}
-
-					await pipeline.exec();
-					_deleted += keys.length;
-					/* v8 ignore start */
-				} catch (error) {
-					reportError(
-						error,
-						'Failed to delete external playlist cache keys from Redis',
-					);
-					/* v8 ignore stop */
-				}
-			}
-
-			stream.resume();
-		});
-
-		stream.on('end', async () => {
-			resolve();
-		});
-	});
+			await pipeline.exec();
+			/* v8 ignore start */
+		} catch (error) {
+			reportError(
+				error,
+				`Failed to delete keys matching ${pattern} from Redis`,
+			);
+		}
+		/* v8 ignore stop */
+	}
 }

@@ -14,7 +14,7 @@ import {
 } from 'discord-player';
 import type { Redis } from 'ioredis';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { RedisQueryCache } from '../RedisQueryCache';
+import { RedisQueryCache } from '../RedisQueryCache.ts';
 
 const EXAMPLE_QUERY = 'test song';
 const EXAMPLE_SPOTIFY_PLAYLIST = 'https://open.spotify.com/playlist/123';
@@ -76,10 +76,6 @@ describe('RedisQueryCache', () => {
 
 		vi.mocked(useMainPlayer).mockReturnValue(mockPlayer);
 		vi.mocked(mockedIsUrlSpotifyPlaylist).mockReturnValue(false);
-	});
-
-	it('should store redis client', () => {
-		expect(redisQueryCache.redis).toBe(mockRedis);
 	});
 
 	describe('addData', () => {
@@ -215,22 +211,11 @@ describe('RedisQueryCache', () => {
 
 	describe('getData', () => {
 		function createMockScanStream(keys: string[]) {
-			const handlers: Record<string, (...args: unknown[]) => void> = {};
-			const stream = {
-				on(event: string, handler: (...args: unknown[]) => void) {
-					handlers[event] = handler;
-					if (event === 'end') {
-						queueMicrotask(() => {
-							handlers.data(keys);
-							queueMicrotask(() => handlers.end());
-						});
-					}
-					return stream;
+			return {
+				async *[Symbol.asyncIterator]() {
+					yield keys;
 				},
-				pause: vi.fn(),
-				resume: vi.fn(),
 			};
-			return stream;
 		}
 
 		it('should return cached tracks', async () => {

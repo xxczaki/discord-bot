@@ -1,84 +1,61 @@
-/**
- * RateLimiter - Implements a daily rate limit counter
- * Reusable across different command handlers
- */
-export class RateLimiter {
-	private static instances = new Map<string, RateLimiter>();
-	private callCount = 0;
-	private lastReset: Date;
+const HOUR_MS = 60 * 60 * 1000;
 
-	private constructor(
-		private readonly maxCalls: number,
-		private readonly resetIntervalHours: number,
-	) {
-		this.lastReset = new Date();
+export class RateLimiter {
+	static #instances = new Map<string, RateLimiter>();
+
+	#callCount = 0;
+	#lastResetMs = Date.now();
+	readonly #maxCalls: number;
+	readonly #resetIntervalHours: number;
+
+	private constructor(maxCalls: number, resetIntervalHours: number) {
+		this.#maxCalls = maxCalls;
+		this.#resetIntervalHours = resetIntervalHours;
 	}
 
-	/**
-	 * Get or create a rate limiter instance with the given configuration
-	 */
 	static getInstance(
 		key: string,
 		maxCalls = 100,
 		resetIntervalHours = 24,
 	): RateLimiter {
-		let instance = RateLimiter.instances.get(key);
+		let instance = RateLimiter.#instances.get(key);
 		if (!instance) {
 			instance = new RateLimiter(maxCalls, resetIntervalHours);
-			RateLimiter.instances.set(key, instance);
+			RateLimiter.#instances.set(key, instance);
 		}
 		return instance;
 	}
 
-	/**
-	 * Check if a call can be made within the rate limit
-	 */
 	canMakeCall(): boolean {
-		this.resetIfNeeded();
-		return this.callCount < this.maxCalls;
+		this.#resetIfNeeded();
+		return this.#callCount < this.#maxCalls;
 	}
 
-	/**
-	 * Increment the call counter
-	 */
 	incrementCall(): void {
-		this.resetIfNeeded();
-		this.callCount++;
+		this.#resetIfNeeded();
+		this.#callCount++;
 	}
 
-	/**
-	 * Get the number of remaining calls in the current period
-	 */
 	getRemainingCalls(): number {
-		this.resetIfNeeded();
-		return Math.max(0, this.maxCalls - this.callCount);
+		this.#resetIfNeeded();
+		return Math.max(0, this.#maxCalls - this.#callCount);
 	}
 
-	/**
-	 * Get the time until the next reset
-	 */
 	getTimeUntilReset(): number {
-		const now = new Date();
-		const hoursSinceReset =
-			(now.getTime() - this.lastReset.getTime()) / (1000 * 60 * 60);
-		const hoursUntilReset = this.resetIntervalHours - hoursSinceReset;
-		return Math.max(0, hoursUntilReset);
+		return Math.max(0, this.#resetIntervalHours - this.#hoursSinceReset());
 	}
 
-	/**
-	 * Manually reset the rate limiter (useful for testing)
-	 */
 	reset(): void {
-		this.callCount = 0;
-		this.lastReset = new Date();
+		this.#callCount = 0;
+		this.#lastResetMs = Date.now();
 	}
 
-	private resetIfNeeded(): void {
-		const now = new Date();
-		const hoursSinceReset =
-			(now.getTime() - this.lastReset.getTime()) / (1000 * 60 * 60);
+	#hoursSinceReset(): number {
+		return (Date.now() - this.#lastResetMs) / HOUR_MS;
+	}
 
-		if (hoursSinceReset >= this.resetIntervalHours) {
+	#resetIfNeeded(): void {
+		if (this.#hoursSinceReset() >= this.#resetIntervalHours) {
 			this.reset();
 		}
 	}

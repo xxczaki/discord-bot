@@ -12,10 +12,10 @@ import {
 import type { GuildQueue } from 'discord-player';
 import { useQueue } from 'discord-player';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../../constants/miscellaneous';
-import enqueuePlaylists from '../enqueuePlaylists';
-import { getPlaylistsChannel } from '../getGuildConfig';
-import processTracksWithQueue from '../processTracksWithQueue';
+import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../../constants/miscellaneous.ts';
+import enqueuePlaylists from '../enqueuePlaylists.ts';
+import { getPlaylistsChannel } from '../getGuildConfig.ts';
+import processTracksWithQueue from '../processTracksWithQueue.ts';
 
 const EXAMPLE_PLAYLIST_IDS = ['playlist1', 'playlist2'];
 const EXAMPLE_PLAYLISTS_CHANNEL_ID = 'channel123';

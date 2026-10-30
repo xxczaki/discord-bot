@@ -1,8 +1,8 @@
 import { ButtonStyle, type ChatInputCommandInteraction } from 'discord.js';
 import { useQueue } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
-import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../../constants/miscellaneous';
-import skipCommandHandler from '../skip';
+import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../../constants/miscellaneous.ts';
+import skipCommandHandler from '../skip.ts';
 
 vi.mock('discord-player', () => ({
 	useQueue: vi.fn(),

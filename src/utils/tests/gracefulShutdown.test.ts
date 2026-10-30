@@ -8,10 +8,10 @@ import {
 import type { GuildQueue } from 'discord-player';
 import { useQueue } from 'discord-player';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import setupGracefulShutdown from '../gracefulShutdown';
-import logger from '../logger';
-import { QueueRecoveryService } from '../QueueRecoveryService';
-import redis from '../redis';
+import setupGracefulShutdown from '../gracefulShutdown.ts';
+import logger from '../logger.ts';
+import { QueueRecoveryService } from '../QueueRecoveryService.ts';
+import redis from '../redis.ts';
 
 vi.mock('discord-player', () => ({
 	useQueue: vi.fn(),

@@ -6,8 +6,8 @@ import {
 	createMockQueue as createBaseMockQueue,
 	createMockTrack,
 	MOCK_TRACK_TITLE,
-} from '../../utils/testing';
-import removeCommandHandler from '../remove';
+} from '../../utils/testing/index.ts';
+import removeCommandHandler from '../remove.ts';
 
 vi.mock('discord-player', () => ({
 	useQueue: vi.fn(),

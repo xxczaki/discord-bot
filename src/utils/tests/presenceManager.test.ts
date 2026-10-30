@@ -1,7 +1,7 @@
 import { ActivityType, type Client } from 'discord.js';
 import { beforeEach, expect, it, vi } from 'vitest';
-import LockdownManager from '../lockdown';
-import { resetPresence, setPresence } from '../presenceManager';
+import LockdownManager from '../lockdown.ts';
+import { resetPresence, setPresence } from '../presenceManager.ts';
 
 const mockSetPresence = vi.fn();
 const mockClient = {

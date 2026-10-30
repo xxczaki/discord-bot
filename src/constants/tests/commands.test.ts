@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { filterDisabledCommands, RAW_COMMANDS } from '../commands';
+import { filterDisabledCommands, RAW_COMMANDS } from '../commands.ts';
 
 it('should exclude commands listed in the disabled set', () => {
 	const commands = filterDisabledCommands(new Set(['lockdown', 'prompt']));

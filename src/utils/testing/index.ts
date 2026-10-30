@@ -6,15 +6,15 @@ export {
 	MOCK_TRACK_TITLE,
 	MOCK_TRACK_URL,
 	MOCK_USER_ID,
-} from './constants';
+} from './constants.ts';
 export {
 	createMockButtonComponent,
 	createMockResponse,
 	createMockSelectMenuComponent,
-} from './mockComponent';
+} from './mockComponent.ts';
 export {
 	createMockComponentInteraction,
 	createMockInteraction,
-} from './mockInteraction';
-export { createMockQueue } from './mockQueue';
-export { createMinimalMockTrack, createMockTrack } from './mockTrack';
+} from './mockInteraction.ts';
+export { createMockQueue } from './mockQueue.ts';
+export { createMinimalMockTrack, createMockTrack } from './mockTrack.ts';

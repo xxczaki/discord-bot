@@ -3,10 +3,10 @@ import { readdir, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import Fuse from 'fuse.js';
 import { transliterate } from 'transliteration';
-import getEnvironmentVariable from './getEnvironmentVariable';
-import logger from './logger';
-import reportError from './reportError';
-import sanitizeForFilename from './sanitizeForFilename';
+import getEnvironmentVariable from './getEnvironmentVariable.ts';
+import logger from './logger.ts';
+import reportError from './reportError.ts';
+import sanitizeForFilename from './sanitizeForFilename.ts';
 
 export interface CacheEntry {
 	filename: string;
@@ -64,7 +64,11 @@ export class OpusCacheManager {
 	#entries: CacheEntry[] = [];
 	#fuse: Fuse<CacheEntry> | null = null;
 
-	constructor(private cacheDirectory: string) {}
+	readonly #cacheDirectory: string;
+
+	constructor(cacheDirectory: string) {
+		this.#cacheDirectory = cacheDirectory;
+	}
 
 	static getDirectoryPath(): string {
 		if (OpusCacheManager.#directoryPath) {
@@ -108,7 +112,7 @@ export class OpusCacheManager {
 
 	async scan(): Promise<void> {
 		try {
-			const files = await readdir(this.cacheDirectory);
+			const files = await readdir(this.#cacheDirectory);
 			const opusFiles = files.filter((file) => file.endsWith('.opus'));
 
 			for (const filename of opusFiles) {
@@ -240,7 +244,7 @@ export class OpusCacheManager {
 	}
 
 	getFilePath(filename: string): string {
-		return join(this.cacheDirectory, filename);
+		return join(this.#cacheDirectory, filename);
 	}
 
 	generateFilename(metadata: TrackMetadata): string {
@@ -266,7 +270,7 @@ export class OpusCacheManager {
 	}
 
 	get directory(): string {
-		return this.cacheDirectory;
+		return this.#cacheDirectory;
 	}
 
 	#normalizeForSearch(input: string): string {

@@ -15,7 +15,7 @@ import {
 	generateSystemPrompt,
 	type ToolContext,
 	type ToolResult,
-} from '../utils/promptTools';
+} from '../utils/promptTools.ts';
 
 const OPENAI_PROVIDER_OPTIONS: OpenAILanguageModelResponsesOptions = {
 	parallelToolCalls: true,

@@ -14,19 +14,19 @@ import {
 	useQueue,
 } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
-import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../../constants/miscellaneous';
-import createSmartInteractionHandler from '../../utils/createSmartInteractionHandler';
-import createTrackEmbed from '../../utils/createTrackEmbed';
-import determineSearchEngine from '../../utils/determineSearchEngine';
-import getTrackPosition from '../../utils/getTrackPosition';
-import logger from '../../utils/logger';
+import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../../constants/miscellaneous.ts';
+import createSmartInteractionHandler from '../../utils/createSmartInteractionHandler.ts';
+import createTrackEmbed from '../../utils/createTrackEmbed.ts';
+import determineSearchEngine from '../../utils/determineSearchEngine.ts';
+import getTrackPosition from '../../utils/getTrackPosition.ts';
+import logger from '../../utils/logger.ts';
 import {
 	createMockResponse as createBaseMockResponse,
 	createMockComponentInteraction,
 	createMockTrack,
 	MOCK_TRACK_TITLE,
-} from '../../utils/testing';
-import playCommandHandler from '../play';
+} from '../../utils/testing/index.ts';
+import playCommandHandler from '../play.ts';
 
 const EXAMPLE_QUERY = 'never gonna give you up';
 

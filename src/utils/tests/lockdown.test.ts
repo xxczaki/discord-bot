@@ -1,6 +1,6 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { beforeEach, expect, it, vi } from 'vitest';
-import LockdownManager from '../lockdown';
+import LockdownManager from '../lockdown.ts';
 
 const HOME_GUILD_ID = 'home-guild';
 const OTHER_GUILD_ID = 'other-guild';

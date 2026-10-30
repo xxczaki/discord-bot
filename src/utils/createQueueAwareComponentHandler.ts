@@ -1,6 +1,6 @@
 import type { InteractionResponse, Message } from 'discord.js';
 import { type GuildQueue, useMainPlayer } from 'discord-player';
-import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
+import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous.ts';
 
 type QueueAwareComponentHandlerOptions = {
 	response: InteractionResponse<boolean> | Message<boolean>;

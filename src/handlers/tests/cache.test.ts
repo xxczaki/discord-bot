@@ -1,11 +1,13 @@
 import { opendir, stat } from 'node:fs/promises';
 import type { ChatInputCommandInteraction } from 'discord.js';
+import type { ScanStream } from 'ioredis';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { isHomeGuild } from '../../utils/getGuildConfig';
-import redis from '../../utils/redis';
+import { isHomeGuild } from '../../utils/getGuildConfig.ts';
+import logger from '../../utils/logger.ts';
+import redis from '../../utils/redis.ts';
 import cacheCommandHandler, {
 	createActionRowWithRemovedButton,
-} from '../cache';
+} from '../cache.ts';
 
 vi.mock('../../utils/getEnvironmentVariable', () => ({
 	default: vi.fn((key: string) => {
@@ -36,6 +38,8 @@ vi.mock('node:fs/promises', () => ({
 const mockOpendir = vi.mocked(opendir);
 const mockStat = vi.mocked(stat);
 const mockIsHomeGuild = vi.mocked(isHomeGuild);
+const mockedLogger = vi.mocked(logger);
+const mockedRedis = vi.mocked(redis);
 
 interface MockCollector {
 	on: ReturnType<typeof vi.fn>;
@@ -111,36 +115,40 @@ function createMockDirectory(files: string[]) {
 	};
 }
 
-function createMockStream() {
-	const listeners: Record<string, ((...args: unknown[]) => void)[]> = {};
-
-	const mockStream = {
-		on: vi.fn((event: string, callback: (...args: unknown[]) => void) => {
-			if (!listeners[event]) listeners[event] = [];
-			listeners[event].push(callback);
-		}),
-		pause: vi.fn(),
-		resume: vi.fn(),
-		emit: (event: string, ...args: unknown[]) => {
-			if (listeners[event]) {
-				listeners[event].forEach((callback) => {
-					callback(...args);
-				});
+function createScanStream(batches: string[][] = []): ScanStream {
+	return {
+		async *[Symbol.asyncIterator]() {
+			for (const batch of batches) {
+				yield batch;
 			}
 		},
-	};
+	} as unknown as ScanStream;
+}
 
-	setTimeout(() => {
-		mockStream.emit('end');
-	}, 10);
+function createFailingScanStream(error: Error): ScanStream {
+	return {
+		async *[Symbol.asyncIterator]() {
+			yield* [];
+			throw error;
+		},
+	} as unknown as ScanStream;
+}
 
-	return mockStream;
+function getScanPattern(options: unknown) {
+	return typeof options === 'object' && options !== null && 'match' in options
+		? options.match
+		: undefined;
+}
+
+function getFieldValue(call: MockEditReplyCall, name: string) {
+	return call.embeds?.[0]?.data.fields.find((field) => field.name === name)
+		?.value;
 }
 
 beforeEach(() => {
 	vi.clearAllMocks();
-	vi.mocked(redis.scanStream).mockReturnValue(createMockStream() as never);
-	vi.mocked(redis.mget).mockResolvedValue([]);
+	mockedRedis.scanStream.mockImplementation(() => createScanStream());
+	mockedRedis.mget.mockResolvedValue([]);
 });
 
 describe('cache command handler', () => {
@@ -315,41 +323,82 @@ describe('cache command handler', () => {
 		expect(mockCollector.on).toHaveBeenCalledWith('end', expect.any(Function));
 	});
 
-	it('should handle Redis scanning errors', async () => {
+	it('should report zeroed stats when Redis scanning fails', async () => {
 		const mockInteraction = createMockInteraction();
+		const scanError = new Error('Redis connection failed');
 		mockOpendir.mockResolvedValue(createMockDirectory([]) as never);
 
-		const errorStream = createMockStream();
-		vi.mocked(redis.scanStream).mockReturnValue(errorStream as never);
+		mockedRedis.scanStream.mockImplementation((options) =>
+			getScanPattern(options) === 'discord-player:query-cache:*'
+				? createFailingScanStream(scanError)
+				: createScanStream([['key1']]),
+		);
+		mockedRedis.mget.mockResolvedValue(['abc']);
 
-		const handlerPromise = cacheCommandHandler(mockInteraction);
+		await cacheCommandHandler(mockInteraction);
 
-		setTimeout(() => {
-			errorStream.emit('error', new Error('Redis connection failed'));
-		}, 5);
+		expect(mockedLogger.error).toHaveBeenCalledWith(
+			scanError,
+			'Failed to scan Redis cache for pattern discord-player:query-cache:*:',
+		);
 
-		await handlerPromise;
+		const call = getEditReplyCall(mockInteraction);
 
-		expect(mockInteraction.editReply).toHaveBeenCalled();
+		expect(getFieldValue(call, 'Query Cache')).toBe('0 entries\n0 B');
+		expect(getFieldValue(call, 'External Playlist Cache')).toBe('1 entry\n3 B');
 	});
 
-	it('should update display when Redis data is received', async () => {
+	it('should count keys and value sizes across Redis batches', async () => {
 		const mockInteraction = createMockInteraction();
 		mockOpendir.mockResolvedValue(createMockDirectory([]) as never);
 
-		const mockStream = createMockStream();
-		vi.mocked(redis.scanStream).mockReturnValue(mockStream as never);
-		vi.mocked(redis.mget).mockResolvedValue(['{"test": "data"}']);
+		mockedRedis.scanStream.mockImplementation((options) =>
+			getScanPattern(options) === 'discord-player:query-cache:*'
+				? createScanStream([['key1', 'key2'], [], ['key3']])
+				: createScanStream(),
+		);
+		mockedRedis.mget
+			.mockResolvedValueOnce(['{"test": "data"}', null])
+			.mockResolvedValueOnce(['abcd']);
 
-		const handlerPromise = cacheCommandHandler(mockInteraction);
+		await cacheCommandHandler(mockInteraction);
 
-		setTimeout(() => {
-			mockStream.emit('data', ['key1', 'key2']);
-		}, 5);
+		expect(mockedRedis.mget).toHaveBeenCalledTimes(2);
+		expect(mockedRedis.mget).toHaveBeenCalledWith(['key1', 'key2']);
+		expect(mockedRedis.mget).toHaveBeenCalledWith(['key3']);
 
-		await handlerPromise;
+		const call = getEditReplyCall(mockInteraction);
 
-		expect(mockInteraction.editReply).toHaveBeenCalled();
+		expect(getFieldValue(call, 'Query Cache')).toBe('3 entries\n20 B');
+		expect(getFieldValue(call, 'Corrected Queries')).toBe('0 queries\n0 B');
+	});
+
+	it('should keep scanning when a Redis batch fails to load', async () => {
+		const mockInteraction = createMockInteraction();
+		const batchError = new Error('MGET failed');
+		mockOpendir.mockResolvedValue(createMockDirectory([]) as never);
+
+		mockedRedis.scanStream.mockImplementation((options) =>
+			getScanPattern(options) === 'external-playlist-cache:*'
+				? createScanStream([['key1'], ['key2']])
+				: createScanStream(),
+		);
+		mockedRedis.mget
+			.mockRejectedValueOnce(batchError)
+			.mockResolvedValueOnce(['ab']);
+
+		await cacheCommandHandler(mockInteraction);
+
+		expect(mockedLogger.error).toHaveBeenCalledWith(
+			batchError,
+			'Failed to process Redis cache batch for pattern external-playlist-cache:*:',
+		);
+		expect(
+			getFieldValue(
+				getEditReplyCall(mockInteraction),
+				'External Playlist Cache',
+			),
+		).toBe('1 entry\n2 B');
 	});
 
 	it('should handle non-owner button clicks with error message', async () => {
@@ -620,64 +669,32 @@ describe('cache command handler', () => {
 
 		mockOpendir.mockResolvedValue(createMockDirectory([]) as never);
 
-		const queryCacheStream = createMockStream();
-		const playlistCacheStream = createMockStream();
-		let scanCallCount = 0;
+		const cachedKeys = new Map([
+			['discord-player:query-cache:*', ['query-key-1', 'query-key-2']],
+			['external-playlist-cache:*', ['playlist-key-1', 'playlist-key-2']],
+		]);
+		const mockPipeline = {
+			del: vi.fn().mockReturnThis(),
+			exec: vi.fn().mockResolvedValue([]),
+		};
 
-		vi.mocked(redis.scanStream).mockImplementation((options) => {
-			scanCallCount++;
+		mockedRedis.pipeline.mockReturnValue(mockPipeline as never);
+		mockedRedis.scanStream.mockImplementation((options) => {
+			const pattern = getScanPattern(options);
+			const keys = typeof pattern === 'string' ? cachedKeys.get(pattern) : [];
 
-			if (
-				options &&
-				typeof options === 'object' &&
-				'match' in options &&
-				options.match === 'discord-player:query-cache:*'
-			) {
-				if (scanCallCount <= 2) {
-					setTimeout(() => {
-						queryCacheStream.emit('data', ['query-key-1', 'query-key-2']);
-						queryCacheStream.emit('end');
-					}, 5);
-					return queryCacheStream as never;
-				}
-
-				const emptyStream = createMockStream();
-				setTimeout(() => {
-					emptyStream.emit('data', []);
-					emptyStream.emit('end');
-				}, 5);
-				return emptyStream as never;
+			if (!keys) {
+				return createScanStream();
 			}
 
-			if (
-				options &&
-				typeof options === 'object' &&
-				'match' in options &&
-				options.match === 'external-playlist-cache:*'
-			) {
-				if (scanCallCount <= 2) {
-					setTimeout(() => {
-						playlistCacheStream.emit('data', [
-							'playlist-key-1',
-							'playlist-key-2',
-						]);
-						playlistCacheStream.emit('end');
-					}, 5);
-					return playlistCacheStream as never;
-				}
-
-				const emptyStreamForPlaylist = createMockStream();
-				setTimeout(() => {
-					emptyStreamForPlaylist.emit('data', []);
-					emptyStreamForPlaylist.emit('end');
-				}, 5);
-				return emptyStreamForPlaylist as never;
+			if (typeof pattern === 'string' && options?.count === 500) {
+				cachedKeys.delete(pattern);
 			}
 
-			return createMockStream() as never;
+			return createScanStream([keys]);
 		});
 
-		vi.mocked(redis.mget).mockResolvedValue(['data1', 'data2']);
+		mockedRedis.mget.mockResolvedValue(['data1', 'data2']);
 
 		await cacheCommandHandler(mockInteraction);
 
@@ -697,8 +714,6 @@ describe('cache command handler', () => {
 
 		await collectCallback(firstButtonInteraction);
 
-		await new Promise((resolve) => setTimeout(resolve, 50));
-
 		expect(firstButtonInteraction.update).toHaveBeenCalled();
 
 		const firstUpdateCall = vi.mocked(firstButtonInteraction.update).mock
@@ -710,6 +725,9 @@ describe('cache command handler', () => {
 		);
 
 		expect(firstQueryCacheField?.value).toContain('2 entries');
+		expect(mockPipeline.del).toHaveBeenCalledWith('query-key-1');
+		expect(mockPipeline.del).toHaveBeenCalledWith('query-key-2');
+		expect(mockPipeline.del).not.toHaveBeenCalledWith('playlist-key-1');
 
 		const secondButtonInteraction = {
 			member: { roles: ['owner-role-123'] },
@@ -720,8 +738,6 @@ describe('cache command handler', () => {
 		};
 
 		await collectCallback(secondButtonInteraction);
-
-		await new Promise((resolve) => setTimeout(resolve, 50));
 
 		expect(secondButtonInteraction.update).toHaveBeenCalled();
 
@@ -734,6 +750,15 @@ describe('cache command handler', () => {
 		);
 
 		expect(secondQueryCacheField?.value).toContain('0 entries');
+		expect(mockPipeline.del).toHaveBeenCalledWith('playlist-key-1');
+		expect(mockPipeline.del).toHaveBeenCalledWith('playlist-key-2');
+
+		const finalCall = getEditReplyCall(mockInteraction);
+
+		expect(getFieldValue(finalCall, 'Query Cache')).toBe('0 entries\n0 B');
+		expect(getFieldValue(finalCall, 'External Playlist Cache')).toBe(
+			'0 entries\n0 B',
+		);
 	});
 });
 
@@ -815,35 +840,18 @@ describe('cache flush error handling', () => {
 
 		mockOpendir.mockResolvedValue(createMockDirectory([]) as never);
 
-		const queryCacheStream = createMockStream();
-
-		vi.mocked(redis.scanStream).mockImplementation((options) => {
-			if (
-				options &&
-				typeof options === 'object' &&
-				'match' in options &&
-				options.match === 'discord-player:query-cache:*'
-			) {
-				setTimeout(() => {
-					queryCacheStream.emit('data', ['query-key-1']);
-				}, 5);
-
-				setTimeout(() => {
-					queryCacheStream.emit('end');
-				}, 10);
-
-				return queryCacheStream as never;
-			}
-
-			return createMockStream() as never;
-		});
+		mockedRedis.scanStream.mockImplementation((options) =>
+			getScanPattern(options) === 'discord-player:query-cache:*'
+				? createScanStream([['query-key-1']])
+				: createScanStream(),
+		);
 
 		const mockPipeline = {
 			del: vi.fn().mockReturnThis(),
 			exec: vi.fn().mockRejectedValue(new Error('Redis pipeline failed')),
 		};
 
-		vi.mocked(redis.pipeline).mockReturnValue(mockPipeline as never);
+		mockedRedis.pipeline.mockReturnValue(mockPipeline as never);
 
 		await cacheCommandHandler(mockInteraction);
 
@@ -863,9 +871,15 @@ describe('cache flush error handling', () => {
 
 		await collectCallback(buttonInteraction);
 
-		await new Promise((resolve) => setTimeout(resolve, 50));
-
 		expect(buttonInteraction.update).toHaveBeenCalled();
+		expect(mockPipeline.del).toHaveBeenCalledWith('query-key-1');
+		expect(mockedLogger.error).toHaveBeenCalledWith(
+			expect.any(Error),
+			'Failed to delete keys matching discord-player:query-cache:* from Redis',
+		);
+		expect(mockInteraction.editReply).toHaveBeenLastCalledWith(
+			expect.objectContaining({ embeds: expect.any(Array) }),
+		);
 	});
 
 	it('should handle flush external playlist cache Redis pipeline error gracefully', async () => {
@@ -886,35 +900,18 @@ describe('cache flush error handling', () => {
 
 		mockOpendir.mockResolvedValue(createMockDirectory([]) as never);
 
-		const playlistCacheStream = createMockStream();
-
-		vi.mocked(redis.scanStream).mockImplementation((options) => {
-			if (
-				options &&
-				typeof options === 'object' &&
-				'match' in options &&
-				options.match === 'external-playlist-cache:*'
-			) {
-				setTimeout(() => {
-					playlistCacheStream.emit('data', ['playlist-key-1']);
-				}, 5);
-
-				setTimeout(() => {
-					playlistCacheStream.emit('end');
-				}, 10);
-
-				return playlistCacheStream as never;
-			}
-
-			return createMockStream() as never;
-		});
+		mockedRedis.scanStream.mockImplementation((options) =>
+			getScanPattern(options) === 'external-playlist-cache:*'
+				? createScanStream([['playlist-key-1']])
+				: createScanStream(),
+		);
 
 		const mockPipeline = {
 			del: vi.fn().mockReturnThis(),
 			exec: vi.fn().mockRejectedValue(new Error('Redis pipeline failed')),
 		};
 
-		vi.mocked(redis.pipeline).mockReturnValue(mockPipeline as never);
+		mockedRedis.pipeline.mockReturnValue(mockPipeline as never);
 
 		await cacheCommandHandler(mockInteraction);
 
@@ -934,8 +931,14 @@ describe('cache flush error handling', () => {
 
 		await collectCallback(buttonInteraction);
 
-		await new Promise((resolve) => setTimeout(resolve, 50));
-
 		expect(buttonInteraction.update).toHaveBeenCalled();
+		expect(mockPipeline.del).toHaveBeenCalledWith('playlist-key-1');
+		expect(mockedLogger.error).toHaveBeenCalledWith(
+			expect.any(Error),
+			'Failed to delete keys matching external-playlist-cache:* from Redis',
+		);
+		expect(mockInteraction.editReply).toHaveBeenLastCalledWith(
+			expect.objectContaining({ embeds: expect.any(Array) }),
+		);
 	});
 });

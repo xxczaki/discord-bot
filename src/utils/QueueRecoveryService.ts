@@ -6,9 +6,9 @@ import {
 	serialize,
 	type Track,
 } from 'discord-player';
-import type { QueueMetadata } from '../types/QueueMetadata';
-import isObject from './isObject';
-import redis from './redis';
+import type { QueueMetadata } from '../types/QueueMetadata.ts';
+import isObject from './isObject.ts';
+import redis from './redis.ts';
 
 function getKeys(guildId: string) {
 	return {

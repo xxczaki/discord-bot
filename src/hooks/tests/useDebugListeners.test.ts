@@ -5,9 +5,9 @@ import type { Client, TextChannel } from 'discord.js';
 import { EmbedBuilder } from 'discord.js';
 import type { GuildQueue, Player } from 'discord-player';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import getEnvironmentVariable from '../../utils/getEnvironmentVariable';
-import logger from '../../utils/logger';
-import useDebugListeners from '../useDebugListeners';
+import getEnvironmentVariable from '../../utils/getEnvironmentVariable.ts';
+import logger from '../../utils/logger.ts';
+import useDebugListeners from '../useDebugListeners.ts';
 
 const TEST_DEBUG_CHANNEL_ID = 'test-debug-channel-id';
 const TEST_SENTRY_ID = 'test-sentry-id';

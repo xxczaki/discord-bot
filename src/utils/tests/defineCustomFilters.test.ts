@@ -1,6 +1,6 @@
 import { AudioFilters } from 'discord-player';
 import { expect, it, vi } from 'vitest';
-import defineCustomFilters from '../defineCustomFilters';
+import defineCustomFilters from '../defineCustomFilters.ts';
 
 vi.mock('discord-player', () => ({
 	AudioFilters: {

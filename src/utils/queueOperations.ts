@@ -4,21 +4,21 @@ import type { GuildQueue, Track } from 'discord-player';
  * Optimized pattern matcher for track filtering
  */
 export class TrackMatcher {
-	private readonly artistLower?: string;
-	private readonly titleLower?: string;
+	readonly #artistLower?: string;
+	readonly #titleLower?: string;
 
 	constructor(artistPattern?: string, titlePattern?: string) {
 		// Pre-lowercase patterns for performance
-		this.artistLower = artistPattern?.toLowerCase();
-		this.titleLower = titlePattern?.toLowerCase();
+		this.#artistLower = artistPattern?.toLowerCase();
+		this.#titleLower = titlePattern?.toLowerCase();
 	}
 
 	matches(track: Track): boolean {
-		const artistMatches = this.artistLower
-			? track.author.toLowerCase().includes(this.artistLower)
+		const artistMatches = this.#artistLower
+			? track.author.toLowerCase().includes(this.#artistLower)
 			: true;
-		const titleMatches = this.titleLower
-			? track.title.toLowerCase().includes(this.titleLower)
+		const titleMatches = this.#titleLower
+			? track.title.toLowerCase().includes(this.#titleLower)
 			: true;
 
 		return artistMatches && titleMatches;

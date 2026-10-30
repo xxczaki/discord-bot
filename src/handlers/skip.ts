@@ -4,8 +4,8 @@ import {
 	ButtonStyle,
 	type ChatInputCommandInteraction,
 } from 'discord.js';
-import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
-import useQueueWithValidation from '../utils/useQueueWithValidation';
+import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous.ts';
+import useQueueWithValidation from '../utils/useQueueWithValidation.ts';
 
 export default async function skipCommandHandler(
 	interaction: ChatInputCommandInteraction,

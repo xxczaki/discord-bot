@@ -1,4 +1,3 @@
-import { addMilliseconds, formatDistance } from 'date-fns';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -9,12 +8,14 @@ import {
 	type Message,
 } from 'discord.js';
 import { type GuildQueue, QueueRepeatMode, type Track } from 'discord-player';
-import createQueueAwareComponentHandler from '../utils/createQueueAwareComponentHandler';
-import formatEndingTime from '../utils/formatEndingTime';
-import getTrackPosition from '../utils/getTrackPosition';
-import getTrackThumbnail from '../utils/getTrackThumbnail';
-import isObject from '../utils/isObject';
-import useQueueWithValidation from '../utils/useQueueWithValidation';
+import createQueueAwareComponentHandler from '../utils/createQueueAwareComponentHandler.ts';
+import formatEndingTime from '../utils/formatEndingTime.ts';
+import getTrackPosition from '../utils/getTrackPosition.ts';
+import getTrackThumbnail from '../utils/getTrackThumbnail.ts';
+import isObject from '../utils/isObject.ts';
+import useQueueWithValidation from '../utils/useQueueWithValidation.ts';
+
+const DURATION_FORMAT = new Intl.DurationFormat('en', { style: 'long' });
 
 export default async function queueCommandHandler(
 	interaction: ChatInputCommandInteraction,
@@ -56,10 +57,19 @@ export default async function queueCommandHandler(
 		index++;
 	}
 
-	const now = new Date();
-	const afterQueueEnds = addMilliseconds(new Date(), queue.estimatedDuration);
+	const queueDuration = Temporal.Duration.from({
+		milliseconds: queue.estimatedDuration,
+	}).round({
+		largestUnit: 'days',
+		smallestUnit: 'minutes',
+		roundingMode: 'ceil',
+	});
 
-	const endingTime = formatEndingTime(afterQueueEnds);
+	const endingTime = formatEndingTime(
+		Temporal.Now.zonedDateTimeISO().add({
+			milliseconds: queue.estimatedDuration,
+		}),
+	);
 
 	const isCached =
 		isObject(currentTrack.metadata) &&
@@ -80,7 +90,7 @@ export default async function queueCommandHandler(
 				name: 'Duration',
 				value: !queue?.estimatedDuration
 					? 'N/A'
-					: `${formatDistance(now, afterQueueEnds)}`,
+					: DURATION_FORMAT.format(queueDuration),
 				inline: true,
 			},
 			{

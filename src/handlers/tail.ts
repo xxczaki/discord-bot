@@ -1,5 +1,5 @@
 import type { ChatInputCommandInteraction, GuildMember } from 'discord.js';
-import enqueuePlaylistSlice from '../utils/enqueuePlaylistSlice';
+import enqueuePlaylistSlice from '../utils/enqueuePlaylistSlice.ts';
 
 export default async function tailCommandHandler(
 	interaction: ChatInputCommandInteraction,

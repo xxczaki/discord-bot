@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import cleanUpPlaylistContent from '../cleanUpPlaylistContent';
+import cleanUpPlaylistContent from '../cleanUpPlaylistContent.ts';
 
 it('should extract content from triple backticks', () => {
 	const input = `id="example"

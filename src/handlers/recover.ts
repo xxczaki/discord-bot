@@ -8,12 +8,12 @@ import {
 	type GuildMember,
 } from 'discord.js';
 import { useMainPlayer, useQueue } from 'discord-player';
-import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous';
-import enqueueTracks from '../utils/enqueueTracks';
-import formatDuration from '../utils/formatDuration';
-import formatRelativeTime from '../utils/formatRelativeTime';
-import pluralize from '../utils/pluralize';
-import { QueueRecoveryService } from '../utils/QueueRecoveryService';
+import { DEFAULT_MESSAGE_COMPONENT_AWAIT_TIME_MS } from '../constants/miscellaneous.ts';
+import enqueueTracks from '../utils/enqueueTracks.ts';
+import formatDuration from '../utils/formatDuration.ts';
+import formatRelativeTime from '../utils/formatRelativeTime.ts';
+import pluralize from '../utils/pluralize.ts';
+import { QueueRecoveryService } from '../utils/QueueRecoveryService.ts';
 
 const queueRecoveryService = QueueRecoveryService.getInstance();
 

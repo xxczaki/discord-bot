@@ -1,10 +1,10 @@
 import type { Client } from 'discord.js';
 import { beforeEach, expect, it, vi } from 'vitest';
-import { getHomeGuildId } from '../getGuildConfig';
-import logger from '../logger';
-import migrateLegacyStats from '../migrateLegacyStats';
-import reportError from '../reportError';
-import { StatsHandler } from '../StatsHandler';
+import { getHomeGuildId } from '../getGuildConfig.ts';
+import logger from '../logger.ts';
+import migrateLegacyStats from '../migrateLegacyStats.ts';
+import reportError from '../reportError.ts';
+import { StatsHandler } from '../StatsHandler.ts';
 
 vi.mock('../getGuildConfig', () => ({
 	getHomeGuildId: vi.fn(),

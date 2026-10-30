@@ -12,15 +12,17 @@ import {
 	useMainPlayer,
 } from 'discord-player';
 import type { Redis } from 'ioredis';
-import { ExternalPlaylistCache } from './ExternalPlaylistCache';
-import isUrlSpotifyPlaylist from './isUrlSpotifyPlaylist';
+import { ExternalPlaylistCache } from './ExternalPlaylistCache.ts';
+import isUrlSpotifyPlaylist from './isUrlSpotifyPlaylist.ts';
 
 export class RedisQueryCache implements QueryCacheProvider<Track> {
 	static EXPIRY_TIMEOUT_SECONDS = 60 * 60 * 24; // 1 day
 
+	readonly #redis: Redis;
 	#externalPlaylistCache: ExternalPlaylistCache;
 
-	constructor(public redis: Redis) {
+	constructor(redis: Redis) {
+		this.#redis = redis;
 		this.#externalPlaylistCache = new ExternalPlaylistCache(redis);
 	}
 
@@ -37,7 +39,7 @@ export class RedisQueryCache implements QueryCacheProvider<Track> {
 			return;
 		}
 
-		const isCorrected = await this.redis.exists(
+		const isCorrected = await this.#redis.exists(
 			this.#createCorrectedKey(data.query),
 		);
 
@@ -50,7 +52,7 @@ export class RedisQueryCache implements QueryCacheProvider<Track> {
 				: data.tracks.map((track) => serialize(track)),
 		);
 
-		await this.redis.setex(
+		await this.#redis.setex(
 			key,
 			RedisQueryCache.EXPIRY_TIMEOUT_SECONDS,
 			serialized,
@@ -70,15 +72,15 @@ export class RedisQueryCache implements QueryCacheProvider<Track> {
 		query: string,
 		serializedTrack: string,
 	): Promise<void> {
-		await this.redis.set(this.#createCorrectedKey(query), serializedTrack);
+		await this.#redis.set(this.#createCorrectedKey(query), serializedTrack);
 	}
 
 	async removeCorrectResolution(query: string): Promise<void> {
-		await this.redis.del(this.#createCorrectedKey(query));
+		await this.#redis.del(this.#createCorrectedKey(query));
 	}
 
 	async isQueryCorrected(query: string): Promise<boolean> {
-		const exists = await this.redis.exists(this.#createCorrectedKey(query));
+		const exists = await this.#redis.exists(this.#createCorrectedKey(query));
 
 		return exists === 1;
 	}
@@ -87,39 +89,34 @@ export class RedisQueryCache implements QueryCacheProvider<Track> {
 		const player = useMainPlayer();
 
 		const results: DiscordPlayerQueryResultCache<Track<unknown>>[] = [];
-		const stream = this.redis.scanStream({
+		const stream = this.#redis.scanStream({
 			match: this.#createKey('*'),
 			count: 200,
 		});
 
-		return new Promise((resolve, reject) => {
-			stream.on('data', async (keys: string[] = []) => {
-				stream.pause();
+		for await (const keys of stream as AsyncIterable<string[]>) {
+			if (keys.length === 0) {
+				continue;
+			}
 
-				if (keys.length > 0) {
-					const serialized = await this.redis.mget(keys);
+			const serialized = await this.#redis.mget(keys);
 
-					for (const item of serialized) {
-						if (!item) continue;
+			for (const item of serialized) {
+				if (!item) continue;
 
-						const parsed = deserialize(player, JSON.parse(item)) as Track;
-						results.push(new DiscordPlayerQueryResultCache(parsed, 0));
-					}
-				}
+				const parsed = deserialize(player, JSON.parse(item)) as Track;
+				results.push(new DiscordPlayerQueryResultCache(parsed, 0));
+			}
+		}
 
-				stream.resume();
-			});
-
-			stream.on('end', () => resolve(results));
-			stream.on('error', reject);
-		});
+		return results;
 	}
 
 	async resolve(context: QueryCacheResolverContext): Promise<SearchResult> {
 		const player = useMainPlayer();
 
 		try {
-			const corrected = await this.redis.get(
+			const corrected = await this.#redis.get(
 				this.#createCorrectedKey(context.query),
 			);
 
@@ -138,7 +135,7 @@ export class RedisQueryCache implements QueryCacheProvider<Track> {
 
 			const key = this.#createKey(context.query);
 
-			const serialized = await this.redis.get(key);
+			const serialized = await this.#redis.get(key);
 			if (!serialized) throw new Error('No data found');
 
 			const raw = JSON.parse(serialized) as

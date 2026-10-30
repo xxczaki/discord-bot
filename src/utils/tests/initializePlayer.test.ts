@@ -9,8 +9,8 @@ import {
 	Player,
 } from 'discord-player';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import getInitializedPlayer from '../initializePlayer';
-import { RedisQueryCache } from '../RedisQueryCache';
+import getInitializedPlayer from '../initializePlayer.ts';
+import { RedisQueryCache } from '../RedisQueryCache.ts';
 
 interface MockTrack {
 	url: string;

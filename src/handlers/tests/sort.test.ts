@@ -4,8 +4,8 @@ import { beforeEach, expect, it, vi } from 'vitest';
 import {
 	createMockInteraction as createBaseMockInteraction,
 	createMockQueue as createBaseMockQueue,
-} from '../../utils/testing';
-import sortCommandHandler from '../sort';
+} from '../../utils/testing/index.ts';
+import sortCommandHandler from '../sort.ts';
 
 vi.mock('discord-player', () => ({
 	useQueue: vi.fn(),

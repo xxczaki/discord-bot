@@ -1,8 +1,8 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
 import type { Track } from 'discord-player';
-import isObject from '../utils/isObject';
-import pluralize from '../utils/pluralize';
-import useQueueWithValidation from '../utils/useQueueWithValidation';
+import isObject from '../utils/isObject.ts';
+import pluralize from '../utils/pluralize.ts';
+import useQueueWithValidation from '../utils/useQueueWithValidation.ts';
 
 const ALGORITHMS = ['bridged', 'source'] as const;
 

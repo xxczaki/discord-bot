@@ -1,7 +1,7 @@
 import type { Client } from 'discord.js';
 import memoize from 'memoize';
 import { z } from 'zod';
-import getEnvironmentVariable from './getEnvironmentVariable';
+import getEnvironmentVariable from './getEnvironmentVariable.ts';
 
 const guildConfigSchema = z.object({
 	playlistsChannelId: z.string().min(1),

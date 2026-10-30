@@ -3,7 +3,7 @@ import {
 	type CategorizedCommand,
 	COMMAND_CATEGORIES,
 	RAW_COMMANDS,
-} from '../constants/commands';
+} from '../constants/commands.ts';
 
 const categorizedCommands = Object.groupBy(
 	RAW_COMMANDS.sort((a, b) => a.name.localeCompare(b.name)).map(

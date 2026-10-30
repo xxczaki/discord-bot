@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import isObject from '../isObject';
+import isObject from '../isObject.ts';
 
 it('should return true for an empty object', () => {
 	expect(isObject({})).toBe(true);

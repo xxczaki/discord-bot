@@ -1,14 +1,14 @@
 import type { Client } from 'discord.js';
 import type { Player } from 'discord-player';
 import { useQueue } from 'discord-player';
-import getCommitLink from '../utils/getCommitLink';
-import getEnvironmentVariable from '../utils/getEnvironmentVariable';
-import isObject from '../utils/isObject';
-import logger from '../utils/logger';
-import { OpusCacheManager } from '../utils/OpusCacheManager';
-import { QueueRecoveryService } from '../utils/QueueRecoveryService';
-import useAutocompleteHandler from './useAutocompleteHandler';
-import useCommandHandlers from './useCommandHandlers';
+import getCommitLink from '../utils/getCommitLink.ts';
+import getEnvironmentVariable from '../utils/getEnvironmentVariable.ts';
+import isObject from '../utils/isObject.ts';
+import logger from '../utils/logger.ts';
+import { OpusCacheManager } from '../utils/OpusCacheManager.ts';
+import { QueueRecoveryService } from '../utils/QueueRecoveryService.ts';
+import useAutocompleteHandler from './useAutocompleteHandler.ts';
+import useCommandHandlers from './useCommandHandlers.ts';
 
 const QUEUE_SAVE_DEBOUNCE_MS = 2000;
 

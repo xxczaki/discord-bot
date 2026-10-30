@@ -6,8 +6,8 @@ import type {
 } from 'discord-player';
 import { SerializedType } from 'discord-player';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { QueueRecoveryService } from '../QueueRecoveryService';
-import redis from '../redis';
+import { QueueRecoveryService } from '../QueueRecoveryService.ts';
+import redis from '../redis.ts';
 
 const EXAMPLE_TRACK_ID = 'track-123';
 const EXAMPLE_TRACK_TITLE = 'Test Song';

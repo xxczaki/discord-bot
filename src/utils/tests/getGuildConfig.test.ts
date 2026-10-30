@@ -4,7 +4,7 @@ import getGuildConfig, {
 	getHomeGuildId,
 	getPlaylistsChannel,
 	isHomeGuild,
-} from '../getGuildConfig';
+} from '../getGuildConfig.ts';
 
 const HOME_GUILD_ID = 'home-guild-id';
 const FRIEND_GUILD_ID = 'friend-guild-id';

@@ -5,8 +5,8 @@ import {
 	StringSelectMenuOptionBuilder,
 } from 'discord.js';
 import type { QueueFilters } from 'discord-player';
-import createQueueAwareComponentHandler from '../utils/createQueueAwareComponentHandler';
-import useQueueWithValidation from '../utils/useQueueWithValidation';
+import createQueueAwareComponentHandler from '../utils/createQueueAwareComponentHandler.ts';
+import useQueueWithValidation from '../utils/useQueueWithValidation.ts';
 
 export default async function tempoCommandHandler(
 	interaction: ChatInputCommandInteraction,

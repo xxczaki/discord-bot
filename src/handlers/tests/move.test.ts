@@ -6,8 +6,8 @@ import {
 	createMockInteraction as createBaseMockInteraction,
 	createMockQueue as createBaseMockQueue,
 	createMockTrack,
-} from '../../utils/testing';
-import moveCommandHandler from '../move';
+} from '../../utils/testing/index.ts';
+import moveCommandHandler from '../move.ts';
 
 vi.mock('discord-player', () => ({
 	useQueue: vi.fn(),

@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import getCommitLink from '../getCommitLink';
+import getCommitLink from '../getCommitLink.ts';
 
 const EXAMPLE_COMMIT_HASH = 'abc123def456';
 const EXPECTED_MARKDOWN_LINK =

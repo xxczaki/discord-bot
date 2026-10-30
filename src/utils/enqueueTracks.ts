@@ -5,12 +5,12 @@ import {
 	useMainPlayer,
 	useQueue,
 } from 'discord-player';
-import type { ProcessingInteraction } from '../types/ProcessingInteraction';
-import type { QueueMetadata } from '../types/QueueMetadata';
-import determineSearchEngine from './determineSearchEngine';
-import pluralize from './pluralize';
-import processTracksWithQueue from './processTracksWithQueue';
-import reportError from './reportError';
+import type { ProcessingInteraction } from '../types/ProcessingInteraction.ts';
+import type { QueueMetadata } from '../types/QueueMetadata.ts';
+import determineSearchEngine from './determineSearchEngine.ts';
+import pluralize from './pluralize.ts';
+import processTracksWithQueue from './processTracksWithQueue.ts';
+import reportError from './reportError.ts';
 
 type Props = {
 	tracks: Track[];

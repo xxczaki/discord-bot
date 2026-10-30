@@ -1,16 +1,16 @@
 import type { Client } from 'discord.js';
-import useDebugListeners, { server } from '../hooks/useDebugListeners';
+import useDebugListeners, { server } from '../hooks/useDebugListeners.ts';
 import useDiscordEventHandlers, {
 	useReadyEventHandler,
-} from '../hooks/useDiscordEventHandlers';
-import usePlayerEventHandlers from '../hooks/usePlayerEventHandlers';
-import { createDiscordClient } from './createDiscordClient';
-import getEnvironmentVariable from './getEnvironmentVariable';
-import setupGracefulShutdown from './gracefulShutdown';
-import initializeCommands from './initializeCommands';
-import getInitializedPlayer from './initializePlayer';
-import migrateLegacyStats from './migrateLegacyStats';
-import performStartupRecovery from './startupRecovery';
+} from '../hooks/useDiscordEventHandlers.ts';
+import usePlayerEventHandlers from '../hooks/usePlayerEventHandlers.ts';
+import { createDiscordClient } from './createDiscordClient.ts';
+import getEnvironmentVariable from './getEnvironmentVariable.ts';
+import setupGracefulShutdown from './gracefulShutdown.ts';
+import initializeCommands from './initializeCommands.ts';
+import getInitializedPlayer from './initializePlayer.ts';
+import migrateLegacyStats from './migrateLegacyStats.ts';
+import performStartupRecovery from './startupRecovery.ts';
 
 export interface BotInitializationResult {
 	client: Client;

@@ -8,8 +8,8 @@ import {
 	StringSelectMenuOptionBuilder,
 } from 'discord.js';
 import type { QueueFilters } from 'discord-player';
-import createQueueAwareComponentHandler from '../utils/createQueueAwareComponentHandler';
-import useQueueWithValidation from '../utils/useQueueWithValidation';
+import createQueueAwareComponentHandler from '../utils/createQueueAwareComponentHandler.ts';
+import useQueueWithValidation from '../utils/useQueueWithValidation.ts';
 
 type OptionData = SelectMenuComponentOptionData & { value: keyof QueueFilters };
 

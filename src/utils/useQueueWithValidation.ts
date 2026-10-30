@@ -1,7 +1,7 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { type GuildQueue, useQueue } from 'discord-player';
-import type { QueueMetadata } from '../types/QueueMetadata';
-import reportError from './reportError';
+import type { QueueMetadata } from '../types/QueueMetadata.ts';
+import reportError from './reportError.ts';
 
 type Options = {
 	message?: string;

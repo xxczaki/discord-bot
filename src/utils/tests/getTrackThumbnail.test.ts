@@ -1,6 +1,6 @@
 import type { Track } from 'discord-player';
 import { beforeEach, expect, it, vi } from 'vitest';
-import getTrackThumbnail from '../getTrackThumbnail';
+import getTrackThumbnail from '../getTrackThumbnail.ts';
 
 vi.mock('discord-player', () => ({
 	serialize: vi.fn((track) => JSON.stringify(track)),

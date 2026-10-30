@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import sanitizeForFilename from '../sanitizeForFilename';
+import sanitizeForFilename from '../sanitizeForFilename.ts';
 
 it('should lowercase the input', () => {
 	expect(sanitizeForFilename('Hello World', 100)).toBe('hello_world');

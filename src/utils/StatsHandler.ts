@@ -1,5 +1,5 @@
-import { ulid } from 'ulid';
-import redis from './redis';
+import { randomUUIDv7 } from 'node:crypto';
+import redis from './redis.ts';
 
 type StatType = 'play' | 'playlist';
 
@@ -26,12 +26,12 @@ export class StatsHandler {
 			| { playlistId: string; requestedById: string },
 	) {
 		await redis.set(
-			`discord-player:stats:${guildId}:${type}:${ulid()}`,
+			`discord-player:stats:${guildId}:${type}:${randomUUIDv7()}`,
 			JSON.stringify(payload),
 		);
 	}
 
-	getStats(guildId: string, type: StatType) {
+	getStats(guildId: string, type: StatType): AsyncIterable<string[]> {
 		return redis.scanStream({
 			match: `discord-player:stats:${guildId}:${type}:*`,
 			count: 1000,

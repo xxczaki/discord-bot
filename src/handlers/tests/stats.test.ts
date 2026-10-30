@@ -1,13 +1,12 @@
-import { EventEmitter } from 'node:events';
+import { setTimeout } from 'node:timers/promises';
 import { captureException } from '@sentry/node';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { EmbedBuilder } from 'discord.js';
-import type { ScanStream } from 'ioredis';
 import { beforeEach, expect, it, vi } from 'vitest';
-import isObject from '../../utils/isObject';
-import logger from '../../utils/logger';
-import redis from '../../utils/redis';
-import statsCommandHandler from '../stats';
+import isObject from '../../utils/isObject.ts';
+import logger from '../../utils/logger.ts';
+import redis from '../../utils/redis.ts';
+import statsCommandHandler from '../stats.ts';
 
 const EXAMPLE_REDIS_KEYS = [
 	'discord-player:stats:play:01HV4F5C123456789ABCDEFG',
@@ -47,11 +46,6 @@ const mockedCaptureException = vi.mocked(captureException);
 const mockedLogger = vi.mocked(logger);
 const mockedRedis = vi.mocked(redis);
 
-interface MockStream extends EventEmitter {
-	pause: () => void;
-	resume: () => void;
-}
-
 function createMockInteraction(): ChatInputCommandInteraction {
 	return {
 		guildId: 'guild-123',
@@ -65,74 +59,70 @@ function createMockInteraction(): ChatInputCommandInteraction {
 	} as unknown as ChatInputCommandInteraction;
 }
 
-function createMockStream(): MockStream {
-	const stream = new EventEmitter() as MockStream;
-
-	stream.pause = vi.fn();
-	stream.resume = vi.fn();
-
-	return stream;
+function createScanStream(batches: string[][]): AsyncIterable<string[]> {
+	return {
+		async *[Symbol.asyncIterator]() {
+			for (const batch of batches) {
+				yield batch;
+			}
+		},
+	};
 }
 
 function setupMockStreams(
-	playKeys: string[] = [],
-	playlistKeys: string[] = [],
-	delay = 10,
+	playBatches: string[][] = [],
+	playlistBatches: string[][] = [],
 ) {
-	const mockPlayStream = createMockStream();
-	const mockPlaylistStream = createMockStream();
-
 	mockStatsHandlerInstance.getStats
-		.mockReturnValueOnce(mockPlayStream as unknown as ScanStream)
-		.mockReturnValueOnce(mockPlaylistStream as unknown as ScanStream);
+		.mockReturnValueOnce(createScanStream(playBatches))
+		.mockReturnValueOnce(createScanStream(playlistBatches));
+}
 
-	setTimeout(() => {
-		mockPlayStream.emit('data', playKeys);
-	}, delay);
+function mockPipelineResults(results: [Error | null, unknown][]) {
+	const mockPipeline = {
+		get: vi.fn().mockReturnThis(),
+		exec: vi.fn().mockResolvedValue(results),
+	} as unknown as ReturnType<typeof redis.pipeline>;
 
-	setTimeout(() => {
-		mockPlayStream.emit('end');
-	}, delay + 10);
+	mockedRedis.pipeline.mockReturnValue(mockPipeline);
 
-	setTimeout(() => {
-		mockPlaylistStream.emit('data', playlistKeys);
-	}, delay + 20);
+	return mockPipeline;
+}
 
-	setTimeout(() => {
-		mockPlaylistStream.emit('end');
-	}, delay + 30);
+function getEmbedDescription(interaction: ChatInputCommandInteraction) {
+	const payload = vi.mocked(interaction.editReply).mock.lastCall?.[0];
 
-	return { mockPlayStream, mockPlaylistStream };
+	if (!isObject(payload) || !Array.isArray(payload.embeds)) {
+		throw new Error('Expected the last reply to contain embeds');
+	}
+
+	const [embed] = payload.embeds;
+
+	if (!(embed instanceof EmbedBuilder)) {
+		throw new Error('Expected an `EmbedBuilder` instance');
+	}
+
+	return embed.data.description ?? '';
 }
 
 beforeEach(() => {
 	vi.clearAllMocks();
 
-	const mockPipeline = {
-		get: vi.fn().mockReturnThis(),
-		exec: vi.fn().mockResolvedValue([]),
-	} as unknown as ReturnType<typeof redis.pipeline>;
-	mockedRedis.pipeline.mockReturnValue(mockPipeline);
+	mockPipelineResults([]);
 });
 
 it('should reply with loading message and process stats successfully', async () => {
 	const interaction = createMockInteraction();
 
-	setupMockStreams(EXAMPLE_REDIS_KEYS);
+	setupMockStreams([EXAMPLE_REDIS_KEYS]);
 
-	const mockPipeline = {
-		get: vi.fn().mockReturnThis(),
-		exec: vi.fn().mockResolvedValue([
-			[null, JSON.stringify(EXAMPLE_TRACK_STATS[0])],
-			[null, JSON.stringify(EXAMPLE_TRACK_STATS[1])],
-			[null, JSON.stringify(EXAMPLE_TRACK_STATS[2])],
-		]),
-	} as unknown as ReturnType<typeof redis.pipeline>;
-	mockedRedis.pipeline.mockReturnValue(mockPipeline);
+	const mockPipeline = mockPipelineResults([
+		[null, JSON.stringify(EXAMPLE_TRACK_STATS[0])],
+		[null, JSON.stringify(EXAMPLE_TRACK_STATS[1])],
+		[null, JSON.stringify(EXAMPLE_TRACK_STATS[2])],
+	]);
 
-	const promise = statsCommandHandler(interaction);
-
-	await promise;
+	await statsCommandHandler(interaction);
 
 	expect(interaction.editReply).toHaveBeenCalledWith('Loading latest stats…');
 	expect(mockStatsHandlerInstance.getStats).toHaveBeenCalledWith(
@@ -145,13 +135,12 @@ it('should reply with loading message and process stats successfully', async () 
 	);
 
 	expect(mockedRedis.pipeline).toHaveBeenCalledTimes(1);
-	const pipelineInstance = mockedRedis.pipeline();
-	expect(pipelineInstance.get).toHaveBeenCalledTimes(3);
-	expect(pipelineInstance.get).toHaveBeenCalledWith(EXAMPLE_REDIS_KEYS[0]);
-	expect(pipelineInstance.get).toHaveBeenCalledWith(EXAMPLE_REDIS_KEYS[1]);
-	expect(pipelineInstance.get).toHaveBeenCalledWith(EXAMPLE_REDIS_KEYS[2]);
+	expect(mockPipeline.get).toHaveBeenCalledTimes(3);
+	expect(mockPipeline.get).toHaveBeenCalledWith(EXAMPLE_REDIS_KEYS[0]);
+	expect(mockPipeline.get).toHaveBeenCalledWith(EXAMPLE_REDIS_KEYS[1]);
+	expect(mockPipeline.get).toHaveBeenCalledWith(EXAMPLE_REDIS_KEYS[2]);
 
-	expect(interaction.editReply).toHaveBeenCalledWith({
+	expect(interaction.editReply).toHaveBeenLastCalledWith({
 		embeds: [expect.any(EmbedBuilder)],
 		content: null,
 	});
@@ -165,28 +154,17 @@ it('should handle tracks with multiple plays correctly', async () => {
 		{ title: 'Test Song', author: 'Test Artist', requestedById: '456' },
 	];
 
-	setupMockStreams(['key1', 'key2']);
+	setupMockStreams([['key1', 'key2']]);
+	mockPipelineResults([
+		[null, JSON.stringify(duplicateTrackStats[0])],
+		[null, JSON.stringify(duplicateTrackStats[1])],
+	]);
 
-	const mockPipeline = {
-		get: vi.fn().mockReturnThis(),
-		exec: vi.fn().mockResolvedValue([
-			[null, JSON.stringify(duplicateTrackStats[0])],
-			[null, JSON.stringify(duplicateTrackStats[1])],
-		]),
-	} as unknown as ReturnType<typeof redis.pipeline>;
-	mockedRedis.pipeline.mockReturnValue(mockPipeline);
+	await statsCommandHandler(interaction);
 
-	const promise = statsCommandHandler(interaction);
-
-	await promise;
-
-	const editReplyCall = vi.mocked(interaction.editReply).mock.calls[0];
-	const callArg = editReplyCall?.[0];
-
-	if (isObject(callArg) && 'embeds' in callArg) {
-		const embed = (callArg as { embeds: EmbedBuilder[] }).embeds[0];
-		expect(embed.data.description).toContain('2 – "Test Song" by Test Artist');
-	}
+	expect(getEmbedDescription(interaction)).toContain(
+		'2 – "Test Song" by Test Artist',
+	);
 });
 
 it('should skip tracks without `requestedById`', async () => {
@@ -197,104 +175,110 @@ it('should skip tracks without `requestedById`', async () => {
 		author: 'System',
 	};
 
-	setupMockStreams(['key1']);
+	setupMockStreams([['key1']]);
+	mockPipelineResults([[null, JSON.stringify(trackWithoutRequesterId)]]);
 
-	const mockPipeline = {
-		get: vi.fn().mockReturnThis(),
-		exec: vi
-			.fn()
-			.mockResolvedValue([[null, JSON.stringify(trackWithoutRequesterId)]]),
-	} as unknown as ReturnType<typeof redis.pipeline>;
-	mockedRedis.pipeline.mockReturnValue(mockPipeline);
+	await statsCommandHandler(interaction);
 
-	const promise = statsCommandHandler(interaction);
+	const description = getEmbedDescription(interaction);
 
-	await promise;
-
-	const editReplyCall = vi.mocked(interaction.editReply).mock.calls[0];
-	const callArg = editReplyCall?.[0];
-
-	if (isObject(callArg) && 'embeds' in callArg) {
-		const embed = (callArg as { embeds: EmbedBuilder[] }).embeds[0];
-		expect(embed.data.description).toContain('*empty*');
-		expect(embed.data.description).toContain('**Total Played**: 0');
-	}
+	expect(description).toContain('*empty*');
+	expect(description).toContain('**Total Played**: 0');
 });
 
 it('should handle Redis get returning null values', async () => {
 	const interaction = createMockInteraction();
 
-	setupMockStreams(['key1']);
+	setupMockStreams([['key1']]);
+	mockPipelineResults([[null, null]]);
 
-	const mockPipeline = {
-		get: vi.fn().mockReturnThis(),
-		exec: vi.fn().mockResolvedValue([[null, null]]),
-	} as unknown as ReturnType<typeof redis.pipeline>;
-	mockedRedis.pipeline.mockReturnValue(mockPipeline);
+	await statsCommandHandler(interaction);
 
-	const promise = statsCommandHandler(interaction);
+	const description = getEmbedDescription(interaction);
 
-	await promise;
+	expect(description).toContain('*empty*');
+	expect(description).toContain('**Total Played**: 0');
+});
 
-	const editReplyCall = vi.mocked(interaction.editReply).mock.calls[0];
-	const callArg = editReplyCall?.[0];
+it('should skip pipeline entries that returned an error', async () => {
+	const interaction = createMockInteraction();
 
-	if (isObject(callArg) && 'embeds' in callArg) {
-		const embed = (callArg as { embeds: EmbedBuilder[] }).embeds[0];
-		expect(embed.data.description).toContain('*empty*');
-	}
+	setupMockStreams([['key1', 'key2']]);
+	mockPipelineResults([
+		[new Error('WRONGTYPE'), JSON.stringify(EXAMPLE_TRACK_STATS[0])],
+		[null, JSON.stringify(EXAMPLE_TRACK_STATS[1])],
+	]);
+
+	await statsCommandHandler(interaction);
+
+	const description = getEmbedDescription(interaction);
+
+	expect(description).toContain('**Total Played**: 1');
+	expect(description).toContain('1 – <@!987654321>');
+	expect(description).not.toContain('<@!123456789>');
 });
 
 it('should handle JSON parsing errors gracefully', async () => {
 	const interaction = createMockInteraction();
 
-	setupMockStreams(['key1']);
+	setupMockStreams([['key1']]);
+	mockPipelineResults([[null, 'invalid-json']]);
 
-	const mockPipeline = {
-		get: vi.fn().mockReturnThis(),
-		exec: vi.fn().mockResolvedValue([[null, 'invalid-json']]),
-	} as unknown as ReturnType<typeof redis.pipeline>;
-	mockedRedis.pipeline.mockReturnValue(mockPipeline);
+	await statsCommandHandler(interaction);
 
-	const promise = statsCommandHandler(interaction);
-
-	await promise;
-
-	expect(mockedLogger.error).toHaveBeenCalled();
+	expect(mockedLogger.error).toHaveBeenCalledWith(
+		expect.any(SyntaxError),
+		'Failed to parse stats JSON value',
+	);
 	expect(mockedCaptureException).toHaveBeenCalled();
+	expect(getEmbedDescription(interaction)).toContain('**Total Played**: 0');
 });
 
-it('should pause and resume stream during data processing', async () => {
+it('should finish processing a batch before requesting the next one', async () => {
 	const interaction = createMockInteraction();
+	const events: string[] = [];
 
-	const { mockPlayStream } = setupMockStreams([EXAMPLE_REDIS_KEYS[0]]);
+	mockStatsHandlerInstance.getStats
+		.mockReturnValueOnce({
+			async *[Symbol.asyncIterator]() {
+				events.push('batch-1-requested');
+				yield ['key1'];
+				events.push('batch-2-requested');
+				yield ['key2'];
+			},
+		})
+		.mockReturnValueOnce(createScanStream([]));
 
 	const mockPipeline = {
 		get: vi.fn().mockReturnThis(),
-		exec: vi
-			.fn()
-			.mockResolvedValue([[null, JSON.stringify(EXAMPLE_TRACK_STATS[0])]]),
+		exec: vi.fn(async () => {
+			await setTimeout(5);
+			events.push('batch-processed');
+
+			return [[null, JSON.stringify(EXAMPLE_TRACK_STATS[0])]];
+		}),
 	} as unknown as ReturnType<typeof redis.pipeline>;
 	mockedRedis.pipeline.mockReturnValue(mockPipeline);
 
-	const promise = statsCommandHandler(interaction);
+	await statsCommandHandler(interaction);
 
-	await promise;
-
-	expect(mockPlayStream.pause).toHaveBeenCalled();
-	expect(mockPlayStream.resume).toHaveBeenCalled();
+	expect(events).toEqual([
+		'batch-1-requested',
+		'batch-processed',
+		'batch-2-requested',
+		'batch-processed',
+	]);
 });
 
-it('should handle empty data arrays and undefined data', async () => {
+it('should skip empty batches without querying Redis', async () => {
 	const interaction = createMockInteraction();
 
-	setupMockStreams([]);
+	setupMockStreams([[]], [[]]);
 
-	const promise = statsCommandHandler(interaction);
-
-	await promise;
+	await statsCommandHandler(interaction);
 
 	expect(mockedRedis.pipeline).not.toHaveBeenCalled();
+	expect(getEmbedDescription(interaction)).toContain('**Total Played**: 0');
 });
 
 it('should aggregate stats by user correctly', async () => {
@@ -306,75 +290,58 @@ it('should aggregate stats by user correctly', async () => {
 		{ title: 'Song 3', author: 'Artist 3', requestedById: '456' },
 	];
 
-	setupMockStreams(['key1', 'key2', 'key3']);
+	setupMockStreams([['key1', 'key2', 'key3']]);
+	mockPipelineResults([
+		[null, JSON.stringify(statsWithSameUser[0])],
+		[null, JSON.stringify(statsWithSameUser[1])],
+		[null, JSON.stringify(statsWithSameUser[2])],
+	]);
 
-	const mockPipeline = {
-		get: vi.fn().mockReturnThis(),
-		exec: vi.fn().mockResolvedValue([
-			[null, JSON.stringify(statsWithSameUser[0])],
-			[null, JSON.stringify(statsWithSameUser[1])],
-			[null, JSON.stringify(statsWithSameUser[2])],
-		]),
-	} as unknown as ReturnType<typeof redis.pipeline>;
-	mockedRedis.pipeline.mockReturnValue(mockPipeline);
+	await statsCommandHandler(interaction);
 
-	const promise = statsCommandHandler(interaction);
+	const description = getEmbedDescription(interaction);
 
-	await promise;
-
-	const editReplyCall = vi.mocked(interaction.editReply).mock.calls[0];
-	const callArg = editReplyCall?.[0];
-
-	if (isObject(callArg) && 'embeds' in callArg) {
-		const embed = (callArg as { embeds: EmbedBuilder[] }).embeds[0];
-		expect(embed.data.description).toContain('2 – <@!123>');
-		expect(embed.data.description).toContain('1 – <@!456>');
-	}
+	expect(description).toContain('2 – <@!123>\n1 – <@!456>');
+	expect(description).toContain('**Total Played**: 3');
 });
 
 it('should only show tracks played more than once in top list', async () => {
 	const interaction = createMockInteraction();
 
-	const singlePlayStats = [
-		{ title: 'Song 1', author: 'Artist 1', requestedById: '123' },
-	];
+	setupMockStreams([['key1']]);
+	mockPipelineResults([
+		[
+			null,
+			JSON.stringify({
+				title: 'Song 1',
+				author: 'Artist 1',
+				requestedById: '123',
+			}),
+		],
+	]);
 
-	setupMockStreams(['key1']);
+	await statsCommandHandler(interaction);
 
-	const mockPipeline = {
-		get: vi.fn().mockReturnThis(),
-		exec: vi
-			.fn()
-			.mockResolvedValue([[null, JSON.stringify(singlePlayStats[0])]]),
-	} as unknown as ReturnType<typeof redis.pipeline>;
-	mockedRedis.pipeline.mockReturnValue(mockPipeline);
+	expect(getEmbedDescription(interaction)).toContain(
+		'**Top 10 Most Frequently Played**:\n*empty*',
+	);
 
-	const promise = statsCommandHandler(interaction);
+	const payload = vi.mocked(interaction.editReply).mock.lastCall?.[0];
 
-	await promise;
-
-	const editReplyCall = vi.mocked(interaction.editReply).mock.calls[0];
-	const callArg = editReplyCall?.[0];
-
-	if (isObject(callArg) && 'embeds' in callArg) {
-		const embed = (callArg as { embeds: EmbedBuilder[] }).embeds[0];
-
-		expect(embed.data.description).toContain(
-			'**Top 10 Most Frequently Played**:\n*empty*',
-		);
-		expect(embed.data.footer?.text).toBe('Not showing tracks played just once');
-	}
+	expect(payload).toEqual({
+		embeds: [
+			expect.objectContaining({
+				data: expect.objectContaining({
+					footer: { text: 'Not showing tracks played just once' },
+				}),
+			}),
+		],
+		content: null,
+	});
 });
 
-it('should wait for all async processing to complete before calculating totals', async () => {
+it('should wait for all batches to be processed before calculating totals', async () => {
 	const interaction = createMockInteraction();
-
-	const mockPlayStream = createMockStream();
-	const mockPlaylistStream = createMockStream();
-
-	mockStatsHandlerInstance.getStats
-		.mockReturnValueOnce(mockPlayStream as unknown as ScanStream)
-		.mockReturnValueOnce(mockPlaylistStream as unknown as ScanStream);
 
 	const batch1Stats = [
 		{ title: 'Song 1', author: 'Artist 1', requestedById: '111' },
@@ -386,36 +353,32 @@ it('should wait for all async processing to complete before calculating totals',
 		{ title: 'Song 4', author: 'Artist 4', requestedById: '444' },
 	];
 
-	let pipeline1Resolved = false;
-	let pipeline2Resolved = false;
+	setupMockStreams([
+		['key1', 'key2'],
+		['key3', 'key4'],
+	]);
 
 	const mockPipeline1 = {
 		get: vi.fn().mockReturnThis(),
-		exec: vi.fn().mockImplementation(() => {
-			return new Promise((resolve) => {
-				setTimeout(() => {
-					pipeline1Resolved = true;
-					resolve([
-						[null, JSON.stringify(batch1Stats[0])],
-						[null, JSON.stringify(batch1Stats[1])],
-					]);
-				}, 50);
-			});
+		exec: vi.fn(async () => {
+			await setTimeout(50);
+
+			return [
+				[null, JSON.stringify(batch1Stats[0])],
+				[null, JSON.stringify(batch1Stats[1])],
+			];
 		}),
 	} as unknown as ReturnType<typeof redis.pipeline>;
 
 	const mockPipeline2 = {
 		get: vi.fn().mockReturnThis(),
-		exec: vi.fn().mockImplementation(() => {
-			return new Promise((resolve) => {
-				setTimeout(() => {
-					pipeline2Resolved = true;
-					resolve([
-						[null, JSON.stringify(batch2Stats[0])],
-						[null, JSON.stringify(batch2Stats[1])],
-					]);
-				}, 100);
-			});
+		exec: vi.fn(async () => {
+			await setTimeout(20);
+
+			return [
+				[null, JSON.stringify(batch2Stats[0])],
+				[null, JSON.stringify(batch2Stats[1])],
+			];
 		}),
 	} as unknown as ReturnType<typeof redis.pipeline>;
 
@@ -423,46 +386,17 @@ it('should wait for all async processing to complete before calculating totals',
 		.mockReturnValueOnce(mockPipeline1)
 		.mockReturnValueOnce(mockPipeline2);
 
-	const promise = statsCommandHandler(interaction);
+	await statsCommandHandler(interaction);
 
-	setTimeout(() => {
-		mockPlayStream.emit('data', ['key1', 'key2']);
-	}, 10);
-
-	setTimeout(() => {
-		mockPlayStream.emit('data', ['key3', 'key4']);
-	}, 20);
-
-	setTimeout(() => {
-		mockPlayStream.emit('end');
-	}, 30);
-
-	setTimeout(() => {
-		mockPlaylistStream.emit('data', []);
-	}, 40);
-
-	setTimeout(() => {
-		mockPlaylistStream.emit('end');
-	}, 50);
-
-	await promise;
-
-	expect(pipeline1Resolved).toBe(true);
-	expect(pipeline2Resolved).toBe(true);
-
-	const editReplyCall = vi.mocked(interaction.editReply).mock.calls[0];
-	const callArg = editReplyCall?.[0];
-
-	if (isObject(callArg) && 'embeds' in callArg) {
-		const embed = (callArg as { embeds: EmbedBuilder[] }).embeds[0];
-		expect(embed.data.description).toContain('**Total Played**: 4');
-	}
+	expect(mockPipeline1.get).toHaveBeenCalledWith('key1');
+	expect(mockPipeline2.get).toHaveBeenCalledWith('key4');
+	expect(getEmbedDescription(interaction)).toContain('**Total Played**: 4');
 });
 
 it('should handle Redis pipeline exec error gracefully', async () => {
 	const interaction = createMockInteraction();
 
-	setupMockStreams(['key1']);
+	setupMockStreams([['key1']]);
 
 	const mockPipeline = {
 		get: vi.fn().mockReturnThis(),
@@ -471,58 +405,43 @@ it('should handle Redis pipeline exec error gracefully', async () => {
 
 	mockedRedis.pipeline.mockReturnValue(mockPipeline);
 
-	const promise = statsCommandHandler(interaction);
+	await statsCommandHandler(interaction);
 
-	await promise;
-
-	expect(mockedLogger.error).toHaveBeenCalled();
+	expect(mockedLogger.error).toHaveBeenCalledWith(
+		expect.any(Error),
+		'Failed to process stats data from Redis',
+	);
 	expect(mockedCaptureException).toHaveBeenCalled();
+	expect(getEmbedDescription(interaction)).toContain('**Total Played**: 0');
 });
 
 it('should process playlist stats correctly', async () => {
 	const interaction = createMockInteraction();
 
-	const playlistKeys = ['playlist-key1', 'playlist-key2', 'playlist-key3'];
 	const playlistStats = [
 		{ playlistId: 'spotify-playlist-123', requestedById: '111' },
 		{ playlistId: 'spotify-playlist-456', requestedById: '222' },
 		{ playlistId: 'spotify-playlist-123', requestedById: '333' },
 	];
 
-	setupMockStreams([], playlistKeys);
+	setupMockStreams([], [['playlist-key1', 'playlist-key2', 'playlist-key3']]);
+	mockPipelineResults([
+		[null, JSON.stringify(playlistStats[0])],
+		[null, JSON.stringify(playlistStats[1])],
+		[null, JSON.stringify(playlistStats[2])],
+	]);
 
-	const mockPipeline = {
-		get: vi.fn().mockReturnThis(),
-		exec: vi.fn().mockResolvedValue([
-			[null, JSON.stringify(playlistStats[0])],
-			[null, JSON.stringify(playlistStats[1])],
-			[null, JSON.stringify(playlistStats[2])],
-		]),
-	} as unknown as ReturnType<typeof redis.pipeline>;
+	await statsCommandHandler(interaction);
 
-	mockedRedis.pipeline.mockReturnValue(mockPipeline);
-
-	const promise = statsCommandHandler(interaction);
-
-	await promise;
-
-	const editReplyCall = vi.mocked(interaction.editReply).mock.calls[0];
-	const callArg = editReplyCall?.[0];
-
-	if (isObject(callArg) && 'embeds' in callArg) {
-		const embed = (callArg as { embeds: EmbedBuilder[] }).embeds[0];
-
-		expect(embed.data.description).toContain('2 – spotify-playlist-123');
-		expect(embed.data.description).toContain('1 – spotify-playlist-456');
-	}
+	expect(getEmbedDescription(interaction)).toContain(
+		'**Top 10 Most Enqueued Playlists**:\n2 – spotify-playlist-123\n1 – spotify-playlist-456',
+	);
 });
 
 it('should handle playlist stats processing errors gracefully', async () => {
 	const interaction = createMockInteraction();
 
-	const playlistKeys = ['playlist-key1'];
-
-	setupMockStreams([], playlistKeys);
+	setupMockStreams([], [['playlist-key1']]);
 
 	const mockPipeline = {
 		get: vi.fn().mockReturnThis(),
@@ -531,78 +450,58 @@ it('should handle playlist stats processing errors gracefully', async () => {
 
 	mockedRedis.pipeline.mockReturnValue(mockPipeline);
 
-	const promise = statsCommandHandler(interaction);
+	await statsCommandHandler(interaction);
 
-	await promise;
-
-	expect(mockedLogger.error).toHaveBeenCalled();
+	expect(mockedLogger.error).toHaveBeenCalledWith(
+		expect.any(Error),
+		'Failed to process playlist stats data from Redis',
+	);
 	expect(mockedCaptureException).toHaveBeenCalled();
+	expect(getEmbedDescription(interaction)).toContain(
+		'**Top 10 Most Enqueued Playlists**:\n*empty*',
+	);
 });
 
 it('should skip playlist stats when requested by bot', async () => {
 	const interaction = createMockInteraction();
 
-	const playlistKeys = ['playlist-key1'];
-	const playlistStats = [
-		{ playlistId: 'spotify-playlist-123', requestedById: 'bot-id-12345' },
-	];
+	setupMockStreams([], [['playlist-key1']]);
+	mockPipelineResults([
+		[
+			null,
+			JSON.stringify({
+				playlistId: 'spotify-playlist-123',
+				requestedById: 'bot-id-12345',
+			}),
+		],
+	]);
 
-	setupMockStreams([], playlistKeys);
+	await statsCommandHandler(interaction);
 
-	const mockPipeline = {
-		get: vi.fn().mockReturnThis(),
-		exec: vi.fn().mockResolvedValue([[null, JSON.stringify(playlistStats[0])]]),
-	} as unknown as ReturnType<typeof redis.pipeline>;
-
-	mockedRedis.pipeline.mockReturnValue(mockPipeline);
-
-	const promise = statsCommandHandler(interaction);
-
-	await promise;
-
-	const editReplyCall = vi.mocked(interaction.editReply).mock.calls[0];
-	const callArg = editReplyCall?.[0];
-
-	if (isObject(callArg) && 'embeds' in callArg) {
-		const embed = (callArg as { embeds: EmbedBuilder[] }).embeds[0];
-
-		expect(embed.data.description).toContain(
-			'**Top 10 Most Enqueued Playlists**:\n*empty*',
-		);
-	}
+	expect(getEmbedDescription(interaction)).toContain(
+		'**Top 10 Most Enqueued Playlists**:\n*empty*',
+	);
 });
 
 it('should skip tracks requested by bot', async () => {
 	const interaction = createMockInteraction();
 
-	const trackStats = [
-		{
-			title: 'Bot Auto-played Song',
-			author: 'System',
-			requestedById: 'bot-id-12345',
-		},
-	];
+	setupMockStreams([['key1']]);
+	mockPipelineResults([
+		[
+			null,
+			JSON.stringify({
+				title: 'Bot Auto-played Song',
+				author: 'System',
+				requestedById: 'bot-id-12345',
+			}),
+		],
+	]);
 
-	setupMockStreams(['key1']);
+	await statsCommandHandler(interaction);
 
-	const mockPipeline = {
-		get: vi.fn().mockReturnThis(),
-		exec: vi.fn().mockResolvedValue([[null, JSON.stringify(trackStats[0])]]),
-	} as unknown as ReturnType<typeof redis.pipeline>;
+	const description = getEmbedDescription(interaction);
 
-	mockedRedis.pipeline.mockReturnValue(mockPipeline);
-
-	const promise = statsCommandHandler(interaction);
-
-	await promise;
-
-	const editReplyCall = vi.mocked(interaction.editReply).mock.calls[0];
-	const callArg = editReplyCall?.[0];
-
-	if (isObject(callArg) && 'embeds' in callArg) {
-		const embed = (callArg as { embeds: EmbedBuilder[] }).embeds[0];
-
-		expect(embed.data.description).toContain('*empty*');
-		expect(embed.data.description).toContain('**Total Played**: 0');
-	}
+	expect(description).toContain('*empty*');
+	expect(description).toContain('**Total Played**: 0');
 });

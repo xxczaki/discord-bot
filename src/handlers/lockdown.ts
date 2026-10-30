@@ -1,6 +1,6 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
-import LockdownManager from '../utils/lockdown';
-import { setPresence } from '../utils/presenceManager';
+import LockdownManager from '../utils/lockdown.ts';
+import { setPresence } from '../utils/presenceManager.ts';
 
 export default async function lockdownCommandHandler(
 	interaction: ChatInputCommandInteraction,
