@@ -255,7 +255,7 @@ importers:
         specifier: 'catalog:'
         version: 5.0.5(vitest@5.0.5)
       ai:
-        specifier: ^7.0.155
+        specifier: ^7.0.156
         version: 7.0.159(zod@4.6.7)
       esbuild:
         specifier: ^0.28.2
