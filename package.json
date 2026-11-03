@@ -18,7 +18,7 @@
 	},
 	"packageManager": "pnpm@12.16.1+sha512.091d1dee7927575661b25dab3c2ae31cafc1c54d6b71ed6a6600cf0c1cb10434a447eae14015f1b23e2e6bedeed79df94a932e2164d2832280dce3fb32f656d1",
 	"dependencies": {
-		"@ai-sdk/mistral": "^4.0.74",
+		"@ai-sdk/mistral": "^4.0.75",
 		"@discord-player/extractor": "^7.2.0",
 		"@sentry/node": "^11.10.0",
 		"bufferutil": "^4.1.0",
@@ -32,7 +32,7 @@
 		"zlib-sync": "^0.1.10"
 	},
 	"devDependencies": {
-		"@ai-sdk/openai": "^4.0.104",
+		"@ai-sdk/openai": "^4.0.105",
 		"@biomejs/biome": "catalog:",
 		"@changesets/cli": "^3.0.3",
 		"@discordjs/rest": "^2.6.3",
@@ -40,7 +40,7 @@
 		"@snazzah/davey": "^0.1.12",
 		"@types/node": "catalog:",
 		"@vitest/coverage-v8": "catalog:",
-		"ai": "^7.0.156",
+		"ai": "^7.0.157",
 		"esbuild": "^0.28.2",
 		"esbuild-plugin-pino": "2.3.3",
 		"fuse.js": "^7.5.0",
