@@ -215,8 +215,8 @@ importers:
         specifier: ^1.1.9
         version: 1.1.9(discord-player@7.2.0)
       discord.js:
-        specifier: ^14.27.0
-        version: 14.27.0(bufferutil@4.1.0)
+        specifier: ^14.28.0
+        version: 14.28.0(bufferutil@4.1.0)
       ioredis:
         specifier: ^6.0.0
         version: 6.0.0(supports-color@8.1.1)
@@ -589,8 +589,8 @@ packages:
   '@discord-player/utils@7.2.0':
     resolution: {integrity: sha512-07zpzOXbSKIKwwZxKdj1UznB1MYHFZjrC3mZeggreY21yJzNE+MYeH2ueDRH8V4f9tOR8KGustJc36Qza6+uMQ==}
 
-  '@discordjs/builders@1.14.1':
-    resolution: {integrity: sha512-gSKkhXLqs96TCzk66VZuHHl8z2bQMJFGwrXC0f33ngK+FLNau4hU1PYny3DNJfNdSH+gVMzE85/d5FQ2BpcNwQ==}
+  '@discordjs/builders@1.15.0':
+    resolution: {integrity: sha512-AifaDWTw6WUDhKBn8E6mwwoyjDAcfsYq+ZE0nKSu1dMH1NLR22D3hGkNx+ctEv8NqHEHdAZnP5REteHDmn1lkA==}
     engines: {node: '>=16.11.0'}
 
   '@discordjs/collection@1.5.3':
@@ -1944,8 +1944,8 @@ packages:
   discord-voip@7.2.0:
     resolution: {integrity: sha512-bteX8XrSSqltsjV13jd6uTr5qVZ+c8yjnx2hV/AhvxgA/9qJ2i43Hkrs4qisw/o94s23Ni3tXXQohvu0EzB4+w==}
 
-  discord.js@14.27.0:
-    resolution: {integrity: sha512-qHbFlFG2N7y3LjPySYsL6A1+BnX6bkTVgo842EX0CqVPk/KTMwZkojPHEXKsQUpWZNyz5BISNHK1cPpQw0+m4A==}
+  discord.js@14.28.0:
+    resolution: {integrity: sha512-l/mIllvqvWQDWqa8NPw7b2AU2tM9oPWiWR6Jk54DTNlUdyArXbi+Y0m0sLIUtQ9O0x+tyVpDMCG6K6Kf0yeAWQ==}
     engines: {node: '>=18'}
 
   dom-serializer@2.0.0:
@@ -3279,7 +3279,7 @@ snapshots:
     dependencies:
       '@discordjs/collection': 1.5.3
 
-  '@discordjs/builders@1.14.1':
+  '@discordjs/builders@1.15.0':
     dependencies:
       '@discordjs/formatters': 0.6.2
       '@discordjs/util': 1.2.0
@@ -4208,7 +4208,7 @@ snapshots:
       '@web-scrobbler/metadata-filter': 3.2.0
       discord-api-types: 0.38.47
       discord-voip: 7.2.0(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(bufferutil@4.1.0)(postcss@8.5.26)(supports-color@8.1.1)(tsx@4.23.15)(yaml@2.9.0)
-      discord.js: 14.27.0(bufferutil@4.1.0)
+      discord.js: 14.28.0(bufferutil@4.1.0)
       mediaplex: 1.0.0
       undici: 8.3.0
     transitivePeerDependencies:
@@ -4249,9 +4249,9 @@ snapshots:
       - utf-8-validate
       - yaml
 
-  discord.js@14.27.0(bufferutil@4.1.0):
+  discord.js@14.28.0(bufferutil@4.1.0):
     dependencies:
-      '@discordjs/builders': 1.14.1
+      '@discordjs/builders': 1.15.0
       '@discordjs/collection': 1.5.3
       '@discordjs/formatters': 0.6.2
       '@discordjs/rest': 2.6.3
