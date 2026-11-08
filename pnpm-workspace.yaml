@@ -39,7 +39,7 @@ packageExtensions:
   discord-voip:
     dependencies:
       '@discord-player/equalizer': '*'
-      '@snazzah/davey': '*'
+      '@snazzah/davey': '^0.1.12'
       discord-api-types: '*'
       ws: '*'
 patchedDependencies:
