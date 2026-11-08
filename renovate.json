@@ -7,6 +7,11 @@
 			"description": "Group Vercel AI SDK packages so @ai-sdk/provider always resolves to a single version",
 			"matchPackageNames": ["ai", "@ai-sdk/**"],
 			"groupName": "Vercel AI SDK"
+		},
+		{
+			"description": "discord-voip 7.2.0 does not call prepareTransition(), which @snazzah/davey 0.2 requires, so voice audio is never encrypted",
+			"matchPackageNames": ["@snazzah/davey"],
+			"allowedVersions": "<0.2.0"
 		}
 	]
 }
