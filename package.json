@@ -20,7 +20,7 @@
 	"dependencies": {
 		"@ai-sdk/mistral": "^4.0.80",
 		"@discord-player/extractor": "^7.2.0",
-		"@sentry/node": "^11.10.0",
+		"@sentry/node": "^11.11.0",
 		"bufferutil": "^4.1.0",
 		"discord-player": "^7.2.0",
 		"discord-player-googlevideo": "workspace:*",
@@ -36,7 +36,7 @@
 		"@biomejs/biome": "catalog:",
 		"@changesets/cli": "^3.0.3",
 		"@discordjs/rest": "^2.6.3",
-		"@sentry/esbuild-plugin": "^11.10.0",
+		"@sentry/esbuild-plugin": "^11.11.0",
 		"@snazzah/davey": "^0.1.12",
 		"@types/node": "catalog:",
 		"@vitest/coverage-v8": "catalog:",
