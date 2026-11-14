@@ -28,7 +28,7 @@
 		"discord.js": "^14.28.0",
 		"ioredis": "^6.0.0",
 		"pino": "^10.4.0",
-		"sodium-native": "^5.2.0",
+		"sodium-native": "^5.2.1",
 		"zlib-sync": "^0.1.10"
 	},
 	"devDependencies": {
