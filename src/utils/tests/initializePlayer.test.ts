@@ -1,5 +1,5 @@
 import { createReadStream, createWriteStream } from 'node:fs';
-import { stat } from 'node:fs/promises';
+import { rename, stat, unlink } from 'node:fs/promises';
 import { Readable } from 'node:stream';
 import { Client } from 'discord.js';
 import {
@@ -110,6 +110,8 @@ vi.mock('node:fs', () => ({
 vi.mock('node:fs/promises', () => ({
 	stat: vi.fn(),
 	readdir: vi.fn().mockResolvedValue([]),
+	rename: vi.fn().mockResolvedValue(undefined),
+	unlink: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock('../RedisQueryCache', () => ({
@@ -132,6 +134,7 @@ const mockOpusCacheManagerInstance = vi.hoisted(() => ({
 }));
 
 vi.mock('../OpusCacheManager', () => ({
+	PARTIAL_CACHE_FILE_SUFFIX: '.part',
 	OpusCacheManager: {
 		initialize: vi.fn(() => mockOpusCacheManagerInstance),
 		getInstance: vi.fn(() => mockOpusCacheManagerInstance),
@@ -489,7 +492,7 @@ describe('onStreamExtracted callback', () => {
 		const result = await onStreamExtractedCallback?.(mockReadable, mockTrack);
 
 		expect(createWriteStream).toHaveBeenCalledWith(
-			'/mock/cache/path/test_track_artist_180.opus',
+			'/mock/cache/path/test_track_artist_180.opus.part',
 		);
 		expect(mockInterceptor.interceptors.add).toHaveBeenCalledWith(
 			mockWriteStream,
@@ -705,7 +708,7 @@ describe('onStreamExtracted callback', () => {
 		expect(closeCallback).toBeDefined();
 	});
 
-	it('should clean up active writes on writeStream close', async () => {
+	it('should discard the partial file when writeStream closes before the source ended', async () => {
 		const mockWriteStream: MockWriteStream = {
 			on: vi.fn(),
 			destroy: vi.fn(),
@@ -745,7 +748,11 @@ describe('onStreamExtracted callback', () => {
 			closeCallback();
 		}
 
-		expect(mockOpusCacheManagerInstance.addEntry).toHaveBeenCalled();
+		expect(mockOpusCacheManagerInstance.addEntry).not.toHaveBeenCalled();
+		expect(rename).not.toHaveBeenCalled();
+		expect(unlink).toHaveBeenCalledWith(
+			'/mock/cache/path/test_track_artist_180.opus.part',
+		);
 	});
 
 	it('should fallback on createWriteStream error for non-Readable stream', async () => {
@@ -951,5 +958,111 @@ describe('onStreamExtracted callback', () => {
 		}
 
 		expect(mockOpusCacheManagerInstance.deleteEntry).not.toHaveBeenCalled();
+	});
+
+	it('should rename the partial file and index it after the source ended', async () => {
+		const mockWriteStream: MockWriteStream = {
+			on: vi.fn(),
+			destroy: vi.fn(),
+			end: vi.fn(),
+			destroyed: false,
+		};
+
+		vi.mocked(createWriteStream).mockReturnValue(
+			mockWriteStream as unknown as import('fs').WriteStream,
+		);
+
+		await getInitializedPlayer(mockClient);
+
+		const mockReadable = new Readable();
+		mockReadable.pipe = vi.fn();
+
+		const mockOn = vi.fn();
+		mockReadable.on = mockOn;
+
+		const mockTrack: MockTrack = {
+			url: 'https://example.com/track',
+			title: 'Test Track',
+			cleanTitle: 'Test Track',
+			author: 'Artist',
+			durationMS: 180000,
+			setMetadata: vi.fn(),
+		};
+
+		await onStreamExtractedCallback?.(mockReadable, mockTrack);
+
+		const endCallback = mockOn.mock.calls.find(
+			(call: unknown[]) => call[0] === 'end',
+		)?.[1] as (() => void) | undefined;
+		const closeCallback = mockWriteStream.on.mock.calls.find(
+			(call: unknown[]) => call[0] === 'close',
+		)?.[1] as (() => void) | undefined;
+
+		endCallback?.();
+		closeCallback?.();
+
+		await vi.waitFor(() => {
+			expect(mockOpusCacheManagerInstance.addEntry).toHaveBeenCalledWith({
+				filename: 'test_track_artist_180.opus',
+				title: 'Test Track',
+				author: 'Artist',
+				durationSeconds: 180,
+			});
+		});
+		expect(rename).toHaveBeenCalledWith(
+			'/mock/cache/path/test_track_artist_180.opus.part',
+			'/mock/cache/path/test_track_artist_180.opus',
+		);
+	});
+
+	it('should not index the file when renaming the partial file fails', async () => {
+		vi.mocked(rename).mockRejectedValueOnce(new Error('EXDEV'));
+
+		const mockWriteStream: MockWriteStream = {
+			on: vi.fn(),
+			destroy: vi.fn(),
+			end: vi.fn(),
+			destroyed: false,
+		};
+
+		vi.mocked(createWriteStream).mockReturnValue(
+			mockWriteStream as unknown as import('fs').WriteStream,
+		);
+
+		await getInitializedPlayer(mockClient);
+
+		const mockReadable = new Readable();
+		mockReadable.pipe = vi.fn();
+
+		const mockOn = vi.fn();
+		mockReadable.on = mockOn;
+
+		const mockTrack: MockTrack = {
+			url: 'https://example.com/track',
+			title: 'Test Track',
+			cleanTitle: 'Test Track',
+			author: 'Artist',
+			durationMS: 180000,
+			setMetadata: vi.fn(),
+		};
+
+		await onStreamExtractedCallback?.(mockReadable, mockTrack);
+
+		const endCallback = mockOn.mock.calls.find(
+			(call: unknown[]) => call[0] === 'end',
+		)?.[1] as (() => void) | undefined;
+		const closeCallback = mockWriteStream.on.mock.calls.find(
+			(call: unknown[]) => call[0] === 'close',
+		)?.[1] as (() => void) | undefined;
+
+		endCallback?.();
+		closeCallback?.();
+
+		await vi.waitFor(() => {
+			expect(unlink).toHaveBeenCalledWith(
+				'/mock/cache/path/test_track_artist_180.opus.part',
+			);
+		});
+		expect(mockOpusCacheManagerInstance.addEntry).not.toHaveBeenCalled();
 	});
 });

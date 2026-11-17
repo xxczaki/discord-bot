@@ -33,6 +33,8 @@ export interface TrackMetadata {
 	durationMS: number;
 }
 
+export const PARTIAL_CACHE_FILE_SUFFIX = '.part';
+
 const FUSE_THRESHOLD = 0.6;
 const DURATION_TOLERANCE_SECONDS = 5;
 const MAX_TITLE_LENGTH = 100;
@@ -114,6 +116,15 @@ export class OpusCacheManager {
 		try {
 			const files = await readdir(this.#cacheDirectory);
 			const opusFiles = files.filter((file) => file.endsWith('.opus'));
+			const partialFiles = files.filter((file) =>
+				file.endsWith(PARTIAL_CACHE_FILE_SUFFIX),
+			);
+
+			await Promise.all(
+				partialFiles.map((file) =>
+					unlink(this.getFilePath(file)).catch(() => {}),
+				),
+			);
 
 			for (const filename of opusFiles) {
 				const parsed = this.#parseFilename(filename);
