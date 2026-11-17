@@ -1,5 +1,5 @@
 import { createReadStream, createWriteStream } from 'node:fs';
-import { stat } from 'node:fs/promises';
+import { rename, stat, unlink } from 'node:fs/promises';
 import { Readable } from 'node:stream';
 import { SoundCloudExtractor } from '@discord-player/extractor';
 import type { Client } from 'discord.js';
@@ -15,7 +15,10 @@ import { SpotifyExtractor } from 'discord-player-spotify';
 import { YOUTUBE_ENABLED } from '../constants/sourceConfig.ts';
 import defineCustomFilters from './defineCustomFilters.ts';
 import logger from './logger.ts';
-import { OpusCacheManager } from './OpusCacheManager.ts';
+import {
+	OpusCacheManager,
+	PARTIAL_CACHE_FILE_SUFFIX,
+} from './OpusCacheManager.ts';
 import { RedisQueryCache } from './RedisQueryCache.ts';
 import redis from './redis.ts';
 
@@ -163,10 +166,12 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 				cacheFilename: filename,
 			});
 
+			const partialFilePath = `${filePath}${PARTIAL_CACHE_FILE_SUFFIX}`;
+
 			try {
 				activeWrites.add(filePath);
 
-				const writeStream = createWriteStream(filePath);
+				const writeStream = createWriteStream(partialFilePath);
 
 				let cleanedUp = false;
 				let streamEndedNormally = false;
@@ -184,7 +189,25 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 					/* v8 ignore stop */
 
 					activeWrites.delete(filePath);
-					void opusCacheManager.deleteEntry(filename);
+					void unlink(partialFilePath).catch(() => {});
+				};
+
+				const commit = async () => {
+					try {
+						await rename(partialFilePath, filePath);
+
+						opusCacheManager.addEntry({
+							filename,
+							title: trackMetadata.title,
+							author: trackMetadata.author,
+							durationSeconds: Math.round(trackMetadata.durationMS / 1000),
+						});
+					} catch (error) {
+						logger.error(error, 'Failed to commit Opus cache file');
+						void unlink(partialFilePath).catch(() => {});
+					} finally {
+						activeWrites.delete(filePath);
+					}
 				};
 
 				writeStream.on('error', (error) => {
@@ -195,14 +218,12 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 				writeStream.on('close', () => {
 					if (cleanedUp) return;
 
-					activeWrites.delete(filePath);
+					if (!streamEndedNormally) {
+						cleanup();
+						return;
+					}
 
-					opusCacheManager.addEntry({
-						filename,
-						title: trackMetadata.title,
-						author: trackMetadata.author,
-						durationSeconds: Math.round(trackMetadata.durationMS / 1000),
-					});
+					void commit();
 				});
 
 				readable.on('error', () => {

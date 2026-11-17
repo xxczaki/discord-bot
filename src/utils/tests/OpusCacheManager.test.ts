@@ -56,6 +56,34 @@ describe('OpusCacheManager', () => {
 			expect(mockedReaddir).toHaveBeenCalledWith(MOCK_CACHE_DIRECTORY);
 			expect(opusCacheManager.entryCount).toBe(2);
 		});
+
+		it('should delete leftover `.part` files and not index them', async () => {
+			mockedReaddir.mockResolvedValue([
+				'bohemian_rhapsody_queen_354.opus',
+				'falling_forever_darkwaves_283.opus.part',
+			] as unknown as Awaited<ReturnType<typeof readdir>>);
+			mockedUnlink.mockResolvedValue(undefined);
+
+			await opusCacheManager.scan();
+
+			expect(mockedUnlink).toHaveBeenCalledWith(
+				join(MOCK_CACHE_DIRECTORY, 'falling_forever_darkwaves_283.opus.part'),
+			);
+			expect(mockedUnlink).toHaveBeenCalledTimes(1);
+			expect(opusCacheManager.entryCount).toBe(1);
+		});
+
+		it('should keep scanning when deleting a `.part` file fails', async () => {
+			mockedReaddir.mockResolvedValue([
+				'bohemian_rhapsody_queen_354.opus',
+				'falling_forever_darkwaves_283.opus.part',
+			] as unknown as Awaited<ReturnType<typeof readdir>>);
+			mockedUnlink.mockRejectedValue(new Error('EACCES'));
+
+			await opusCacheManager.scan();
+
+			expect(opusCacheManager.entryCount).toBe(1);
+		});
 	});
 
 	describe('findMatch', () => {
