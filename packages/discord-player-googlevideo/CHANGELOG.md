@@ -1,5 +1,11 @@
 # discord-player-googlevideo
 
+## 0.2.8
+
+### Patch Changes
+
+- 50139de: Update dependencies
+
 ## 0.2.7
 
 ### Patch Changes
