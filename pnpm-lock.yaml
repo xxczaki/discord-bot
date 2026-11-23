@@ -233,8 +233,8 @@ importers:
         specifier: ^10.4.0
         version: 10.4.0
       sodium-native:
-        specifier: ^5.2.1
-        version: 5.2.1(bare-events@2.8.3)(bare-url@2.4.3)
+        specifier: ^5.2.2
+        version: 5.2.2(bare-events@2.8.3)(bare-url@2.4.3)
       zlib-sync:
         specifier: ^0.1.10
         version: 0.1.10
@@ -2658,8 +2658,8 @@ packages:
   sisteransi@1.0.5:
     resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
 
-  sodium-native@5.2.1:
-    resolution: {integrity: sha512-F/8A2cvcWF1cxFa8Ipv39fWKx/DMmAfOXQETF0b4X2sdBtgZlR+E0Lqj3cFeZU9Z78Au20TFfJc2MUcqBR9eJA==}
+  sodium-native@5.2.2:
+    resolution: {integrity: sha512-SYlJY+iPXoVJKxYjiuQtItBDseqMmeVDWCnda18ogPfg4oOlDjKnwXtKJBYgF3l6xwX2rxT1GbgV0BdTadSjoA==}
     engines: {bare: '>=1.16.0'}
 
   sonic-boom@4.2.1:
@@ -4989,7 +4989,7 @@ snapshots:
 
   sisteransi@1.0.5: {}
 
-  sodium-native@5.2.1(bare-events@2.8.3)(bare-url@2.4.3):
+  sodium-native@5.2.2(bare-events@2.8.3)(bare-url@2.4.3):
     dependencies:
       bare-assert: 1.2.0(bare-events@2.8.3)
       require-addon: 1.2.0(bare-url@2.4.3)
