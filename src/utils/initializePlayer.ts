@@ -14,6 +14,7 @@ import { YoutubeSabrExtractor } from 'discord-player-googlevideo';
 import { SpotifyExtractor } from 'discord-player-spotify';
 import { YOUTUBE_ENABLED } from '../constants/sourceConfig.ts';
 import defineCustomFilters from './defineCustomFilters.ts';
+import isObject from './isObject.ts';
 import logger from './logger.ts';
 import {
 	OpusCacheManager,
@@ -218,7 +219,10 @@ export default async function getInitializedPlayer(client: Client<boolean>) {
 				writeStream.on('close', () => {
 					if (cleanedUp) return;
 
-					if (!streamEndedNormally) {
+					const hadStreamError =
+						isObject(track.metadata) && 'streamError' in track.metadata;
+
+					if (!streamEndedNormally || hadStreamError) {
 						cleanup();
 						return;
 					}

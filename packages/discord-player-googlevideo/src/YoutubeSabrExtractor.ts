@@ -28,6 +28,10 @@ const YOUTUBE_PLAYLIST_REGEX =
 	/youtube\.com\/(?:watch|playlist).*[&?]list=([a-zA-Z0-9_-]{34})/;
 const YOUTUBE_DOMAIN_REGEX = /^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\//;
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === 'object' && value !== null;
+}
+
 type VideoData = {
 	id: string;
 	title?: { text?: string };
@@ -167,17 +171,21 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 		}
 
 		const outputStream = new PassThrough();
-		/* v8 ignore start */
-		this.#startStream(videoId, outputStream).catch((error) => {
+		const failStream = (error: unknown) => {
 			console.error('[YoutubeSabrExtractor] Stream error:', error);
-			if (track.metadata && typeof track.metadata === 'object') {
-				(track.metadata as Record<string, unknown>).streamError = error;
-			}
+
+			track.setMetadata({
+				...(isRecord(track.metadata) ? track.metadata : {}),
+				streamError: error,
+			});
 
 			if (!outputStream.destroyed) {
 				outputStream.end();
 			}
-		});
+		};
+
+		/* v8 ignore start */
+		this.#startStream(videoId, outputStream, failStream).catch(failStream);
 		/* v8 ignore stop */
 
 		return outputStream;
@@ -187,6 +195,7 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 	async #startStream(
 		videoId: string,
 		outputStream: PassThrough,
+		failStream: (error: unknown) => void,
 	): Promise<void> {
 		const playerResponse = await this.#makePlayerRequest(videoId);
 
@@ -265,11 +274,8 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 		});
 
 		nodeStream.on('error', (error) => {
-			console.error('[YoutubeSabrExtractor] Stream error:', error);
 			serverAbrStream.removeAllListeners();
-			if (!outputStream.destroyed) {
-				outputStream.end();
-			}
+			failStream(error);
 		});
 	}
 	/* v8 ignore stop */
