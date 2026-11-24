@@ -60,11 +60,6 @@ spec:
               secretKeyRef:
                 name: {{ .Values.secrets.spotifyClientSecret.name }}
                 key: {{ .Values.secrets.spotifyClientSecret.key }}
-          - name: OPENAI_API_KEY
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.secrets.openAiApiKey.name }}
-                key: {{ .Values.secrets.openAiApiKey.key }}
           {{- if .Values.env.spotifyMarket }}
           - name: SPOTIFY_MARKET
             value: "{{ .Values.env.spotifyMarket }}"
