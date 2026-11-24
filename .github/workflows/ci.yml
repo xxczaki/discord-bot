@@ -6,21 +6,31 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
+permissions: {}
+
 jobs:
   lint:
     name: Lint with Biome CLI
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: biomejs/setup-biome@v2
       - run: biome ci ./src
 
   test:
     name: Run Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -52,9 +62,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: [lint, test]
     permissions:
-      id-token: write
       contents: read
-      attestations: write
       packages: write
     name: Build image (${{ matrix.platform }})
     strategy:
@@ -73,6 +81,8 @@ jobs:
         run: echo "PLATFORM_PAIR=${PLATFORM//\//-}" >> "$GITHUB_ENV"
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - name: Login to Docker Hub
         uses: docker/login-action@v4
         with:
@@ -129,6 +139,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write
+      attestations: write
     name: Push multi-arch manifest
     runs-on: ubuntu-latest
     steps:
@@ -189,51 +201,96 @@ jobs:
             echo "::error::Could not inspect ${image} after 5 attempts"
             exit 1
           done
+      - name: Resolve index digest
+        id: index
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          digest=$(docker buildx imagetools inspect "ghcr.io/xxczaki/discord-bot:${VERSION}" --format '{{json .Manifest}}' | jq --raw-output .digest)
+          echo "digest=${digest}" >> "$GITHUB_OUTPUT"
+      - name: Attest provenance (GHCR)
+        uses: actions/attest@v4
+        with:
+          subject-name: ghcr.io/xxczaki/discord-bot
+          subject-digest: ${{ steps.index.outputs.digest }}
+          push-to-registry: true
+          create-storage-record: false
+      - name: Attest provenance (Docker Hub)
+        uses: actions/attest@v4
+        with:
+          subject-name: docker.io/xxczaki/discord-bot
+          subject-digest: ${{ steps.index.outputs.digest }}
+          push-to-registry: true
+          create-storage-record: false
 
   promote:
     needs: [merge]
     name: Deploy to homelab
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+          path: discord-bot
       - name: Checkout homelab repo
         uses: actions/checkout@v7
         with:
           repository: xxczaki/homelab
-          token: ${{ secrets.GH_PAT }}
+          persist-credentials: false
           path: homelab
-      - name: Pin commit in Argo CD Application
+      - name: Check deploy source
+        id: source
         working-directory: homelab
         env:
           APPLICATION_FILE: apps/discord-bot/application.yaml
-          COMMIT_SHA: ${{ github.sha }}
         run: |
           source_path=$(yq 'select(.kind == "Application") | .spec.source.path' "$APPLICATION_FILE")
           if [ "$source_path" != "deploy/chart" ]; then
             echo "::notice::Skipping homelab deploy: ${APPLICATION_FILE} uses source path '${source_path}', not 'deploy/chart'"
-            exit 0
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
           fi
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
+      - name: Create GitHub App token
+        if: steps.source.outputs.enabled == 'true'
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.GITOPS_APP_CLIENT_ID }}
+          private-key: ${{ secrets.GITOPS_APP_PRIVATE_KEY }}
+          repositories: homelab
+          permission-contents: write
+      - name: Pin commit in Argo CD Application
+        if: steps.source.outputs.enabled == 'true'
+        working-directory: homelab
+        env:
+          APPLICATION_FILE: apps/discord-bot/application.yaml
+          COMMIT_SHA: ${{ github.sha }}
+          COMMIT_SCRIPT: ${{ github.workspace }}/discord-bot/.github/scripts/commit-via-api.sh
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
           apply_change() {
             yq -i '
               (select(.kind == "Application") | .spec.source.targetRevision) = strenv(COMMIT_SHA) |
               (select(.kind == "Application") | .spec.source.helm.valuesObject.image.tag) = strenv(COMMIT_SHA)
             ' "$APPLICATION_FILE"
-            if git diff --quiet; then
+            git add "$APPLICATION_FILE"
+            if git diff --cached --quiet; then
               echo "Homelab already deploys ${COMMIT_SHA}"
               return 1
             fi
-            git commit --quiet --all --message "chore(discord-bot): deploy ${COMMIT_SHA::7}"
           }
 
           apply_change || exit 0
           for attempt in 1 2 3 4 5; do
-            if git push origin HEAD:main; then
+            if "$COMMIT_SCRIPT" xxczaki/homelab main "chore(discord-bot): deploy ${COMMIT_SHA::7}"; then
               exit 0
             fi
-            echo "Push attempt ${attempt} failed, retrying on top of the latest main"
+            echo "Commit attempt ${attempt} failed, retrying on top of the latest main"
             sleep $((attempt * 2))
             git fetch --quiet origin main
             git reset --quiet --hard origin/main
@@ -246,39 +303,38 @@ jobs:
     needs: [merge]
     name: Publish Helm chart
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v7
         with:
+          persist-credentials: false
           path: discord-bot
       - name: Checkout charts repo
         uses: actions/checkout@v7
         with:
           repository: xxczaki/charts
-          token: ${{ secrets.GH_PAT }}
+          persist-credentials: false
           fetch-tags: true
           path: charts-repo
-      - name: Import GPG key
-        id: import-gpg
-        uses: crazy-max/ghaction-import-gpg@v7
+      - name: Create GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v3
         with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.PASSPHRASE }}
-          git_user_signingkey: true
-          git_commit_gpgsign: true
-          workdir: charts-repo
+          client-id: ${{ vars.GITOPS_APP_CLIENT_ID }}
+          private-key: ${{ secrets.GITOPS_APP_PRIVATE_KEY }}
+          repositories: charts
+          permission-contents: write
       - name: Update and push chart
         working-directory: charts-repo
         env:
           SOURCE_CHART: ${{ github.workspace }}/discord-bot/deploy/chart/
           TARGET_CHART: charts/discord-bot
           COMMIT_SHA: ${{ github.sha }}
-          GIT_USER_NAME: ${{ steps.import-gpg.outputs.name }}
-          GIT_USER_EMAIL: ${{ steps.import-gpg.outputs.email }}
+          COMMIT_SCRIPT: ${{ github.workspace }}/discord-bot/.github/scripts/commit-via-api.sh
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          git config user.name "$GIT_USER_NAME"
-          git config user.email "$GIT_USER_EMAIL"
-
           apply_change() {
             published_version=$(yq '.version' "$TARGET_CHART/Chart.yaml")
             latest_tag=$(git tag --list 'discord-bot-*' --sort=-version:refname | head -1)
@@ -298,15 +354,14 @@ jobs:
               return 1
             fi
             echo "Publishing discord-bot chart ${NEXT_VERSION}"
-            git commit --quiet --message "chore: update discord-bot chart"
           }
 
           apply_change || exit 0
           for attempt in 1 2 3 4 5; do
-            if git push origin HEAD:main; then
+            if "$COMMIT_SCRIPT" xxczaki/charts main "chore: update discord-bot chart"; then
               exit 0
             fi
-            echo "Push attempt ${attempt} failed, retrying on top of the latest main"
+            echo "Commit attempt ${attempt} failed, retrying on top of the latest main"
             sleep $((attempt * 2))
             git fetch --quiet --tags origin main
             git reset --quiet --hard origin/main
