@@ -618,6 +618,59 @@ describe('YoutubeSabrExtractor', () => {
 
 			expect(stream).toBeInstanceOf(PassThrough);
 		});
+
+		it('should set `streamError` and end the output when SABR fails mid-stream', async () => {
+			vi.spyOn(console, 'error').mockImplementation(() => {});
+
+			mockInnertube.session.player.decipher.mockResolvedValue(
+				'https://deciphered.com/stream',
+			);
+			mockNavigationEndpointCall.mockResolvedValue({
+				streaming_data: {
+					server_abr_streaming_url: 'https://example.com/stream',
+					adaptive_formats: [{ itag: 251 }],
+				},
+				player_config: {
+					media_common_config: {
+						media_ustreamer_request_config: {
+							video_playback_ustreamer_config: 'config-data',
+						},
+					},
+				},
+			} as never);
+
+			const sabrError = new Error(
+				'Streaming data reload requested but no handler was found',
+			);
+
+			mockSabrStream.start.mockReturnValue({
+				audioStream: new ReadableStream({
+					start(controller) {
+						controller.enqueue(new Uint8Array([1, 2, 3]));
+						setTimeout(() => controller.error(sabrError), 10);
+					},
+				}),
+			});
+
+			const setMetadata = vi.fn();
+			const stream = await extractor.stream({
+				url: 'https://youtube.com/watch?v=dQw4w9WgXcQ',
+				metadata: { requestedById: '123' },
+				setMetadata,
+			} as unknown as Track);
+
+			stream.resume();
+
+			await vi.waitFor(() => {
+				expect(setMetadata).toHaveBeenCalledWith({
+					requestedById: '123',
+					streamError: sabrError,
+				});
+			});
+			await vi.waitFor(() => {
+				expect(stream.writableEnded).toBe(true);
+			});
+		});
 	});
 
 	describe('getRelatedTracks', () => {
