@@ -203,7 +203,7 @@ importers:
   .:
     dependencies:
       '@ai-sdk/mistral':
-        specifier: ^4.0.88
+        specifier: ^4.0.89
         version: 4.0.89(zod@4.6.7)
       '@discord-player/extractor':
         specifier: ^7.2.0
@@ -240,7 +240,7 @@ importers:
         version: 0.1.10
     devDependencies:
       '@ai-sdk/openai':
-        specifier: ^4.0.121
+        specifier: ^4.0.122
         version: 4.0.122(zod@4.6.7)
       '@biomejs/biome':
         specifier: 'catalog:'
@@ -264,7 +264,7 @@ importers:
         specifier: 'catalog:'
         version: 5.1.1(vitest@5.1.1)
       ai:
-        specifier: ^7.0.177
+        specifier: ^7.0.178
         version: 7.0.178(zod@4.6.7)
       esbuild:
         specifier: ^0.28.2
