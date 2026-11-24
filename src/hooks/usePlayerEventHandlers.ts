@@ -24,6 +24,7 @@ import type { QueueMetadata } from '../types/QueueMetadata.ts';
 import createSmartInteractionHandler from '../utils/createSmartInteractionHandler.ts';
 import createTrackEmbed from '../utils/createTrackEmbed.ts';
 import determineSearchEngine from '../utils/determineSearchEngine.ts';
+import hasStreamError from '../utils/hasStreamError.ts';
 import isObject from '../utils/isObject.ts';
 import { OpusCacheManager } from '../utils/OpusCacheManager.ts';
 import { resetPresence, setPresence } from '../utils/presenceManager.ts';
@@ -323,8 +324,7 @@ export default function usePlayerEventHandlers(
 
 		nowPlayingMessages.delete(guildId);
 
-		const hadStreamError =
-			isObject(track.metadata) && 'streamError' in track.metadata;
+		const hadStreamError = hasStreamError(track);
 
 		const finishedEmbed = await createTrackEmbed(
 			track,

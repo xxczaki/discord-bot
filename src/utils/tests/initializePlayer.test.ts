@@ -19,6 +19,7 @@ interface MockTrack {
 	author: string;
 	durationMS: number;
 	metadata?: Record<string, unknown>;
+	bridgedTrack?: { metadata: Record<string, unknown> };
 	setMetadata: ReturnType<typeof vi.fn>;
 }
 
@@ -1047,6 +1048,58 @@ describe('onStreamExtracted callback', () => {
 		await onStreamExtractedCallback?.(mockReadable, mockTrack);
 
 		mockTrack.metadata = { streamError: new Error('SABR failed') };
+
+		const endCallback = mockOn.mock.calls.find(
+			(call: unknown[]) => call[0] === 'end',
+		)?.[1] as (() => void) | undefined;
+		const closeCallback = mockWriteStream.on.mock.calls.find(
+			(call: unknown[]) => call[0] === 'close',
+		)?.[1] as (() => void) | undefined;
+
+		endCallback?.();
+		closeCallback?.();
+
+		expect(rename).not.toHaveBeenCalled();
+		expect(mockOpusCacheManagerInstance.addEntry).not.toHaveBeenCalled();
+		expect(unlink).toHaveBeenCalledWith(
+			'/mock/cache/path/test_track_artist_180.opus.part',
+		);
+	});
+
+	it('should discard the partial file when the bridged track has a `streamError`', async () => {
+		const mockWriteStream: MockWriteStream = {
+			on: vi.fn(),
+			destroy: vi.fn(),
+			end: vi.fn(),
+			destroyed: false,
+		};
+
+		vi.mocked(createWriteStream).mockReturnValue(
+			mockWriteStream as unknown as import('fs').WriteStream,
+		);
+
+		await getInitializedPlayer(mockClient);
+
+		const mockReadable = new Readable();
+		mockReadable.pipe = vi.fn();
+
+		const mockOn = vi.fn();
+		mockReadable.on = mockOn;
+
+		const mockTrack: MockTrack = {
+			url: 'https://example.com/track',
+			title: 'Test Track',
+			cleanTitle: 'Test Track',
+			author: 'Artist',
+			durationMS: 180000,
+			setMetadata: vi.fn(),
+		};
+
+		await onStreamExtractedCallback?.(mockReadable, mockTrack);
+
+		mockTrack.bridgedTrack = {
+			metadata: { streamError: new Error('Stream stalled 3 times. Aborting') },
+		};
 
 		const endCallback = mockOn.mock.calls.find(
 			(call: unknown[]) => call[0] === 'end',
