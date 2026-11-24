@@ -209,8 +209,8 @@ importers:
         specifier: ^7.2.0
         version: 7.2.0
       '@sentry/node':
-        specifier: ^11.15.0
-        version: 11.15.0(rollup@4.60.4)
+        specifier: ^11.16.0
+        version: 11.17.0(rollup@4.60.4)
       bufferutil:
         specifier: ^4.2.0
         version: 4.2.0
@@ -252,8 +252,8 @@ importers:
         specifier: ^2.6.3
         version: 2.6.3
       '@sentry/esbuild-plugin':
-        specifier: ^11.15.0
-        version: 11.15.0(rollup@4.60.4)
+        specifier: ^11.16.0
+        version: 11.17.0(rollup@4.60.4)
       '@snazzah/davey':
         specifier: ^0.1.12
         version: 0.1.12(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
@@ -1393,8 +1393,8 @@ packages:
     resolution: {integrity: sha512-xzvBr1Q1c4lCe7i6sRnrofxeO1QTP/LKQ6A6qy0iB4x5yfiSfARMEQEghojzTNALDTcv8En04qYNIco9/K9eZQ==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
 
-  '@sentry/bundler-plugins@11.15.0':
-    resolution: {integrity: sha512-SyqRR0H8DbVNQRaUNDy9mCQSqCVlYKxbmXkSErCOIUjfNWujsyVK5fnl5aIIYbDrj1Vy1TX8gAkmyPfMbMD/QQ==}
+  '@sentry/bundler-plugins@11.17.0':
+    resolution: {integrity: sha512-MX7Bb3BCxHbDS7yuok30XnnNMK77NU0plp30DPYXmqa5hgo17lgTdoh8WUw61ttW6q2Fw/nZklNq5k4UaFDRnQ==}
     engines: {node: '>=20.19.0 <22.0.0 || >=22.12.0 <23.0.0 || >=23.2.0'}
     peerDependencies:
       rollup: '>=3.2.0'
@@ -1405,34 +1405,34 @@ packages:
       webpack:
         optional: true
 
-  '@sentry/conventions@0.33.0':
-    resolution: {integrity: sha512-5aa3g/VOnMoL8yHbfkYIWBYC3BLgMudgRNBTKNMrcMEj1mE9aKIt/CYCG7sasijhiSU4nTcSEzyM2voIVzLCng==}
+  '@sentry/conventions@0.35.0':
+    resolution: {integrity: sha512-bq2ecu6zaBni0gG5bHN9cY7fmUsOW49ntjGZ6VA69PVAa1Uk1NvgF1SdTGoVC0zkqQKziTnxzOs9KuuVlpb26w==}
     engines: {node: '>=14'}
 
-  '@sentry/core@11.15.0':
-    resolution: {integrity: sha512-zsprEOu/voisojJFnDIhPd+GhycAli/aqjV752eQHiNOrAwAvigCadsSh2ND5e1AEycvSmZTxOOhCNjWzSZ4Ng==}
+  '@sentry/core@11.17.0':
+    resolution: {integrity: sha512-Tf9XOBEMeGdZZNaCBzFTk1lN/q9gzSnWtnNRZW9IYtokM99VVfx4wTWVeg6qZ++c6mNybmhUbltnN7b87RqOwQ==}
     engines: {node: '>=20.19.0 <22.0.0 || >=22.12.0 <23.0.0 || >=23.2.0'}
 
-  '@sentry/esbuild-plugin@11.15.0':
-    resolution: {integrity: sha512-VZ/d0GeVPIqUzkNeCEGOzHfn7ueg9K2zpKSAW4BRiEynzjKwYC1E8e0G5G4rZZPpfJb7hwfvlZ/0X6T/l56+fA==}
+  '@sentry/esbuild-plugin@11.17.0':
+    resolution: {integrity: sha512-iz9kyGjfrHOHhnIZlHgN9fvqvRx1H/RmkSr1gjQeLvMC56uWeRHXSuDcfvV0WsXsSsavMxxL/1Pnd6MKsqToQw==}
     engines: {node: '>=20.19.0 <22.0.0 || >=22.12.0 <23.0.0 || >=23.2.0'}
 
-  '@sentry/node@11.15.0':
-    resolution: {integrity: sha512-D+DXJGsJDeVJA6r5QZmLmym626ffg9Zrr4Z1b4wxURdyfwSYhQoBq7QhrrUFnF5tgHfV/iq1+ZyhFav7COqKIg==}
+  '@sentry/node@11.17.0':
+    resolution: {integrity: sha512-6/CqLhcVLntu9u8pkelb5HDf8E/uc6beAAl0wTvOEhZokEKwbtmlB4Bv/P6ZSSUvbagJ673DLLauEBVT7CN/Lw==}
     engines: {node: '>=20.19.0 <22.0.0 || >=22.12.0 <23.0.0 || >=23.2.0'}
 
-  '@sentry/opentelemetry@11.15.0':
-    resolution: {integrity: sha512-0RoIi7EBuE2kl+HnixJIIdAEipELawed7ejUrWjidiNpSIMk6hygUON5SYfk0vZkFn+uEPsy3GN5hR7Re8g+NA==}
+  '@sentry/opentelemetry@11.17.0':
+    resolution: {integrity: sha512-pNl1jJrNQ9uxih2SpmQ6/JdPotUzhvMv8Ioa0g3GkhRWoRSZxwZb191X5xMawL2e9ziQaAhuXhOHUrP6rtJpMA==}
     engines: {node: '>=20.19.0 <22.0.0 || >=22.12.0 <23.0.0 || >=23.2.0'}
     peerDependencies:
       '@opentelemetry/api': ^1.9.0
 
-  '@sentry/server-runtime-injection@11.15.0':
-    resolution: {integrity: sha512-aNOpbh1w1ivyoTqS2eOtC5O49KJL+i+xVd6KRyzVYldOKNtWdBATXPTjiUtTlH0ItnOgzg1cL4YAEhcd3vUqwg==}
+  '@sentry/server-runtime-injection@11.17.0':
+    resolution: {integrity: sha512-x8B0ZwTQjAVRuZ3G70oSuXKijfdJ3EE79zYuO09heNlt3Aovue+SSsQAktPJhAIhYzAWyjS+Kigxk5/JJOuF3g==}
     engines: {node: '>=20.19.0 <22.0.0 || >=22.12.0 <23.0.0 || >=23.2.0'}
 
-  '@sentry/server-utils@11.15.0':
-    resolution: {integrity: sha512-ASBVOTAaXLNL3P2icwKgnLBH1kljLFybXcQCvSH4WseZAxeLQJYm90N5p2LhWTpM+7E8uClQtbWzxYcLjUG7RA==}
+  '@sentry/server-utils@11.17.0':
+    resolution: {integrity: sha512-wXLtO3zoot7A1cKl8cv2ENMuYJmyEVQAq3gfBO5YLGLAIEAAqkRgZbifbosumLakcd2VHcKqAg8T51V8jxnX8w==}
     engines: {node: '>=20.19.0 <22.0.0 || >=22.12.0 <23.0.0 || >=23.2.0'}
 
   '@snazzah/davey-android-arm-eabi@0.1.12':
@@ -2273,9 +2273,6 @@ packages:
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
 
-  magic-string@1.4.3:
-    resolution: {integrity: sha512-z12OxmaPGE0F4xlpGdjuAUckipLpQlTAuAmyGhNoD7ODpYUzvDfvtxUbjM/jwznyP178oju/KDdyi220wNJ0RQ==}
-
   magic-string@1.4.5:
     resolution: {integrity: sha512-oLLC2+YvQUfAa+vxoufE/yc1icb87M9iXIRqAoR/2EhE/8cb3SF/+Gi0c2By1B+5Vz2e2vQtUvHiu1+63Znh+w==}
 
@@ -2646,8 +2643,8 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
-  sentry@0.49.0:
-    resolution: {integrity: sha512-9tjS0jTx5FQzhwAGhpcnwvqE0MlQiwJtunsIUNqGkw6E9CBOMbijlamIDUqvZTDtJAveVwa9L5ziP44bOJUzcQ==}
+  sentry@0.50.0:
+    resolution: {integrity: sha512-2BCdoK4xO3mN4c0QTXaMtJBJ9rjL5v1VawaV7Wd605hVWVrpZTipLbjGHEFavS8IliI0W68TGi8CuScbHALPjA==}
     engines: {node: '>=20.0'}
     hasBin: true
 
@@ -3762,59 +3759,59 @@ snapshots:
 
   '@sapphire/snowflake@3.5.5': {}
 
-  '@sentry/bundler-plugins@11.15.0(rollup@4.60.4)':
+  '@sentry/bundler-plugins@11.17.0(rollup@4.60.4)':
     dependencies:
-      '@sentry/core': 11.15.0
+      '@sentry/core': 11.17.0
       dotenv: 17.4.2
       glob: 14.0.4
-      magic-string: 1.4.3
+      magic-string: 1.4.5
       oxc-parser: 0.152.0
-      sentry: 0.49.0
+      sentry: 0.50.0
     optionalDependencies:
       rollup: 4.60.4
 
-  '@sentry/conventions@0.33.0': {}
+  '@sentry/conventions@0.35.0': {}
 
-  '@sentry/core@11.15.0':
+  '@sentry/core@11.17.0':
     dependencies:
-      '@sentry/conventions': 0.33.0
+      '@sentry/conventions': 0.35.0
 
-  '@sentry/esbuild-plugin@11.15.0(rollup@4.60.4)':
+  '@sentry/esbuild-plugin@11.17.0(rollup@4.60.4)':
     dependencies:
-      '@sentry/bundler-plugins': 11.15.0(rollup@4.60.4)
+      '@sentry/bundler-plugins': 11.17.0(rollup@4.60.4)
     transitivePeerDependencies:
       - rollup
       - webpack
 
-  '@sentry/node@11.15.0(rollup@4.60.4)':
+  '@sentry/node@11.17.0(rollup@4.60.4)':
     dependencies:
       '@opentelemetry/api': 1.9.1
-      '@sentry/bundler-plugins': 11.15.0(rollup@4.60.4)
-      '@sentry/conventions': 0.33.0
-      '@sentry/core': 11.15.0
-      '@sentry/opentelemetry': 11.15.0(@opentelemetry/api@1.9.1)
-      '@sentry/server-runtime-injection': 11.15.0
-      '@sentry/server-utils': 11.15.0
+      '@sentry/bundler-plugins': 11.17.0(rollup@4.60.4)
+      '@sentry/conventions': 0.35.0
+      '@sentry/core': 11.17.0
+      '@sentry/opentelemetry': 11.17.0(@opentelemetry/api@1.9.1)
+      '@sentry/server-runtime-injection': 11.17.0
+      '@sentry/server-utils': 11.17.0
     transitivePeerDependencies:
       - rollup
       - webpack
 
-  '@sentry/opentelemetry@11.15.0(@opentelemetry/api@1.9.1)':
+  '@sentry/opentelemetry@11.17.0(@opentelemetry/api@1.9.1)':
     dependencies:
       '@opentelemetry/api': 1.9.1
-      '@sentry/conventions': 0.33.0
-      '@sentry/core': 11.15.0
+      '@sentry/conventions': 0.35.0
+      '@sentry/core': 11.17.0
 
-  '@sentry/server-runtime-injection@11.15.0':
+  '@sentry/server-runtime-injection@11.17.0':
     dependencies:
-      '@sentry/core': 11.15.0
-      '@sentry/server-utils': 11.15.0
+      '@sentry/core': 11.17.0
+      '@sentry/server-utils': 11.17.0
 
-  '@sentry/server-utils@11.15.0':
+  '@sentry/server-utils@11.17.0':
     dependencies:
       '@opentelemetry/api': 1.9.1
-      '@sentry/conventions': 0.33.0
-      '@sentry/core': 11.15.0
+      '@sentry/conventions': 0.35.0
+      '@sentry/core': 11.17.0
 
   '@snazzah/davey-android-arm-eabi@0.1.12':
     optional: true
@@ -4605,10 +4602,6 @@ snapshots:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  magic-string@1.4.3:
-    dependencies:
-      '@jridgewell/sourcemap-codec': 1.6.0
-
   magic-string@1.4.5:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.6.0
@@ -4983,7 +4976,7 @@ snapshots:
 
   semver@7.8.1: {}
 
-  sentry@0.49.0: {}
+  sentry@0.50.0: {}
 
   shell-quote@1.10.0: {}
 
