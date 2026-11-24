@@ -16,12 +16,6 @@ secrets:
   spotifyClientSecret:
     name: ""
     key: ""
-  # -- Optional Secret containing the OpenAI API key
-  # Only used by the prompt benchmark, the `/prompt` command uses Mistral
-  # @section -- Bot
-  openAiApiKey:
-    name: ""
-    key: ""
   # -- Points to a Secret containing the Mistral API key
   # Used for the `/prompt` command
   # @section -- Bot

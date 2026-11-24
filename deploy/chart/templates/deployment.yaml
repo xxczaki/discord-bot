@@ -72,13 +72,6 @@ spec:
           - name: DISABLED_COMMANDS
             value: "{{ .Values.env.disabledCommands }}"
           {{- end }}
-          {{- if and .Values.secrets.openAiApiKey.name .Values.secrets.openAiApiKey.key }}
-          - name: OPENAI_API_KEY
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.secrets.openAiApiKey.name }}
-                key: {{ .Values.secrets.openAiApiKey.key }}
-          {{- end }}
           {{- if and .Values.secrets.mistralApiKey.name .Values.secrets.mistralApiKey.key }}
           - name: MISTRAL_API_KEY
             valueFrom:
