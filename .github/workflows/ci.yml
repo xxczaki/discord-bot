@@ -209,12 +209,6 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-          sparse-checkout: .github/scripts
-          path: discord-bot
       - name: Checkout homelab repo
         uses: actions/checkout@v7
         with:
@@ -245,38 +239,22 @@ jobs:
           permission-contents: write
       - name: Pin commit in Argo CD Application
         if: steps.source.outputs.enabled == 'true'
-        working-directory: homelab
+        uses: xxczaki/actions/commit-via-api@2055f70b487aac8d86315ce4eb26028931f60cd6 # v1.0.0
         env:
           APPLICATION_FILE: apps/discord-bot/application.yaml
           COMMIT_SHA: ${{ github.sha }}
-          COMMIT_SCRIPT: ${{ github.workspace }}/discord-bot/.github/scripts/commit-via-api.sh
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: |
-          apply_change() {
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          repository: xxczaki/homelab
+          branch: main
+          working-directory: homelab
+          message: "chore(discord-bot): deploy ${{ github.sha }}"
+          apply: |
             yq -i '
               (select(.kind == "Application") | .spec.source.targetRevision) = strenv(COMMIT_SHA) |
               (select(.kind == "Application") | .spec.source.helm.valuesObject.image.tag) = strenv(COMMIT_SHA)
             ' "$APPLICATION_FILE"
             git add "$APPLICATION_FILE"
-            if git diff --cached --quiet; then
-              echo "Homelab already deploys ${COMMIT_SHA}"
-              return 1
-            fi
-          }
-
-          apply_change || exit 0
-          for attempt in 1 2 3 4 5; do
-            if "$COMMIT_SCRIPT" xxczaki/homelab main "chore(discord-bot): deploy ${COMMIT_SHA::7}"; then
-              exit 0
-            fi
-            echo "Commit attempt ${attempt} failed, retrying on top of the latest main"
-            sleep $((attempt * 2))
-            git fetch --quiet origin main
-            git reset --quiet --hard origin/main
-            apply_change || exit 0
-          done
-          echo "::error::Could not push the homelab deploy commit after 5 attempts"
-          exit 1
 
   publish-chart:
     needs: [merge]
@@ -306,15 +284,19 @@ jobs:
           repositories: charts
           permission-contents: write
       - name: Update and push chart
-        working-directory: charts-repo
+        uses: xxczaki/actions/commit-via-api@2055f70b487aac8d86315ce4eb26028931f60cd6 # v1.0.0
         env:
           SOURCE_CHART: ${{ github.workspace }}/discord-bot/deploy/chart/
           TARGET_CHART: charts/discord-bot
           COMMIT_SHA: ${{ github.sha }}
-          COMMIT_SCRIPT: ${{ github.workspace }}/discord-bot/.github/scripts/commit-via-api.sh
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: |
-          apply_change() {
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          repository: xxczaki/charts
+          branch: main
+          working-directory: charts-repo
+          message: "chore: update discord-bot chart"
+          apply: |
+            git fetch --quiet --tags origin
             published_version=$(yq '.version' "$TARGET_CHART/Chart.yaml")
             latest_tag=$(git tag --list 'discord-bot-*' --sort=-version:refname | head -1)
             base_version=$(printf '%s\n' "${latest_tag#discord-bot-}" "$published_version" | grep -v '^$' | sort -V | tail -1)
@@ -326,25 +308,4 @@ jobs:
             rsync --archive --delete --exclude README.md "$SOURCE_CHART" "$TARGET_CHART/"
             yq -i '.image.tag = strenv(COMMIT_SHA)' "$TARGET_CHART/values.yaml"
             yq -i '.appVersion = strenv(COMMIT_SHA) | .version = strenv(NEXT_VERSION)' "$TARGET_CHART/Chart.yaml"
-
             git add --all "$TARGET_CHART"
-            if git diff --cached --quiet; then
-              echo "Chart already up to date"
-              return 1
-            fi
-            echo "Publishing discord-bot chart ${NEXT_VERSION}"
-          }
-
-          apply_change || exit 0
-          for attempt in 1 2 3 4 5; do
-            if "$COMMIT_SCRIPT" xxczaki/charts main "chore: update discord-bot chart"; then
-              exit 0
-            fi
-            echo "Commit attempt ${attempt} failed, retrying on top of the latest main"
-            sleep $((attempt * 2))
-            git fetch --quiet --tags origin main
-            git reset --quiet --hard origin/main
-            apply_change || exit 0
-          done
-          echo "::error::Could not push the chart update after 5 attempts"
-          exit 1
