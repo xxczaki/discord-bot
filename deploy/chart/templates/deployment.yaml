@@ -60,11 +60,6 @@ spec:
               secretKeyRef:
                 name: {{ .Values.secrets.spotifyClientSecret.name }}
                 key: {{ .Values.secrets.spotifyClientSecret.key }}
-          - name: OPENAI_API_KEY
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.secrets.openAiApiKey.name }}
-                key: {{ .Values.secrets.openAiApiKey.key }}
           {{- if .Values.env.spotifyMarket }}
           - name: SPOTIFY_MARKET
             value: "{{ .Values.env.spotifyMarket }}"
@@ -76,6 +71,13 @@ spec:
           {{- if .Values.env.disabledCommands }}
           - name: DISABLED_COMMANDS
             value: "{{ .Values.env.disabledCommands }}"
+          {{- end }}
+          {{- if and .Values.secrets.openAiApiKey.name .Values.secrets.openAiApiKey.key }}
+          - name: OPENAI_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.secrets.openAiApiKey.name }}
+                key: {{ .Values.secrets.openAiApiKey.key }}
           {{- end }}
           {{- if and .Values.secrets.mistralApiKey.name .Values.secrets.mistralApiKey.key }}
           - name: MISTRAL_API_KEY
