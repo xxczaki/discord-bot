@@ -24,17 +24,30 @@ const mockInnertube = vi.hoisted(() => {
 	};
 });
 
+type SabrStreamConfig = {
+	poToken?: string;
+	serverAbrStreamingUrl: string;
+	videoPlaybackUstreamerConfig: string;
+	callbacks: {
+		onMintPoToken: () => Promise<Uint8Array>;
+		onReloadPlayerResponse: (context: unknown) => Promise<unknown>;
+	};
+};
+
 const mockSabrStream = vi.hoisted(() => {
 	return {
+		configs: [] as unknown[],
 		start: vi.fn(),
 		abort: vi.fn(),
 		removeAllListeners: vi.fn(),
 		on: vi.fn(),
 		getState: vi.fn(),
+		snapshot: vi.fn(),
 	};
 });
 
-const mockGenerateWebPoToken = vi.hoisted(() => vi.fn());
+const mockCreateWebPoMinter = vi.hoisted(() => vi.fn());
+const mockLogger = vi.hoisted(() => ({ setLogLevels: vi.fn() }));
 
 const mockNavigationEndpointCall = vi.hoisted(() => vi.fn());
 
@@ -64,11 +77,16 @@ vi.mock('youtubei.js', () => {
 
 vi.mock('googlevideo/sabr-stream', () => {
 	class SabrStream {
+		constructor(config: unknown) {
+			mockSabrStream.configs.push(config);
+		}
+
 		start = mockSabrStream.start;
 		abort = mockSabrStream.abort;
 		removeAllListeners = mockSabrStream.removeAllListeners;
 		on = mockSabrStream.on;
 		getState = mockSabrStream.getState;
+		snapshot = mockSabrStream.snapshot;
 	}
 
 	return { SabrStream };
@@ -79,11 +97,26 @@ vi.mock('googlevideo/utils', () => ({
 	EnabledTrackTypes: {
 		AUDIO_ONLY: 1,
 	},
+	Logger: {
+		getInstance: () => mockLogger,
+	},
+	LogLevel: {
+		ERROR: 1,
+		WARN: 2,
+		INFO: 3,
+	},
 }));
 
 vi.mock('../utils/generateWebPoToken.js', () => ({
-	generateWebPoToken: mockGenerateWebPoToken,
+	createWebPoMinter: mockCreateWebPoMinter,
 }));
+
+function createMockMinter(token: string) {
+	return {
+		mint: vi.fn().mockResolvedValue(new TextEncoder().encode(token)),
+		mintAsWebsafeString: vi.fn().mockResolvedValue(token),
+	};
+}
 
 const mockPlayer = {
 	extractors: {
@@ -99,9 +132,10 @@ describe('YoutubeSabrExtractor', () => {
 		vi.clearAllMocks();
 		extractor = new YoutubeSabrExtractor({} as never, mockPlayer);
 
-		mockGenerateWebPoToken.mockResolvedValue({
-			visitorData: 'visitor-data',
-			poToken: 'po-token-123',
+		mockSabrStream.configs = [];
+		mockCreateWebPoMinter.mockResolvedValue({
+			minter: createMockMinter('po-token-123'),
+			expiresAt: Number.POSITIVE_INFINITY,
 		});
 	});
 
@@ -583,7 +617,7 @@ describe('YoutubeSabrExtractor', () => {
 		});
 
 		it('should handle PO token generation failure gracefully', async () => {
-			mockGenerateWebPoToken.mockRejectedValue(
+			mockCreateWebPoMinter.mockRejectedValue(
 				new Error('PO token generation failed'),
 			);
 
@@ -670,6 +704,249 @@ describe('YoutubeSabrExtractor', () => {
 			await vi.waitFor(() => {
 				expect(stream.writableEnded).toBe(true);
 			});
+		});
+	});
+
+	describe('stream protection', () => {
+		const playerResponse = {
+			streaming_data: {
+				server_abr_streaming_url: 'https://example.com/stream',
+				adaptive_formats: [{ itag: 251 }],
+			},
+			player_config: {
+				media_common_config: {
+					media_ustreamer_request_config: {
+						video_playback_ustreamer_config: 'config-data',
+					},
+				},
+			},
+		};
+
+		let statusListener: (update: { status: number }) => void;
+
+		async function startStream(): Promise<SabrStreamConfig> {
+			const configCount = mockSabrStream.configs.length;
+
+			await extractor.stream({
+				url: 'https://youtube.com/watch?v=dQw4w9WgXcQ',
+				metadata: {},
+				setMetadata: vi.fn(),
+			} as unknown as Track);
+
+			await vi.waitFor(() => {
+				expect(mockSabrStream.configs).toHaveLength(configCount + 1);
+			});
+
+			return mockSabrStream.configs.at(-1) as SabrStreamConfig;
+		}
+
+		beforeEach(async () => {
+			vi.spyOn(console, 'warn').mockImplementation(() => {});
+			mockInnertube.session.player.decipher.mockImplementation(
+				async (url: string) => `${url}?deciphered`,
+			);
+			mockNavigationEndpointCall.mockResolvedValue(playerResponse as never);
+			mockSabrStream.on.mockImplementation(
+				(event: string, listener: typeof statusListener) => {
+					if (event === 'streamProtectionStatusUpdate') {
+						statusListener = listener;
+					}
+				},
+			);
+			mockSabrStream.start.mockImplementation(() => ({
+				audioStream: new ReadableStream(),
+			}));
+
+			await extractor.activate();
+		});
+
+		it('should reuse one BotGuard session across streams', async () => {
+			const firstConfig = await startStream();
+			await startStream();
+
+			expect(firstConfig.poToken).toBe('po-token-123');
+			expect(mockCreateWebPoMinter).toHaveBeenCalledTimes(1);
+		});
+
+		it('should create a new BotGuard session once the cached one expires', async () => {
+			mockCreateWebPoMinter.mockResolvedValueOnce({
+				minter: createMockMinter('expired-token'),
+				expiresAt: Date.now() - 1,
+			});
+
+			await startStream();
+			const config = await startStream();
+
+			expect(config.poToken).toBe('po-token-123');
+			expect(mockCreateWebPoMinter).toHaveBeenCalledTimes(2);
+		});
+
+		it('should mint with the cached session while attestation is accepted', async () => {
+			const config = await startStream();
+
+			statusListener({ status: 1 });
+			const token = await config.callbacks.onMintPoToken();
+
+			expect(new TextDecoder().decode(token)).toBe('po-token-123');
+			expect(mockCreateWebPoMinter).toHaveBeenCalledTimes(1);
+		});
+
+		it('should create a new BotGuard session when attestation is not accepted', async () => {
+			const config = await startStream();
+
+			mockCreateWebPoMinter.mockResolvedValueOnce({
+				minter: createMockMinter('fresh-token'),
+				expiresAt: Number.POSITIVE_INFINITY,
+			});
+			statusListener({ status: 2 });
+			const token = await config.callbacks.onMintPoToken();
+
+			expect(new TextDecoder().decode(token)).toBe('fresh-token');
+			expect(mockCreateWebPoMinter).toHaveBeenCalledTimes(2);
+		});
+
+		it('should stop creating new BotGuard sessions after 10 attempts per stream', async () => {
+			const config = await startStream();
+
+			for (let attempt = 0; attempt < 12; attempt++) {
+				statusListener({ status: 3 });
+				await config.callbacks.onMintPoToken();
+			}
+
+			expect(mockCreateWebPoMinter).toHaveBeenCalledTimes(11);
+		});
+
+		it('should reload streaming data with the playback context', async () => {
+			const config = await startStream();
+			const reloadPlaybackContext = { reloadPlaybackParams: 'params' };
+
+			const streamingData = await config.callbacks.onReloadPlayerResponse(
+				reloadPlaybackContext,
+			);
+
+			expect(mockNavigationEndpointCall).toHaveBeenLastCalledWith(
+				mockInnertube.actions,
+				expect.objectContaining({
+					playbackContext: expect.objectContaining({
+						reloadPlaybackContext,
+					}),
+				}),
+			);
+			expect(streamingData).toEqual({
+				serverAbrStreamingUrl: 'https://example.com/stream?deciphered',
+				videoPlaybackUstreamerConfig: 'config-data',
+			});
+		});
+	});
+
+	describe('stream recovery', () => {
+		const snapshot = { playerTimeMs: 10_000, tracks: [{ itag: 251 }] };
+		let listeners: Map<string, () => void>;
+
+		beforeEach(async () => {
+			vi.spyOn(console, 'warn').mockImplementation(() => {});
+			vi.spyOn(console, 'error').mockImplementation(() => {});
+			listeners = new Map();
+			mockInnertube.session.player.decipher.mockResolvedValue(
+				'https://deciphered.com/stream',
+			);
+			mockNavigationEndpointCall.mockResolvedValue({
+				streaming_data: {
+					server_abr_streaming_url: 'https://example.com/stream',
+					adaptive_formats: [{ itag: 251 }],
+				},
+				player_config: {
+					media_common_config: {
+						media_ustreamer_request_config: {
+							video_playback_ustreamer_config: 'config-data',
+						},
+					},
+				},
+			} as never);
+			mockSabrStream.on.mockImplementation(
+				(event: string, listener: () => void) => {
+					listeners.set(event, listener);
+				},
+			);
+			mockSabrStream.snapshot.mockResolvedValue(snapshot);
+
+			await extractor.activate();
+		});
+
+		function failingAudioStream(chunk: number[], error: Error) {
+			return new ReadableStream({
+				async start(controller) {
+					controller.enqueue(new Uint8Array(chunk));
+					await new Promise((resolve) => setTimeout(resolve, 0));
+					listeners.get('trackStateUpdate')?.();
+					await new Promise((resolve) => setTimeout(resolve, 10));
+					controller.error(error);
+				},
+			});
+		}
+
+		function completeAudioStream(chunk: number[]) {
+			return new ReadableStream({
+				start(controller) {
+					controller.enqueue(new Uint8Array(chunk));
+					controller.close();
+				},
+			});
+		}
+
+		async function collect(stream: PassThrough): Promise<number[]> {
+			const bytes: number[] = [];
+
+			for await (const chunk of stream) {
+				bytes.push(...chunk);
+			}
+
+			return bytes;
+		}
+
+		it('should resume from the last snapshot when SABR fails mid-stream', async () => {
+			mockSabrStream.start
+				.mockImplementationOnce(() => ({
+					audioStream: failingAudioStream(
+						[1, 2],
+						new Error('Stream stalled 3 times. Aborting'),
+					),
+				}))
+				.mockImplementationOnce(() => ({
+					audioStream: completeAudioStream([3, 4]),
+				}));
+
+			const setMetadata = vi.fn();
+			const stream = await extractor.stream({
+				url: 'https://youtube.com/watch?v=dQw4w9WgXcQ',
+				metadata: {},
+				setMetadata,
+			} as unknown as Track);
+
+			expect(await collect(stream as PassThrough)).toEqual([1, 2, 3, 4]);
+			expect(mockSabrStream.start).toHaveBeenLastCalledWith(
+				expect.objectContaining({ snapshot }),
+			);
+			expect(setMetadata).not.toHaveBeenCalled();
+		});
+
+		it('should set `streamError` after 3 failed resume attempts', async () => {
+			const sabrError = new Error('Stream stalled 3 times. Aborting');
+
+			mockSabrStream.start.mockImplementation(() => ({
+				audioStream: failingAudioStream([1], sabrError),
+			}));
+
+			const setMetadata = vi.fn();
+			const stream = await extractor.stream({
+				url: 'https://youtube.com/watch?v=dQw4w9WgXcQ',
+				metadata: {},
+				setMetadata,
+			} as unknown as Track);
+
+			expect(await collect(stream as PassThrough)).toEqual([1, 1, 1, 1]);
+			expect(mockSabrStream.start).toHaveBeenCalledTimes(4);
+			expect(setMetadata).toHaveBeenCalledWith({ streamError: sabrError });
 		});
 	});
 

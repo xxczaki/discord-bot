@@ -1,4 +1,4 @@
-import { PassThrough, Readable } from 'node:stream';
+import { PassThrough } from 'node:stream';
 import {
 	BaseExtractor,
 	type ExtractorInfo,
@@ -8,8 +8,14 @@ import {
 	type SearchQueryType,
 	Track,
 } from 'discord-player';
-import { SabrStream } from 'googlevideo/sabr-stream';
-import { buildSabrFormat, EnabledTrackTypes } from 'googlevideo/utils';
+import type { ReloadPlaybackContext } from 'googlevideo/protos';
+import { type SabrSnapshot, SabrStream } from 'googlevideo/sabr-stream';
+import {
+	buildSabrFormat,
+	EnabledTrackTypes,
+	Logger,
+	LogLevel,
+} from 'googlevideo/utils';
 import {
 	Constants,
 	Innertube,
@@ -18,10 +24,17 @@ import {
 	UniversalCache,
 	YTNodes,
 } from 'youtubei.js';
-import { generateWebPoToken } from './utils/generateWebPoToken.js';
+import {
+	createWebPoMinter,
+	type WebPoMinterSession,
+} from './utils/generateWebPoToken.js';
 
 const MAX_SEARCH_RESULTS = 10;
 const MAX_RELATED_TRACKS = 5;
+const MAX_MINTER_REFRESHES_PER_STREAM = 10;
+const STREAM_PROTECTION_STATUS_OK = 1;
+const MAX_RESUME_ATTEMPTS = 3;
+const STALL_DETECTION_MS = 10_000;
 const YOUTUBE_URL_REGEX =
 	/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
 const YOUTUBE_PLAYLIST_REGEX =
@@ -62,6 +75,11 @@ type AdaptiveFormat = {
 	projectionType?: string;
 	averageBitrate?: number;
 	approxDurationMs?: string;
+};
+
+type StreamingData = {
+	serverAbrStreamingUrl: string;
+	videoPlaybackUstreamerConfig: string;
 };
 
 type PlayerResponse = {
@@ -105,9 +123,15 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 	static identifier = 'com.github.xxczaki.youtube-sabr' as const;
 
 	#innertube: Innertube | null = null;
+	#webPoMinter: Promise<WebPoMinterSession> | null = null;
 
 	async activate(): Promise<void> {
 		setupYoutubeJsEvaluator();
+		Logger.getInstance().setLogLevels(
+			LogLevel.ERROR,
+			LogLevel.WARN,
+			LogLevel.INFO,
+		);
 
 		this.#innertube = await Innertube.create({
 			cache: new UniversalCache(true, '/tmp/.cache'),
@@ -118,6 +142,7 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 
 	async deactivate(): Promise<void> {
 		this.#innertube = null;
+		this.#webPoMinter = null;
 	}
 
 	async validate(
@@ -197,24 +222,88 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 		outputStream: PassThrough,
 		failStream: (error: unknown) => void,
 	): Promise<void> {
+		let activeStream: SabrStream | undefined;
+		let latestSnapshot: SabrSnapshot | undefined;
+		let bytesWritten = 0;
+
+		outputStream.once('close', () => {
+			void activeStream?.abort();
+		});
+
+		for (let attempt = 0; ; attempt++) {
+			try {
+				const sabrStream = await this.#openSabrStream(videoId);
+				activeStream = sabrStream;
+
+				sabrStream.on('trackStateUpdate', () => {
+					sabrStream
+						.snapshot()
+						.then((snapshot) => {
+							latestSnapshot = snapshot;
+						})
+						.catch(() => {});
+				});
+
+				const { audioStream } = sabrStream.start({
+					audioPreferences: { quality: 'AUDIO_QUALITY_MEDIUM' },
+					enabledTrackTypes: EnabledTrackTypes.AUDIO_ONLY,
+					isPostLiveDvr: false,
+					stallDetectionMs: STALL_DETECTION_MS,
+					...(latestSnapshot ? { snapshot: latestSnapshot } : {}),
+				});
+
+				const reader = audioStream.getReader();
+
+				for (;;) {
+					const { done, value } = await reader.read();
+
+					if (done) {
+						break;
+					}
+
+					if (outputStream.destroyed) {
+						return;
+					}
+
+					bytesWritten += value.byteLength;
+					outputStream.write(value);
+				}
+
+				sabrStream.removeAllListeners();
+
+				if (!outputStream.destroyed) {
+					outputStream.end();
+				}
+
+				return;
+			} catch (error) {
+				activeStream?.removeAllListeners();
+
+				if (outputStream.destroyed) {
+					return;
+				}
+
+				const canResume =
+					attempt < MAX_RESUME_ATTEMPTS &&
+					(latestSnapshot !== undefined || bytesWritten === 0);
+
+				if (!canResume) {
+					failStream(error);
+					return;
+				}
+
+				console.warn(
+					`[YoutubeSabrExtractor] Stream for ${videoId} failed, resuming from ${latestSnapshot?.playerTimeMs ?? 0}ms (attempt ${attempt + 1}/${MAX_RESUME_ATTEMPTS}):`,
+					error,
+				);
+			}
+		}
+	}
+	/* v8 ignore stop */
+
+	async #openSabrStream(videoId: string): Promise<SabrStream> {
 		const playerResponse = await this.#makePlayerRequest(videoId);
-
-		const serverAbrStreamingUrl =
-			await this.#innertube?.session.player?.decipher(
-				playerResponse.streaming_data?.server_abr_streaming_url,
-			);
-
-		const videoPlaybackUstreamerConfig =
-			playerResponse.player_config?.media_common_config
-				.media_ustreamer_request_config?.video_playback_ustreamer_config;
-
-		if (!videoPlaybackUstreamerConfig) {
-			throw new Error('Streaming configuration not available');
-		}
-
-		if (!serverAbrStreamingUrl) {
-			throw new Error('Streaming URL not available');
-		}
+		const streamingData = await this.#getStreamingData(playerResponse);
 
 		const sabrFormats =
 			playerResponse.streaming_data?.adaptive_formats.map((format) =>
@@ -223,7 +312,8 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 
 		let poToken: string | undefined;
 		try {
-			poToken = await generateWebPoToken(videoId);
+			const { minter } = await this.#getWebPoMinter();
+			poToken = await minter.mintAsWebsafeString(videoId);
 		} catch (error) {
 			console.warn(
 				'[YoutubeSabrExtractor] Failed to generate PO token:',
@@ -231,11 +321,13 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 			);
 		}
 
-		const serverAbrStream = new SabrStream({
+		let attestationRejected = false;
+		let minterRefreshes = 0;
+
+		const sabrStream = new SabrStream({
 			videoId,
 			formats: sabrFormats,
-			serverAbrStreamingUrl,
-			videoPlaybackUstreamerConfig,
+			...streamingData,
 			...(poToken ? { poToken } : {}),
 			clientInfo: {
 				clientName: Number.parseInt(
@@ -247,38 +339,42 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 				),
 				clientVersion: this.#innertube?.session.context.client.clientVersion,
 			},
+			callbacks: {
+				onMintPoToken: async () => {
+					const shouldRefresh =
+						attestationRejected &&
+						minterRefreshes < MAX_MINTER_REFRESHES_PER_STREAM;
+
+					attestationRejected = false;
+
+					if (shouldRefresh) {
+						minterRefreshes++;
+						console.warn(
+							`[YoutubeSabrExtractor] PO token not accepted for ${videoId}, creating a new BotGuard session (${minterRefreshes}/${MAX_MINTER_REFRESHES_PER_STREAM})`,
+						);
+					}
+
+					const { minter } = await (shouldRefresh
+						? this.#refreshWebPoMinter()
+						: this.#getWebPoMinter());
+
+					return minter.mint(videoId);
+				},
+				onReloadPlayerResponse: async (reloadPlaybackContext) =>
+					this.#getStreamingData(
+						await this.#makePlayerRequest(videoId, reloadPlaybackContext),
+					),
+			},
 		});
 
-		const { audioStream } = serverAbrStream.start({
-			audioPreferences: { quality: 'AUDIO_QUALITY_MEDIUM' },
-			enabledTrackTypes: EnabledTrackTypes.AUDIO_ONLY,
-			isPostLiveDvr: false,
-		});
-
-		// Web ReadableStream from googlevideo needs to be converted to Node.js stream
-		// @ts-expect-error - ReadableStream type mismatch between web and Node.js streams
-		const nodeStream = Readable.fromWeb(audioStream);
-
-		nodeStream.on('data', (chunk) => {
-			if (!outputStream.destroyed) {
-				outputStream.write(chunk);
+		sabrStream.on('streamProtectionStatusUpdate', ({ status }) => {
+			if (status !== STREAM_PROTECTION_STATUS_OK) {
+				attestationRejected = true;
 			}
 		});
 
-		nodeStream.on('end', () => {
-			if (!outputStream.destroyed) {
-				outputStream.end();
-			}
-			serverAbrStream.abort();
-			serverAbrStream.removeAllListeners();
-		});
-
-		nodeStream.on('error', (error) => {
-			serverAbrStream.removeAllListeners();
-			failStream(error);
-		});
+		return sabrStream;
 	}
-	/* v8 ignore stop */
 
 	async getRelatedTracks(track: Track): Promise<ExtractorInfo> {
 		if (!this.#innertube) {
@@ -523,7 +619,58 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 		return `${minutes}:${secs.toString().padStart(2, '0')}`;
 	}
 
-	async #makePlayerRequest(videoId: string): Promise<PlayerResponse> {
+	async #getStreamingData(
+		playerResponse: PlayerResponse,
+	): Promise<StreamingData> {
+		const serverAbrStreamingUrl =
+			await this.#innertube?.session.player?.decipher(
+				playerResponse.streaming_data?.server_abr_streaming_url,
+			);
+
+		const videoPlaybackUstreamerConfig =
+			playerResponse.player_config?.media_common_config
+				.media_ustreamer_request_config?.video_playback_ustreamer_config;
+
+		if (!videoPlaybackUstreamerConfig) {
+			throw new Error('Streaming configuration not available');
+		}
+
+		if (!serverAbrStreamingUrl) {
+			throw new Error('Streaming URL not available');
+		}
+
+		return { serverAbrStreamingUrl, videoPlaybackUstreamerConfig };
+	}
+
+	#getWebPoMinter(): Promise<WebPoMinterSession> {
+		const cached = this.#webPoMinter;
+
+		if (cached) {
+			return cached.then((session) =>
+				session.expiresAt > Date.now() ? session : this.#refreshWebPoMinter(),
+			);
+		}
+
+		return this.#refreshWebPoMinter();
+	}
+
+	#refreshWebPoMinter(): Promise<WebPoMinterSession> {
+		const session = createWebPoMinter();
+
+		this.#webPoMinter = session;
+		session.catch(() => {
+			if (this.#webPoMinter === session) {
+				this.#webPoMinter = null;
+			}
+		});
+
+		return session;
+	}
+
+	async #makePlayerRequest(
+		videoId: string,
+		reloadPlaybackContext?: ReloadPlaybackContext,
+	): Promise<PlayerResponse> {
 		/* v8 ignore start */
 		if (!this.#innertube) {
 			throw new Error('YoutubeSabrExtractor not initialized');
@@ -541,6 +688,7 @@ export class YoutubeSabrExtractor extends BaseExtractor {
 				lactMilliseconds: '-1',
 				signatureTimestamp: this.#innertube.session.player?.signature_timestamp,
 			},
+			...(reloadPlaybackContext ? { reloadPlaybackContext } : {}),
 		};
 
 		const extraArgs = {
