@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { generateWebPoToken } from '../generateWebPoToken.js';
+import {
+	createWebPoMinter,
+	generateWebPoToken,
+} from '../generateWebPoToken.js';
 
 const mockBotGuardClient = {
 	snapshot: vi.fn(),
@@ -8,6 +11,14 @@ const mockBotGuardClient = {
 const mockWebPoMinter = {
 	mintAsWebsafeString: vi.fn(),
 };
+
+const { MockHTMLCanvasElement } = vi.hoisted(() => ({
+	MockHTMLCanvasElement: class {
+		getContext(_contextId: string): unknown {
+			return null;
+		}
+	},
+}));
 
 const mockBGBotGuardClientCreate = vi.hoisted(() => vi.fn());
 const mockBGWebPoMinterCreate = vi.hoisted(() => vi.fn());
@@ -58,6 +69,7 @@ vi.mock('jsdom', () => {
 				location: {},
 				origin: 'https://www.youtube.com/',
 				navigator: {},
+				HTMLCanvasElement: MockHTMLCanvasElement,
 			};
 		},
 	};
@@ -171,5 +183,42 @@ describe('generateWebPoToken', () => {
 		expect(mockWebPoMinter.mintAsWebsafeString).toHaveBeenCalledWith(
 			'test-video-id',
 		);
+	});
+});
+
+describe('createWebPoMinter', () => {
+	it('should return the minter with an expiry based on the integrity token TTL', async () => {
+		vi.useFakeTimers({ now: 1_000_000 });
+		mockBGBotGuardClientCreate.mockResolvedValue(mockBotGuardClient);
+		mockBGWebPoMinterCreate.mockResolvedValue(mockWebPoMinter);
+
+		const session = await createWebPoMinter();
+
+		expect(session.minter).toBe(mockWebPoMinter);
+		expect(session.expiresAt).toBe(1_000_000 + (42 - 5) * 1000);
+
+		vi.useRealTimers();
+	});
+
+	it('should stub the 2D canvas context used by BotGuard', async () => {
+		mockBGBotGuardClientCreate.mockResolvedValue(mockBotGuardClient);
+		mockBGWebPoMinterCreate.mockResolvedValue(mockWebPoMinter);
+
+		await createWebPoMinter();
+
+		const canvas = new MockHTMLCanvasElement();
+		const context = canvas.getContext('2d') as {
+			getImageData: (
+				x: number,
+				y: number,
+				width: number,
+				height: number,
+			) => { data: Uint8ClampedArray };
+			measureText: () => { width: number };
+		};
+
+		expect(context.getImageData(0, 0, 2, 3).data).toHaveLength(24);
+		expect(context.measureText().width).toBe(0);
+		expect(canvas.getContext('webgl')).toBeNull();
 	});
 });

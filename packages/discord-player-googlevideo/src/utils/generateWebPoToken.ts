@@ -15,11 +15,22 @@ import type { IRawBotguardChallenge, IRawResponse } from 'youtubei.js';
 
 const REQUEST_KEY = 'O43z0dpjhgX20SCx4KAo';
 
+export type WebPoMinterSession = {
+	minter: WebPoMinter;
+	expiresAt: number;
+};
+
 export async function generateWebPoToken(videoId: string): Promise<string> {
 	if (!videoId) {
 		throw new Error('Video ID required for PO token generation');
 	}
 
+	const { minter } = await createWebPoMinter();
+
+	return minter.mintAsWebsafeString(videoId);
+}
+
+export async function createWebPoMinter(): Promise<WebPoMinterSession> {
 	const pageHtml = await setUpDOM();
 	const initialAttestationData = pageHtml.match(
 		/window\.ytAtN\(\s*({[\s\S]*?})\s*\)/,
@@ -44,11 +55,19 @@ export async function generateWebPoToken(videoId: string): Promise<string> {
 
 	const webPoSignalOutput: WebPoSignalOutput = [];
 	const botguardResponse = await botGuardClient.snapshot({ webPoSignalOutput });
-	const webPoMinter = await WebPoMinter.create(
-		await getIntegrityTokenData(botguardResponse),
+	const integrityTokenData = await getIntegrityTokenData(botguardResponse);
+	const minter = await WebPoMinter.create(
+		integrityTokenData,
 		webPoSignalOutput,
 	);
-	return await webPoMinter.mintAsWebsafeString(videoId);
+	const ttlSeconds =
+		(integrityTokenData.estimatedTtlSecs ?? 0) -
+		(integrityTokenData.mintRefreshThreshold ?? 0);
+
+	return {
+		minter,
+		expiresAt: Date.now() + Math.max(ttlSeconds, 0) * 1000,
+	};
 }
 
 async function setUpDOM(): Promise<string> {
@@ -79,6 +98,7 @@ async function setUpDOM(): Promise<string> {
 	dom.window.yt = {
 		config_: JSON.parse(ytConfig),
 	};
+	stubCanvasContext(dom.window);
 	Object.assign(globalThis, {
 		yt: dom.window.yt,
 		window: dom.window,
@@ -94,6 +114,44 @@ async function setUpDOM(): Promise<string> {
 	}
 
 	return pageHtml;
+}
+
+function stubCanvasContext(window: JSDOM['window']): void {
+	const noop = () => {};
+	const context2d = {
+		arc: noop,
+		beginPath: noop,
+		clearRect: noop,
+		clip: noop,
+		closePath: noop,
+		createImageData: () => [],
+		drawImage: noop,
+		fill: noop,
+		fillRect: noop,
+		fillText: noop,
+		getImageData: (_x: number, _y: number, width: number, height: number) => ({
+			data: new Uint8ClampedArray(width * height * 4),
+		}),
+		lineTo: noop,
+		measureText: () => ({ width: 0 }),
+		moveTo: noop,
+		putImageData: noop,
+		rect: noop,
+		restore: noop,
+		rotate: noop,
+		save: noop,
+		scale: noop,
+		setTransform: noop,
+		stroke: noop,
+		transform: noop,
+		translate: noop,
+	};
+
+	window.HTMLCanvasElement.prototype.getContext = function getContext(
+		contextId: string,
+	) {
+		return contextId === '2d' ? context2d : null;
+	} as never;
 }
 
 async function executeBotGuardInterpreter(
