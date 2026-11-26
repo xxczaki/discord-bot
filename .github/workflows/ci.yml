@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: biomejs/setup-biome@v2
+      - uses: biomejs/setup-biome@77af1e9ce0cc32955e83b0c3e30c28ae3b81cab7 # v2.8.0
       - run: biome ci ./src
 
   test:
