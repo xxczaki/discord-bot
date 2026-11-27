@@ -93,7 +93,7 @@ jobs:
         uses: docker/setup-buildx-action@v4
       - name: Extract metadata
         id: meta
-        uses: docker/metadata-action@v6
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ghcr.io/xxczaki/discord-bot
       - name: Build and push by digest
@@ -153,7 +153,7 @@ jobs:
         uses: docker/setup-buildx-action@v4
       - name: Extract metadata
         id: meta
-        uses: docker/metadata-action@v6
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         env:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: index
         with:
