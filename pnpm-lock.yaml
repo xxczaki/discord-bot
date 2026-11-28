@@ -274,7 +274,7 @@ importers:
         specifier: 'catalog:'
         version: 5.1.1(vitest@5.1.1)
       ai:
-        specifier: ^7.0.179
+        specifier: ^7.0.181
         version: 7.0.181(zod@4.6.7)
       esbuild:
         specifier: ^0.28.2
