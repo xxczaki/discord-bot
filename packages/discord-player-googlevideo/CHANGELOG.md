@@ -1,5 +1,11 @@
 # discord-player-googlevideo
 
+## 0.3.0
+
+### Minor Changes
+
+- 5bba1cc: Recover from YouTube stream protection instead of stopping after about a minute of audio. The extractor now reuses one BotGuard session, re-mints PO tokens when SABR asks for them, starts a new BotGuard session when the token is not accepted, handles player reload requests, stubs the canvas context BotGuard reads, and resumes a failed stream from its last snapshot.
+
 ## 0.2.8
 
 ### Patch Changes
